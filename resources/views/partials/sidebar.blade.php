@@ -16,15 +16,15 @@
         </div>
 
         <nav class="nav flex-column">
-            <a class="nav-link {{ request()->is('/') ? 'active' : '' }}" href="/">
+            <a class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                 <i class="bi bi-house-door"></i>
                 <span class="sidebar-text">Dashboard</span>
             </a>
-            <a class="nav-link {{ request()->is('analytics') ? 'active' : '' }}" href="/analytics">
+            <a class="nav-link {{ request()->is('ruangan') ? 'active' : '' }}" href="{{ route('ruangan.index') }}">
                 <i class="bi bi-bar-chart"></i>
                 <span class="sidebar-text">Ruangan</span>
             </a>
-            <a class="nav-link {{ request()->is('users') ? 'active' : '' }}" href="/users">
+            <a class="nav-link {{ request()->is('mahasiswa') ? 'active' : '' }}" href="{{ route('mahasiswa.index') }}">
                 <i class="bi bi-people"></i>
                 <span class="sidebar-text">Mahasiswa</span>
                 <span class="badge-notification">3</span>

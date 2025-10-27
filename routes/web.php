@@ -3,28 +3,50 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MahasiswaController;
+use App\Http\Controllers\RuanganController;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 |
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
+| Define all web routes for your application here.
+| Routes are loaded by the RouteServiceProvider within the "web" middleware group.
 |
 */
 
-// Redirect root to the explicit /login route so route('login') resolves to /login
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+// Redirect root to /login
+Route::get('/', fn() => redirect()->route('login'));
 
-// Explicit login page (named 'login') and form POST handler
+// Authentication Routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->name('dashboard')
-    ->middleware('auth');
+// Protected Routes
+Route::middleware('auth')->group(function () {
+
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Ruangan Routes (resource-like, tapi manual)
+    Route::prefix('ruangan')->name('ruangan.')->group(function () {
+        Route::get('/', [RuanganController::class, 'index'])->name('index');
+        Route::get('/create', [RuanganController::class, 'create'])->name('create');
+        Route::post('/', [RuanganController::class, 'store'])->name('store');
+        Route::get('/{ruangan}/edit', [RuanganController::class, 'edit'])->name('edit');
+        Route::put('/{ruangan}', [RuanganController::class, 'update'])->name('update');
+        Route::delete('/{ruangan}', [RuanganController::class, 'destroy'])->name('destroy');
+    });
+
+    // Mahasiswa Routes
+    Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
+        Route::get('/', [MahasiswaController::class, 'index'])->name('index');
+        Route::get('/create', [MahasiswaController::class, 'create'])->name('create');
+        Route::post('/', [MahasiswaController::class, 'store'])->name('store');
+        Route::get('/{mahasiswa}/edit', [MahasiswaController::class, 'edit'])->name('edit');
+        Route::put('/{mahasiswa}', [MahasiswaController::class, 'update'])->name('update');
+        Route::delete('/{mahasiswa}', [MahasiswaController::class, 'destroy'])->name('destroy');
+    });
+});
