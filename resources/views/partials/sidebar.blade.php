@@ -30,17 +30,22 @@
                 <span class="badge-notification">3</span>
             </a>
             <hr>
-            <a class="nav-link {{ request()->is('logout') ? 'active' : '' }}" href="/logout">
+            {{-- Logout: use POST form to call the named logout route --}}
+            <a class="nav-link" href="#"
+                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                 <i class="bi bi-box-arrow-right"></i>
                 <span class="sidebar-text">Logout</span>
             </a>
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                @csrf
+            </form>
         </nav>
     </div>
 
     <div class="p-3">
         <div class="d-flex align-items-center">
             <img src="https://ui-avatars.com/api/?name=Admin+User&background=7c1316&color=fff"
-                 class="rounded-circle me-2" width="40" height="40" alt="User">
+                class="rounded-circle me-2" width="40" height="40" alt="User">
             <div class="sidebar-text">
                 <div class="fw-bold">Admin User</div>
                 <small>Administrator</small>
@@ -176,9 +181,17 @@
     }
 
     @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.1); }
-        100% { transform: scale(1); }
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+
+        100% {
+            transform: scale(1);
+        }
     }
 
     /* Search Bar */

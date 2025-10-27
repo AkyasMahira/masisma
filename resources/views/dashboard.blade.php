@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard Utama')
-@section('page-title', 'Dashboard Interaktif')
+@section('title', 'Dashboard')
+@section('page-title', 'Dashboard')
 
 @section('content')
     {{-- Dashboard Stats --}}
