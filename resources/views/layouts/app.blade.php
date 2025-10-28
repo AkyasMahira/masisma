@@ -431,69 +431,6 @@
                 });
             }
 
-            // Notifications
-            function showNotification(title, message, type = 'info') {
-                const notificationContainer = document.getElementById('notificationContainer');
-                if (!notificationContainer) return;
-
-                const notification = document.createElement('div');
-                notification.className = 'notification';
-
-                let iconClass = 'bi-info-circle';
-                if (type === 'success') iconClass = 'bi-check-circle';
-                if (type === 'warning') iconClass = 'bi-exclamation-triangle';
-                if (type === 'error') iconClass = 'bi-x-circle';
-
-                notification.innerHTML = `
-                    <div class="notification-icon">
-                        <i class="bi ${iconClass}"></i>
-                    </div>
-                    <div class="notification-content">
-                        <strong>${title}</strong>
-                        <p class="mb-0">${message}</p>
-                    </div>
-                    <button class="notification-close">
-                        <i class="bi bi-x"></i>
-                    </button>
-                `;
-
-                notificationContainer.appendChild(notification);
-
-                // Show notification with animation
-                setTimeout(() => {
-                    notification.classList.add('show');
-                }, 100);
-
-                // Auto remove after 5 seconds
-                setTimeout(() => {
-                    hideNotification(notification);
-                }, 5000);
-
-                // Close button event
-                const closeBtn = notification.querySelector('.notification-close');
-                closeBtn.addEventListener('click', () => {
-                    hideNotification(notification);
-                });
-            }
-
-            function hideNotification(notification) {
-                notification.classList.remove('show');
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.parentNode.removeChild(notification);
-                    }
-                }, 500);
-            }
-
-            // Show sample notifications after page load
-            setTimeout(() => {
-                showNotification('Welcome!', 'Dashboard has been loaded successfully.', 'success');
-            }, 1000);
-
-            setTimeout(() => {
-                showNotification('New Data Available', 'Recent analytics data has been updated.', 'info');
-            }, 3000);
-
             // Search functionality
             const searchInput = document.querySelector('.search-input');
             if (searchInput) {

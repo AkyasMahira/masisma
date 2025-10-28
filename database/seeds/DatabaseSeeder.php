@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
-use App\User;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -14,10 +14,20 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         // Create a default user for testing/login
-        if (User::where('email', 'admin@example.com')->doesntExist()) {
+        if (User::where('email', 'admin@gmail.com')->doesntExist()) {
             User::create([
                 'name' => 'Admin',
-                'email' => 'admin@example.com',
+                'email' => 'admin@gmail.com',
+                'role' => 'admin',
+                'password' => Hash::make('password'), // password: "password"
+            ]);
+        }
+
+        if (User::where('email', 'user@gmail.com')->doesntExist()) {
+            User::create([
+                'name' => 'User',
+                'email' => 'user@gmail.com',
+                'role' => 'user',
                 'password' => Hash::make('password'), // password: "password"
             ]);
         }
