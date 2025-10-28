@@ -8,12 +8,16 @@
             @if (session('success'))
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif
+            @if (session('error'))
+                <div class="alert alert-danger">{{ session('error') }}</div>
+            @endif
 
             <div class="card">
                 <div class="card-body text-center">
                     <h4>{{ $mahasiswa->nm_mahasiswa }}</h4>
                     <p>{{ $mahasiswa->univ_asal }} — {{ $mahasiswa->prodi }}</p>
-                    <p><strong>Ruangan:</strong> {{ $mahasiswa->nm_ruangan }}</p>
+                    <p><strong>Ruangan:</strong>
+                        {{ $mahasiswa->ruangan ? $mahasiswa->ruangan->nm_ruangan : $mahasiswa->nm_ruangan }}</p>
                     <p><strong>Status:</strong> {{ $mahasiswa->status }}</p>
 
                     <form action="{{ route('absensi.masuk', $mahasiswa->share_token) }}" method="POST"

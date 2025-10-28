@@ -11,8 +11,15 @@
                     <h4>{{ $mahasiswa->nm_mahasiswa }}</h4>
                     <p><strong>Universitas:</strong> {{ $mahasiswa->univ_asal }}</p>
                     <p><strong>Prodi:</strong> {{ $mahasiswa->prodi }}</p>
-                    <p><strong>Ruangan:</strong> {{ $mahasiswa->nm_ruangan }}</p>
-                    <p><strong>Status:</strong> {{ $mahasiswa->status }}</p>
+                    <p><strong>Ruangan:</strong>
+                        {{ $mahasiswa->ruangan ? $mahasiswa->ruangan->nm_ruangan : $mahasiswa->nm_ruangan }}</p>
+                    <p><strong>Status:</strong> {{ ucfirst($mahasiswa->status) }}</p>
+
+                    <hr>
+                    <p><small><strong>Share token:</strong>
+                            {{ \Illuminate\Support\Str::limit($mahasiswa->share_token, 16, '...') }}</small></p>
+                    <p><small><strong>Last attendance today:</strong>
+                            {{ $lastStatus ? ucfirst($lastStatus) : 'No record' }}</small></p>
 
                     <p>
                         <strong>Link absensi publik:</strong>

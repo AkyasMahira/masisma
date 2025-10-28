@@ -7,6 +7,16 @@ use App\Models\Ruangan;
 
 class RuanganController extends Controller
 {
+    public function __construct()
+    {
+        // Restrict Ruangan CRUD to admin users only
+        $this->middleware(function ($request, $next) {
+            if (!auth()->check() || auth()->user()->role !== 'admin') {
+                abort(403);
+            }
+            return $next($request);
+        });
+    }
     /**
      * Display a listing of the resource.
      */
@@ -50,7 +60,7 @@ class RuanganController extends Controller
 
         // 3. Redirect
         return redirect()->route('ruangan.index')
-                         ->with('success', 'Ruangan berhasil ditambahkan.');
+            ->with('success', 'Ruangan berhasil ditambahkan.');
     }
 
     /**

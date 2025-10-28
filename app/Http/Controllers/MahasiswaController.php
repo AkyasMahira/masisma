@@ -3,10 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Mahasiswa;
+use App\Models\Ruangan;
 use Illuminate\Http\Request;
 
 class MahasiswaController extends Controller
 {
+    public function __construct()
+    {
+        // Restrict Mahasiswa CRUD to admin users only
+        $this->middleware(function ($request, $next) {
+            if (!auth()->check() || auth()->user()->role !== 'admin') {
+                abort(403);
+            }
+            return $next($request);
+        });
+    }
     /**
      * Display a listing of the resource.
      *
@@ -25,7 +36,8 @@ class MahasiswaController extends Controller
      */
     public function create()
     {
-        return view('mahasiswa.create');
+        $ruangans = Ruangan::all();
+        return view('mahasiswa.create', compact('ruangans'));
     }
 
     /**
@@ -41,8 +53,22 @@ class MahasiswaController extends Controller
             'univ_asal' => 'nullable|string|max:255',
             'prodi' => 'nullable|string|max:255',
             'nm_ruangan' => 'nullable|string|max:255',
+            'ruangan_id' => 'nullable|exists:ruangans,id',
             'status' => 'required|in:aktif,nonaktif',
         ]);
+
+        // handle ruangan quota if ruangan_id provided
+        if (!empty($data['ruangan_id'])) {
+            $ruangan = Ruangan::find($data['ruangan_id']);
+            if (!$ruangan) {
+                return redirect()->back()->withErrors(['ruangan_id' => 'Ruangan tidak ditemukan'])->withInput();
+            }
+            if ($ruangan->kuota_ruangan <= 0) {
+                return redirect()->back()->withErrors(['ruangan_id' => 'Kuota ruangan penuh'])->withInput();
+            }
+            $ruangan->decrement('kuota_ruangan');
+            $data['nm_ruangan'] = $ruangan->nm_ruangan;
+        }
 
         Mahasiswa::create($data);
 
@@ -58,7 +84,10 @@ class MahasiswaController extends Controller
     public function show($id)
     {
         $mahasiswa = Mahasiswa::findOrFail($id);
-        return view('mahasiswa.show', compact('mahasiswa'));
+        $today = now()->toDateString();
+        $last = $mahasiswa->absensis()->whereDate('created_at', $today)->latest()->first();
+        $lastStatus = $last ? $last->type : null;
+        return view('mahasiswa.show', compact('mahasiswa', 'lastStatus'));
     }
 
     /**
@@ -70,7 +99,8 @@ class MahasiswaController extends Controller
     public function edit($id)
     {
         $mahasiswa = Mahasiswa::findOrFail($id);
-        return view('mahasiswa.edit', compact('mahasiswa'));
+        $ruangans = Ruangan::all();
+        return view('mahasiswa.edit', compact('mahasiswa', 'ruangans'));
     }
 
     /**
@@ -89,8 +119,31 @@ class MahasiswaController extends Controller
             'univ_asal' => 'nullable|string|max:255',
             'prodi' => 'nullable|string|max:255',
             'nm_ruangan' => 'nullable|string|max:255',
+            'ruangan_id' => 'nullable|exists:ruangans,id',
             'status' => 'required|in:aktif,nonaktif',
         ]);
+
+        $newRuanganId = $data['ruangan_id'] ?? null;
+        $oldRuanganId = $mahasiswa->ruangan_id;
+
+        if ($newRuanganId && $newRuanganId != $oldRuanganId) {
+            $new = Ruangan::find($newRuanganId);
+            if ($new->kuota_ruangan <= 0) {
+                return redirect()->back()->withErrors(['ruangan_id' => 'Kuota ruangan penuh'])->withInput();
+            }
+            $new->decrement('kuota_ruangan');
+            $data['nm_ruangan'] = $new->nm_ruangan;
+
+            if ($oldRuanganId) {
+                $old = Ruangan::find($oldRuanganId);
+                if ($old) $old->increment('kuota_ruangan');
+            }
+        }
+
+        if (!$newRuanganId && $oldRuanganId) {
+            $old = Ruangan::find($oldRuanganId);
+            if ($old) $old->increment('kuota_ruangan');
+        }
 
         $mahasiswa->update($data);
 
@@ -106,6 +159,11 @@ class MahasiswaController extends Controller
     public function destroy($id)
     {
         $mahasiswa = Mahasiswa::findOrFail($id);
+        if ($mahasiswa->ruangan_id) {
+            $ruangan = Ruangan::find($mahasiswa->ruangan_id);
+            if ($ruangan) $ruangan->increment('kuota_ruangan');
+        }
+
         $mahasiswa->delete();
 
         return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa berhasil dihapus.');

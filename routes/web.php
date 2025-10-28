@@ -52,6 +52,9 @@ Route::middleware('auth')->group(function () {
         Route::put('/{mahasiswa}', [MahasiswaController::class, 'update'])->name('update');
         Route::delete('/{mahasiswa}', [MahasiswaController::class, 'destroy'])->name('destroy');
     });
+
+    // Admin: view today's absensi with filters
+    Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi.index');
 });
 
 // Public attendance (absensi) routes using share tokens — no auth required

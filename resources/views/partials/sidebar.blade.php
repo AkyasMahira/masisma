@@ -20,15 +20,22 @@
                 <i class="bi bi-house-door"></i>
                 <span class="sidebar-text">Dashboard</span>
             </a>
-            <a class="nav-link {{ request()->is('ruangan') ? 'active' : '' }}" href="{{ route('ruangan.index') }}">
-                <i class="bi bi-bar-chart"></i>
-                <span class="sidebar-text">Ruangan</span>
-            </a>
-            <a class="nav-link {{ request()->is('mahasiswa') ? 'active' : '' }}" href="{{ route('mahasiswa.index') }}">
-                <i class="bi bi-people"></i>
-                <span class="sidebar-text">Mahasiswa</span>
-                <span class="badge-notification">3</span>
-            </a>
+            @if (auth()->check() && auth()->user()->role === 'admin')
+                <a class="nav-link {{ request()->is('ruangan') ? 'active' : '' }}" href="{{ route('ruangan.index') }}">
+                    <i class="bi bi-bar-chart"></i>
+                    <span class="sidebar-text">Ruangan</span>
+                </a>
+                <a class="nav-link {{ request()->is('mahasiswa') ? 'active' : '' }}"
+                    href="{{ route('mahasiswa.index') }}">
+                    <i class="bi bi-people"></i>
+                    <span class="sidebar-text">Mahasiswa</span>
+                    <span class="badge-notification">3</span>
+                </a>
+                <a class="nav-link {{ request()->is('absensi') ? 'active' : '' }}" href="{{ route('absensi.index') }}">
+                    <i class="bi bi-clock-history"></i>
+                    <span class="sidebar-text">Absensi Hari Ini</span>
+                </a>
+            @endif
             <hr>
             {{-- Logout: use POST form to call the named logout route --}}
             <a class="nav-link" href="#"
@@ -44,12 +51,21 @@
 
     <div class="p-3">
         <div class="d-flex align-items-center">
-            <img src="https://ui-avatars.com/api/?name=Admin+User&background=7c1316&color=fff"
-                class="rounded-circle me-2" width="40" height="40" alt="User">
-            <div class="sidebar-text">
-                <div class="fw-bold">Admin User</div>
-                <small>Administrator</small>
-            </div>
+            @if (auth()->check())
+                <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=7c1316&color=fff"
+                    class="rounded-circle me-2" width="40" height="40" alt="User">
+                <div class="sidebar-text">
+                    <div class="fw-bold">{{ auth()->user()->name }}</div>
+                    <small>{{ ucfirst(auth()->user()->role ?? 'user') }}</small>
+                </div>
+            @else
+                <img src="https://ui-avatars.com/api/?name=Guest&background=7c1316&color=fff"
+                    class="rounded-circle me-2" width="40" height="40" alt="User">
+                <div class="sidebar-text">
+                    <div class="fw-bold">Guest</div>
+                    <small>Visitor</small>
+                </div>
+            @endif
         </div>
     </div>
 </div>

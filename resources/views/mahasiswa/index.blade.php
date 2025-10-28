@@ -33,7 +33,7 @@
                             <td>{{ $m->nm_mahasiswa }}</td>
                             <td>{{ $m->univ_asal }}</td>
                             <td>{{ $m->prodi }}</td>
-                            <td>{{ $m->nm_ruangan }}</td>
+                            <td>{{ $m->ruangan ? $m->ruangan->nm_ruangan : $m->nm_ruangan }}</td>
                             <td>{{ $m->status }}</td>
                             <td>
                                 <a href="{{ route('mahasiswa.show', $m->id) }}" class="btn btn-sm btn-info">Lihat</a>

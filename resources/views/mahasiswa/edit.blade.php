@@ -28,9 +28,16 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Nama Ruangan</label>
-                    <input type="text" name="nm_ruangan" class="form-control"
-                        value="{{ old('nm_ruangan', $mahasiswa->nm_ruangan) }}">
+                    <label>Ruangan</label>
+                    <select name="ruangan_id" class="form-control">
+                        <option value="">-- pilih ruangan (opsional) --</option>
+                        @foreach ($ruangans as $r)
+                            <option value="{{ $r->id }}"
+                                {{ old('ruangan_id', $mahasiswa->ruangan_id) == $r->id ? 'selected' : '' }}>
+                                {{ $r->nm_ruangan }} (kuota: {{ $r->kuota_ruangan }})
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="form-group">

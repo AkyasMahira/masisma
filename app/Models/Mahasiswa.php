@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\Models\Absensi;
+use App\Models\Ruangan;
 
 class Mahasiswa extends Model
 {
@@ -14,6 +16,7 @@ class Mahasiswa extends Model
         'univ_asal',
         'prodi',
         'nm_ruangan',
+        'ruangan_id',
         'status',
         'share_token',
     ];
@@ -32,5 +35,10 @@ class Mahasiswa extends Model
     public function absensis()
     {
         return $this->hasMany(Absensi::class, 'mahasiswa_id');
+    }
+
+    public function ruangan()
+    {
+        return $this->belongsTo(Ruangan::class, 'ruangan_id');
     }
 }
