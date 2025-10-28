@@ -40,7 +40,44 @@ class RuanganController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validasi input
+        // Handle Excel import
+        if ($request->has('data')) {
+            try {
+                $data = json_decode($request->data, true);
+                $success = 0;
+                $errors = [];
+
+                foreach ($data as $row) {
+                    // Validate each row
+                    if (empty($row['Nama Ruangan']) || empty($row['Kuota Ruangan'])) {
+                        continue;
+                    }
+
+                    try {
+                        Ruangan::create([
+                            'nm_ruangan' => $row['Nama Ruangan'],
+                            'kuota_ruangan' => (int)$row['Kuota Ruangan']
+                        ]);
+                        $success++;
+                    } catch (\Exception $e) {
+                        $errors[] = "Baris {$row['Nama Ruangan']}: " . $e->getMessage();
+                    }
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "Berhasil import $success data ruangan",
+                    'errors' => $errors
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error: ' . $e->getMessage()
+                ]);
+            }
+        }
+
+        // Handle normal form submission
         $request->validate([
             'nm_ruangan' => 'required|string|max:255|unique:ruangans',
             'kuota_ruangan' => 'required|integer|min:1',
@@ -52,13 +89,11 @@ class RuanganController extends Controller
             'kuota_ruangan.min' => 'Kuota minimal adalah 1.',
         ]);
 
-        // 2. Simpan data
         Ruangan::create([
             'nm_ruangan' => $request->nm_ruangan,
             'kuota_ruangan' => $request->kuota_ruangan,
         ]);
 
-        // 3. Redirect
         return redirect()->route('ruangan.index')
             ->with('success', 'Ruangan berhasil ditambahkan.');
     }

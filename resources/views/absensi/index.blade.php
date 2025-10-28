@@ -26,6 +26,7 @@
                 <div class="col-md-4">
                     <button class="btn btn-primary">Filter</button>
                     <a href="{{ route('absensi.index') }}" class="btn btn-secondary">Reset</a>
+                    <button class="btn btn-success ms-2" onclick="exportAbsensi()">Export Excel</button>
                 </div>
             </form>
 
@@ -54,4 +55,35 @@
             </table>
         </div>
     </div>
+@section('scripts')
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <script>
+        function exportAbsensi() {
+            const table = document.querySelector('table');
+            const rows = Array.from(table.querySelectorAll('thead tr, tbody tr'));
+            const ws_data = [];
+
+            // headers
+            const headers = Array.from(table.querySelectorAll('thead th')).map(h => h.innerText.trim());
+            // We will use: Waktu, Nama, Ruangan, Tipe
+            ws_data.push(['Waktu', 'Nama', 'Ruangan', 'Tipe']);
+
+            table.querySelectorAll('tbody tr').forEach(tr => {
+                const cells = Array.from(tr.querySelectorAll('td'));
+                if (cells.length >= 5) {
+                    const waktu = cells[1].innerText.trim();
+                    const nama = cells[2].innerText.trim();
+                    const ruangan = cells[3].innerText.trim();
+                    const tipe = cells[4].innerText.trim();
+                    ws_data.push([waktu, nama, ruangan, tipe]);
+                }
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Absensi');
+            XLSX.writeFile(wb, `Absensi_${new Date().toISOString().split('T')[0]}.xlsx`);
+        }
+    </script>
+@endsection
 @endsection

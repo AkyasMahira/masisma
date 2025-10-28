@@ -48,6 +48,74 @@ class MahasiswaController extends Controller
      */
     public function store(Request $request)
     {
+        // If import via SheetJS: payload will contain 'data' JSON
+        if ($request->has('data')) {
+            try {
+                $rows = json_decode($request->data, true);
+                $created = 0;
+                $errors = [];
+
+                foreach ($rows as $i => $row) {
+                    // Accept various header names (case-insensitive)
+                    $name = $row['Nama'] ?? $row['nama'] ?? $row['Nama Mahasiswa'] ?? null;
+                    $univ = $row['Universitas'] ?? $row['universitas'] ?? $row['univ_asal'] ?? null;
+                    $prodi = $row['Prodi'] ?? $row['prodi'] ?? null;
+                    $ruanganName = $row['Ruangan'] ?? $row['ruangan'] ?? null;
+                    $status = $row['Status'] ?? $row['status'] ?? 'aktif';
+
+                    if (empty($name)) {
+                        $errors[] = "Baris " . ($i + 2) . ": nama kosong";
+                        continue;
+                    }
+
+                    $mahasiswaData = [
+                        'nm_mahasiswa' => $name,
+                        'univ_asal' => $univ,
+                        'prodi' => $prodi,
+                        'status' => in_array($status, ['aktif', 'nonaktif']) ? $status : 'aktif',
+                    ];
+
+                    // If ruangan name provided, try to find ruangan and set ruangan_id, nm_ruangan; handle kuota
+                    if (!empty($ruanganName)) {
+                        $ruangan = Ruangan::where('nm_ruangan', $ruanganName)->first();
+                        if ($ruangan) {
+                            if ($ruangan->kuota_ruangan <= 0) {
+                                $errors[] = "Baris " . ($i + 2) . ": ruangan {$ruanganName} kuota penuh";
+                                // still set nm_ruangan but leave ruangan_id null
+                                $mahasiswaData['nm_ruangan'] = $ruanganName;
+                            } else {
+                                $mahasiswaData['ruangan_id'] = $ruangan->id;
+                                $mahasiswaData['nm_ruangan'] = $ruangan->nm_ruangan;
+                                $ruangan->decrement('kuota_ruangan');
+                            }
+                        } else {
+                            // no matching ruangan, store name as plain text
+                            $mahasiswaData['nm_ruangan'] = $ruanganName;
+                        }
+                    }
+
+                    try {
+                        Mahasiswa::create($mahasiswaData);
+                        $created++;
+                    } catch (\Exception $e) {
+                        $errors[] = "Baris " . ($i + 2) . ": " . $e->getMessage();
+                    }
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "Berhasil mengimpor $created mahasiswa",
+                    'errors' => $errors
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error saat import: ' . $e->getMessage()
+                ]);
+            }
+        }
+
+        // Normal single-form submission
         $data = $request->validate([
             'nm_mahasiswa' => 'required|string|max:255',
             'univ_asal' => 'nullable|string|max:255',

@@ -75,9 +75,25 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="fw-bold text-maroon" style="color: var(--maroon);">Daftar Mahasiswa</h4>
-        <a href="{{ route('mahasiswa.create') }}" class="btn-maroon">
-            <i class="bi bi-person-plus"></i> Tambah Mahasiswa
-        </a>
+        <div class="btn-group">
+            <button class="btn btn-light btn-sm me-2" onclick="exportMahasiswa()">
+                <i class="bi bi-file-earmark-arrow-down"></i> Export Excel
+            </button>
+
+            <label class="btn btn-light btn-sm me-2">
+                <i class="bi bi-upload"></i> Import Excel
+                <input type="file" id="fileImportMahasiswa" style="display:none" accept=".xlsx,.xls"
+                    onchange="importMahasiswa(this)">
+            </label>
+
+            <button class="btn btn-light btn-sm me-2" onclick="downloadTemplateMahasiswa()">
+                <i class="bi bi-download"></i> Template
+            </button>
+
+            <a href="{{ route('mahasiswa.create') }}" class="btn-maroon">
+                <i class="bi bi-person-plus"></i> Tambah Mahasiswa
+            </a>
+        </div>
     </div>
 
     @if (session('success'))
@@ -143,4 +159,87 @@
             </div>
         </div>
     </div>
+
+    @section('scripts')
+        <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+        <script>
+            function exportMahasiswa() {
+                const data = [
+                    @foreach ($mahasiswas as $m)
+                        [
+                            {!! json_encode($m->nm_mahasiswa ?? '') !!},
+                            {!! json_encode($m->univ_asal ?? '') !!},
+                            {!! json_encode($m->prodi ?? '') !!},
+                            {!! json_encode($m->ruangan ? $m->ruangan->nm_ruangan : $m->nm_ruangan ?? '') !!},
+                            {!! json_encode($m->status ?? '') !!}
+                        ] {{ $loop->last ? '' : ',' }}
+                    @endforeach
+                ];
+
+                const ws_data = [
+                    ['Nama', 'Universitas', 'Prodi', 'Ruangan', 'Status']
+                ].concat(data);
+                const ws = XLSX.utils.aoa_to_sheet(ws_data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Mahasiswa');
+                XLSX.writeFile(wb, `Data_Mahasiswa_${new Date().toISOString().split('T')[0]}.xlsx`);
+            }
+
+            function downloadTemplateMahasiswa() {
+                const ws_data = [
+                    ['Nama', 'Universitas', 'Prodi', 'Ruangan', 'Status'],
+                    ['Budi Santoso', 'Universitas A', 'Teknik Informatika', 'Ruang A', 'aktif']
+                ];
+                const ws = XLSX.utils.aoa_to_sheet(ws_data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Template_Mahasiswa');
+                XLSX.writeFile(wb, 'Template_Mahasiswa.xlsx');
+            }
+
+            function importMahasiswa(input) {
+                const file = input.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {
+                        type: 'array'
+                    });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(firstSheet, {
+                        defval: ''
+                    });
+
+                    if (json.length === 0) {
+                        alert('File kosong atau format tidak sesuai');
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('_token', '{{ csrf_token() }}');
+                    formData.append('data', JSON.stringify(json));
+
+                    fetch('{{ route('mahasiswa.store') }}', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(res => res.json())
+                        .then(res => {
+                            if (res.success) {
+                                alert(res.message || 'Import berhasil');
+                                location.reload();
+                            } else {
+                                alert('Import gagal: ' + (res.message || 'Unknown'));
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('Terjadi kesalahan saat import');
+                        });
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        </script>
+    @endsection
+
 @endsection
