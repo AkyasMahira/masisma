@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Mahasiswa;
 use Illuminate\Http\Request;
 
 class MahasiswaController extends Controller
@@ -13,7 +14,8 @@ class MahasiswaController extends Controller
      */
     public function index()
     {
-        return view('mahasiswa.index');
+        $mahasiswas = Mahasiswa::orderBy('created_at', 'desc')->get();
+        return view('mahasiswa.index', compact('mahasiswas'));
     }
 
     /**
@@ -23,7 +25,7 @@ class MahasiswaController extends Controller
      */
     public function create()
     {
-        //
+        return view('mahasiswa.create');
     }
 
     /**
@@ -34,7 +36,17 @@ class MahasiswaController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'nm_mahasiswa' => 'required|string|max:255',
+            'univ_asal' => 'nullable|string|max:255',
+            'prodi' => 'nullable|string|max:255',
+            'nm_ruangan' => 'nullable|string|max:255',
+            'status' => 'required|in:aktif,nonaktif',
+        ]);
+
+        Mahasiswa::create($data);
+
+        return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa berhasil ditambahkan.');
     }
 
     /**
@@ -45,7 +57,8 @@ class MahasiswaController extends Controller
      */
     public function show($id)
     {
-        //
+        $mahasiswa = Mahasiswa::findOrFail($id);
+        return view('mahasiswa.show', compact('mahasiswa'));
     }
 
     /**
@@ -56,7 +69,8 @@ class MahasiswaController extends Controller
      */
     public function edit($id)
     {
-        //
+        $mahasiswa = Mahasiswa::findOrFail($id);
+        return view('mahasiswa.edit', compact('mahasiswa'));
     }
 
     /**
@@ -68,7 +82,19 @@ class MahasiswaController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $mahasiswa = Mahasiswa::findOrFail($id);
+
+        $data = $request->validate([
+            'nm_mahasiswa' => 'required|string|max:255',
+            'univ_asal' => 'nullable|string|max:255',
+            'prodi' => 'nullable|string|max:255',
+            'nm_ruangan' => 'nullable|string|max:255',
+            'status' => 'required|in:aktif,nonaktif',
+        ]);
+
+        $mahasiswa->update($data);
+
+        return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa berhasil diperbarui.');
     }
 
     /**
@@ -79,6 +105,9 @@ class MahasiswaController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $mahasiswa = Mahasiswa::findOrFail($id);
+        $mahasiswa->delete();
+
+        return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa berhasil dihapus.');
     }
 }

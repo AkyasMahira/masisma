@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\RuanganController;
+use App\Http\Controllers\AbsensiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,8 +47,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [MahasiswaController::class, 'index'])->name('index');
         Route::get('/create', [MahasiswaController::class, 'create'])->name('create');
         Route::post('/', [MahasiswaController::class, 'store'])->name('store');
+        Route::get('/{mahasiswa}', [MahasiswaController::class, 'show'])->name('show');
         Route::get('/{mahasiswa}/edit', [MahasiswaController::class, 'edit'])->name('edit');
         Route::put('/{mahasiswa}', [MahasiswaController::class, 'update'])->name('update');
         Route::delete('/{mahasiswa}', [MahasiswaController::class, 'destroy'])->name('destroy');
     });
 });
+
+// Public attendance (absensi) routes using share tokens — no auth required
+Route::get('/absensi/{token}', [AbsensiController::class, 'card'])->name('absensi.card');
+Route::post('/absensi/{token}/masuk', [AbsensiController::class, 'masuk'])->name('absensi.masuk');
+Route::post('/absensi/{token}/keluar', [AbsensiController::class, 'keluar'])->name('absensi.keluar');
