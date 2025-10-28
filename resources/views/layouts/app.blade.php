@@ -64,6 +64,11 @@
             border-bottom: 1px solid #dee2e6;
         }
 
+        a {
+            text-decoration: none;
+            color: var(--maroon);
+        }
+
         .theme-toggle {
             background: var(--maroon);
             color: white;

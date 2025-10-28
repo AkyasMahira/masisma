@@ -29,7 +29,6 @@
                     href="{{ route('mahasiswa.index') }}">
                     <i class="bi bi-people"></i>
                     <span class="sidebar-text">Mahasiswa</span>
-                    <span class="badge-notification">3</span>
                 </a>
                 <a class="nav-link {{ request()->is('absensi') ? 'active' : '' }}" href="{{ route('absensi.index') }}">
                     <i class="bi bi-clock-history"></i>
