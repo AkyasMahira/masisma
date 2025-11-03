@@ -32,7 +32,7 @@
                 </a>
                 <a class="nav-link {{ request()->is('absensi') ? 'active' : '' }}" href="{{ route('absensi.index') }}">
                     <i class="bi bi-clock-history"></i>
-                    <span class="sidebar-text">Absensi Hari Ini</span>
+                    <span class="sidebar-text">Riwayat Absensi</span>
                 </a>
             @endif
             <hr>

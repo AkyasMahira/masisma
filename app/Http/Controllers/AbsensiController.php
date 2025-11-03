@@ -63,19 +63,36 @@ class AbsensiController extends Controller
         }
 
         $ruangans = Ruangan::all();
-        $today = Carbon::today();
 
-        $query = Absensi::with('mahasiswa')
-            ->whereDate('created_at', $today);
+        // Build query
+        $query = Absensi::with(['mahasiswa', 'mahasiswa.ruangan']);
 
+        // Filter Ruangan
         if ($request->filled('ruangan_id')) {
             $query->whereHas('mahasiswa', function ($q) use ($request) {
                 $q->where('ruangan_id', $request->ruangan_id);
             });
         }
 
-        $absensis = $query->orderBy('created_at', 'desc')->get();
+        // Filter Type
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
 
-        return view('absensi.index', compact('absensis', 'ruangans'));
+        // Date range
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
+        // Paginate and keep query string for links
+        $absensi = $query->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+        // Return view with the variable name expected by blade
+        return view('absensi.index', compact('absensi', 'ruangans'));
     }
 }

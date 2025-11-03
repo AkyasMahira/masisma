@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,30 +29,76 @@
             --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
 
+        /* Body */
         body {
             background-color: var(--bg-light);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: var(--text-dark);
             overflow-x: hidden;
             transition: background-color var(--transition-speed);
+            display: flex;
+            /* NEW */
+            min-height: 100vh;
+            /* NEW */
         }
 
+        /* Dark Mode */
         body.dark-mode {
             --bg-light: #1a1a1a;
             --text-dark: #f0f0f0;
             --text-muted: #a0a0a0;
         }
 
-        /* Content */
+        /* Content Layout */
         .content {
             margin-left: 250px;
             padding: 30px;
             min-height: 100vh;
             transition: margin-left var(--transition-speed) ease;
+
+            display: flex;
+            /* NEW */
+            flex-direction: column;
+            /* NEW → agar footer bisa auto ke bawah */
+            flex: 1;
+            /* NEW */
         }
 
         .content.expanded {
             margin-left: 70px;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            /* Dorong ke bawah */
+            padding: 12px 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.6);
+            transition: background var(--transition-speed), color var(--transition-speed);
+        }
+
+        /* Footer link */
+        footer a {
+            color: inherit;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color var(--transition-speed), transform 0.2s ease;
+        }
+
+        footer a:hover {
+            color: var(--maroon);
+            transform: translateY(-2px);
+        }
+
+        /* Dark mode footer */
+        body.dark-mode footer {
+            background: rgba(255, 255, 255, 0.04);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         /* Header Content */
@@ -230,8 +277,15 @@
 
         /* Animations */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .fade-in {
@@ -470,4 +524,5 @@
 
     @yield('scripts')
 </body>
+
 </html>
