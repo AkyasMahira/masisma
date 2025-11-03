@@ -4,83 +4,74 @@ namespace App\Http\Controllers;
 
 use App\Models\Absensi;
 use App\Models\Mahasiswa;
-use Illuminate\Http\Request;
 use App\Models\Ruangan;
+use Illuminate\Http\Request;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 
 class AbsensiController extends Controller
 {
-    // public card (no auth) to show mahasiswa info and buttons
+    // Public card (no auth) 
     public function card($token)
     {
         $mahasiswa = Mahasiswa::where('share_token', $token)->firstOrFail();
-        return view('absensi.card', compact('mahasiswa'));
+
+        $today = Carbon::today();
+        $absenHariIni = Absensi::where('mahasiswa_id', $mahasiswa->id)
+            ->whereDate('created_at', $today)
+            ->first();
+
+        return view('absensi.card', compact('mahasiswa', 'absenHariIni'));
     }
 
-    public function masuk(Request $request, $token)
+    // 1 tombol toggle
+    public function toggle($token)
     {
         $mahasiswa = Mahasiswa::where('share_token', $token)->firstOrFail();
+        $today = Carbon::today();
 
-        $today = Carbon::now()->toDateString();
-        $already = $mahasiswa->absensis()->whereDate('created_at', $today)->where('type', 'masuk')->exists();
-        if ($already) {
-            return redirect()->back()->with('error', 'You have already checked in today.');
+        $absen = Absensi::where('mahasiswa_id', $mahasiswa->id)
+            ->whereDate('created_at', $today)
+            ->first();
+
+        // Jika belum absen hari ini → catat jam masuk
+        if (!$absen) {
+            Absensi::create([
+                'mahasiswa_id' => $mahasiswa->id,
+                'jam_masuk' => now(),
+            ]);
+
+            return back()->with('success', 'Absensi Masuk berhasil direkam!');
         }
 
-        Absensi::create([
-            'mahasiswa_id' => $mahasiswa->id,
-            'type' => 'masuk',
-        ]);
+        // Jika sudah masuk tapi belum keluar → update jam keluar
+        if (!$absen->jam_keluar) {
+            $absen->update(['jam_keluar' => now()]);
+            return back()->with('success', 'Absensi Keluar berhasil direkam!');
+        }
 
-        return redirect()->back()->with('success', 'Absensi masuk tercatat.');
+        // Jika sudah masuk & keluar → kasih info
+        return back()->with('error', 'Anda sudah absen masuk & keluar hari ini.');
     }
 
-    public function keluar(Request $request, $token)
-    {
-        $mahasiswa = Mahasiswa::where('share_token', $token)->firstOrFail();
 
-        $today = Carbon::now()->toDateString();
-        $hasMasuk = $mahasiswa->absensis()->whereDate('created_at', $today)->where('type', 'masuk')->exists();
-        if (!$hasMasuk) {
-            return redirect()->back()->with('error', 'Cannot check out without checking in first.');
-        }
-
-        $alreadyKeluar = $mahasiswa->absensis()->whereDate('created_at', $today)->where('type', 'keluar')->exists();
-        if ($alreadyKeluar) {
-            return redirect()->back()->with('error', 'You have already checked out today.');
-        }
-
-        Absensi::create([
-            'mahasiswa_id' => $mahasiswa->id,
-            'type' => 'keluar',
-        ]);
-
-        return redirect()->back()->with('success', 'Absensi keluar tercatat.');
-    }
-
-    // admin view for today's absensi with filters
+    // Admin view
     public function index(Request $request)
     {
-        // only admin
-        $user = Auth::user();
+        $user = auth()->user();
         if (!$user || $user->role !== 'admin') {
             abort(403);
         }
 
         $ruangans = Ruangan::all();
+        $today = Carbon::today();
 
-        $query = Absensi::with('mahasiswa')->whereDate('created_at', Carbon::now()->toDateString());
+        $query = Absensi::with('mahasiswa')
+            ->whereDate('created_at', $today);
 
         if ($request->filled('ruangan_id')) {
-            $ruanganId = $request->ruangan_id;
-            $query->whereHas('mahasiswa', function ($q) use ($ruanganId) {
-                $q->where('ruangan_id', $ruanganId);
+            $query->whereHas('mahasiswa', function ($q) use ($request) {
+                $q->where('ruangan_id', $request->ruangan_id);
             });
-        }
-
-        if ($request->filled('type')) {
-            $query->where('type', $request->type);
         }
 
         $absensis = $query->orderBy('created_at', 'desc')->get();

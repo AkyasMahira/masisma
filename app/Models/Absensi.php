@@ -11,7 +11,8 @@ class Absensi extends Model
 
     protected $fillable = [
         'mahasiswa_id',
-        'type',
+        'jam_masuk',
+        'jam_keluar',
     ];
 
     public function mahasiswa()

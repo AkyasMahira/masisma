@@ -59,5 +59,6 @@ Route::middleware('auth')->group(function () {
 
 // Public attendance (absensi) routes using share tokens — no auth required
 Route::get('/absensi/{token}', [AbsensiController::class, 'card'])->name('absensi.card');
-Route::post('/absensi/{token}/masuk', [AbsensiController::class, 'masuk'])->name('absensi.masuk');
-Route::post('/absensi/{token}/keluar', [AbsensiController::class, 'keluar'])->name('absensi.keluar');
+
+// Toggle Absen
+Route::post('/absensi/{token}/toggle', [AbsensiController::class, 'toggle'])->name('absensi.toggle');

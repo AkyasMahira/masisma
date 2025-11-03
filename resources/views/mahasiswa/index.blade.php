@@ -8,11 +8,44 @@
         :root {
             --maroon: #7c1316;
             --maroon-light: #9d2a2e;
+            /* Digunakan untuk hover */
             --text-dark: #222;
             --text-muted: #6c757d;
             --bg-light: #f8f9fa;
         }
 
+        /* --- Animasi & Efek --- */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Komponen Utama --- */
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            /* Terapkan animasi fade-in */
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0;
+            /* Mulai transparan untuk animasi */
+        }
+
+        .alert {
+            border-radius: 10px;
+            font-weight: 500;
+            /* Terapkan animasi juga untuk alert */
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+
+        /* --- Styling Tombol --- */
         .btn-maroon {
             background-color: var(--maroon);
             border: none;
@@ -25,89 +58,153 @@
 
         .btn-maroon:hover {
             background-color: var(--maroon-light);
+            transform: translateY(-2px);
+            /* Efek 'lift' */
+            box-shadow: 0 4px 12px rgba(124, 19, 22, 0.25);
+        }
+
+        /* Tombol sekunder (Import/Export) */
+        .btn-outline-custom {
+            border: 1px solid #ced4da;
+            color: var(--text-dark);
+            font-weight: 500;
+            border-radius: 10px;
+            background-color: #fff;
+            transition: all 0.2s ease;
+        }
+
+        .btn-outline-custom:hover {
+            background-color: var(--bg-light);
+            border-color: #adb5bd;
+            color: var(--text-dark);
             transform: translateY(-1px);
         }
 
+        /* --- Styling & Animasi Tabel --- */
         .table {
             border-radius: 12px;
             overflow: hidden;
+            /* Penting untuk border-radius */
+            border-collapse: separate;
+            /* Membantu shadow-box pada hover */
+            border-spacing: 0;
         }
 
-        thead {
+        .table thead {
             background-color: var(--maroon);
             color: #fff;
         }
 
-        th {
+        .table th {
             font-weight: 600;
             text-transform: uppercase;
             font-size: 0.85rem;
             letter-spacing: 0.5px;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
         }
 
-        td {
+        .table td {
             vertical-align: middle !important;
+            padding: 0.9rem 0.75rem;
+            /* Sedikit lebih tinggi */
         }
 
-        .card {
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        /* Ini adalah animasi yang Anda minta */
+        .table-hover tbody tr {
+            transition: all 0.2s ease-out;
         }
 
-        .alert {
-            border-radius: 10px;
-            font-weight: 500;
+        .table-hover tbody tr:hover {
+            background-color: #fffafb;
+            /* Warna hover yang sangat halus */
+            transform: translateY(-3px);
+            /* Efek 'lift' pada baris */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.07);
+            position: relative;
+            /* Agar shadow terlihat di atas baris lain */
+            z-index: 10;
         }
+
+        /* --- End Animasi Tabel --- */
 
         .btn-sm {
             border-radius: 8px;
         }
 
+        .text-maroon {
+            color: var(--maroon);
+        }
+
         @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 1rem;
+            }
 
             th,
             td {
                 font-size: 0.85rem;
+                padding: 0.75rem 0.5rem;
+            }
+
+            /* Stack tombol di mobile */
+            .header-buttons {
+                flex-direction: column;
+                align-items: stretch !important;
+                width: 100%;
+                gap: 0.5rem;
+            }
+
+            .header-buttons .btn,
+            .header-buttons .btn-maroon,
+            .header-buttons .btn-outline-custom {
+                width: 100%;
+                margin: 0 !important;
             }
         }
     </style>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="fw-bold text-maroon" style="color: var(--maroon);">Daftar Mahasiswa</h4>
-        <div class="btn-group">
-            <button class="btn btn-light btn-sm me-2" onclick="exportMahasiswa()">
-                <i class="bi bi-file-earmark-arrow-down"></i> Export Excel
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap page-header">
+        <h4 class="fw-bold text-maroon mb-0">Daftar Mahasiswa</h4>
+
+        <div class="d-flex flex-wrap gap-2 header-buttons">
+            <button class="btn btn-outline-custom btn-sm" onclick="exportMahasiswa()">
+                <i class="bi bi-file-earmark-arrow-down me-1"></i> Export Excel
             </button>
 
-            <label class="btn btn-light btn-sm me-2">
-                <i class="bi bi-upload"></i> Import Excel
+            <label class="btn btn-outline-custom btn-sm" style="cursor: pointer;">
+                <i class="bi bi-upload me-1"></i> Import Excel
                 <input type="file" id="fileImportMahasiswa" style="display:none" accept=".xlsx,.xls"
                     onchange="importMahasiswa(this)">
             </label>
 
-            <button class="btn btn-light btn-sm me-2" onclick="downloadTemplateMahasiswa()">
-                <i class="bi bi-download"></i> Template
+            <button class="btn btn-outline-custom btn-sm" onclick="downloadTemplateMahasiswa()">
+                <i class="bi bi-download me-1"></i> Template
             </button>
 
-            <a href="{{ route('mahasiswa.create') }}" class="btn-maroon">
-                <i class="bi bi-person-plus"></i> Tambah Mahasiswa
+            <a href="{{ route('mahasiswa.create') }}" class="btn-maroon btn-sm">
+                <i class="bi bi-person-plus me-1"></i> Tambah Mahasiswa
             </a>
         </div>
     </div>
 
     @if (session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     @endif
 
-    <div class="card">
+    <div class="card mb-4">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-striped mb-0">
+                <table class="table table-striped table-hover mb-0">
                     <thead>
                         <tr class="text-center">
                             <th>#</th>
-                            <th>Nama</th>
+                            <th class="text-start">Nama</th>
                             <th>Universitas</th>
                             <th>Prodi</th>
                             <th>Ruangan</th>
@@ -151,7 +248,9 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-3">Belum ada data mahasiswa.</td>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    Belum ada data mahasiswa.
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -161,6 +260,7 @@
     </div>
 
     @section('scripts')
+        {{-- Script Anda tidak berubah dan sudah bagus --}}
         <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
         <script>
             function exportMahasiswa() {
@@ -219,25 +319,41 @@
                     formData.append('_token', '{{ csrf_token() }}');
                     formData.append('data', JSON.stringify(json));
 
+                    // Tampilkan semacam loading spinner jika ada
+                    // ...
+
                     fetch('{{ route('mahasiswa.store') }}', {
                             method: 'POST',
-                            body: formData
+                            body: formData,
+                            headers: {
+                                'Accept': 'application/json', // Pastikan server merespon JSON
+                            }
                         })
-                        .then(res => res.json())
+                        .then(res => {
+                            // Sembunyikan loading
+                            if (!res.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return res.json();
+                        })
                         .then(res => {
                             if (res.success) {
                                 alert(res.message || 'Import berhasil');
                                 location.reload();
                             } else {
-                                alert('Import gagal: ' + (res.message || 'Unknown'));
+                                alert('Import gagal: ' + (res.message || 'Unknown error'));
                             }
                         })
                         .catch(err => {
+                            // Sembunyikan loading
                             console.error(err);
-                            alert('Terjadi kesalahan saat import');
+                            alert('Terjadi kesalahan saat import. Cek konsol untuk detail.');
                         });
                 };
                 reader.readAsArrayBuffer(file);
+
+                // Reset input file agar bisa import file yang sama lagi
+                input.value = '';
             }
         </script>
     @endsection
