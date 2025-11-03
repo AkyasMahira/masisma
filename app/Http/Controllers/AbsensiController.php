@@ -38,6 +38,7 @@ class AbsensiController extends Controller
             Absensi::create([
                 'mahasiswa_id' => $mahasiswa->id,
                 'jam_masuk' => now(),
+                'type' => 'masuk',
             ]);
 
             return back()->with('success', 'Absensi Masuk berhasil direkam!');
@@ -45,7 +46,7 @@ class AbsensiController extends Controller
 
         // Jika sudah masuk tapi belum keluar → update jam keluar
         if (!$absen->jam_keluar) {
-            $absen->update(['jam_keluar' => now()]);
+            $absen->update(['jam_keluar' => now(), 'type' => 'keluar']);
             return back()->with('success', 'Absensi Keluar berhasil direkam!');
         }
 

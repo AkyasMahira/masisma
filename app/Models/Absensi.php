@@ -13,6 +13,12 @@ class Absensi extends Model
         'mahasiswa_id',
         'jam_masuk',
         'jam_keluar',
+        'type',
+    ];
+
+    protected $casts = [
+        'jam_masuk' => 'datetime',
+        'jam_keluar' => 'datetime',
     ];
 
     public function mahasiswa()

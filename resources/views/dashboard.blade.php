@@ -9,7 +9,7 @@
         <div class="col-md-3">
             <div class="dashboard-card fade-in" style="animation-delay: 0.1s">
                 <div class="card-icon primary">
-                    <i class="bi bi-graph-up-arrow"></i>
+                    <i class="bi bi-people"></i>
                 </div>
                 <div class="stat-number" id="revenueCount">0</div>
                 <div class="stat-text">Mahasiswa</div>
@@ -27,7 +27,7 @@
         <div class="col-md-3">
             <div class="dashboard-card fade-in" style="animation-delay: 0.2s">
                 <div class="card-icon success">
-                    <i class="bi bi-people"></i>
+                    <i class="bi bi-door-open"></i>
                 </div>
                 <div class="stat-number" id="userCount">0</div>
                 <div class="stat-text">Room</div>
@@ -45,7 +45,7 @@
         <div class="col-md-3">
             <div class="dashboard-card fade-in" style="animation-delay: 0.3s">
                 <div class="card-icon warning">
-                    <i class="bi bi-cart"></i>
+                    <i class="bi bi-person"></i>
                 </div>
                 <div class="stat-number" id="orderCount">0</div>
                 <div class="stat-text">Users</div>
@@ -56,24 +56,6 @@
                     </div>
                     <div class="progress">
                         <div class="progress-bar bg-warning" role="progressbar" style="width: 85%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="dashboard-card fade-in" style="animation-delay: 0.4s">
-                <div class="card-icon info">
-                    <i class="bi bi-chat-left-text"></i>
-                </div>
-                <div class="stat-number" id="feedbackCount">0</div>
-                <div class="stat-text">Feedback</div>
-                <div class="progress-container">
-                    <div class="progress-label">
-                        <span>Target</span>
-                        <span>45%</span>
-                    </div>
-                    <div class="progress">
-                        <div class="progress-bar bg-info" role="progressbar" style="width: 45%"></div>
                     </div>
                 </div>
             </div>
@@ -103,8 +85,17 @@
 @endsection
 
 @section('scripts')
-    {{-- Script tambahan khusus untuk halaman dashboard --}}
     <script>
-        // Script khusus untuk halaman dashboard bisa ditambahkan di sini
+        // Provide dashboard data to the global layout so counters & charts use real data
+        window.dashboardData = {
+            totalMahasiswa: {{ $totalMahasiswa ?? 0 }},
+            totalRuangan: {{ $totalRuangan ?? 0 }},
+            totalUsers: {{ $totalUsers ?? 0 }},
+            todayAbsensi: {{ $todayAbsensi ?? 0 }},
+            months: {!! json_encode($months ?? []) !!},
+            mahasiswaPerMonth: {!! json_encode($mahasiswaPerMonth ?? []) !!},
+            ruanganLabels: {!! json_encode($ruanganLabels ?? []) !!},
+            ruanganData: {!! json_encode($ruanganData ?? []) !!}
+        };
     </script>
 @endsection

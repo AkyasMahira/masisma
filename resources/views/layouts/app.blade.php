@@ -12,6 +12,11 @@
     {{-- Icon Bootstrap --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
+    {{-- Choices.js CSS --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/choices.js/1.1.6/styles/css/choices.min.css"
+        integrity="sha512-+8K1k6gM6+6a2r9oQwB+8u8Zxq2u1Jp0xFhZkq6Ykq1F0s3rVw1Z3QXw6k3Qw6s1y2z7x7Y9G6q2K1M1Q=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     {{-- Chart.js untuk visualisasi data --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -347,6 +352,10 @@
 
     {{-- Bootstrap JS --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {{-- Choices.js --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/choices.js/1.1.6/choices.min.js"
+        integrity="sha512-+kq1Zk6gM6+6a2r9oQwB+8u8Zxq2u1Jp0xFhZkq6Ykq1F0s3rVw1Z3QXw6k3Qw6s1y2z7x7Y9G6q2K1M1Q=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -411,24 +420,33 @@
                 updateCounter();
             }
 
-            // Initialize counters if elements exist
+            // Initialize counters if elements exist. If window.dashboardData provided, use its values.
             setTimeout(() => {
-                if (document.getElementById('revenueCount')) animateCounter('revenueCount', 12543);
-                if (document.getElementById('userCount')) animateCounter('userCount', 324);
-                if (document.getElementById('orderCount')) animateCounter('orderCount', 567);
-                if (document.getElementById('feedbackCount')) animateCounter('feedbackCount', 89);
+                const dd = window.dashboardData || {};
+                if (document.getElementById('revenueCount')) animateCounter('revenueCount', dd
+                    .totalMahasiswa ?? 12543);
+                if (document.getElementById('userCount')) animateCounter('userCount', dd.totalRuangan ??
+                    324);
+                if (document.getElementById('orderCount')) animateCounter('orderCount', dd.totalUsers ??
+                    567);
+                if (document.getElementById('feedbackCount')) animateCounter('feedbackCount', dd
+                    .todayAbsensi ?? 89);
             }, 500);
 
             // Charts initialization with existence check
             const revenueCtx = document.getElementById('revenueChart');
             if (revenueCtx) {
+                const dd = window.dashboardData || {};
+                const labels = dd.months ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
+                const dataSeries = dd.mahasiswaPerMonth ?? [6500, 7900, 8300, 10500, 12000, 14500, 16800];
+
                 const revenueChart = new Chart(revenueCtx.getContext('2d'), {
                     type: 'line',
                     data: {
-                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                        labels: labels,
                         datasets: [{
-                            label: 'Revenue',
-                            data: [6500, 7900, 8300, 10500, 12000, 14500, 16800],
+                            label: 'Mahasiswa',
+                            data: dataSeries,
                             borderColor: '#7c1316',
                             backgroundColor: 'rgba(124, 19, 22, 0.1)',
                             borderWidth: 2,
@@ -463,18 +481,20 @@
 
             const trafficCtx = document.getElementById('trafficChart');
             if (trafficCtx) {
+                const dd = window.dashboardData || {};
+                const labels = dd.ruanganLabels && dd.ruanganLabels.length ? dd.ruanganLabels : ['Direct', 'Social',
+                    'Referral', 'Organic'
+                ];
+                const dataSeries = dd.ruanganData && dd.ruanganData.length ? dd.ruanganData : [35, 25, 20, 20];
+                const colors = ['#7c1316', '#9d2a2e', '#c13c41', '#e05257', '#e77a7a', '#f2a3a3'];
+
                 const trafficChart = new Chart(trafficCtx.getContext('2d'), {
                     type: 'doughnut',
                     data: {
-                        labels: ['Direct', 'Social', 'Referral', 'Organic'],
+                        labels: labels,
                         datasets: [{
-                            data: [35, 25, 20, 20],
-                            backgroundColor: [
-                                '#7c1316',
-                                '#9d2a2e',
-                                '#c13c41',
-                                '#e05257'
-                            ],
+                            data: dataSeries,
+                            backgroundColor: colors.slice(0, labels.length),
                             borderWidth: 0
                         }]
                     },
@@ -506,6 +526,26 @@
                         }
                     });
                 });
+            }
+
+            // Initialize Choices.js for selects marked with .js-choices
+            try {
+                const choiceElements = document.querySelectorAll('select.js-choices');
+                choiceElements.forEach(el => {
+                    // Avoid double initialization
+                    if (!el._choicesInitialized) {
+                        new Choices(el, {
+                            searchEnabled: true,
+                            itemSelectText: '',
+                            shouldSort: false,
+                            placeholder: true,
+                        });
+                        el._choicesInitialized = true;
+                    }
+                });
+            } catch (e) {
+                // If Choices.js fails to load, ignore gracefully
+                console.warn('Choices.js init failed', e);
             }
 
             // Add hover effects to cards

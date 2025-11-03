@@ -109,7 +109,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Ruangan</label>
-                            <select name="ruangan_id" class="form-select">
+                            <select name="ruangan_id" class="form-select js-choices">
                                 <option value="">-- Pilih Ruangan (Opsional) --</option>
                                 @foreach ($ruangans as $r)
                                     <option value="{{ $r->id }}"
@@ -122,9 +122,10 @@
 
                         <div class="mb-4">
                             <label class="form-label">Status</label>
-                            <select name="status" class="form-select">
+                            <select name="status" class="form-select js-choices">
                                 <option value="aktif" {{ $mahasiswa->status === 'aktif' ? 'selected' : '' }}>Aktif</option>
-                                <option value="nonaktif" {{ $mahasiswa->status === 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                                <option value="nonaktif" {{ $mahasiswa->status === 'nonaktif' ? 'selected' : '' }}>Nonaktif
+                                </option>
                             </select>
                         </div>
 
