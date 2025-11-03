@@ -5,7 +5,6 @@
 
 @section('content')
 
-    {{-- 1. Animasi background --}}
     <div class="background-animation">
         <div class="circle c1"></div>
         <div class="circle c2"></div>
@@ -15,7 +14,6 @@
         <div class="circle c6"></div>
     </div>
 
-    {{-- 2. Wrapper konten utama --}}
     <div style="position: relative; z-index: 2;">
 
         @if (session('success'))
@@ -26,7 +24,6 @@
         @endif
 
         <div class="card shadow-sm">
-            {{-- 3. Header utama TETAP berwarna marun kustom --}}
             <div class="card-header bg-custom-maroon text-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <h4 class="card-title mb-0">Manajemen Ruangan</h4>
@@ -48,26 +45,21 @@
                     </div>
                 </div>
             </div>
+
             <div class="card-body">
 
-                {{-- 4. KEMBALIKAN array warna Bootstrap --}}
-                @php
-                    $colors = ['primary', 'success', 'info', 'warning', 'danger', 'dark'];
-                @endphp
+                @php $colors = ['primary', 'success', 'info', 'warning', 'danger', 'dark']; @endphp
 
                 <div class="row">
                     @forelse ($ruangan as $room)
-                        {{-- 5. Ambil warna dinamis berdasarkan index loop --}}
-                        @php
-                            $color = $colors[$loop->index % count($colors)];
-                        @endphp
+                        @php $color = $colors[$loop->index % count($colors)]; @endphp
 
-                        {{-- 6. Card item dengan animasi berurutan --}}
                         <div class="col-lg-4 col-md-6 mb-4 card-animated"
                             style="animation-delay: {{ $loop->index * 0.05 }}s;">
-                            <div class="card shadow-sm h-100">
 
-                                {{-- 7. Header card item DIUBAH KEMBALI ke warna dinamis --}}
+                            <div class="card shadow-sm h-100 room-card" style="cursor: pointer;"
+                                data-nama="{{ $room->nm_ruangan }}" data-mahasiswa='@json($room->mahasiswa)'>
+
                                 <div class="card-header bg-{{ $color }} text-white">
                                     <h5 class="mb-0">
                                         <i class="fas fa-bed me-2"></i>
@@ -77,8 +69,6 @@
 
                                 <div class="card-body text-center d-flex flex-column">
                                     <h6 class="card-title text-muted">KUOTA TERSEDIA</h6>
-
-                                    {{-- 8. Angka kuota DIUBAH KEMBALI ke warna dinamis --}}
                                     <p class="card-text display-4 fw-bold text-{{ $color }}">
                                         {{ $room->kuota_ruangan }}
                                     </p>
@@ -86,13 +76,13 @@
                                     <div class="mt-auto pt-3">
                                         <hr>
                                         <a href="{{ route('ruangan.edit', $room->id) }}"
-                                            class="btn btn-sm btn-outline-primary">
+                                            class="btn btn-sm btn-outline-primary me-1" onclick="event.stopPropagation()">
                                             <i class="fas fa-edit"></i> Edit
                                         </a>
 
                                         <form action="{{ route('ruangan.destroy', $room->id) }}" method="POST"
                                             class="d-inline"
-                                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus ruangan ini?');">
+                                            onsubmit="event.stopPropagation(); return confirm('Apakah Anda yakin ingin menghapus ruangan ini?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-outline-danger">
@@ -101,6 +91,7 @@
                                         </form>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
 
@@ -113,10 +104,25 @@
                         </div>
                     @endforelse
                 </div>
-
             </div>
         </div>
     </div>
+
+    <!-- Modal Mahasiswa -->
+    <div class="modal fade" id="modalMahasiswa" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-custom-maroon text-white">
+                    <h5 class="modal-title">Mahasiswa di Ruangan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <ul id="listMahasiswa" class="list-group"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('scripts')
@@ -206,6 +212,48 @@
             reader.readAsArrayBuffer(file);
         }
     </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.room-card');
+            const modalElement = document.getElementById('modalMahasiswa');
+            const modal = new bootstrap.Modal(modalElement);
+            const list = document.getElementById('listMahasiswa');
+
+            cards.forEach(card => {
+                card.addEventListener('click', () => {
+
+                    const namaRuangan = card.dataset.nama;
+                    const mahasiswa = JSON.parse(card.dataset.mahasiswa);
+
+                    modalElement.querySelector('.modal-title').innerText =
+                        "Mahasiswa di " + namaRuangan;
+
+                    list.innerHTML = "";
+
+                    if (!mahasiswa || mahasiswa.length === 0) {
+                        list.innerHTML = `
+                    <li class="list-group-item text-muted">
+                        Belum ada mahasiswa di ruangan ini.
+                    </li>
+                `;
+                    } else {
+                        mahasiswa.forEach(m => {
+                            list.innerHTML += `
+                        <li class="list-group-item">
+                            <strong>${m.nm_mahasiswa}</strong><br>
+                            <small>${m.prodi ?? '-'} - ${m.univ_asal ?? '-'}</small>
+                        </li>
+                    `;
+                        });
+                    }
+
+                    modal.show();
+                });
+            });
+        });
+    </script>
+
 
     {{-- 9. CSS kustom TETAP ADA --}}
     <style>

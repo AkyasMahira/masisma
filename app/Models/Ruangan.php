@@ -23,4 +23,9 @@ class Ruangan extends Model
         'nm_ruangan',
         'kuota_ruangan',
     ];
+
+    public function mahasiswa()
+    {
+        return $this->hasMany(\App\Models\Mahasiswa::class, 'ruangan_id');
+    }
 }

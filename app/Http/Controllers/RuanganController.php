@@ -22,8 +22,7 @@ class RuanganController extends Controller
      */
     public function index()
     {
-        // Variabel harus 'ruangan' (plural) agar cocok dengan compact
-        $ruangan = Ruangan::all();
+        $ruangan = Ruangan::with('mahasiswa')->get();
         return view('ruangan.index', compact('ruangan'));
     }
 
