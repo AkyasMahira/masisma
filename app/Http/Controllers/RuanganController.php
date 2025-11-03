@@ -20,9 +20,17 @@ class RuanganController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $ruangan = Ruangan::with('mahasiswa')->get();
+        $query = Ruangan::with('mahasiswa') 
+            ->withCount('mahasiswa'); 
+
+        // Fitur pencarian
+        if ($request->filled('search')) {
+            $query->where('nm_ruangan', 'like', '%' . $request->search . '%');
+        }
+        $ruangan = $query->paginate(6)->appends($request->query());
+
         return view('ruangan.index', compact('ruangan'));
     }
 
