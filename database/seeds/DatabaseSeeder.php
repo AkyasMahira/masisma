@@ -13,6 +13,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        $this->call([
+            RuanganSeeder::class,
+            MahasiswaSeeder::class,
+            // AbsensiSeeder::class,
+        ]);
         // Create a default user for testing/login
         if (User::where('email', 'admin@gmail.com')->doesntExist()) {
             User::create([

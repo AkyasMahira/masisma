@@ -22,8 +22,8 @@ class RuanganController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Ruangan::with('mahasiswa') 
-            ->withCount('mahasiswa'); 
+        $query = Ruangan::with('mahasiswa')
+            ->withCount('mahasiswa');
 
         // Fitur pencarian
         if ($request->filled('search')) {
