@@ -2,7 +2,7 @@
 <div class="sidebar">
     <div>
         <div class="sidebar-header">
-            <h4 class="sidebar-text">Masisma</h4>
+            <img class="image-sidebar" src="{{ asset('icon.png') }}" alt="Logo">
             <button class="sidebar-toggle" id="sidebarToggle">
                 <i class="bi bi-chevron-left"></i>
             </button>
@@ -86,9 +86,22 @@
         z-index: 1000;
         transition: all var(--transition-speed) ease;
     }
+    .image-sidebar {
+        width: 77%;
+        height: 90px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .sidebar.collapsed .image-sidebar {
+        display: none;
+    }
 
     .sidebar.collapsed {
         width: 70px;
+        box-shadow: none;
+        overflow: hidden;
+        transition: all var(--transition-speed) ease;
     }
 
     .sidebar.collapsed .sidebar-text {

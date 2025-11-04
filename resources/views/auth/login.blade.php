@@ -16,7 +16,8 @@
             --warna-text-dark: #333;
         }
 
-        html, body {
+        html,
+        body {
             height: 100%;
         }
 
@@ -42,6 +43,12 @@
 
         .login-header {
             margin-bottom: 2rem;
+        }
+        .image-sidebar {
+            width: 77%;
+            height: 157px;
+            object-fit: cover;
+            border-radius: 8px;
         }
 
         .login-header h2 {
@@ -137,18 +144,35 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @keyframes waveMove {
-            0% { transform: translateX(0); }
-            50% { transform: translateX(-5%); }
-            100% { transform: translateX(0); }
+            0% {
+                transform: translateX(0);
+            }
+
+            50% {
+                transform: translateX(-5%);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
         }
 
         @media (max-width: 576px) {
-            .login-header h2 { font-size: 2rem; }
+            .login-header h2 {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
@@ -158,8 +182,7 @@
         {{-- Login Form --}}
         <div id="loginForm">
             <div class="login-header text-center">
-                <h2 class="fw-bold">LOGIN</h2>
-                <p>TO CONTINUE</p>
+                <img class="image-sidebar" src="{{ asset('icon.png') }}" alt="Logo">
             </div>
 
             @if ($errors->any())
@@ -220,7 +243,8 @@
                 <div class="mb-4">
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                        <input type="password" name="password_confirmation" class="form-control" placeholder="Konfirmasi Password" required>
+                        <input type="password" name="password_confirmation" class="form-control"
+                            placeholder="Konfirmasi Password" required>
                     </div>
                 </div>
                 <button type="submit" class="btn btn-login w-100">REGISTER</button>
@@ -236,29 +260,32 @@
         <div class="wave wave-1">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
                 <path fill="#a83236"
-                    d="M0,192L48,181.3C96,171,192,149,288,160C384,171,480,213,576,208C672,203,768,149,864,138.7C960,128,1056,160,1152,176C1248,192,1344,192,1392,192L1440,192L1440,320L0,320Z"></path>
+                    d="M0,192L48,181.3C96,171,192,149,288,160C384,171,480,213,576,208C672,203,768,149,864,138.7C960,128,1056,160,1152,176C1248,192,1344,192,1392,192L1440,192L1440,320L0,320Z">
+                </path>
             </svg>
         </div>
         <div class="wave wave-2">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
                 <path fill="#f8eaea"
-                    d="M0,256L48,245.3C96,235,192,213,288,208C384,203,480,213,576,229.3C672,245,768,267,864,256C960,245,1056,203,1152,192C1248,181,1344,203,1392,213.3L1440,224L1440,320L0,320Z"></path>
+                    d="M0,256L48,245.3C96,235,192,213,288,208C384,203,480,213,576,229.3C672,245,768,267,864,256C960,245,1056,203,1152,192C1248,181,1344,203,1392,213.3L1440,224L1440,320L0,320Z">
+                </path>
             </svg>
         </div>
     </div>
 
     <script>
-        document.getElementById('showRegister').addEventListener('click', function (e) {
+        document.getElementById('showRegister').addEventListener('click', function(e) {
             e.preventDefault();
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('registerForm').style.display = 'block';
         });
 
-        document.getElementById('showLogin').addEventListener('click', function (e) {
+        document.getElementById('showLogin').addEventListener('click', function(e) {
             e.preventDefault();
             document.getElementById('registerForm').style.display = 'none';
             document.getElementById('loginForm').style.display = 'block';
         });
     </script>
 </body>
+
 </html>
