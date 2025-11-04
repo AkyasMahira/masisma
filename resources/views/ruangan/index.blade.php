@@ -58,7 +58,7 @@
 
         .room-card {
             border: 1px solid #e9ecef;
-            border-left: 4px solid var(--maroon-rgba);
+            /* border-left: 4px solid var(--maroon-rgba); */
             transition: all var(--transition-speed);
             cursor: pointer;
             background-color: #fff;
@@ -69,14 +69,20 @@
         .room-card:hover {
             transform: translateY(-6px);
             box-shadow: 0 1rem 1.5rem rgba(0, 0, 0, 0.12);
-            border-left-color: var(--custom-maroon);
+            /* border-left-color: var(--custom-maroon); */
         }
 
-        .room-card .card-header {
-            background-color: #f8f9fa;
+        .card-header {
+            background-color: var(--custom-maroon);
             border-bottom: 1px solid #e9ecef;
             font-weight: 600;
-            color: var(--custom-maroon-dark);
+            color: #fff;
+        }
+
+        /* Utility class for maroon header used in card header markup */
+        .card-header.bg-custom-maroon {
+            background-color: var(--custom-maroon) !important;
+            color: #fff !important;
         }
 
         .room-card .card-body {
@@ -241,7 +247,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 
 @endsection
