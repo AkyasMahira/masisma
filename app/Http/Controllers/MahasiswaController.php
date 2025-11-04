@@ -40,6 +40,15 @@ class MahasiswaController extends Controller
         return $this->storeSingleMahasiswa($request);
     }
 
+    public function show($id)
+    {
+        $mahasiswa = Mahasiswa::findOrFail($id);
+        $today = now()->toDateString();
+        $last = $mahasiswa->absensis()->whereDate('created_at', $today)->latest()->first();
+        $lastStatus = $last ? $last->type : null;
+        return view('mahasiswa.show', compact('mahasiswa', 'lastStatus'));
+    }
+
     /**
      * Import multiple mahasiswa from Excel
      */
