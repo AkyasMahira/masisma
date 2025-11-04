@@ -41,7 +41,7 @@ class MahasiswaController extends Controller
     }
 
     /**
-     * Import multiple mahasiswa from Excel/SheetJS
+     * Import multiple mahasiswa from Excel
      */
     private function importMahasiswa(Request $request)
     {
@@ -51,52 +51,46 @@ class MahasiswaController extends Controller
             $errors = [];
 
             foreach ($rows as $i => $row) {
-                $name = $row['Nama'] ?? $row['nama'] ?? $row['Nama Mahasiswa'] ?? null;
-                $univ = $row['Universitas'] ?? $row['universitas'] ?? $row['univ_asal'] ?? null;
-                $prodi = $row['Prodi'] ?? $row['prodi'] ?? null;
-                $ruanganName = $row['Ruangan'] ?? $row['ruangan'] ?? null;
-                $status = $row['Status'] ?? $row['status'] ?? 'aktif';
+                $name = $row['Nama'] ?? $row['nama'] ?? null;
+                $ruanganName = $row['Ruangan'] ?? null;
+                $status = $row['Status'] ?? 'aktif';
 
                 if (empty($name)) {
                     $errors[] = "Baris " . ($i + 2) . ": nama kosong";
                     continue;
                 }
 
-                $mahasiswaData = [
+                $data = [
                     'nm_mahasiswa' => $name,
-                    'univ_asal' => $univ,
-                    'prodi' => $prodi,
+                    'univ_asal' => $row['Universitas'] ?? null,
+                    'prodi' => $row['Prodi'] ?? null,
                     'status' => in_array($status, ['aktif', 'nonaktif']) ? $status : 'aktif',
                 ];
 
-                if (!empty($ruanganName)) {
+                if ($ruanganName) {
                     $ruangan = Ruangan::where('nm_ruangan', $ruanganName)->first();
+
                     if ($ruangan) {
-                        // use snapshot-aware availability
-                        if ($ruangan->getKuotaTersedia() <= 0) {
-                            $errors[] = "Baris " . ($i + 2) . ": ruangan {$ruanganName} kuota penuh";
-                            $mahasiswaData['nm_ruangan'] = $ruanganName;
+                        $snapshot = RuanganKetersediaan::firstOrCreate(
+                            ['ruangan_id' => $ruangan->id, 'tanggal' => now()->toDateString()],
+                            ['tersedia' => $ruangan->kuota_ruangan] // ✅ pakai kolom kuota_ruangan
+                        );
+
+                        if ($snapshot->tersedia <= 0) {
+                            $errors[] = "Baris " . ($i + 2) . ": ruangan {$ruanganName} penuh";
+                            continue;
                         } else {
-                            $mahasiswaData['ruangan_id'] = $ruangan->id;
-                            $mahasiswaData['nm_ruangan'] = $ruangan->nm_ruangan;
-                            // Update kuota column and snapshot
-                            $ruangan->decrement('kuota_ruangan');
-                            RuanganKetersediaan::updateOrCreate(
-                                ['ruangan_id' => $ruangan->id, 'tanggal' => now()->toDateString()],
-                                ['tersedia' => $ruangan->kuota_ruangan]
-                            );
+                            $snapshot->decrement('tersedia');
+                            $data['ruangan_id'] = $ruangan->id;
+                            $data['nm_ruangan'] = $ruangan->nm_ruangan;
                         }
                     } else {
-                        $mahasiswaData['nm_ruangan'] = $ruanganName;
+                        $data['nm_ruangan'] = $ruanganName;
                     }
                 }
 
-                try {
-                    Mahasiswa::create($mahasiswaData);
-                    $created++;
-                } catch (\Exception $e) {
-                    $errors[] = "Baris " . ($i + 2) . ": " . $e->getMessage();
-                }
+                Mahasiswa::create($data);
+                $created++;
             }
 
             return response()->json([
@@ -105,16 +99,10 @@ class MahasiswaController extends Controller
                 'errors' => $errors
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error saat import: ' . $e->getMessage()
-            ]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 
-    /**
-     * Store single mahasiswa - FIXED VERSION
-     */
     private function storeSingleMahasiswa(Request $request)
     {
         $data = $request->validate([
@@ -126,51 +114,33 @@ class MahasiswaController extends Controller
             'status' => 'required|in:aktif,nonaktif',
         ]);
 
-        // Use snapshot-aware availability and keep kuota_ruangan in sync
         if (!empty($data['ruangan_id'])) {
             $ruangan = Ruangan::find($data['ruangan_id']);
-            if (!$ruangan) {
-                return redirect()->back()->withErrors(['ruangan_id' => 'Ruangan tidak ditemukan'])->withInput();
-            }
-
-            if ($ruangan->getKuotaTersedia() <= 0) {
-                return redirect()->back()->withErrors(['ruangan_id' => 'Kuota ruangan penuh'])->withInput();
-            }
-
-            // Kurangi kuota dan set nama ruangan, lalu snapshot
-            $ruangan->decrement('kuota_ruangan');
-            RuanganKetersediaan::updateOrCreate(
+            $snapshot = RuanganKetersediaan::firstOrCreate(
                 ['ruangan_id' => $ruangan->id, 'tanggal' => now()->toDateString()],
-                ['tersedia' => $ruangan->kuota_ruangan]
+                ['tersedia' => $ruangan->kuota_ruangan] // ✅ fix di sini
             );
 
+            if ($snapshot->tersedia <= 0) {
+                return back()->withErrors(['ruangan_id' => 'Kuota ruangan penuh'])->withInput();
+            }
+
+            $snapshot->decrement('tersedia');
             $data['nm_ruangan'] = $ruangan->nm_ruangan;
         }
 
         Mahasiswa::create($data);
-
         return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa berhasil ditambahkan.');
-    }
-
-    public function show($id)
-    {
-        $mahasiswa = Mahasiswa::findOrFail($id);
-        $today = now()->toDateString();
-        $last = $mahasiswa->absensis()->whereDate('created_at', $today)->latest()->first();
-        $lastStatus = $last ? $last->type : null;
-        return view('mahasiswa.show', compact('mahasiswa', 'lastStatus'));
     }
 
     public function edit($id)
     {
         $mahasiswa = Mahasiswa::findOrFail($id);
         $ruangans = Ruangan::all();
+
         return view('mahasiswa.edit', compact('mahasiswa', 'ruangans'));
     }
 
-    /**
-     * Update the specified resource in storage - FIXED VERSION
-     */
     public function update(Request $request, $id)
     {
         return DB::transaction(function () use ($request, $id) {
@@ -185,57 +155,42 @@ class MahasiswaController extends Controller
                 'status' => 'required|in:aktif,nonaktif',
             ]);
 
-            $newRuanganId = $data['ruangan_id'] ?? null;
             $oldRuanganId = $mahasiswa->ruangan_id;
+            $newRuanganId = $data['ruangan_id'] ?? null;
 
-            // Jika TIDAK ada perubahan ruangan
             if ($newRuanganId == $oldRuanganId) {
-                if ($newRuanganId) {
-                    $currentRuangan = Ruangan::find($newRuanganId);
-                    $data['nm_ruangan'] = $currentRuangan->nm_ruangan;
-                }
                 $mahasiswa->update($data);
-                return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa berhasil diperbarui.');
+                return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa diperbarui.');
             }
 
-            // VALIDATE availability on destination ruangan using snapshot table
-            if ($newRuanganId) {
-                $newRuangan = Ruangan::find($newRuanganId);
-                if ($newRuangan->getKuotaTersedia() <= 0) {
-                    return redirect()->back()->withErrors(['ruangan_id' => 'Kuota ruangan tujuan penuh'])->withInput();
-                }
-            }
-
-            // **PROSES PEMINDAHAN:**
-
-            // 1. Kembalikan kuota ruangan lama (jika ada)
+            // Kembalikan ketersediaan ruangan lama
             if ($oldRuanganId) {
-                $oldRuangan = Ruangan::find($oldRuanganId);
-                if ($oldRuangan) {
-                    $oldRuangan->increment('kuota_ruangan');
-                    RuanganKetersediaan::updateOrCreate(
-                        ['ruangan_id' => $oldRuangan->id, 'tanggal' => now()->toDateString()],
-                        ['tersedia' => $oldRuangan->kuota_ruangan]
-                    );
-                }
+                $old = Ruangan::find($oldRuanganId);
+                $snap = RuanganKetersediaan::firstOrCreate(
+                    ['ruangan_id' => $old->id, 'tanggal' => now()->toDateString()],
+                    ['tersedia' => $old->kuota_ruangan] // ✅ fix di sini
+                );
+                $snap->increment('tersedia');
             }
 
-            // 2. Kurangi kuota ruangan baru (jika ada)
+            // Kurangi ketersediaan ruangan baru
             if ($newRuanganId) {
-                $newRuangan = Ruangan::find($newRuanganId);
-                $newRuangan->decrement('kuota_ruangan');
-                RuanganKetersediaan::updateOrCreate(
-                    ['ruangan_id' => $newRuangan->id, 'tanggal' => now()->toDateString()],
-                    ['tersedia' => $newRuangan->kuota_ruangan]
+                $new = Ruangan::find($newRuanganId);
+                $snap = RuanganKetersediaan::firstOrCreate(
+                    ['ruangan_id' => $new->id, 'tanggal' => now()->toDateString()],
+                    ['tersedia' => $new->kuota_ruangan] // ✅ fix di sini
                 );
-                $data['nm_ruangan'] = $newRuangan->nm_ruangan;
+
+                if ($snap->tersedia <= 0) {
+                    return back()->withErrors(['ruangan_id' => 'Ruangan tujuan penuh'])->withInput();
+                }
+                $snap->decrement('tersedia');
+                $data['nm_ruangan'] = $new->nm_ruangan;
             } else {
                 $data['nm_ruangan'] = null;
             }
 
-            // 3. Update mahasiswa
             $mahasiswa->update($data);
-
             return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa berhasil diperbarui.');
         });
     }
@@ -243,80 +198,20 @@ class MahasiswaController extends Controller
     public function destroy($id)
     {
         return DB::transaction(function () use ($id) {
-            $mahasiswa = Mahasiswa::findOrFail($id);
+            $mhs = Mahasiswa::findOrFail($id);
 
-            if ($mahasiswa->ruangan_id) {
-                $ruangan = Ruangan::find($mahasiswa->ruangan_id);
-                if ($ruangan) {
-                    $ruangan->increment('kuota_ruangan');
-                    RuanganKetersediaan::updateOrCreate(
-                        ['ruangan_id' => $ruangan->id, 'tanggal' => now()->toDateString()],
-                        ['tersedia' => $ruangan->kuota_ruangan]
-                    );
-                }
-            }
-
-            $mahasiswa->delete();
-
-            return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa berhasil dihapus.');
-        });
-    }
-
-    /**
-     * HARD RESET semua kuota - PASTI WORK
-     */
-    public function hardResetKuota()
-    {
-        DB::transaction(function () {
-            $ruangans = Ruangan::all();
-
-                foreach ($ruangans as $ruangan) {
-                // Hitung ulang dari mahasiswa
-                $jumlahMahasiswa = Mahasiswa::where('ruangan_id', $ruangan->id)->count();
-                $kuotaSebenarnya = $ruangan->kapasitas_total - $jumlahMahasiswa;
-
-                // Update kuota column and create/update snapshot for today
-                $ruangan->kuota_ruangan = $kuotaSebenarnya;
-                $ruangan->save();
-
-                RuanganKetersediaan::updateOrCreate(
+            if ($mhs->ruangan_id) {
+                $ruangan = Ruangan::find($mhs->ruangan_id);
+                $snap = RuanganKetersediaan::firstOrCreate(
                     ['ruangan_id' => $ruangan->id, 'tanggal' => now()->toDateString()],
-                    ['tersedia' => $ruangan->kuota_ruangan]
+                    ['tersedia' => $ruangan->kuota_ruangan] // ✅ fix di sini
                 );
-
-                \Log::info("Reset {$ruangan->nm_ruangan}: {$jumlahMahasiswa}/{$ruangan->kapasitas_total} = Kuota: {$kuotaSebenarnya}");
+                $snap->increment('tersedia');
             }
+
+            $mhs->delete();
+            return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa dihapus.');
         });
-
-        return redirect()->route('mahasiswa.index')
-            ->with('success', 'Hard reset kuota berhasil! Semua kuota telah disesuaikan.');
-    }
-
-    /**
-     * Check and fix kuota consistency
-     */
-    public function checkKuotaConsistency()
-    {
-        $ruangans = Ruangan::all();
-        $fixedCount = 0;
-
-        foreach ($ruangans as $ruangan) {
-            $jumlahMahasiswa = Mahasiswa::where('ruangan_id', $ruangan->id)->count();
-            $expectedKuota = $ruangan->kapasitas_total - $jumlahMahasiswa;
-
-            if ($ruangan->kuota_ruangan != $expectedKuota) {
-                $ruangan->kuota_ruangan = $expectedKuota;
-                $ruangan->save();
-                RuanganKetersediaan::updateOrCreate(
-                    ['ruangan_id' => $ruangan->id, 'tanggal' => now()->toDateString()],
-                    ['tersedia' => $ruangan->kuota_ruangan]
-                );
-                $fixedCount++;
-            }
-        }
-
-        return redirect()->route('mahasiswa.index')
-            ->with('success', "Consistency check completed. Fixed $fixedCount ruangan(s).");
     }
 
     public function getRuanganInfo($id)
@@ -326,15 +221,19 @@ class MahasiswaController extends Controller
             return response()->json(['error' => 'Ruangan tidak ditemukan'], 404);
         }
 
-        $jumlahMahasiswa = Mahasiswa::where('ruangan_id', $id)->count();
-        $kuotaTersedia = $ruangan->getKuotaTersedia();
+        $snapshot = RuanganKetersediaan::where('ruangan_id', $ruangan->id)
+            ->where('tanggal', now()->toDateString())
+            ->first();
+
+        $tersedia = $snapshot->tersedia ?? $ruangan->kuota_ruangan;
+        $terisi = Mahasiswa::where('ruangan_id', $ruangan->id)->count();
 
         return response()->json([
             'nm_ruangan' => $ruangan->nm_ruangan,
-            'kapasitas_total' => $ruangan->kapasitas_total,
-            'kuota_tersedia' => $kuotaTersedia,
-            'jumlah_mahasiswa' => $jumlahMahasiswa,
-            'status' => $kuotaTersedia > 0 ? 'Tersedia' : 'Penuh'
+            'kuota_total' => $ruangan->kuota_ruangan,
+            'tersedia' => $tersedia,
+            'terisi' => $terisi,
+            'status' => $tersedia > 0 ? 'Tersedia' : 'Penuh'
         ]);
     }
 }
