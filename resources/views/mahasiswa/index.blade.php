@@ -71,6 +71,10 @@
             border-radius: 10px;
             background-color: #fff;
             transition: all 0.2s ease;
+            gap: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-outline-custom:hover {
@@ -162,6 +166,14 @@
             .header-buttons .btn-outline-custom {
                 width: 100%;
                 margin: 0 !important;
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+            }
+
+            .header-buttons i {
+                margin-right: 0.5rem !important;
             }
         }
     </style>
@@ -170,22 +182,31 @@
         <h4 class="fw-bold text-maroon mb-0">Daftar Mahasiswa</h4>
 
         <div class="d-flex flex-wrap gap-2 header-buttons">
-            <button class="btn btn-outline-custom btn-sm" onclick="exportMahasiswa()">
-                <i class="bi bi-file-earmark-arrow-down me-1"></i> Export Excel
+            <button class="btn btn-outline-custom btn-sm d-inline-flex align-items-center" onclick="exportMahasiswa()">
+                <i class="bi bi-file-earmark-arrow-down"></i>
+                <span>Export Excel</span>
             </button>
 
-            <label class="btn btn-outline-custom btn-sm" style="cursor: pointer;">
-                <i class="bi bi-upload me-1"></i> Import Excel
+            <label class="btn btn-outline-custom btn-sm d-inline-flex align-items-center" style="cursor: pointer;">
+                <i class="bi bi-upload"></i>
+                <span>Import Excel</span>
                 <input type="file" id="fileImportMahasiswa" style="display:none" accept=".xlsx,.xls"
                     onchange="importMahasiswa(this)">
             </label>
 
-            <button class="btn btn-outline-custom btn-sm" onclick="downloadTemplateMahasiswa()">
-                <i class="bi bi-download me-1"></i> Template
+            <button class="btn btn-outline-custom btn-sm d-inline-flex align-items-center" onclick="downloadTemplateMahasiswa()">
+                <i class="bi bi-download"></i>
+                <span>Template</span>
             </button>
 
-            <a href="{{ route('mahasiswa.create') }}" class="btn-maroon btn-sm">
-                <i class="bi bi-person-plus me-1"></i> Tambah Mahasiswa
+            <button type="button" class="btn btn-outline-custom btn-sm d-inline-flex align-items-center" onclick="copyAllLinks()">
+                <i class="bi bi-clipboard"></i>
+                <span>Salin Semua Link Absensi</span>
+            </button>
+
+            <a href="{{ route('mahasiswa.create') }}" class="btn-maroon btn-sm d-inline-flex align-items-center">
+                <i class="bi bi-person-plus"></i>
+                <span>Tambah Mahasiswa</span>
             </a>
         </div>
     </div>
@@ -208,6 +229,7 @@
                             <th>Universitas</th>
                             <th>Prodi</th>
                             <th>Ruangan</th>
+                            <th>Masa Aktif</th>
                             <th>Status</th>
                             <th>Aksi</th>
                         </tr>
@@ -220,6 +242,17 @@
                                 <td>{{ $m->univ_asal }}</td>
                                 <td>{{ $m->prodi }}</td>
                                 <td>{{ $m->ruangan ? $m->ruangan->nm_ruangan : $m->nm_ruangan }}</td>
+                                <td>
+                                    @if ($m->tanggal_berakhir)
+                                        @if ($m->sisa_hari > 0)
+                                            <span class="badge bg-info">{{ $m->sisa_hari }} hari</span>
+                                        @else
+                                            <span class="badge bg-danger">Habis</span>
+                                        @endif
+                                    @else
+                                        <span class="badge bg-secondary">-</span>
+                                    @endif
+                                </td>
                                 <td>
                                     @if ($m->status == 'aktif')
                                         <span class="badge bg-success">Aktif</span>
@@ -248,7 +281,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
+                                <td colspan="8" class="text-center text-muted py-4">
                                     Belum ada data mahasiswa.
                                 </td>
                             </tr>
@@ -262,7 +295,50 @@
     @section('scripts')
         {{-- Script Anda tidak berubah dan sudah bagus --}}
         <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+        <!-- Tambahkan Toastify untuk notifikasi -->
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
         <script>
+            function copyAllLinks() {
+                const mahasiswaData = [
+                    @foreach($mahasiswas as $m)
+                    {
+                        nama: {!! json_encode($m->nm_mahasiswa) !!},
+                        link: {!! json_encode(route('absensi.card', $m->share_token)) !!}
+                    },
+                    @endforeach
+                ];
+
+                // Format pesan
+                const message = mahasiswaData.map(m =>
+                    `Link Absensi untuk ${m.nama}:\n${m.link}`
+                ).join('\n\n');
+
+                // Copy to clipboard
+                navigator.clipboard.writeText(message).then(() => {
+                    // Show success notification
+                    Toastify({
+                        text: "Semua link absensi berhasil disalin!",
+                        duration: 3000,
+                        gravity: "bottom",
+                        position: "right",
+                        style: {
+                            background: "linear-gradient(to right, #00b09b, #96c93d)",
+                        }
+                    }).showToast();
+                }).catch(() => {
+                    Toastify({
+                        text: "Gagal menyalin link absensi",
+                        duration: 3000,
+                        gravity: "bottom",
+                        position: "right",
+                        style: {
+                            background: "linear-gradient(to right, #ff5f6d, #ffc371)",
+                        }
+                    }).showToast();
+                });
+            }
+
             function exportMahasiswa() {
                 const data = [
                     @foreach ($mahasiswas as $m)

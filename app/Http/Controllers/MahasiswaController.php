@@ -120,10 +120,12 @@ class MahasiswaController extends Controller
             'prodi' => 'nullable|string|max:255',
             'nm_ruangan' => 'nullable|string|max:255',
             'ruangan_id' => 'nullable|exists:ruangans,id',
-            'status' => 'required|in:aktif,nonaktif',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_berakhir' => 'required|date|after:tanggal_mulai',
         ]);
 
-        if (!empty($data['ruangan_id'])) {
+        // Set status to aktif by default and validate dates
+        $data['status'] = 'aktif';        if (!empty($data['ruangan_id'])) {
             $ruangan = Ruangan::find($data['ruangan_id']);
             $snapshot = RuanganKetersediaan::firstOrCreate(
                 ['ruangan_id' => $ruangan->id, 'tanggal' => now()->toDateString()],
@@ -161,6 +163,8 @@ class MahasiswaController extends Controller
                 'prodi' => 'nullable|string|max:255',
                 'nm_ruangan' => 'nullable|string|max:255',
                 'ruangan_id' => 'nullable|exists:ruangans,id',
+                'tanggal_mulai' => 'required|date',
+                'tanggal_berakhir' => 'required|date|after:tanggal_mulai',
                 'status' => 'required|in:aktif,nonaktif',
             ]);
 

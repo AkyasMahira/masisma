@@ -19,6 +19,8 @@ class Mahasiswa extends Model
         'ruangan_id',
         'status',
         'share_token',
+        'tanggal_mulai',
+        'tanggal_berakhir',
     ];
 
     protected static function boot()
@@ -40,5 +42,21 @@ class Mahasiswa extends Model
     public function ruangan()
     {
         return $this->belongsTo(Ruangan::class, 'ruangan_id');
+    }
+
+    public function getSisaHariAttribute()
+    {
+        if (!$this->tanggal_berakhir) {
+            return null;
+        }
+
+        $today = now()->startOfDay();
+        $endDate = \Carbon\Carbon::parse($this->tanggal_berakhir)->startOfDay();
+
+        if ($today > $endDate) {
+            return 0;
+        }
+
+        return $today->diffInDays($endDate);
     }
 }

@@ -118,13 +118,16 @@
                             </select>
                         </div>
 
+                        <div class="mb-3">
+                            <label class="form-label">Tanggal Mulai <span class="text-danger">*</span></label>
+                            <input type="date" name="tanggal_mulai" class="form-control"
+                                value="{{ old('tanggal_mulai', now()->toDateString()) }}" required>
+                        </div>
+
                         <div class="mb-4">
-                            <label class="form-label">Status</label>
-                            <select name="status" class="form-select js-choices">
-                                <option value="aktif" {{ old('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
-                                <option value="nonaktif" {{ old('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif
-                                </option>
-                            </select>
+                            <label class="form-label">Tanggal Berakhir <span class="text-danger">*</span></label>
+                            <input type="date" name="tanggal_berakhir" class="form-control"
+                                value="{{ old('tanggal_berakhir') }}" required>
                         </div>
 
                         <div class="d-flex justify-content-between">
