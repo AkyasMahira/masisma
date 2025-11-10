@@ -120,10 +120,25 @@
                             </select>
                         </div>
 
+                        {{-- NEW: DATE RANGE --}}
+                        <div class="mb-3">
+                            <label class="form-label">Tanggal Mulai <span class="text-danger">*</span></label>
+                            <input type="date" name="tanggal_mulai" class="form-control"
+                                value="{{ old('tanggal_mulai', $mahasiswa->tanggal_mulai) }}" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Tanggal Berakhir <span class="text-danger">*</span></label>
+                            <input type="date" name="tanggal_berakhir" class="form-control"
+                                value="{{ old('tanggal_berakhir', $mahasiswa->tanggal_berakhir) }}" required>
+                        </div>
+                        {{-- END NEW --}}
+
                         <div class="mb-4">
                             <label class="form-label">Status</label>
                             <select name="status" class="form-select js-choices">
-                                <option value="aktif" {{ $mahasiswa->status === 'aktif' ? 'selected' : '' }}>Aktif</option>
+                                <option value="aktif" {{ $mahasiswa->status === 'aktif' ? 'selected' : '' }}>Aktif
+                                </option>
                                 <option value="nonaktif" {{ $mahasiswa->status === 'nonaktif' ? 'selected' : '' }}>Nonaktif
                                 </option>
                             </select>
@@ -134,6 +149,7 @@
                             <button type="submit" class="btn-maroon">Simpan Perubahan</button>
                         </div>
                     </form>
+
                 </div>
             </div>
         </div>

@@ -18,6 +18,7 @@ class AbsensiController extends Controller
         $today = Carbon::today();
         $absenHariIni = Absensi::where('mahasiswa_id', $mahasiswa->id)
             ->whereDate('created_at', $today)
+            ->latest()
             ->first();
 
         return view('absensi.card', compact('mahasiswa', 'absenHariIni'));
@@ -28,30 +29,54 @@ class AbsensiController extends Controller
     {
         $mahasiswa = Mahasiswa::where('share_token', $token)->firstOrFail();
         $today = Carbon::today();
+        $sekarang = now();
 
-        $absen = Absensi::where('mahasiswa_id', $mahasiswa->id)
+        // Cek absensi terakhir hari ini
+        $lastAbsen = Absensi::where('mahasiswa_id', $mahasiswa->id)
             ->whereDate('created_at', $today)
+            ->latest()
             ->first();
 
-        // Jika belum absen hari ini → catat jam masuk
-        if (!$absen) {
+        // Jika belum ada absen hari ini atau absen terakhir adalah keluar, buat absen masuk baru
+        if (!$lastAbsen || $lastAbsen->type === 'keluar') {
             Absensi::create([
                 'mahasiswa_id' => $mahasiswa->id,
-                'jam_masuk' => now(),
-                'type' => 'masuk',
+                'jam_masuk' => $sekarang,
+                'type' => 'masuk'
             ]);
 
             return back()->with('success', 'Absensi Masuk berhasil direkam!');
         }
 
-        // Jika sudah masuk tapi belum keluar → update jam keluar
-        if (!$absen->jam_keluar) {
-            $absen->update(['jam_keluar' => now(), 'type' => 'keluar']);
-            return back()->with('success', 'Absensi Keluar berhasil direkam!');
+        // Jika absen terakhir adalah masuk, lakukan absen keluar
+        if ($lastAbsen->type === 'masuk') {
+            $jamMasuk = Carbon::parse($lastAbsen->jam_masuk);
+
+            // Cek cooldown 3 jam
+            $cooldownBerakhir = $jamMasuk->copy()->addHours(3);
+            if ($sekarang->lt($cooldownBerakhir)) {
+                $menitTersisa = $sekarang->diffInMinutes($cooldownBerakhir);
+                return back()->with('error', "Mohon tunggu {$menitTersisa} menit lagi sebelum absen keluar.");
+            }
+
+            // Hitung durasi
+            $durasiMenit = $jamMasuk->diffInMinutes($sekarang);
+
+            // Buat record absen keluar baru
+            Absensi::create([
+                'mahasiswa_id' => $mahasiswa->id,
+                'jam_masuk' => $jamMasuk,
+                'jam_keluar' => $sekarang,
+                'type' => 'keluar',
+                'durasi_menit' => $durasiMenit
+            ]);
+
+            $message = "Absensi Keluar berhasil direkam! Durasi: " . floor($durasiMenit / 60) . " jam " . ($durasiMenit % 60) . " menit.";
+            return back()->with('success', $message);
         }
 
-        // Jika sudah masuk & keluar → kasih info
-        return back()->with('error', 'Anda sudah absen masuk & keluar hari ini.');
+        // Shouldn't reach here, but just in case
+        return back()->with('error', 'Terjadi kesalahan pada sistem absensi.');
     }
 
 

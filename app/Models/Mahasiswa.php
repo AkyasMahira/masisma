@@ -23,6 +23,14 @@ class Mahasiswa extends Model
         'tanggal_berakhir',
     ];
 
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_INACTIVE = 'inactive';
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', self::STATUS_ACTIVE);
+    }
+
     protected static function boot()
     {
         parent::boot();
@@ -54,6 +62,24 @@ class Mahasiswa extends Model
         $endDate = \Carbon\Carbon::parse($this->tanggal_berakhir)->startOfDay();
 
         if ($today > $endDate) {
+            // Auto-deactivate the student if they've expired
+            if ($this->status !== 'inactive') {
+                $ruanganId = $this->ruangan_id;
+
+                $this->update([
+                    'status' => 'inactive',
+                    'ruangan_id' => null,
+                    'nm_ruangan' => null
+                ]);
+
+                // Update room quota if student was assigned to a room
+                if ($ruanganId) {
+                    $ruangan = Ruangan::find($ruanganId);
+                    if ($ruangan) {
+                        $ruangan->syncAllKuota();
+                    }
+                }
+            }
             return 0;
         }
 
