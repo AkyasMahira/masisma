@@ -57,6 +57,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi.index');
 });
 
+Route::get('/test-419', function () {
+    throw new \Illuminate\Session\TokenMismatchException;
+});
+
 // Public attendance (absensi) routes using share tokens — no auth required
 Route::get('/absensi/{token}', [AbsensiController::class, 'card'])->name('absensi.card');
 
