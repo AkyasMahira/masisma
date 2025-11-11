@@ -194,12 +194,14 @@
                     onchange="importMahasiswa(this)">
             </label>
 
-            <button class="btn btn-outline-custom btn-sm d-inline-flex align-items-center" onclick="downloadTemplateMahasiswa()">
+            <button class="btn btn-outline-custom btn-sm d-inline-flex align-items-center"
+                onclick="downloadTemplateMahasiswa()">
                 <i class="bi bi-download"></i>
                 <span>Template</span>
             </button>
 
-            <button type="button" class="btn btn-outline-custom btn-sm d-inline-flex align-items-center" onclick="copyAllLinks()">
+            <button type="button" class="btn btn-outline-custom btn-sm d-inline-flex align-items-center"
+                onclick="copyAllLinks()">
                 <i class="bi bi-clipboard"></i>
                 <span>Salin Semua Link Absensi</span>
             </button>
@@ -288,6 +290,9 @@
                         @endforelse
                     </tbody>
                 </table>
+                <div class="d-flex justify-content-center mt-3">
+                    {{ $mahasiswas->links('pagination.custom') }}
+                </div>
             </div>
         </div>
     </div>
@@ -301,11 +306,11 @@
         <script>
             function copyAllLinks() {
                 const mahasiswaData = [
-                    @foreach($mahasiswas as $m)
-                    {
-                        nama: {!! json_encode($m->nm_mahasiswa) !!},
-                        link: {!! json_encode(route('absensi.card', $m->share_token)) !!}
-                    },
+                    @foreach ($mahasiswas as $m)
+                        {
+                            nama: {!! json_encode($m->nm_mahasiswa) !!},
+                            link: {!! json_encode(route('absensi.card', $m->share_token)) !!}
+                        },
                     @endforeach
                 ];
 

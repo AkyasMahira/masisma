@@ -22,7 +22,10 @@ class MahasiswaController extends Controller
 
     public function index()
     {
-        $mahasiswas = Mahasiswa::orderBy('created_at', 'desc')->get();
+        $mahasiswas = Mahasiswa::where('status', 'aktif')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10)->withQueryString();
+
         return view('mahasiswa.index', compact('mahasiswas'));
     }
 
@@ -125,7 +128,8 @@ class MahasiswaController extends Controller
         ]);
 
         // Set status to aktif by default and validate dates
-        $data['status'] = 'aktif';        if (!empty($data['ruangan_id'])) {
+        $data['status'] = 'aktif';
+        if (!empty($data['ruangan_id'])) {
             $ruangan = Ruangan::find($data['ruangan_id']);
             $snapshot = RuanganKetersediaan::firstOrCreate(
                 ['ruangan_id' => $ruangan->id, 'tanggal' => now()->toDateString()],
@@ -171,32 +175,63 @@ class MahasiswaController extends Controller
             $oldRuanganId = $mahasiswa->ruangan_id;
             $newRuanganId = $data['ruangan_id'] ?? null;
 
+            /* -------------------------------
+         | 1. Jika status berubah aktif → nonaktif
+         |    Kembalikan kuota & keluarkan dari ruangan
+         --------------------------------*/
+            if ($mahasiswa->status === 'aktif' && $data['status'] === 'nonaktif' && $oldRuanganId) {
+                $old = Ruangan::find($oldRuanganId);
+
+                $snap = RuanganKetersediaan::firstOrCreate(
+                    ['ruangan_id' => $old->id, 'tanggal' => now()->toDateString()],
+                    ['tersedia' => $old->kuota_ruangan]
+                );
+
+                $snap->increment('tersedia'); // kembalikan kuota
+
+                // kosongkan ruangan mahasiswa
+                $data['ruangan_id'] = null;
+                $data['nm_ruangan'] = null;
+
+                $mahasiswa->update($data);
+                return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa dinonaktifkan & dikeluarkan dari ruangan.');
+            }
+
+            /* -----------------------------------------
+         | 2. Jika status tetap aktif dan ruangan tidak berubah
+         ------------------------------------------*/
             if ($newRuanganId == $oldRuanganId) {
                 $mahasiswa->update($data);
                 return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa diperbarui.');
             }
 
-            // Kembalikan ketersediaan ruangan lama
+            /* -----------------------------------------
+         | 3. Jika pindah ruangan (aktif → aktif atau nonaktif → aktif)
+         ------------------------------------------*/
+
+            // Kembalikan kuota ruangan lama
             if ($oldRuanganId) {
                 $old = Ruangan::find($oldRuanganId);
                 $snap = RuanganKetersediaan::firstOrCreate(
                     ['ruangan_id' => $old->id, 'tanggal' => now()->toDateString()],
-                    ['tersedia' => $old->kuota_ruangan] // ✅ fix di sini
+                    ['tersedia' => $old->kuota_ruangan]
                 );
                 $snap->increment('tersedia');
             }
 
-            // Kurangi ketersediaan ruangan baru
+            // Kurangi kuota ruangan baru
             if ($newRuanganId) {
                 $new = Ruangan::find($newRuanganId);
+
                 $snap = RuanganKetersediaan::firstOrCreate(
                     ['ruangan_id' => $new->id, 'tanggal' => now()->toDateString()],
-                    ['tersedia' => $new->kuota_ruangan] // ✅ fix di sini
+                    ['tersedia' => $new->kuota_ruangan]
                 );
 
                 if ($snap->tersedia <= 0) {
                     return back()->withErrors(['ruangan_id' => 'Ruangan tujuan penuh'])->withInput();
                 }
+
                 $snap->decrement('tersedia');
                 $data['nm_ruangan'] = $new->nm_ruangan;
             } else {

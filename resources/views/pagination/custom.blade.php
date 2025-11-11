@@ -50,6 +50,7 @@
         gap: 0.45rem;
         list-style: none;
         padding: 0;
+        padding-bottom: 1.9rem;
         margin: 0;
     }
 

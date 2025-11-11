@@ -227,12 +227,10 @@
                     @endforelse
                 </div>
             </div>
+            <div class="d-flex justify-content-center mt-3">
+                {{ $ruangan->links('pagination.custom') }}
+            </div>
         </div>
-
-        <div class="d-flex justify-content-center mt-3">
-            {{ $ruangan->links('pagination.custom') }}
-        </div>
-
         <!-- Modal Mahasiswa -->
         <div class="modal fade" id="modalMahasiswa" tabindex="-1">
             <div class="modal-dialog modal-lg">

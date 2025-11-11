@@ -19,9 +19,14 @@ class CreateMahasiswasTable extends Migration
             $table->string('univ_asal')->nullable();
             $table->string('prodi')->nullable();
             $table->string('nm_ruangan')->nullable();
+            $table->unsignedBigInteger('ruangan_id')->nullable();
+            $table->date('tanggal_mulai')->nullable();
+            $table->date('tanggal_berakhir')->nullable();
             $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
             $table->string('share_token')->unique();
             $table->timestamps();
+
+            $table->foreign('ruangan_id')->references('id')->on('ruangans')->onDelete('set null');
         });
     }
 
