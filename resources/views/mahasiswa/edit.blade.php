@@ -58,6 +58,11 @@
             transform: translateY(-1px);
         }
 
+        .btn-maroon:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
         .card-body {
             padding: 2rem;
         }
@@ -85,7 +90,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('mahasiswa.update', $mahasiswa->id) }}" method="POST">
+                    <form action="{{ route('mahasiswa.update', $mahasiswa->id) }}" method="POST" id="form-mahasiswa">
                         @csrf
                         @method('PUT')
 
@@ -109,15 +114,27 @@
 
                         <div class="mb-3">
                             <label class="form-label">Ruangan</label>
-                            <select name="ruangan_id" class="form-select js-choices">
+                            <select id="ruangan_id" name="ruangan_id" class="form-select js-choices">
                                 <option value="">-- Pilih Ruangan (Opsional) --</option>
                                 @foreach ($ruangans as $r)
                                     <option value="{{ $r->id }}"
                                         {{ old('ruangan_id', $mahasiswa->ruangan_id) == $r->id ? 'selected' : '' }}>
-                                        {{ $r->nm_ruangan }} (Kuota: {{ $r->kuota_ruangan }})
+                                        {{ $r->nm_ruangan }}
                                     </option>
                                 @endforeach
                             </select>
+                        </div>
+
+                        <!-- Info Kuota Real-time -->
+                        <div id="ruangan-info" class="alert alert-info"
+                            style="display: {{ old('ruangan_id', $mahasiswa->ruangan_id) ? 'block' : 'none' }};">
+                            <small>
+                                <strong id="info-nama"></strong><br>
+                                Kuota Total: <span id="info-kuota-total">-</span><br>
+                                Tersedia: <span id="info-tersedia" style="font-weight: bold; color: #28a745;">-</span><br>
+                                Terisi: <span id="info-terisi">-</span><br>
+                                Status: <span id="info-status">-</span>
+                            </small>
                         </div>
 
                         {{-- NEW: DATE RANGE --}}
@@ -146,7 +163,7 @@
 
                         <div class="d-flex justify-content-between">
                             <a href="{{ route('mahasiswa.index') }}" class="btn btn-secondary">Kembali</a>
-                            <button type="submit" class="btn-maroon">Simpan Perubahan</button>
+                            <button type="submit" class="btn-maroon" id="submit-btn">Simpan Perubahan</button>
                         </div>
                     </form>
 
@@ -154,4 +171,72 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ruanganSelect = document.getElementById('ruangan_id');
+            const ruanganInfo = document.getElementById('ruangan-info');
+            const submitBtn = document.getElementById('submit-btn');
+            const originalRuanganId =
+                {{ old('ruangan_id', $mahasiswa->ruangan_id) ? $mahasiswa->ruangan_id : 'null' }};
+            let selectedRuanganFull = false;
+
+            function loadRuanganInfo(ruanganId) {
+                if (!ruanganId) {
+                    ruanganInfo.style.display = 'none';
+                    return;
+                }
+
+                fetch(`/mahasiswa/ruangan-info/${ruanganId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('info-nama').textContent = data.nm_ruangan;
+                        document.getElementById('info-kuota-total').textContent = data.kuota_total;
+                        document.getElementById('info-tersedia').textContent = data.tersedia;
+                        document.getElementById('info-terisi').textContent = data.terisi;
+
+                        const statusEl = document.getElementById('info-status');
+                        // Jika mengubah ke ruangan baru dan ruangan penuh, disable submit
+                        if (data.tersedia <= 0 && ruanganId != originalRuanganId) {
+                            statusEl.textContent = '❌ Penuh (tidak bisa pindah)';
+                            statusEl.style.color = '#dc3545';
+                            document.getElementById('info-tersedia').style.color = '#dc3545';
+                            selectedRuanganFull = true;
+                            submitBtn.disabled = true;
+                        } else {
+                            statusEl.textContent = '✅ Tersedia';
+                            statusEl.style.color = '#28a745';
+                            document.getElementById('info-tersedia').style.color = '#28a745';
+                            selectedRuanganFull = false;
+                            submitBtn.disabled = false;
+                        }
+
+                        ruanganInfo.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        ruanganInfo.style.display = 'none';
+                        selectedRuanganFull = false;
+                        submitBtn.disabled = false;
+                    });
+            }
+
+            // Load info jika ruangan sudah dipilih
+            if (originalRuanganId) {
+                loadRuanganInfo(originalRuanganId);
+            }
+
+            ruanganSelect.addEventListener('change', function() {
+                loadRuanganInfo(this.value);
+            });
+
+            document.getElementById('form-mahasiswa').addEventListener('submit', function(e) {
+                if (selectedRuanganFull) {
+                    e.preventDefault();
+                    alert(
+                        'Ruangan tujuan sudah penuh. Silakan pilih ruangan lain atau tetap di ruangan saat ini.');
+                }
+            });
+        });
+    </script>
 @endsection

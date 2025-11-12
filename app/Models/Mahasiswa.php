@@ -23,8 +23,10 @@ class Mahasiswa extends Model
         'tanggal_berakhir',
     ];
 
-    public const STATUS_ACTIVE = 'active';
-    public const STATUS_INACTIVE = 'inactive';
+    protected $appends = ['sisa_hari']; 
+
+    public const STATUS_ACTIVE = 'aktif';  
+    public const STATUS_INACTIVE = 'nonaktif';
 
     public function scopeActive($query)
     {
@@ -55,34 +57,16 @@ class Mahasiswa extends Model
     public function getSisaHariAttribute()
     {
         if (!$this->tanggal_berakhir) {
-            return null;
+            return '-';
         }
 
         $today = now()->startOfDay();
         $endDate = \Carbon\Carbon::parse($this->tanggal_berakhir)->startOfDay();
 
         if ($today > $endDate) {
-            // Auto-deactivate the student if they've expired
-            if ($this->status !== 'nonaktif') {
-                $ruanganId = $this->ruangan_id;
-
-                $this->update([
-                    'status' => 'nonaktif',
-                    'ruangan_id' => null,
-                    'nm_ruangan' => null
-                ]);
-
-                // Update room quota if student was assigned to a room
-                if ($ruanganId) {
-                    $ruangan = Ruangan::find($ruanganId);
-                    if ($ruangan) {
-                        $ruangan->syncAllKuota();
-                    }
-                }
-            }
-            return 0;
+            return 'Selesai';
         }
 
-        return $today->diffInDays($endDate);
+        return $today->diffInDays($endDate) . ' hari';
     }
 }

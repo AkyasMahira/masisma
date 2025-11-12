@@ -15,9 +15,11 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RuanganSeeder::class,
+            RuanganKetersediaanSeeder::class,
             MahasiswaSeeder::class,
-            // AbsensiSeeder::class,
+            AbsensiSeeder::class,
         ]);
+
         // Create a default user for testing/login
         if (User::where('email', 'admin@gmail.com')->doesntExist()) {
             User::create([

@@ -58,6 +58,11 @@
             transform: translateY(-1px);
         }
 
+        .btn-maroon:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
         .card-body {
             padding: 2rem;
         }
@@ -68,7 +73,6 @@
             }
         }
     </style>
-
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
             <div class="card">
@@ -85,7 +89,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('mahasiswa.store') }}" method="POST">
+                    <form action="{{ route('mahasiswa.store') }}" method="POST" id="form-mahasiswa">
                         @csrf
 
                         <div class="mb-3">
@@ -108,14 +112,25 @@
 
                         <div class="mb-3">
                             <label class="form-label">Ruangan</label>
-                            <select name="ruangan_id" class="form-select js-choices">
+                            <select id="ruangan_id" name="ruangan_id" class="form-select js-choices">
                                 <option value="">-- Pilih Ruangan (Opsional) --</option>
                                 @foreach ($ruangans as $r)
                                     <option value="{{ $r->id }}" {{ old('ruangan_id') == $r->id ? 'selected' : '' }}>
-                                        {{ $r->nm_ruangan }} (Kuota: {{ $r->kuota_ruangan }})
+                                        {{ $r->nm_ruangan }}
                                     </option>
                                 @endforeach
                             </select>
+                        </div>
+
+                        <!-- Info Kuota Real-time -->
+                        <div id="ruangan-info" class="alert alert-info" style="display: none;">
+                            <small>
+                                <strong id="info-nama"></strong><br>
+                                Kuota Total: <span id="info-kuota-total">-</span><br>
+                                Tersedia: <span id="info-tersedia" style="font-weight: bold; color: #28a745;">-</span><br>
+                                Terisi: <span id="info-terisi">-</span><br>
+                                Status: <span id="info-status">-</span>
+                            </small>
                         </div>
 
                         <div class="mb-3">
@@ -132,11 +147,73 @@
 
                         <div class="d-flex justify-content-between">
                             <a href="{{ route('mahasiswa.index') }}" class="btn btn-secondary">Kembali</a>
-                            <button type="submit" class="btn-maroon">Simpan</button>
+                            <button type="submit" class="btn-maroon" id="submit-btn">Simpan</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ruanganSelect = document.getElementById('ruangan_id');
+            const ruanganInfo = document.getElementById('ruangan-info');
+            const submitBtn = document.getElementById('submit-btn');
+            let selectedRuanganFull = false;
+
+            ruanganSelect.addEventListener('change', function() {
+                const ruanganId = this.value;
+
+                if (!ruanganId) {
+                    ruanganInfo.style.display = 'none';
+                    selectedRuanganFull = false;
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                // Fetch kuota tersedia real-time
+                fetch(`/mahasiswa/ruangan-info/${ruanganId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('info-nama').textContent = data.nm_ruangan;
+                        document.getElementById('info-kuota-total').textContent = data.kuota_total;
+                        document.getElementById('info-tersedia').textContent = data.tersedia;
+                        document.getElementById('info-terisi').textContent = data.terisi;
+
+                        // Tampilkan status dengan warna
+                        const statusEl = document.getElementById('info-status');
+                        if (data.tersedia <= 0) {
+                            statusEl.textContent = '❌ Penuh';
+                            statusEl.style.color = '#dc3545';
+                            document.getElementById('info-tersedia').style.color = '#dc3545';
+                            selectedRuanganFull = true;
+                            submitBtn.disabled = true;
+                        } else {
+                            statusEl.textContent = '✅ Tersedia';
+                            statusEl.style.color = '#28a745';
+                            document.getElementById('info-tersedia').style.color = '#28a745';
+                            selectedRuanganFull = false;
+                            submitBtn.disabled = false;
+                        }
+
+                        ruanganInfo.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        ruanganInfo.style.display = 'none';
+                        selectedRuanganFull = false;
+                        submitBtn.disabled = false;
+                    });
+            });
+
+            // Validasi form sebelum submit
+            document.getElementById('form-mahasiswa').addEventListener('submit', function(e) {
+                if (selectedRuanganFull) {
+                    e.preventDefault();
+                    alert('Ruangan yang dipilih sudah penuh. Silakan pilih ruangan lain.');
+                }
+            });
+        });
+    </script>
 @endsection

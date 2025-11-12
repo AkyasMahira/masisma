@@ -252,8 +252,8 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label for="search" class="form-label">Cari Nama Mahasiswa</label>
-                        <input type="text" class="form-control" id="search" name="search" placeholder="Ketik nama mahasiswa..."
-                            value="{{ request('search') }}">
+                        <input type="text" class="form-control" id="search" name="search"
+                            placeholder="Ketik nama mahasiswa..." value="{{ request('search') }}">
                     </div>
                     <div class="col-md-6">
                         <label for="univ_asal" class="form-label">Filter Universitas</label>
@@ -261,7 +261,9 @@
                             <input type="text" class="form-control" id="univ_asal" placeholder="Cari universitas..."
                                 autocomplete="off">
                             <input type="hidden" id="univ_asal_hidden" name="univ_asal" value="{{ request('univ_asal') }}">
-                            <div id="univDropdown" class="dropdown-list" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #dee2e6; border-radius: 0.375rem; max-height: 300px; overflow-y: auto; z-index: 1000;"></div>
+                            <div id="univDropdown" class="dropdown-list"
+                                style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #dee2e6; border-radius: 0.375rem; max-height: 300px; overflow-y: auto; z-index: 1000;">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -304,7 +306,7 @@
                                 <td>
                                     @if ($m->tanggal_berakhir)
                                         @if ($m->sisa_hari > 0)
-                                            <span class="badge bg-info">{{ $m->sisa_hari }} hari</span>
+                                            <span class="badge bg-info">{{ $m->sisa_hari }} </span>
                                         @else
                                             <span class="badge bg-danger">Habis</span>
                                         @endif
@@ -355,69 +357,32 @@
     </div>
 
     @section('scripts')
-        {{-- Script Anda tidak berubah dan sudah bagus --}}
+        <!-- SheetJS dan Toastify -->
         <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-        <!-- Tambahkan Toastify untuk notifikasi -->
         <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
         <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
         <script>
-            // Live Search untuk Universitas
-            document.addEventListener('DOMContentLoaded', function() {
-                const univInput = document.getElementById('univ_asal');
-                const univHidden = document.getElementById('univ_asal_hidden');
-                const dropdown = document.getElementById('univDropdown');
-                let searchTimeout;
+            // Fungsi utilitas untuk Toastify
+            function showToast(message, type = 'success') {
+                const colors = {
+                    success: "linear-gradient(to right, #00b09b, #96c93d)",
+                    error: "linear-gradient(to right, #ff5f6d, #ffc371)",
+                    info: "linear-gradient(to right, #2193b0, #6dd5ed)"
+                };
 
-                // Set input value dari hidden field jika ada
-                if (univHidden.value) {
-                    univInput.value = univHidden.value;
-                }
-
-                univInput.addEventListener('input', function(e) {
-                    clearTimeout(searchTimeout);
-                    const query = e.target.value.trim();
-
-                    if (query.length === 0) {
-                        dropdown.style.display = 'none';
-                        univHidden.value = '';
-                        return;
+                Toastify({
+                    text: message,
+                    duration: 3000,
+                    gravity: "bottom",
+                    position: "right",
+                    style: {
+                        background: colors[type] || colors.info
                     }
-
-                    searchTimeout = setTimeout(function() {
-                        fetch(`{{ route('mahasiswa.search.universitas') }}?q=${encodeURIComponent(query)}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.length === 0) {
-                                    dropdown.innerHTML = '<div class="dropdown-item text-muted">Tidak ada universitas yang cocok</div>';
-                                } else {
-                                    dropdown.innerHTML = data.map(univ => `
-                                        <div class="dropdown-item" onclick="selectUniversitas('${univ.replace(/'/g, "\\'")}')">
-                                            ${univ}
-                                        </div>
-                                    `).join('');
-                                }
-                                dropdown.style.display = 'block';
-                            })
-                            .catch(error => console.error('Error:', error));
-                    }, 300); // Debounce 300ms
-                });
-
-                // Close dropdown ketika klik di luar
-                document.addEventListener('click', function(e) {
-                    if (!e.target.closest('.position-relative')) {
-                        dropdown.style.display = 'none';
-                    }
-                });
-            });
-
-            function selectUniversitas(univ) {
-                const univInput = document.getElementById('univ_asal');
-                const univHidden = document.getElementById('univ_asal_hidden');
-                univInput.value = univ;
-                univHidden.value = univ;
-                document.getElementById('univDropdown').style.display = 'none';
+                }).showToast();
             }
 
+            // Copy semua link absensi ke clipboard
             function copyAllLinks() {
                 const mahasiswaData = [
                     @foreach ($mahasiswas as $m)
@@ -428,129 +393,151 @@
                     @endforeach
                 ];
 
-                // Format pesan
                 const message = mahasiswaData.map(m =>
                     `Link Absensi untuk ${m.nama}:\n${m.link}`
                 ).join('\n\n');
 
-                // Copy to clipboard
-                navigator.clipboard.writeText(message).then(() => {
-                    // Show success notification
-                    Toastify({
-                        text: "Semua link absensi berhasil disalin!",
-                        duration: 3000,
-                        gravity: "bottom",
-                        position: "right",
-                        style: {
-                            background: "linear-gradient(to right, #00b09b, #96c93d)",
-                        }
-                    }).showToast();
-                }).catch(() => {
-                    Toastify({
-                        text: "Gagal menyalin link absensi",
-                        duration: 3000,
-                        gravity: "bottom",
-                        position: "right",
-                        style: {
-                            background: "linear-gradient(to right, #ff5f6d, #ffc371)",
-                        }
-                    }).showToast();
-                });
+                navigator.clipboard.writeText(message)
+                    .then(() => showToast("Semua link absensi berhasil disalin!", "success"))
+                    .catch(() => showToast("Gagal menyalin link absensi", "error"));
             }
 
+            // Export data mahasiswa ke Excel
             function exportMahasiswa() {
-                const data = [
-                    @foreach ($mahasiswas as $m)
-                        [
-                            {!! json_encode($m->nm_mahasiswa ?? '') !!},
-                            {!! json_encode($m->univ_asal ?? '') !!},
-                            {!! json_encode($m->prodi ?? '') !!},
-                            {!! json_encode($m->ruangan ? $m->ruangan->nm_ruangan : $m->nm_ruangan ?? '') !!},
-                            {!! json_encode($m->status ?? '') !!}
-                        ] {{ $loop->last ? '' : ',' }}
-                    @endforeach
-                ];
+                try {
+                    const data = [
+                        @foreach ($mahasiswas as $m)
+                            [
+                                {!! json_encode($m->nm_mahasiswa ?? '') !!},
+                                {!! json_encode($m->univ_asal ?? '') !!},
+                                {!! json_encode($m->prodi ?? '') !!},
+                                {!! json_encode($m->ruangan ? $m->ruangan->nm_ruangan : $m->nm_ruangan ?? '') !!},
+                                {!! json_encode($m->tanggal_mulai ?? '-') !!},
+                                {!! json_encode($m->tanggal_berakhir ?? '-') !!},
+                                {!! json_encode($m->status ?? '') !!}
+                            ] {{ $loop->last ? '' : ',' }}
+                        @endforeach
+                    ];
 
-                const ws_data = [
-                    ['Nama', 'Universitas', 'Prodi', 'Ruangan', 'Status']
-                ].concat(data);
-                const ws = XLSX.utils.aoa_to_sheet(ws_data);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, 'Mahasiswa');
-                XLSX.writeFile(wb, `Data_Mahasiswa_${new Date().toISOString().split('T')[0]}.xlsx`);
+                    const ws_data = [
+                        ['Nama', 'Universitas', 'Prodi', 'Ruangan', 'Tanggal Mulai', 'Tanggal Berakhir', 'Status']
+                    ].concat(data);
+
+                    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, 'Mahasiswa');
+                    XLSX.writeFile(wb, `Data_Mahasiswa_${new Date().toISOString().split('T')[0]}.xlsx`);
+
+                    showToast("Data mahasiswa berhasil diexport!", "success");
+                } catch (error) {
+                    console.error(error);
+                    showToast("Gagal export data mahasiswa", "error");
+                }
             }
 
+            // Unduh template Excel untuk input
             function downloadTemplateMahasiswa() {
-                const ws_data = [
-                    ['Nama', 'Universitas', 'Prodi', 'Ruangan', 'Status'],
-                    ['Budi Santoso', 'Universitas A', 'Teknik Informatika', 'Ruang A', 'aktif']
-                ];
-                const ws = XLSX.utils.aoa_to_sheet(ws_data);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, 'Template_Mahasiswa');
-                XLSX.writeFile(wb, 'Template_Mahasiswa.xlsx');
+                try {
+                    const ws_data = [
+                        ['Nama', 'Universitas', 'Prodi', 'Ruangan', 'Tanggal Mulai', 'Tanggal Berakhir', 'Status'],
+                        ['Budi Santoso', 'Universitas A', 'Teknik Informatika', 'Gelatik', '2025-08-01', '2025-12-31',
+                            'aktif'
+                        ]
+                    ];
+
+                    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, 'Template_Mahasiswa');
+                    XLSX.writeFile(wb, 'Template_Mahasiswa.xlsx');
+
+                    showToast("Template Mahasiswa berhasil diunduh!", "success");
+                } catch (error) {
+                    console.error(error);
+                    showToast("Gagal mengunduh template mahasiswa", "error");
+                }
             }
 
+            // Import file Excel ke database
             function importMahasiswa(input) {
                 const file = input.files[0];
                 if (!file) return;
+
                 const reader = new FileReader();
+
                 reader.onload = function(e) {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {
-                        type: 'array'
-                    });
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const json = XLSX.utils.sheet_to_json(firstSheet, {
-                        defval: ''
-                    });
-
-                    if (json.length === 0) {
-                        alert('File kosong atau format tidak sesuai');
-                        return;
-                    }
-
-                    const formData = new FormData();
-                    formData.append('_token', '{{ csrf_token() }}');
-                    formData.append('data', JSON.stringify(json));
-
-                    // Tampilkan semacam loading spinner jika ada
-                    // ...
-
-                    fetch('{{ route('mahasiswa.store') }}', {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'Accept': 'application/json', // Pastikan server merespon JSON
-                            }
-                        })
-                        .then(res => {
-                            // Sembunyikan loading
-                            if (!res.ok) {
-                                throw new Error('Network response was not ok');
-                            }
-                            return res.json();
-                        })
-                        .then(res => {
-                            if (res.success) {
-                                alert(res.message || 'Import berhasil');
-                                location.reload();
-                            } else {
-                                alert('Import gagal: ' + (res.message || 'Unknown error'));
-                            }
-                        })
-                        .catch(err => {
-                            // Sembunyikan loading
-                            console.error(err);
-                            alert('Terjadi kesalahan saat import. Cek konsol untuk detail.');
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, {
+                            type: 'array',
+                            cellDates: true,
+                            raw: false
                         });
-                };
-                reader.readAsArrayBuffer(file);
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const json = XLSX.utils.sheet_to_json(firstSheet, {
+                            defval: '',
+                            dateNF: 'yyyy-mm-dd'
+                        });
 
-                // Reset input file agar bisa import file yang sama lagi
-                input.value = '';
+                        if (json.length === 0) {
+                            showToast('File kosong atau format tidak sesuai', 'error');
+                            return;
+                        }
+
+                        // Normalisasi tanggal agar pasti format YYYY-MM-DD
+                        json.forEach(row => {
+                            const normalizeDate = val => {
+                                if (!val) return '';
+                                if (typeof val === 'number') return XLSX.SSF.format('yyyy-mm-dd', val);
+                                if (val instanceof Date) return val.toISOString().split('T')[0];
+                                const date = new Date(val);
+                                return isNaN(date) ? '' : date.toISOString().split('T')[0];
+                            };
+
+                            row['Tanggal Mulai'] = normalizeDate(row['Tanggal Mulai']);
+                            row['Tanggal Berakhir'] = normalizeDate(row['Tanggal Berakhir']);
+                        });
+
+                        const formData = new FormData();
+                        formData.append('_token', '{{ csrf_token() }}');
+                        formData.append('data', JSON.stringify(json));
+
+                        showToast("Sedang mengimpor data...", "info");
+
+                        fetch('{{ route('mahasiswa.store') }}', {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'Accept': 'application/json'
+                                }
+                            })
+                            .then(res => {
+                                if (!res.ok) throw new Error('Network response was not ok');
+                                return res.json();
+                            })
+                            .then(res => {
+                                if (res.success) {
+                                    showToast(res.message || 'Import berhasil!', 'success');
+                                    setTimeout(() => location.reload(), 1000);
+                                } else {
+                                    showToast('Import gagal: ' + (res.message || 'Unknown error'), 'error');
+                                }
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                showToast('Terjadi kesalahan saat import. Cek konsol untuk detail.', 'error');
+                            });
+
+                    } catch (err) {
+                        console.error(err);
+                        showToast('File tidak valid atau rusak.', 'error');
+                    }
+                };
+
+                reader.readAsArrayBuffer(file);
+                input.value = ''; // Reset input agar bisa pilih file yang sama lagi
             }
         </script>
     @endsection
+
 
 @endsection
