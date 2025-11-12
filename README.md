@@ -1,4 +1,4 @@
-# MasISMA (Manajemen Mahasiswa Magang)
+# MasISMA (Manajemen Siswa Magang)
 
 **MasISMA** adalah aplikasi berbasis Laravel 7 yang dirancang untuk memudahkan pengelolaan mahasiswa magang di lingkungan Rumah Sakit SLG Kediri.  
 Dengan MasISMA, admin dapat melakukan: laporan periode dan cetak PDF, serta manajemen ruangan/layanan.
