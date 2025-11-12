@@ -63,11 +63,11 @@ class Mahasiswa extends Model
 
         if ($today > $endDate) {
             // Auto-deactivate the student if they've expired
-            if ($this->status !== 'inactive') {
+            if ($this->status !== 'nonaktif') {
                 $ruanganId = $this->ruangan_id;
 
                 $this->update([
-                    'status' => 'inactive',
+                    'status' => 'nonaktif',
                     'ruangan_id' => null,
                     'nm_ruangan' => null
                 ]);
