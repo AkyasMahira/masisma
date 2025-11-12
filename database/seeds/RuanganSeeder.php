@@ -8,7 +8,7 @@ class RuanganSeeder extends Seeder
     public function run()
     {
         $ruangans = [
-            ['nm_ruangan' => 'Ruangan IT', 'kuota_ruangan' => 3],
+            ['nm_ruangan' => 'IT', 'kuota_ruangan' => 3],
             ['nm_ruangan' => 'Gelatik', 'kuota_ruangan' => 30],
             ['nm_ruangan' => 'Perkutut', 'kuota_ruangan' => 25],
             ['nm_ruangan' => 'Punai', 'kuota_ruangan' => 10],
