@@ -20,11 +20,30 @@ class MahasiswaController extends Controller
         });
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $mahasiswas = Mahasiswa::where('status', 'aktif')
-            ->orderBy('created_at', 'desc')
+        $query = Mahasiswa::where('status', 'aktif');
+
+        // Filter by universitas if provided
+        if ($request->has('univ_asal') && !empty($request->univ_asal)) {
+            $query->where('univ_asal', $request->univ_asal);
+        }
+
+        // Search by mahasiswa name
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('nm_mahasiswa', 'like', '%' . $request->search . '%');
+        }
+
+        $mahasiswas = $query->orderBy('created_at', 'desc')
             ->paginate(10)->withQueryString();
+
+        // Trigger auto-deactivate logic for each mahasiswa by accessing sisa_hari
+        $mahasiswas->getCollection()->transform(function ($m) {
+            // Access sisa_hari to trigger auto-deactivate if expired
+            $m->sisa_hari;
+            // Reload to get updated status
+            return $m->fresh();
+        });
 
         return view('mahasiswa.index', compact('mahasiswas'));
     }
@@ -283,5 +302,22 @@ class MahasiswaController extends Controller
             'terisi' => $terisi,
             'status' => $tersedia > 0 ? 'Tersedia' : 'Penuh'
         ]);
+    }
+
+    /**
+     * API: Get list of universities for live search
+     */
+    public function searchUniversitas(Request $request)
+    {
+        $search = $request->query('q', '');
+
+        $universitas = Mahasiswa::where('status', 'aktif')
+            ->where('univ_asal', 'like', '%' . $search . '%')
+            ->distinct('univ_asal')
+            ->pluck('univ_asal')
+            ->filter(fn($u) => !empty($u))
+            ->values();
+
+        return response()->json($universitas);
     }
 }

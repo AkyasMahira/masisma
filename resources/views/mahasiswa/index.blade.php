@@ -140,6 +140,31 @@
             color: var(--maroon);
         }
 
+        /* Dropdown styling untuk universitas */
+        .dropdown-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-list .dropdown-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .dropdown-list .dropdown-item:hover {
+            background-color: #f8f9fa;
+            color: var(--maroon);
+        }
+
+        .dropdown-list .dropdown-item.active {
+            background-color: var(--maroon);
+            color: white;
+        }
+
         @media (max-width: 768px) {
             .page-header {
                 flex-direction: column;
@@ -219,6 +244,38 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+
+    <!-- Filter Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form id="filterForm" method="GET" action="{{ route('mahasiswa.index') }}">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="search" class="form-label">Cari Nama Mahasiswa</label>
+                        <input type="text" class="form-control" id="search" name="search" placeholder="Ketik nama mahasiswa..."
+                            value="{{ request('search') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="univ_asal" class="form-label">Filter Universitas</label>
+                        <div class="position-relative">
+                            <input type="text" class="form-control" id="univ_asal" placeholder="Cari universitas..."
+                                autocomplete="off">
+                            <input type="hidden" id="univ_asal_hidden" name="univ_asal" value="{{ request('univ_asal') }}">
+                            <div id="univDropdown" class="dropdown-list" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #dee2e6; border-radius: 0.375rem; max-height: 300px; overflow-y: auto; z-index: 1000;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-maroon btn-sm">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                    <a href="{{ route('mahasiswa.index') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-clockwise"></i> Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <div class="card mb-4">
         <div class="card-body p-0">
@@ -304,6 +361,63 @@
         <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
         <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
         <script>
+            // Live Search untuk Universitas
+            document.addEventListener('DOMContentLoaded', function() {
+                const univInput = document.getElementById('univ_asal');
+                const univHidden = document.getElementById('univ_asal_hidden');
+                const dropdown = document.getElementById('univDropdown');
+                let searchTimeout;
+
+                // Set input value dari hidden field jika ada
+                if (univHidden.value) {
+                    univInput.value = univHidden.value;
+                }
+
+                univInput.addEventListener('input', function(e) {
+                    clearTimeout(searchTimeout);
+                    const query = e.target.value.trim();
+
+                    if (query.length === 0) {
+                        dropdown.style.display = 'none';
+                        univHidden.value = '';
+                        return;
+                    }
+
+                    searchTimeout = setTimeout(function() {
+                        fetch(`{{ route('mahasiswa.search.universitas') }}?q=${encodeURIComponent(query)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.length === 0) {
+                                    dropdown.innerHTML = '<div class="dropdown-item text-muted">Tidak ada universitas yang cocok</div>';
+                                } else {
+                                    dropdown.innerHTML = data.map(univ => `
+                                        <div class="dropdown-item" onclick="selectUniversitas('${univ.replace(/'/g, "\\'")}')">
+                                            ${univ}
+                                        </div>
+                                    `).join('');
+                                }
+                                dropdown.style.display = 'block';
+                            })
+                            .catch(error => console.error('Error:', error));
+                    }, 300); // Debounce 300ms
+                });
+
+                // Close dropdown ketika klik di luar
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.position-relative')) {
+                        dropdown.style.display = 'none';
+                    }
+                });
+            });
+
+            function selectUniversitas(univ) {
+                const univInput = document.getElementById('univ_asal');
+                const univHidden = document.getElementById('univ_asal_hidden');
+                univInput.value = univ;
+                univHidden.value = univ;
+                document.getElementById('univDropdown').style.display = 'none';
+            }
+
             function copyAllLinks() {
                 const mahasiswaData = [
                     @foreach ($mahasiswas as $m)

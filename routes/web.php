@@ -51,6 +51,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/{mahasiswa}/edit', [MahasiswaController::class, 'edit'])->name('edit');
         Route::put('/{mahasiswa}', [MahasiswaController::class, 'update'])->name('update');
         Route::delete('/{mahasiswa}', [MahasiswaController::class, 'destroy'])->name('destroy');
+        Route::get('/search/universitas', [MahasiswaController::class, 'searchUniversitas'])->name('search.universitas');
     });
 
     // Admin: view today's absensi with filters
