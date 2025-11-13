@@ -46,6 +46,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
         Route::get('/', [MahasiswaController::class, 'index'])->name('index');
         Route::get('/create', [MahasiswaController::class, 'create'])->name('create');
+        Route::get('/export', [MahasiswaController::class, 'export'])->name('export');
         Route::get('/ruangan-info/{id}', [MahasiswaController::class, 'getRuanganInfo'])->name('ruangan.info');
         Route::get('/search/universitas', [MahasiswaController::class, 'searchUniversitas'])->name('search.universitas');
         Route::post('/', [MahasiswaController::class, 'store'])->name('store');

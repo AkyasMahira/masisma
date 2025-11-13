@@ -382,45 +382,65 @@
                 }).showToast();
             }
 
-            // Copy semua link absensi ke clipboard
-            function copyAllLinks() {
-                const mahasiswaData = [
-                    @foreach ($mahasiswas as $m)
-                        {
-                            nama: {!! json_encode($m->nm_mahasiswa) !!},
-                            link: {!! json_encode(route('absensi.card', $m->share_token)) !!}
-                        },
-                    @endforeach
-                ];
+            // Copy semua link absensi ke clipboard for ALL mahasiswa matching current filters
+            async function copyAllLinks() {
+                try {
+                    // fetch all filtered mahasiswa via export endpoint so it respects current filters
+                    const resp = await fetch('{{ route('mahasiswa.export') }}' + window.location.search, {
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+                    if (!resp.ok) throw new Error('Gagal mengambil data mahasiswa');
+                    const data = await resp.json();
 
-                const message = mahasiswaData.map(m =>
-                    `Link Absensi untuk ${m.nama}:\n${m.link}`
-                ).join('\n\n');
+                    if (!data || data.length === 0) {
+                        showToast('Tidak ada mahasiswa untuk disalin.', 'info');
+                        return;
+                    }
 
-                navigator.clipboard.writeText(message)
-                    .then(() => showToast("Semua link absensi berhasil disalin!", "success"))
-                    .catch(() => showToast("Gagal menyalin link absensi", "error"));
+                    const message = data.map(m => `Link Absensi untuk ${m.nama}:\n${m.share_link || ''}`).join('\n\n');
+
+                    await navigator.clipboard.writeText(message);
+                    showToast('Semua link absensi berhasil disalin!', 'success');
+                } catch (err) {
+                    console.error(err);
+                    showToast('Gagal menyalin link absensi', 'error');
+                }
             }
 
-            // Export data mahasiswa ke Excel
-            function exportMahasiswa() {
+            // Export data mahasiswa ke Excel for ALL mahasiswa matching current filters
+            async function exportMahasiswa() {
                 try {
-                    const data = [
-                        @foreach ($mahasiswas as $m)
-                            [
-                                {!! json_encode($m->nm_mahasiswa ?? '') !!},
-                                {!! json_encode($m->univ_asal ?? '') !!},
-                                {!! json_encode($m->prodi ?? '') !!},
-                                {!! json_encode($m->ruangan ? $m->ruangan->nm_ruangan : $m->nm_ruangan ?? '') !!},
-                                {!! json_encode($m->tanggal_mulai ?? '-') !!},
-                                {!! json_encode($m->tanggal_berakhir ?? '-') !!},
-                                {!! json_encode($m->status ?? '') !!}
-                            ] {{ $loop->last ? '' : ',' }}
-                        @endforeach
-                    ];
+                    const resp = await fetch('{{ route('mahasiswa.export') }}' + window.location.search, {
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+                    if (!resp.ok) throw new Error('Gagal mengambil data untuk export');
+                    const rows = await resp.json();
+
+                    if (!rows || rows.length === 0) {
+                        showToast('Tidak ada data mahasiswa untuk diexport.', 'info');
+                        return;
+                    }
+
+                    const data = rows.map(r => [
+                        r.nama || '',
+                        r.universitas || '',
+                        r.prodi || '',
+                        r.ruangan || '',
+                        r.tanggal_mulai || '-',
+                        r.tanggal_berakhir || '-',
+                        r.status || '',
+                        r.share_link || '' // include attendance link
+                    ]);
 
                     const ws_data = [
-                        ['Nama', 'Universitas', 'Prodi', 'Ruangan', 'Tanggal Mulai', 'Tanggal Berakhir', 'Status']
+                        [
+                            'Nama', 'Universitas', 'Prodi', 'Ruangan', 'Tanggal Mulai', 'Tanggal Berakhir', 'Status',
+                            'Link Absensi'
+                        ]
                     ].concat(data);
 
                     const ws = XLSX.utils.aoa_to_sheet(ws_data);
@@ -428,10 +448,10 @@
                     XLSX.utils.book_append_sheet(wb, ws, 'Mahasiswa');
                     XLSX.writeFile(wb, `Data_Mahasiswa_${new Date().toISOString().split('T')[0]}.xlsx`);
 
-                    showToast("Data mahasiswa berhasil diexport!", "success");
+                    showToast('Data mahasiswa berhasil diexport!', 'success');
                 } catch (error) {
                     console.error(error);
-                    showToast("Gagal export data mahasiswa", "error");
+                    showToast('Gagal export data mahasiswa', 'error');
                 }
             }
 
