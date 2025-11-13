@@ -1,204 +1,182 @@
 @extends('layouts.app')
 
 @section('title', 'Tambah Ruangan')
-@section('page-title', 'Tambah Ruangan Baru')
+@section('page-title', 'Tambah Ruangan')
 
 @section('content')
+    <style>
+        :root {
+            --custom-maroon: #7c1316;
+            --custom-maroon-light: #a3191d;
+            --custom-maroon-subtle: #fcf0f1;
+            --text-dark: #2c3e50;
+            --text-muted: #95a5a6;
+            --card-radius: 16px;
+            --transition: 0.3s ease;
+        }
 
-{{--
-  1. TAMBAHKAN KODE INI
-  Ini adalah elemen HTML untuk animasi background
---}}
-<div class="background-animation">
-    <div class="circle c1"></div>
-    <div class="circle c2"></div>
-    <div class="circle c3"></div>
-    <div class="circle c4"></div>
-    <div class="circle c5"></div>
-    <div class="circle c6"></div>
-</div>
+        /* --- Card Styling --- */
+        .form-card {
+            border: none;
+            border-radius: var(--card-radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            background: #fff;
+            overflow: hidden;
+        }
 
-{{--
-  Beri style 'position: relative' dan 'z-index: 2'
-  agar form ini TAMPIL DI DEPAN animasi background
---}}
-<div class="row justify-content-center" style="position: relative; z-index: 2;">
-    <div class="col-md-8">
-        <div class="card shadow-sm card-animated">
+        .card-header-custom {
+            background-color: var(--custom-maroon);
+            padding: 1.5rem;
+            color: white;
+            border-bottom: 4px solid var(--custom-maroon-light);
+        }
 
-            <div class="card-header bg-custom-maroon text-white">
-                <h4 class="card-title mb-0">
-                    <i class="fas fa-plus-circle me-2"></i>
-                    Form Tambah Ruangan
-                </h4>
-            </div>
+        /* --- Form Styling --- */
+        .form-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
 
-            <div class="card-body p-4">
+        .input-group-text {
+            background-color: #f8f9fa;
+            border-right: none;
+            color: var(--custom-maroon);
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
 
-                @if ($errors->any())
-                    <div class="alert alert-danger" role="alert">
-                        <h5 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i> Terjadi Kesalahan!</h5>
-                        <p>Mohon periksa kembali inputan Anda sebelum menyimpan.</p>
-                        <hr>
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+        .form-control {
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+            padding: 0.7rem 1rem;
+            border-color: #dee2e6;
+            box-shadow: none !important;
+            transition: border-color 0.2s;
+        }
 
-                <form action="{{ route('ruangan.store') }}" method="POST">
-                    @csrf
+        .form-control:focus {
+            border-color: var(--custom-maroon-light);
+        }
 
-                    <div class="mb-3">
-                        <label for="nm_ruangan" class="form-label fw-bold">Nama Ruangan</label>
-                        <div class="input-group">
-                            <span class="input-group-text text-custom-maroon"><i class="fas fa-bed fa-fw"></i></span>
-                            <input type="text" class="form-control @error('nm_ruangan') is-invalid @enderror"
-                                   id="nm_ruangan" name="nm_ruangan"
-                                   value="{{ old('nm_ruangan') }}"
-                                   placeholder="Contoh: Ruang Mawar Lt. 2" required>
+        /* --- Buttons --- */
+        .btn-maroon {
+            background-color: var(--custom-maroon);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(124, 19, 22, 0.2);
+        }
 
+        .btn-maroon:hover {
+            background-color: var(--custom-maroon-light);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .btn-light-custom {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            color: var(--text-dark);
+            border-radius: 50px;
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .btn-light-custom:hover {
+            background: #f8f9fa;
+            color: var(--custom-maroon);
+        }
+
+        /* Animation */
+        .animate-up {
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+
+    <div class="row justify-content-center animate-up">
+        <div class="col-md-8 col-lg-6">
+            <div class="form-card">
+                <div class="card-header-custom">
+                    <h4 class="mb-0 fw-bold"><i class="bi bi-plus-circle-fill me-2"></i> Tambah Ruangan</h4>
+                    <p class="mb-0 small opacity-75">Isi detail ruangan baru untuk sistem magang.</p>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    @if ($errors->any())
+                        <div class="alert alert-danger rounded-3 shadow-sm mb-4">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                                <strong class="mb-0">Terjadi Kesalahan!</strong>
+                            </div>
+                            <ul class="mb-0 small ps-3">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <form action="{{ route('ruangan.store') }}" method="POST">
+                        @csrf
+
+                        <div class="mb-4">
+                            <label for="nm_ruangan" class="form-label">Nama Ruangan <span
+                                    class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-door-closed"></i></span>
+                                <input type="text" class="form-control @error('nm_ruangan') is-invalid @enderror"
+                                    id="nm_ruangan" name="nm_ruangan" value="{{ old('nm_ruangan') }}"
+                                    placeholder="Contoh: Ruang Mawar Lt. 2" required>
+                            </div>
                             @error('nm_ruangan')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
+                                <div class="text-danger small mt-1">{{ $message }}</div>
                             @enderror
                         </div>
-                    </div>
 
-                    <div class="mb-3">
-                        <label for="kuota_ruangan" class="form-label fw-bold">Kuota Ruangan</label>
-                        <div class="input-group">
-                            <span class="input-group-text text-custom-maroon"><i class="fas fa-users fa-fw"></i></span>
-                            <input type="number" class="form-control @error('kuota_ruangan') is-invalid @enderror"
-                                   id="kuota_ruangan" name="kuota_ruangan"
-                                   value="{{ old('kuota_ruangan') }}"
-                                   placeholder="Masukkan jumlah kuota (misal: 10)" required min="1">
-
+                        <div class="mb-4">
+                            <label for="kuota_ruangan" class="form-label">Kuota Maksimal <span
+                                    class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-people-fill"></i></span>
+                                <input type="number" class="form-control @error('kuota_ruangan') is-invalid @enderror"
+                                    id="kuota_ruangan" name="kuota_ruangan" value="{{ old('kuota_ruangan') }}"
+                                    placeholder="Masukkan angka (misal: 10)" min="1" required>
+                            </div>
+                            <div class="form-text text-muted small mt-1">
+                                <i class="bi bi-info-circle me-1"></i> Jumlah maksimal mahasiswa yang dapat ditampung.
+                            </div>
                             @error('kuota_ruangan')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
+                                <div class="text-danger small mt-1">{{ $message }}</div>
                             @enderror
                         </div>
-                    </div>
 
-                    <hr class="my-4">
+                        <hr class="my-4 border-light">
 
-                    <div class="d-flex justify-content-end">
-                        <a href="{{ route('ruangan.index') }}" class="btn btn-secondary me-2">
-                            <i class="fas fa-arrow-left me-1"></i>
-                            Batal
-                        </a>
-                        <button type="submit" class="btn btn-custom-maroon">
-                            <i class="fas fa-save me-1"></i>
-                            Simpan
-                        </button>
-                    </div>
-                </form>
+                        <div class="d-flex justify-content-between align-items-center pt-2">
+                            <a href="{{ route('ruangan.index') }}" class="btn btn-light-custom shadow-sm">
+                                <i class="bi bi-arrow-left me-2"></i> Batal
+                            </a>
+                            <button type="submit" class="btn btn-maroon">
+                                Simpan Ruangan <i class="bi bi-check-lg ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
-@endsection
-
-@section('scripts')
-{{--
-  2. TAMBAHKAN/GANTI KODE CSS DI SINI
---}}
-<style>
-    :root {
-        --custom-maroon: #7c1316;
-        --custom-maroon-darker: #5f0f11;
-
-        /* Warna untuk lingkaran (versi RGBA dari #7c1316) */
-        --maroon-rgba: rgba(124, 19, 22, 0.15);
-    }
-
-    /* ... (Kode CSS .bg-custom-maroon, .btn-custom-maroon, dll. tetap sama) ... */
-    .bg-custom-maroon {
-        background-color: var(--custom-maroon) !important;
-    }
-    .text-custom-maroon {
-        color: var(--custom-maroon) !important;
-    }
-    .btn-custom-maroon {
-        background-color: var(--custom-maroon);
-        border-color: var(--custom-maroon);
-        color: #fff;
-    }
-    .btn-custom-maroon:hover {
-        background-color: var(--custom-maroon-darker);
-        border-color: var(--custom-maroon-darker);
-        color: #fff;
-    }
-    .input-group-text {
-        background-color: #f8f9fa;
-        border-right: 0;
-    }
-    .form-control { border-left: 0; }
-    .form-control:focus { border-left: 1px solid #ced4da; }
-    .form-control.is-invalid { border-left: 1px solid #dc3545; }
-
-
-    /* --- ANIMASI CARD FADE-IN --- */
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    .card-animated {
-        /* Kita perlambat sedikit agar lebih halus */
-        animation: fadeInUp 0.8s ease-out forwards;
-    }
-
-
-    /* --- ANIMASI BACKGROUND LINGKARAN --- */
-
-    .background-animation {
-        position: fixed; /* Tetap di layar */
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh;
-        overflow: hidden;
-        z-index: 1; /* Posisikan di belakang form (yang punya z-index: 2) */
-    }
-
-    .circle {
-        position: absolute;
-        display: block;
-        list-style: none;
-        background: var(--maroon-rgba); /* Warna dari CSS variabel */
-        animation: animate-circles 25s linear infinite;
-        bottom: -150px; /* Mulai dari bawah layar */
-    }
-
-    /* Variasi ukuran, posisi, dan kecepatan */
-    .c1 { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
-    .c2 { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
-    .c3 { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
-    .c4 { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
-    .c5 { left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
-    .c6 { left: 85%; width: 110px; height: 110px; animation-delay: 3s; }
-
-    @keyframes animate-circles {
-        0% {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        100% {
-            transform: translateY(-1000px); /* Bergerak ke atas */
-            opacity: 0;
-        }
-    }
-
-</style>
 @endsection

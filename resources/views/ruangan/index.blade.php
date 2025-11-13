@@ -8,240 +8,366 @@
     <style>
         :root {
             --custom-maroon: #7c1316;
-            --custom-maroon-dark: #5f0f11;
-            --maroon-rgba: rgba(124, 19, 22, 0.15);
-            --transition-speed: 0.3s;
+            --custom-maroon-light: #a3191d;
+            --custom-maroon-subtle: #fcf0f1;
+            --text-dark: #2c3e50;
+            --text-muted: #95a5a6;
+            --card-radius: 16px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* --- BUTTON STYLING --- */
+        /* --- Header & Toolbar --- */
+        .page-header-wrapper {
+            background: #fff;
+            border-radius: var(--card-radius);
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--custom-maroon);
+
+            /* FIX Z-INDEX: Agar dropdown muncul paling atas */
+            position: relative;
+            z-index: 1050;
+            overflow: visible;
+        }
+
+        /* --- Room Cards --- */
+        .room-card {
+            border: none;
+            border-radius: var(--card-radius);
+            background: #fff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .room-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(124, 19, 22, 0.15);
+        }
+
+        .room-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--custom-maroon);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .room-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon-bg {
+            width: 50px;
+            height: 50px;
+            background-color: var(--custom-maroon-subtle);
+            color: var(--custom-maroon);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .room-title {
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .capacity-text {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1;
+        }
+
+        /* --- Buttons --- */
         .btn-maroon {
             background-color: var(--custom-maroon);
             color: #fff;
-            border-color: var(--custom-maroon);
-            transition: all var(--transition-speed);
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            font-weight: 500;
         }
 
         .btn-maroon:hover {
-            background-color: var(--custom-maroon-dark);
-            border-color: var(--custom-maroon-dark);
+            background-color: var(--custom-maroon-light);
             color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(124, 19, 22, 0.3);
         }
 
-        .btn-outline-maroon {
-            color: var(--custom-maroon);
+        .btn-icon-soft {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            background: #f8f9fa;
+            color: var(--text-dark);
+            border: 1px solid transparent;
+        }
+
+        .btn-icon-soft:hover {
+            background: var(--custom-maroon);
+            color: white;
+        }
+
+        .btn-icon-soft.delete:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-tool {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            color: var(--text-dark);
+            border-radius: 8px;
+            padding: 8px 12px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-tool:hover,
+        .btn-tool:focus {
+            background: #f8f9fa;
             border-color: var(--custom-maroon);
-            transition: all var(--transition-speed);
+            outline: none;
         }
 
-        .btn-outline-maroon:hover {
-            background-color: var(--custom-maroon);
-            color: #fff;
+        /* --- Empty State --- */
+        .empty-state-box {
+            border: 2px dashed #e0e0e0;
+            border-radius: var(--card-radius);
+            background: #fafafa;
+            transition: var(--transition);
         }
 
-        /* --- CARD ANIMASI & INTERAKSI --- */
+        .empty-state-box:hover {
+            border-color: var(--custom-maroon);
+            background: #fff;
+        }
+
+        /* --- Animation --- */
+        .animate-up {
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
 
-        .card-animated {
-            opacity: 0;
-            animation: fadeInUp 0.6s ease-out forwards;
+        /* --- Modal List --- */
+        .student-list-item {
+            border-left: 3px solid transparent;
+            transition: 0.2s;
         }
 
-        .room-card {
-            border: 1px solid #e9ecef;
-            /* border-left: 4px solid var(--maroon-rgba); */
-            transition: all var(--transition-speed);
-            cursor: pointer;
-            background-color: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .room-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 1rem 1.5rem rgba(0, 0, 0, 0.12);
-            /* border-left-color: var(--custom-maroon); */
-        }
-
-        .card-header {
-            background-color: var(--custom-maroon);
-            border-bottom: 1px solid #e9ecef;
-            font-weight: 600;
-            color: #fff;
-        }
-
-        /* Utility class for maroon header used in card header markup */
-        .card-header.bg-custom-maroon {
-            background-color: var(--custom-maroon) !important;
-            color: #fff !important;
-        }
-
-        .room-card .card-body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .room-card .card-text.display-6 {
-            font-size: 2rem;
-        }
-
-        /* --- EMPTY STATE --- */
-        .border-dashed {
-            border: 2px dashed #ddd;
-            border-radius: 12px;
-            padding: 40px 20px;
-            background-color: #fdfdfd;
-            transition: all var(--transition-speed);
-        }
-
-        .border-dashed:hover {
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
-        }
-
-        /* --- MODAL STYLING --- */
-        #listMahasiswa .list-group-item {
-            border-radius: 8px;
-            margin-bottom: 8px;
-            border: 1px solid #eee;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            transition: all var(--transition-speed);
-        }
-
-        #listMahasiswa .list-group-item strong {
-            color: var(--custom-maroon);
-        }
-
-        /* --- PAGINATION --- */
-        .pagination .page-link {
-            border-radius: 8px;
-            transition: all var(--transition-speed);
-        }
-
-        .pagination .page-item.active .page-link {
-            background-color: var(--custom-maroon);
-            border-color: var(--custom-maroon);
-            color: #fff;
+        .student-list-item:hover {
+            background-color: #f9f9f9;
+            border-left-color: var(--custom-maroon);
         }
     </style>
 
-    <div>
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-
-        <div class="card shadow-sm">
-            <div class="card-header bg-custom-maroon text-white d-flex justify-content-between align-items-center">
-                <h4 class="card-title mb-0">Manajemen Ruangan</h4>
-                <div class="d-flex align-items-center gap-2">
-                    <div class="btn-group" role="group">
-                        <button onclick="exportToExcel()" class="btn btn-light btn-sm"><i class="fas fa-file-export"></i>
-                            Export</button>
-                        <label class="btn btn-light btn-sm mb-0"> <i class="fas fa-file-import"></i> Import
-                            <input type="file" id="fileImport" style="display: none" accept=".xlsx,.xls"
-                                onchange="importExcel(this)">
-                        </label>
-                        <button onclick="downloadTemplate()" class="btn btn-light btn-sm"><i class="fas fa-download"></i>
-                            Template</button>
-                    </div>
-                    <a href="{{ route('ruangan.create') }}" class="btn btn-maroon btn-sm"><i class="fas fa-plus"></i> Tambah
-                        Ruangan</a>
-                </div>
-            </div>
-
-            <div class="card-body">
-                <form method="GET" class="mb-4" style="max-width: 400px;">
-                    <div class="input-group">
-                        <input type="text" name="search" class="form-control" placeholder="Cari nama ruangan..."
-                            value="{{ request('search') }}">
-                        <button type="submit" class="btn btn-outline-maroon"><i class="fas fa-search"></i> Cari</button>
-                    </div>
-                </form>
-
-                <div class="row">
-                    @forelse ($ruangan as $room)
-                        @php
-                            $terisi = $room->mahasiswa_count;
-                            $total = $room->kuota_ruangan;
-                            $tersedia = max($total - $terisi, 0);
-                            $persentase = $total > 0 ? $tersedia / $total : 0;
-                            $kuotaColor =
-                                $persentase == 0
-                                    ? 'text-danger'
-                                    : ($persentase <= 0.25
-                                        ? 'text-warning'
-                                        : 'text-success');
-                        @endphp
-
-                        <div class="col-lg-4 col-md-6 mb-4 card-animated"
-                            style="animation-delay: {{ $loop->index * 0.05 }}s;">
-                            <div class="card shadow-sm h-100 room-card" style="cursor:pointer;"
-                                data-nama="{{ $room->nm_ruangan }}" data-mahasiswa='@json($room->mahasiswa)'>
-                                <div class="card-header">{{ $room->nm_ruangan }}</div>
-                                <div class="card-body text-center">
-                                    <h6 class="text-muted">KUOTA TERSEDIA</h6>
-                                    <p class="card-text display-6 fw-bold {{ $kuotaColor }}">
-                                        {{ $tersedia }}/{{ $room->kuota_ruangan }}</p>
-                                    <small class="text-muted">tersedia dari total kuota</small>
-                                    <div class="mt-3">
-                                        <hr>
-                                        <a href="{{ route('ruangan.edit', $room->id) }}"
-                                            class="btn btn-sm btn-outline-primary me-1" onclick="event.stopPropagation()"><i
-                                                class="bi bi-pencil-square"></i></a>
-                                        <form action="{{ route('ruangan.destroy', $room->id) }}" method="POST"
-                                            class="d-inline"
-                                            onsubmit="event.stopPropagation(); return confirm('Apakah Anda yakin ingin menghapus ruangan ini?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger"><i
-                                                    class="bi bi-trash"></i></button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="col-12">
-                            <div class="alert alert-light text-center p-5 border-dashed">
-                                <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
-                                <h5 class="text-muted">Belum Ada Data Ruangan</h5>
-                                <p class="text-muted mb-3">Mulai tambahkan ruangan pertama Anda ke sistem.</p>
-                                <a href="{{ route('ruangan.create') }}" class="btn btn-maroon"><i class="fas fa-plus"></i>
-                                    Tambah Data Baru</a>
-                            </div>
-                        </div>
-                    @endforelse
-                </div>
-            </div>
-            <div class="d-flex justify-content-center mt-3">
-                {{ $ruangan->links('pagination.custom') }}
-            </div>
+    <div class="page-header-wrapper d-flex flex-wrap justify-content-between align-items-center gap-3 animate-up">
+        <div>
+            <h4 class="fw-bold text-dark mb-1">Manajemen Ruangan</h4>
+            <p class="text-muted mb-0 small">Kelola kapasitas dan penempatan mahasiswa.</p>
         </div>
-        <!-- Modal Mahasiswa -->
-        <div class="modal fade" id="modalMahasiswa" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header bg-custom-maroon text-white">
-                        <h5 class="modal-title">Mahasiswa di Ruangan</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <form method="GET" class="me-2">
+                <div class="input-group shadow-sm" style="width: 250px;">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-white border-right-0"
+                            style="border-radius: 8px 0 0 8px; height: 100%;">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
                     </div>
-                    <div class="modal-body">
-                        <ul id="listMahasiswa" class="list-group list-group-flush"></ul>
+                    <input type="text" name="search" class="form-control border-left-0" placeholder="Cari ruangan..."
+                        value="{{ request('search') }}" style="box-shadow: none; border-radius: 0 8px 8px 0;">
+                </div>
+            </form>
+
+            <div class="dropdown position-relative">
+                <button class="btn btn-tool shadow-sm" type="button" id="toolsBtn" onclick="toggleTools(event)">
+                    <i class="bi bi-gear-fill text-secondary"></i> Tools
+                </button>
+
+                <div id="toolsDropdownMenu" class="dropdown-menu dropdown-menu-right shadow-sm border-0"
+                    style="border-radius: 12px; position: absolute; right: 0; top: 110%; z-index: 2000; display: none; min-width: 200px; background: white;">
+
+                    <a class="dropdown-item py-2" href="javascript:void(0)" onclick="exportToExcel(); closeTools();">
+                        <i class="bi bi-file-earmark-excel text-success mr-2"></i> Export Excel
+                    </a>
+                    <a class="dropdown-item py-2" href="javascript:void(0)" onclick="downloadTemplate(); closeTools();">
+                        <i class="bi bi-download text-primary mr-2"></i> Template
+                    </a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <label class="dropdown-item py-2 mb-0" style="cursor: pointer;">
+                        <i class="bi bi-upload text-warning mr-2"></i> Import Excel
+                        <input type="file" id="fileImport" style="display: none" accept=".xlsx,.xls"
+                            onchange="importExcel(this); closeTools();">
+                    </label>
+                </div>
+            </div>
+
+            <a href="{{ route('ruangan.create') }}" class="btn btn-maroon shadow-sm d-flex align-items-center gap-2">
+                <i class="bi bi-plus-lg"></i> Ruangan Baru
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        @forelse ($ruangan as $room)
+            @php
+                $terisi = $room->mahasiswa_count;
+                $total = $room->kuota_ruangan;
+                $tersedia = max($total - $terisi, 0);
+                $persentaseIsi = $total > 0 ? ($terisi / $total) * 100 : 0;
+
+                if ($persentaseIsi >= 100) {
+                    $statusColor = 'danger';
+                    $statusText = 'Penuh';
+                    $statusIcon = 'bi-x-circle-fill';
+                } elseif ($persentaseIsi >= 80) {
+                    $statusColor = 'warning';
+                    $statusText = 'Hampir Penuh';
+                    $statusIcon = 'bi-exclamation-circle-fill';
+                } else {
+                    $statusColor = 'success';
+                    $statusText = 'Tersedia';
+                    $statusIcon = 'bi-check-circle-fill';
+                }
+            @endphp
+
+            <div class="col-lg-4 col-md-6 animate-up" style="animation-delay: {{ $loop->index * 0.1 }}s;">
+                <div class="room-card p-4 d-flex flex-column justify-content-between" data-nama="{{ $room->nm_ruangan }}"
+                    data-mahasiswa='@json($room->mahasiswa)' onclick="openModal(this)">
+
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="card-icon-bg">
+                                <i class="bi bi-door-open-fill"></i>
+                            </div>
+                            <span class="badge badge-pill badge-light text-{{ $statusColor }} px-3 py-2 shadow-sm">
+                                <i class="bi {{ $statusIcon }}"></i> {{ $statusText }}
+                            </span>
+                        </div>
+
+                        <h5 class="room-title mt-3">{{ $room->nm_ruangan }}</h5>
+
+                        <div class="d-flex align-items-baseline mt-3">
+                            <span class="capacity-text text-dark">{{ $terisi }}</span>
+                            <span class="text-muted ml-2" style="font-size: 1.2rem;">/ {{ $total }}</span>
+                        </div>
+                        <div class="text-muted small mb-2">Mahasiswa Terdaftar</div>
+
+                        <div class="progress"
+                            style="height: 10px; border-radius: 20px; background-color: #e9ecef; margin-top: 10px;">
+                            <div class="progress-bar bg-{{ $statusColor }}" role="progressbar"
+                                style="width: {{ $persentaseIsi }}%" aria-valuenow="{{ $persentaseIsi }}"
+                                aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
                     </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top border-light">
+                        <small class="text-muted d-flex align-items-center gap-1">
+                            <i class="bi bi-info-circle"></i> Detail
+                        </small>
+
+                        <div onclick="event.stopPropagation()">
+                            <a href="{{ route('ruangan.edit', $room->id) }}" class="btn-icon-soft mr-1" title="Edit">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+
+                            <form action="{{ route('ruangan.destroy', $room->id) }}" method="POST" class="d-inline">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="btn-icon-soft delete" title="Hapus"
+                                    onclick="return confirm('Yakin hapus ruangan ini? Data mahasiswa di dalamnya mungkin terpengaruh.')">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="col-12 animate-up">
+                <div class="empty-state-box text-center p-5">
+                    <div class="mb-3">
+                        <i class="bi bi-box-seam display-1 text-muted opacity-50"></i>
+                    </div>
+                    <h5 class="text-dark fw-bold">Belum Ada Ruangan</h5>
+                    <p class="text-muted">Silakan tambahkan ruangan manual atau import dari Excel.</p>
+                    <a href="{{ route('ruangan.create') }}"
+                        class="btn btn-maroon mt-2 d-inline-flex align-items-center gap-2">
+                        <i class="bi bi-plus-lg"></i> Tambah Ruangan
+                    </a>
+                </div>
+            </div>
+        @endforelse
+    </div>
+
+    <div class="d-flex justify-content-center mt-5 animate-up">
+        {{ $ruangan->links('pagination.custom') }}
+    </div>
+
+    <div class="modal fade" id="modalMahasiswa" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                <div class="modal-header bg-white border-bottom-0 pb-0">
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark" id="modalTitle">Detail Ruangan</h5>
+                        <p class="text-muted small mb-0">Daftar mahasiswa yang menempati ruangan ini.</p>
+                    </div>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-light border-right-0"><i
+                                        class="bi bi-search text-muted"></i></span>
+                            </div>
+                            <input type="text" id="searchModal" class="form-control bg-light border-left-0"
+                                placeholder="Filter nama mahasiswa..." onkeyup="filterList()">
+                        </div>
+                    </div>
+
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <ul id="listMahasiswa" class="list-group list-group-flush">
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-dismiss="modal">Tutup</button>
                 </div>
             </div>
         </div>
@@ -249,57 +375,147 @@
 
 @endsection
 
-
 @section('scripts')
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <script>
-        // Export Ruangan ke Excel
-        function exportToExcel() {
-            const ruanganData = @json($ruangan);
-            const ws_data = [
-                ['Nama Ruangan', 'Kuota Ruangan']
-            ];
-
-            ruanganData.forEach(room => {
-                ws_data.push([room.nm_ruangan, room.kuota_ruangan]);
-            });
-
-            const ws = XLSX.utils.aoa_to_sheet(ws_data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Ruangan");
-            XLSX.writeFile(wb, `Data_Ruangan_${new Date().toISOString().split('T')[0]}.xlsx`);
+        // --- 1. MANUAL DROPDOWN SCRIPT (Supaya Tools Pasti Jalan) ---
+        function toggleTools(e) {
+            if (e) e.stopPropagation();
+            var menu = document.getElementById('toolsDropdownMenu');
+            // Toggle logic sederhana
+            if (menu.style.display === 'block') {
+                menu.style.display = 'none';
+            } else {
+                menu.style.display = 'block';
+            }
         }
 
-        // Download Template
+        function closeTools() {
+            document.getElementById('toolsDropdownMenu').style.display = 'none';
+        }
+
+        // Tutup dropdown jika klik di luar
+        window.addEventListener('click', function(e) {
+            var menu = document.getElementById('toolsDropdownMenu');
+            var btn = document.getElementById('toolsBtn');
+            if (menu.style.display === 'block' && !menu.contains(e.target) && !btn.contains(e.target)) {
+                menu.style.display = 'none';
+            }
+        });
+
+        // --- 2. MODAL & LIST SCRIPT ---
+        // Deteksi Library Modal (Bootstrap 4 vs 5)
+        function openModal(element) {
+            const namaRuangan = element.dataset.nama;
+            const mahasiswa = JSON.parse(element.dataset.mahasiswa);
+
+            document.getElementById('modalTitle').innerText = `Penghuni ${namaRuangan}`;
+            const listContainer = document.getElementById('listMahasiswa');
+            listContainer.innerHTML = "";
+
+            if (!mahasiswa || mahasiswa.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="bi bi-person-x display-4 text-muted opacity-25 mb-3"></i>
+                        <p class="text-muted">Belum ada mahasiswa di ruangan ini.</p>
+                    </div>`;
+            } else {
+                mahasiswa.forEach(m => {
+                    listContainer.innerHTML += `
+                        <li class="list-group-item student-list-item d-flex align-items-center py-3 px-2 border-bottom">
+                            <div class="mr-3">
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-person-fill text-secondary" style="font-size: 1.2rem;"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-dark student-name">${m.nm_mahasiswa}</h6>
+                                <small class="text-muted d-flex align-items-center gap-2">
+                                    <span><i class="bi bi-building mr-1"></i> ${m.univ_asal ?? '-'}</span>
+                                    <span class="mx-1">&bull;</span> 
+                                    <span>${m.prodi ?? '-'}</span>
+                                </small>
+                            </div>
+                        </li>
+                    `;
+                });
+            }
+            // Tampilkan modal (Support jQuery/BS4 standard Laravel 7)
+            $('#modalMahasiswa').modal('show');
+        }
+
+        function filterList() {
+            const input = document.getElementById('searchModal');
+            const filter = input.value.toLowerCase();
+            const li = document.getElementById('listMahasiswa').getElementsByTagName('li');
+
+            for (let i = 0; i < li.length; i++) {
+                const nameEl = li[i].getElementsByClassName('student-name')[0];
+                if (nameEl) {
+                    const txtValue = nameEl.textContent || nameEl.innerText;
+                    li[i].style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? "" : "none";
+                }
+            }
+        }
+
+        // --- 3. EXCEL EXPORT/IMPORT (FIXED DATA STRUCTURE) ---
+        function exportToExcel() {
+            try {
+                // Ambil data mentah dari PHP
+                const rawData = @json($ruangan);
+
+                // FIX: Cek apakah data paginated (punya properti .data) atau array biasa
+                const dataToExport = rawData.data ? rawData.data : rawData;
+
+                if (!dataToExport || dataToExport.length === 0) {
+                    alert("Tidak ada data untuk diexport.");
+                    return;
+                }
+
+                const ws_data = [
+                    ['Nama Ruangan', 'Kuota Ruangan']
+                ];
+
+                // Loop data yang sudah dinormalisasi
+                dataToExport.forEach(r => {
+                    ws_data.push([r.nm_ruangan, r.kuota_ruangan]);
+                });
+
+                const ws = XLSX.utils.aoa_to_sheet(ws_data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Ruangan");
+                XLSX.writeFile(wb, `Data_Ruangan_${new Date().toISOString().split('T')[0]}.xlsx`);
+            } catch (error) {
+                console.error(error);
+                alert("Gagal melakukan export. Cek konsol browser.");
+            }
+        }
+
         function downloadTemplate() {
             const ws_data = [
                 ['Nama Ruangan', 'Kuota Ruangan'],
-                ['Ruang A', '30'],
-                ['Ruang B', '25']
+                ['Ruang Mawar', '30'],
+                ['Ruang Melati', '25']
             ];
-
             const ws = XLSX.utils.aoa_to_sheet(ws_data);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Template_Ruangan");
+            XLSX.utils.book_append_sheet(wb, ws, "Template");
             XLSX.writeFile(wb, "Template_Ruangan.xlsx");
         }
 
-        // Import Excel
         function importExcel(input) {
             const file = input.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, {
                     type: 'array'
                 });
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
 
-                if (jsonData.length === 0) {
-                    alert('File Excel kosong atau format tidak sesuai!');
+                if (!jsonData.length) {
+                    alert('File kosong!');
                     return;
                 }
 
@@ -307,61 +523,32 @@
                 formData.append('_token', '{{ csrf_token() }}');
                 formData.append('data', JSON.stringify(jsonData));
 
+                // Tampilkan loading sederhana (optional)
+                const btn = document.getElementById('toolsBtn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = 'Importing...';
+
                 fetch('{{ route('ruangan.store') }}', {
                         method: 'POST',
                         body: formData
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Data berhasil diimport!');
+                    .then(r => r.json())
+                    .then(d => {
+                        btn.innerHTML = originalText;
+                        if (d.success) {
+                            alert('Berhasil import!');
                             location.reload();
                         } else {
-                            alert('Gagal import data: ' + data.message);
+                            alert('Gagal: ' + d.message);
                         }
                     })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Terjadi kesalahan saat import data');
+                    .catch(err => {
+                        btn.innerHTML = originalText;
+                        alert('Terjadi kesalahan koneksi.');
                     });
             };
-
             reader.readAsArrayBuffer(file);
+            input.value = '';
         }
-
-        // Klik Card → Tampilkan Modal Mahasiswa
-        document.addEventListener('DOMContentLoaded', () => {
-            const cards = document.querySelectorAll('.room-card');
-            const modalElement = document.getElementById('modalMahasiswa');
-            const modal = new bootstrap.Modal(modalElement);
-            const list = document.getElementById('listMahasiswa');
-
-            cards.forEach(card => {
-                card.addEventListener('click', () => {
-                    const namaRuangan = card.dataset.nama;
-                    const mahasiswa = JSON.parse(card.dataset.mahasiswa);
-
-                    modalElement.querySelector('.modal-title').innerText = "Mahasiswa di " +
-                        namaRuangan;
-                    list.innerHTML = "";
-
-                    if (!mahasiswa || mahasiswa.length === 0) {
-                        list.innerHTML =
-                            `<li class="list-group-item text-muted">Belum ada mahasiswa di ruangan ini.</li>`;
-                    } else {
-                        mahasiswa.forEach(m => {
-                            list.innerHTML += `
-                                <li class="list-group-item">
-                                    <strong>${m.nm_mahasiswa}</strong><br>
-                                    <small>${m.prodi ?? '-'} - ${m.univ_asal ?? '-'}</small>
-                                </li>
-                            `;
-                        });
-                    }
-
-                    modal.show();
-                });
-            });
-        });
     </script>
 @endsection
