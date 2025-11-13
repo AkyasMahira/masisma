@@ -382,65 +382,99 @@
                 }).showToast();
             }
 
-            // Copy semua link absensi ke clipboard for ALL mahasiswa matching current filters
-            async function copyAllLinks() {
-                try {
-                    // fetch all filtered mahasiswa via export endpoint so it respects current filters
-                    const resp = await fetch('{{ route('mahasiswa.export') }}' + window.location.search, {
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    });
-                    if (!resp.ok) throw new Error('Gagal mengambil data mahasiswa');
-                    const data = await resp.json();
+            // Live-search untuk filter universitas
+            (function() {
+                const univInput = document.getElementById('univ_asal');
+                const univHidden = document.getElementById('univ_asal_hidden');
+                const dropdown = document.getElementById('univDropdown');
+                let timeout;
 
-                    if (!data || data.length === 0) {
-                        showToast('Tidak ada mahasiswa untuk disalin.', 'info');
-                        return;
-                    }
-
-                    const message = data.map(m => `Link Absensi untuk ${m.nama}:\n${m.share_link || ''}`).join('\n\n');
-
-                    await navigator.clipboard.writeText(message);
-                    showToast('Semua link absensi berhasil disalin!', 'success');
-                } catch (err) {
-                    console.error(err);
-                    showToast('Gagal menyalin link absensi', 'error');
+                // Prefill visible input from hidden value if present
+                if (univHidden && univHidden.value) {
+                    univInput.value = univHidden.value;
                 }
+
+                univInput.addEventListener('input', function(e) {
+                    clearTimeout(timeout);
+                    const q = e.target.value.trim();
+                    if (!q) { dropdown.style.display = 'none'; univHidden.value = ''; return; }
+                    timeout = setTimeout(() => {
+                        fetch(`{{ route('mahasiswa.search.universitas') }}?q=${encodeURIComponent(q)}`)
+                            .then(r => r.json())
+                            .then(list => {
+                                if (!Array.isArray(list) || list.length === 0) {
+                                    dropdown.innerHTML = '<div class="dropdown-item text-muted">Tidak ada universitas yang cocok</div>';
+                                } else {
+                                    dropdown.innerHTML = list.map(u => `<div class="dropdown-item" data-val="${u}">${u}</div>`).join('');
+                                }
+                                dropdown.style.display = 'block';
+                            }).catch(err => console.error(err));
+                    }, 250);
+                });
+
+                // click handler
+                dropdown.addEventListener('click', function(e) {
+                    const it = e.target.closest('.dropdown-item');
+                    if (!it) return;
+                    const val = it.dataset.val || it.textContent.trim();
+                    univInput.value = val;
+                    univHidden.value = val;
+                    dropdown.style.display = 'none';
+                });
+
+                // close on outside click
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.position-relative')) {
+                        dropdown.style.display = 'none';
+                    }
+                });
+            })();
+
+            // Copy semua link absensi ke clipboard (menghormati filter)
+            function copyAllLinks() {
+                const params = new URLSearchParams();
+                const univ = document.getElementById('univ_asal_hidden').value;
+                const search = document.getElementById('search').value || '';
+                if (univ) params.append('univ_asal', univ);
+                if (search) params.append('search', search);
+
+                fetch('{{ route('mahasiswa.links') }}?' + params.toString())
+                    .then(res => res.json())
+                    .then(data => {
+                        if (!Array.isArray(data) || data.length === 0) {
+                            showToast('Tidak ada link untuk disalin sesuai filter', 'info');
+                            return;
+                        }
+                        const message = data.map(m => `Link Absensi untuk ${m.nama}:\n${m.link}`).join('\n\n');
+                        return navigator.clipboard.writeText(message)
+                            .then(() => showToast("Link absensi berhasil disalin sesuai filter", "success"))
+                            .catch(() => showToast("Gagal menyalin link absensi", "error"));
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        showToast('Gagal mengambil data link', 'error');
+                    });
             }
 
-            // Export data mahasiswa ke Excel for ALL mahasiswa matching current filters
-            async function exportMahasiswa() {
+            // Export data mahasiswa ke Excel
+            function exportMahasiswa() {
                 try {
-                    const resp = await fetch('{{ route('mahasiswa.export') }}' + window.location.search, {
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    });
-                    if (!resp.ok) throw new Error('Gagal mengambil data untuk export');
-                    const rows = await resp.json();
-
-                    if (!rows || rows.length === 0) {
-                        showToast('Tidak ada data mahasiswa untuk diexport.', 'info');
-                        return;
-                    }
-
-                    const data = rows.map(r => [
-                        r.nama || '',
-                        r.universitas || '',
-                        r.prodi || '',
-                        r.ruangan || '',
-                        r.tanggal_mulai || '-',
-                        r.tanggal_berakhir || '-',
-                        r.status || '',
-                        r.share_link || '' // include attendance link
-                    ]);
+                    const data = [
+                        @foreach ($mahasiswas as $m)
+                            [
+                                {!! json_encode($m->nm_mahasiswa ?? '') !!},
+                                {!! json_encode($m->univ_asal ?? '') !!},
+                                {!! json_encode($m->prodi ?? '') !!},
+                                {!! json_encode($m->ruangan ? $m->ruangan->nm_ruangan : $m->nm_ruangan ?? '') !!},
+                                {!! json_encode($m->tanggal_mulai ?? '-') !!},
+                                {!! json_encode($m->tanggal_berakhir ?? '-') !!},
+                                {!! json_encode($m->status ?? '') !!}
+                            ] {{ $loop->last ? '' : ',' }}
+                        @endforeach
+                    ];
 
                     const ws_data = [
-                        [
-                            'Nama', 'Universitas', 'Prodi', 'Ruangan', 'Tanggal Mulai', 'Tanggal Berakhir', 'Status',
-                            'Link Absensi'
-                        ]
+                        ['Nama', 'Universitas', 'Prodi', 'Ruangan', 'Tanggal Mulai', 'Tanggal Berakhir', 'Status']
                     ].concat(data);
 
                     const ws = XLSX.utils.aoa_to_sheet(ws_data);
@@ -448,10 +482,10 @@
                     XLSX.utils.book_append_sheet(wb, ws, 'Mahasiswa');
                     XLSX.writeFile(wb, `Data_Mahasiswa_${new Date().toISOString().split('T')[0]}.xlsx`);
 
-                    showToast('Data mahasiswa berhasil diexport!', 'success');
+                    showToast("Data mahasiswa berhasil diexport!", "success");
                 } catch (error) {
                     console.error(error);
-                    showToast('Gagal export data mahasiswa', 'error');
+                    showToast("Gagal export data mahasiswa", "error");
                 }
             }
 

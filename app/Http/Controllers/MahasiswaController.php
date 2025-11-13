@@ -368,44 +368,6 @@ class MahasiswaController extends Controller
     }
 
     /**
-     * Export mahasiswa matching current filters as JSON (used by client-side XLSX export)
-     */
-    public function export(Request $request)
-    {
-        $query = Mahasiswa::query();
-
-        // only exported active by default (same as index)
-        $query->where('status', 'aktif');
-
-        if ($request->has('univ_asal') && !empty($request->univ_asal)) {
-            $query->where('univ_asal', $request->univ_asal);
-        }
-
-        if ($request->has('search') && !empty($request->search)) {
-            $query->where('nm_mahasiswa', 'like', '%' . $request->search . '%');
-        }
-
-        $rows = $query->orderBy('created_at', 'desc')->get();
-
-        $data = $rows->map(function ($m) {
-            return [
-                'nama' => $m->nm_mahasiswa,
-                'universitas' => $m->univ_asal,
-                'prodi' => $m->prodi,
-                'ruangan' => $m->ruangan ? $m->ruangan->nm_ruangan : $m->nm_ruangan,
-                'tanggal_mulai' => $m->tanggal_mulai ? $m->tanggal_mulai->toDateString() : null,
-                'tanggal_berakhir' => $m->tanggal_berakhir ? $m->tanggal_berakhir->toDateString() : null,
-                'status' => $m->status,
-                'share_token' => $m->share_token,
-                // full url to absensi card
-                'share_link' => $m->share_token ? route('absensi.card', $m->share_token) : null,
-            ];
-        })->values();
-
-        return response()->json($data);
-    }
-
-    /**
      * API: Get list of universities for live search
      */
     public function searchUniversitas(Request $request)
@@ -420,5 +382,35 @@ class MahasiswaController extends Controller
             ->values();
 
         return response()->json($universitas);
+    }
+
+    /**
+     * API: Return mahasiswa links filtered by optional params (used by copyAllLinks)
+     */
+    public function copyLinks(Request $request)
+    {
+        $query = Mahasiswa::query();
+
+        // optional filter by universitas
+        if ($request->has('univ_asal') && !empty($request->univ_asal)) {
+            $query->where('univ_asal', $request->univ_asal);
+        }
+
+        // optional search by name
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('nm_mahasiswa', 'like', '%' . $request->search . '%');
+        }
+
+        $rows = $query->orderBy('created_at', 'desc')
+            ->get(['nm_mahasiswa', 'share_token']);
+
+        $data = $rows->map(function ($m) {
+            return [
+                'nama' => $m->nm_mahasiswa,
+                'link' => route('absensi.card', $m->share_token)
+            ];
+        });
+
+        return response()->json($data);
     }
 }
