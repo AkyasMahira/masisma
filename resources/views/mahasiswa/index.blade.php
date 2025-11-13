@@ -397,15 +397,22 @@
                 univInput.addEventListener('input', function(e) {
                     clearTimeout(timeout);
                     const q = e.target.value.trim();
-                    if (!q) { dropdown.style.display = 'none'; univHidden.value = ''; return; }
+                    if (!q) {
+                        dropdown.style.display = 'none';
+                        univHidden.value = '';
+                        return;
+                    }
                     timeout = setTimeout(() => {
                         fetch(`{{ route('mahasiswa.search.universitas') }}?q=${encodeURIComponent(q)}`)
                             .then(r => r.json())
                             .then(list => {
                                 if (!Array.isArray(list) || list.length === 0) {
-                                    dropdown.innerHTML = '<div class="dropdown-item text-muted">Tidak ada universitas yang cocok</div>';
+                                    dropdown.innerHTML =
+                                        '<div class="dropdown-item text-muted">Tidak ada universitas yang cocok</div>';
                                 } else {
-                                    dropdown.innerHTML = list.map(u => `<div class="dropdown-item" data-val="${u}">${u}</div>`).join('');
+                                    dropdown.innerHTML = list.map(u =>
+                                            `<div class="dropdown-item" data-val="${u}">${u}</div>`)
+                                        .join('');
                                 }
                                 dropdown.style.display = 'block';
                             }).catch(err => console.error(err));
@@ -468,21 +475,41 @@
                                 {!! json_encode($m->ruangan ? $m->ruangan->nm_ruangan : $m->nm_ruangan ?? '') !!},
                                 {!! json_encode($m->tanggal_mulai ?? '-') !!},
                                 {!! json_encode($m->tanggal_berakhir ?? '-') !!},
-                                {!! json_encode($m->status ?? '') !!}
+                                {!! json_encode($m->status ?? '') !!},
+                                {!! json_encode($m->share_token ? url('/absensi/' . $m->share_token) : '') !!}
                             ] {{ $loop->last ? '' : ',' }}
                         @endforeach
                     ];
 
                     const ws_data = [
-                        ['Nama', 'Universitas', 'Prodi', 'Ruangan', 'Tanggal Mulai', 'Tanggal Berakhir', 'Status']
+                        ['Nama', 'Universitas', 'Prodi', 'Ruangan', 'Tanggal Mulai', 'Tanggal Berakhir', 'Status',
+                            'Link Absensi'
+                        ]
                     ].concat(data);
 
                     const ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+                    // Agar link absensi bisa diklik di Excel (opsional)
+                    const range = XLSX.utils.decode_range(ws['!ref']);
+                    for (let R = 1; R <= range.e.r; ++R) {
+                        const cellAddress = XLSX.utils.encode_cell({
+                            r: R,
+                            c: 7
+                        }); // kolom ke-8 (index mulai 0)
+                        const cell = ws[cellAddress];
+                        if (cell && typeof cell.v === 'string' && cell.v.startsWith('http')) {
+                            cell.l = {
+                                Target: cell.v,
+                                Tooltip: "Klik untuk buka absensi"
+                            };
+                        }
+                    }
+
                     const wb = XLSX.utils.book_new();
                     XLSX.utils.book_append_sheet(wb, ws, 'Mahasiswa');
                     XLSX.writeFile(wb, `Data_Mahasiswa_${new Date().toISOString().split('T')[0]}.xlsx`);
 
-                    showToast("Data mahasiswa berhasil diexport!", "success");
+                    showToast("Data mahasiswa + link absensi berhasil diexport!", "success");
                 } catch (error) {
                     console.error(error);
                     showToast("Gagal export data mahasiswa", "error");
