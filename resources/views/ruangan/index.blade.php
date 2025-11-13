@@ -284,7 +284,7 @@
                             <span class="capacity-text text-dark">{{ $terisi }}</span>
                             <span class="text-muted ml-2" style="font-size: 1.2rem;">/ {{ $total }}</span>
                         </div>
-                        <div class="text-muted small mb-2">Mahasiswa Terdaftar</div>
+                        <div class="text-muted small mb-2">Mahasiswa Terdaftar ({{ $tersedia }} tersedia)</div>
 
                         <div class="progress"
                             style="height: 10px; border-radius: 20px; background-color: #e9ecef; margin-top: 10px;">
@@ -305,10 +305,13 @@
                                 <i class="bi bi-pencil-square"></i>
                             </a>
 
-                            <form action="{{ route('ruangan.destroy', $room->id) }}" method="POST" class="d-inline">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn-icon-soft delete" title="Hapus"
-                                    onclick="return confirm('Yakin hapus ruangan ini? Data mahasiswa di dalamnya mungkin terpengaruh.')">
+                            <form id="delete-form-{{ $room->id }}" action="{{ route('ruangan.destroy', $room->id) }}"
+                                method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+
+                                <button type="button" class="btn-icon-soft delete" title="Hapus"
+                                    onclick="confirmDelete('{{ $room->id }}')">
                                     <i class="bi bi-trash-fill"></i>
                                 </button>
                             </form>
@@ -337,47 +340,68 @@
         {{ $ruangan->links('pagination.custom') }}
     </div>
 
-    <div class="modal fade" id="modalMahasiswa" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal fade" id="modalMahasiswa" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+
                 <div class="modal-header bg-white border-bottom-0 pb-0">
                     <div>
                         <h5 class="modal-title fw-bold text-dark" id="modalTitle">Detail Ruangan</h5>
                         <p class="text-muted small mb-0">Daftar mahasiswa yang menempati ruangan ini.</p>
                     </div>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <!-- FIX: tombol close pakai Bootstrap 5 -->
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+
                 <div class="modal-body p-4">
                     <div class="mb-3">
                         <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text bg-light border-right-0"><i
-                                        class="bi bi-search text-muted"></i></span>
-                            </div>
+                            <span class="input-group-text bg-light border-right-0">
+                                <i class="bi bi-search text-muted"></i>
+                            </span>
                             <input type="text" id="searchModal" class="form-control bg-light border-left-0"
                                 placeholder="Filter nama mahasiswa..." onkeyup="filterList()">
                         </div>
                     </div>
 
                     <div style="max-height: 400px; overflow-y: auto;">
-                        <ul id="listMahasiswa" class="list-group list-group-flush">
-                        </ul>
+                        <ul id="listMahasiswa" class="list-group list-group-flush"></ul>
                     </div>
                 </div>
+
                 <div class="modal-footer border-top-0 pt-0">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-dismiss="modal">Tutup</button>
+                    <!-- FIX: ganti data-dismiss jadi data-bs-dismiss -->
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Tutup</button>
                 </div>
+
             </div>
         </div>
     </div>
+
 
 @endsection
 
 @section('scripts')
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data mahasiswa di dalam ruangan ini mungkin akan terpengaruh!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#7c1316',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Cari form berdasarkan ID yang dikirim, lalu submit
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            })
+        }
         // --- 1. MANUAL DROPDOWN SCRIPT (Supaya Tools Pasti Jalan) ---
         function toggleTools(e) {
             if (e) e.stopPropagation();
@@ -404,7 +428,6 @@
         });
 
         // --- 2. MODAL & LIST SCRIPT ---
-        // Deteksi Library Modal (Bootstrap 4 vs 5)
         function openModal(element) {
             const namaRuangan = element.dataset.nama;
             const mahasiswa = JSON.parse(element.dataset.mahasiswa);
@@ -415,33 +438,35 @@
 
             if (!mahasiswa || mahasiswa.length === 0) {
                 listContainer.innerHTML = `
-                    <div class="text-center py-5">
-                        <i class="bi bi-person-x display-4 text-muted opacity-25 mb-3"></i>
-                        <p class="text-muted">Belum ada mahasiswa di ruangan ini.</p>
-                    </div>`;
+            <div class="text-center py-5">
+                <i class="bi bi-person-x display-4 text-muted opacity-25 mb-3"></i>
+                <p class="text-muted">Belum ada mahasiswa di ruangan ini.</p>
+            </div>`;
             } else {
                 mahasiswa.forEach(m => {
                     listContainer.innerHTML += `
-                        <li class="list-group-item student-list-item d-flex align-items-center py-3 px-2 border-bottom">
-                            <div class="mr-3">
-                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                    <i class="bi bi-person-fill text-secondary" style="font-size: 1.2rem;"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <h6 class="mb-0 fw-bold text-dark student-name">${m.nm_mahasiswa}</h6>
-                                <small class="text-muted d-flex align-items-center gap-2">
-                                    <span><i class="bi bi-building mr-1"></i> ${m.univ_asal ?? '-'}</span>
-                                    <span class="mx-1">&bull;</span> 
-                                    <span>${m.prodi ?? '-'}</span>
-                                </small>
-                            </div>
-                        </li>
-                    `;
+                <li class="list-group-item student-list-item d-flex align-items-center py-3 px-2 border-bottom">
+                    <div class="me-3">
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <i class="bi bi-person-fill text-secondary" style="font-size: 1.2rem;"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 fw-bold text-dark student-name">${m.nm_mahasiswa}</h6>
+                        <small class="text-muted d-flex align-items-center gap-2">
+                            <span><i class="bi bi-building me-1"></i> ${m.univ_asal ?? '-'}</span>
+                            <span class="mx-1">&bull;</span>
+                            <span>${m.prodi ?? '-'}</span>
+                        </small>
+                    </div>
+                </li>`;
                 });
             }
-            // Tampilkan modal (Support jQuery/BS4 standard Laravel 7)
-            $('#modalMahasiswa').modal('show');
+
+            // --- Bootstrap 5 Modal (tanpa jQuery) ---
+            const modalEl = document.getElementById('modalMahasiswa');
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
         }
 
         function filterList() {

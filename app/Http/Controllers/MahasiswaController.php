@@ -79,89 +79,147 @@ class MahasiswaController extends Controller
     }
 
     /**
-     * Import multiple mahasiswa from Excel
+     * Import multiple mahasiswa from Excel (Support Re-write/Update)
      */
-    private function importMahasiswa(Request $request)
+    public function importExcel(Request $request)
     {
         try {
             $rows = json_decode($request->data, true);
-            $created = 0;
+            $processed = 0; // Ganti created jadi processed karena bisa update/create
             $errors = [];
 
             foreach ($rows as $i => $row) {
                 $name = $row['Nama'] ?? $row['nama'] ?? null;
+                $univ = $row['Universitas'] ?? null; // Kunci unik kedua
                 $ruanganName = $row['Ruangan'] ?? null;
-                $status = $row['Status'] ?? 'aktif';
+                $status = isset($row['Status']) ? strtolower($row['Status']) : 'aktif';
                 $tanggalMulai = $row['Tanggal Mulai'] ?? null;
                 $tanggalBerakhir = $row['Tanggal Berakhir'] ?? null;
 
+                // Validasi dasar
                 if (empty($name)) {
                     $errors[] = "Baris " . ($i + 2) . ": nama kosong";
                     continue;
                 }
-
-                if (empty($tanggalMulai)) {
-                    $errors[] = "Baris " . ($i + 2) . ": tanggal mulai kosong";
+                if (empty($tanggalMulai) || empty($tanggalBerakhir)) {
+                    $errors[] = "Baris " . ($i + 2) . ": tanggal tidak lengkap";
                     continue;
                 }
 
-                if (empty($tanggalBerakhir)) {
-                    $errors[] = "Baris " . ($i + 2) . ": tanggal berakhir kosong";
-                    continue;
+                // 1. Cari Ruangan ID berdasarkan Nama Ruangan di Excel
+                $ruanganId = null;
+                $nmRuangan = null;
+
+                if ($ruanganName) {
+                    $ruanganDb = Ruangan::where('nm_ruangan', 'like', '%' . $ruanganName . '%')->first();
+                    if ($ruanganDb) {
+                        $ruanganId = $ruanganDb->id;
+                        $nmRuangan = $ruanganDb->nm_ruangan;
+                    } else {
+                        // Jika ruangan di excel tidak ditemukan di DB, set null atau skip
+                        $nmRuangan = $ruanganName; // Tetap simpan nama text-nya
+                    }
                 }
 
-                $data = [
+                // 2. SIAPKAN DATA
+                $dataToSave = [
                     'nm_mahasiswa' => $name,
-                    'univ_asal' => $row['Universitas'] ?? null,
+                    'univ_asal' => $univ,
                     'prodi' => $row['Prodi'] ?? null,
                     'tanggal_mulai' => $tanggalMulai,
                     'tanggal_berakhir' => $tanggalBerakhir,
                     'status' => in_array($status, ['aktif', 'nonaktif']) ? $status : 'aktif',
+                    'ruangan_id' => $ruanganId,
+                    'nm_ruangan' => $nmRuangan,
                 ];
 
-                if ($ruanganName) {
-                    $ruangan = Ruangan::where('nm_ruangan', $ruanganName)->first();
+                // 3. CEK DATA LAMA (RE-WRITE LOGIC)
+                // Kita anggap unik jika Nama + Univ sama
+                $mahasiswa = Mahasiswa::where('nm_mahasiswa', $name)
+                    ->where('univ_asal', $univ)
+                    ->first();
 
-                    if ($ruangan) {
-                        // Hitung tersedia dari jumlah mahasiswa aktual
-                        $terisi = Mahasiswa::where('ruangan_id', $ruangan->id)->count();
+                $today = now()->toDateString();
+
+                // ==========================
+                // SKENARIO A: UPDATE DATA
+                // ==========================
+                if ($mahasiswa) {
+                    $oldRuanganId = $mahasiswa->ruangan_id;
+                    $newRuanganId = $ruanganId;
+
+                    // Cek apakah pindah ruangan?
+                    if ($newRuanganId && $newRuanganId != $oldRuanganId) {
+                        // 1. Kembalikan Kuota Ruangan Lama
+                        if ($oldRuanganId) {
+                            $oldSnap = RuanganKetersediaan::firstOrCreate(
+                                ['ruangan_id' => $oldRuanganId, 'tanggal' => $today],
+                                ['tersedia' => 0] // Default dummy, nanti di increment
+                            );
+                            // Pastikan sinkron data asli, tapi logic sederhananya increment
+                            $oldSnap->increment('tersedia');
+                        }
+
+                        // 2. Kurangi Kuota Ruangan Baru (Cek Penuh gak?)
+                        $newRuangan = Ruangan::find($newRuanganId);
+                        $terisi = Mahasiswa::where('ruangan_id', $newRuanganId)->count();
+                        $tersedia = $newRuangan->kuota_ruangan - $terisi;
+
+                        if ($tersedia <= 0) {
+                            $errors[] = "Baris " . ($i + 2) . ": Update gagal, ruangan $ruanganName penuh.";
+                            continue; // Skip baris ini
+                        }
+
+                        $newSnap = RuanganKetersediaan::firstOrCreate(
+                            ['ruangan_id' => $newRuanganId, 'tanggal' => $today],
+                            ['tersedia' => $tersedia]
+                        );
+
+                        // Jika baru dibuat (firstOrCreate), nilainya sudah benar. 
+                        // Jika sudah ada, kita decrement.
+                        if (!$newSnap->wasRecentlyCreated) {
+                            $newSnap->decrement('tersedia');
+                        }
+                    }
+
+                    // Lakukan Update
+                    $mahasiswa->update($dataToSave);
+                }
+                // ==========================
+                // SKENARIO B: BUAT BARU (CREATE)
+                // ==========================
+                else {
+                    // Cek Kuota Ruangan Dulu
+                    if ($ruanganId) {
+                        $ruangan = Ruangan::find($ruanganId);
+                        $terisi = Mahasiswa::where('ruangan_id', $ruanganId)->count();
                         $tersedia = $ruangan->kuota_ruangan - $terisi;
 
                         if ($tersedia <= 0) {
-                            $errors[] = "Baris " . ($i + 2) . ": ruangan {$ruanganName} penuh";
+                            $errors[] = "Baris " . ($i + 2) . ": Ruangan $ruanganName penuh.";
                             continue;
                         }
 
-                        // Update atau buat snapshot
-                        $today = now()->toDateString();
-                        $snapshot = RuanganKetersediaan::where('ruangan_id', $ruangan->id)
-                            ->where('tanggal', $today)
-                            ->first();
+                        // Update Snapshot Ketersediaan
+                        $snapshot = RuanganKetersediaan::firstOrCreate(
+                            ['ruangan_id' => $ruanganId, 'tanggal' => $today],
+                            ['tersedia' => $tersedia]
+                        );
 
-                        if ($snapshot) {
+                        if (!$snapshot->wasRecentlyCreated) {
                             $snapshot->decrement('tersedia');
-                        } else {
-                            RuanganKetersediaan::create([
-                                'ruangan_id' => $ruangan->id,
-                                'tanggal' => $today,
-                                'tersedia' => $tersedia - 1
-                            ]);
                         }
-
-                        $data['ruangan_id'] = $ruangan->id;
-                        $data['nm_ruangan'] = $ruangan->nm_ruangan;
-                    } else {
-                        $data['nm_ruangan'] = $ruanganName;
                     }
+
+                    Mahasiswa::create($dataToSave);
                 }
 
-                Mahasiswa::create($data);
-                $created++;
+                $processed++;
             }
 
             return response()->json([
                 'success' => true,
-                'message' => "Berhasil mengimpor $created mahasiswa",
+                'message' => "Berhasil memproses $processed data (Update/Create)",
                 'errors' => $errors
             ]);
         } catch (\Exception $e) {

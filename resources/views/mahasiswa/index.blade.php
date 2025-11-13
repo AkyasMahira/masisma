@@ -24,10 +24,10 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
             margin-bottom: 2rem;
             border-left: 5px solid var(--custom-maroon);
-            
+
             /* FIX Z-INDEX: Agar dropdown muncul paling atas */
             position: relative;
-            z-index: 1050; 
+            z-index: 1050;
             overflow: visible;
         }
 
@@ -39,7 +39,8 @@
             margin-bottom: 1.5rem;
             border: 1px solid #f0f0f0;
             position: relative;
-            z-index: 50; /* Lebih rendah dari header */
+            z-index: 50;
+            /* Lebih rendah dari header */
         }
 
         .filter-header {
@@ -80,7 +81,8 @@
             gap: 0.5rem;
         }
 
-        .btn-tool:hover, .btn-tool:focus {
+        .btn-tool:hover,
+        .btn-tool:focus {
             background: #f8f9fa;
             border-color: var(--custom-maroon);
             outline: none;
@@ -120,7 +122,9 @@
         /* --- Dropdown List (Autocomplete) --- */
         .dropdown-list {
             position: absolute;
-            top: 100%; left: 0; right: 0;
+            top: 100%;
+            left: 0;
+            right: 0;
             background: white;
             z-index: 1000;
             max-height: 200px;
@@ -131,37 +135,80 @@
         }
 
         .dropdown-list .dropdown-item {
-            padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f9f9f9;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f9f9f9;
         }
 
         .dropdown-list .dropdown-item:hover {
-            background-color: #f8f9fa; color: var(--custom-maroon);
+            background-color: #f8f9fa;
+            color: var(--custom-maroon);
         }
 
         /* --- Badges & Actions --- */
         .badge-pill-soft {
-            border-radius: 50px; padding: 6px 12px; font-weight: 500; font-size: 0.75rem;
+            border-radius: 50px;
+            padding: 6px 12px;
+            font-weight: 500;
+            font-size: 0.75rem;
         }
-        .bg-soft-success { background-color: #d1fae5; color: #065f46; }
-        .bg-soft-secondary { background-color: #f3f4f6; color: #4b5563; }
-        .bg-soft-info { background-color: #dbeafe; color: #1e40af; }
-        .bg-soft-danger { background-color: #fee2e2; color: #991b1b; }
+
+        .bg-soft-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .bg-soft-secondary {
+            background-color: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .bg-soft-info {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .bg-soft-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
 
         .action-btn {
-            width: 32px; height: 32px; border-radius: 6px;
-            display: inline-flex; align-items: center; justify-content: center;
-            color: #6c757d; transition: var(--transition);
-            background: transparent; border: 1px solid transparent;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            transition: var(--transition);
+            background: transparent;
+            border: 1px solid transparent;
         }
-        .action-btn:hover { background: var(--custom-maroon-subtle); color: var(--custom-maroon); }
-        .action-btn.delete:hover { background: #fee2e2; color: #dc2626; }
+
+        .action-btn:hover {
+            background: var(--custom-maroon-subtle);
+            color: var(--custom-maroon);
+        }
+
+        .action-btn.delete:hover {
+            background: #fee2e2;
+            color: #dc2626;
+        }
 
         /* Animation */
         .animate-up {
             animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-            opacity: 0; transform: translateY(20px);
+            opacity: 0;
+            transform: translateY(20px);
         }
-        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 
     <div class="page-header-wrapper d-flex flex-wrap justify-content-between align-items-center gap-3 animate-up">
@@ -172,32 +219,33 @@
 
         <div class="d-flex align-items-center gap-2 flex-wrap">
             <div class="dropdown position-relative">
-    <button class="btn btn-tool shadow-sm" type="button" id="toolsBtn" onclick="toggleTools(event)">
-        <i class="bi bi-gear-fill text-secondary"></i> Tools
-    </button>
-    
-    <div id="toolsDropdownMenu" class="dropdown-menu dropdown-menu-right shadow-sm border-0" 
-            style="border-radius: 12px; position: absolute; right: 0; top: 110%; z-index: 2000; display: none; min-width: 200px; background: white;">
-            
-        <a class="dropdown-item py-2" href="javascript:void(0)" onclick="exportMahasiswa(); closeTools();">
-            <i class="bi bi-file-earmark-excel text-success mr-2"></i> Export Excel
-        </a>
-        <a class="dropdown-item py-2" href="javascript:void(0)" onclick="downloadTemplateMahasiswa(); closeTools();">
-            <i class="bi bi-download text-primary mr-2"></i> Template
-        </a>
-        <a class="dropdown-item py-2" href="javascript:void(0)" onclick="copyAllLinks(); closeTools();">
-            <i class="bi bi-link-45deg text-info mr-2"></i> Salin Semua Link
-        </a>
-        
-        <div class="dropdown-divider"></div>
-        
-        <label class="dropdown-item py-2 mb-0 cursor-pointer" style="cursor: pointer;">
-            <i class="bi bi-upload text-warning mr-2"></i> Import Excel
-            <input type="file" id="fileImportMahasiswa" style="display: none" accept=".xlsx,.xls" 
-                    onchange="closeTools(); importMahasiswa(this);">
-        </label>
-    </div>
-</div>
+                <button class="btn btn-tool shadow-sm" type="button" id="toolsBtn" onclick="toggleTools(event)">
+                    <i class="bi bi-gear-fill text-secondary"></i> Tools
+                </button>
+
+                <div id="toolsDropdownMenu" class="dropdown-menu dropdown-menu-right shadow-sm border-0"
+                    style="border-radius: 12px; position: absolute; right: 0; top: 110%; z-index: 2000; display: none; min-width: 200px; background: white;">
+
+                    <a class="dropdown-item py-2" href="javascript:void(0)" onclick="exportMahasiswa(); closeTools();">
+                        <i class="bi bi-file-earmark-excel text-success mr-2"></i> Export Excel
+                    </a>
+                    <a class="dropdown-item py-2" href="javascript:void(0)"
+                        onclick="downloadTemplateMahasiswa(); closeTools();">
+                        <i class="bi bi-download text-primary mr-2"></i> Template
+                    </a>
+                    <a class="dropdown-item py-2" href="javascript:void(0)" onclick="copyAllLinks(); closeTools();">
+                        <i class="bi bi-link-45deg text-info mr-2"></i> Salin Semua Link
+                    </a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <label class="dropdown-item py-2 mb-0 cursor-pointer" style="cursor: pointer;">
+                        <i class="bi bi-upload text-warning mr-2"></i> Import Excel
+                        <input type="file" id="fileImportMahasiswa" style="display: none" accept=".xlsx,.xls"
+                            onchange="closeTools(); importMahasiswa(this);">
+                    </label>
+                </div>
+            </div>
 
             <a href="{{ route('mahasiswa.create') }}" class="btn btn-maroon shadow-sm d-flex align-items-center gap-2">
                 <i class="bi bi-plus-lg"></i> Mahasiswa Baru
@@ -228,7 +276,8 @@
                         <div class="position-relative">
                             <div class="input-group shadow-sm">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text bg-light border-right-0"><i class="bi bi-building"></i></span>
+                                    <span class="input-group-text bg-light border-right-0"><i
+                                            class="bi bi-building"></i></span>
                                 </div>
                                 <input type="text" class="form-control bg-light border-left-0" id="univ_asal"
                                     placeholder="Semua Kampus" autocomplete="off">
@@ -243,7 +292,8 @@
                         <label class="small text-muted font-weight-bold text-uppercase">Ruangan</label>
                         <div class="input-group shadow-sm">
                             <div class="input-group-prepend">
-                                <span class="input-group-text bg-light border-right-0"><i class="bi bi-door-open"></i></span>
+                                <span class="input-group-text bg-light border-right-0"><i
+                                        class="bi bi-door-open"></i></span>
                             </div>
                             <select class="form-control bg-light border-left-0" name="ruangan_id">
                                 <option value="">Semua Ruangan</option>
@@ -259,7 +309,8 @@
 
                     <div class="col-md-2 d-flex align-items-end">
                         <button type="submit" class="btn btn-maroon w-100 mr-2 shadow-sm">Terapkan</button>
-                        <a href="{{ route('mahasiswa.index') }}" class="btn btn-light border shadow-sm" title="Reset Filter">
+                        <a href="{{ route('mahasiswa.index') }}" class="btn btn-light border shadow-sm"
+                            title="Reset Filter">
                             <i class="bi bi-arrow-counterclockwise"></i>
                         </a>
                     </div>
@@ -307,7 +358,7 @@
                             <td class="text-center">
                                 @if ($m->tanggal_berakhir)
                                     @if ($m->sisa_hari > 0)
-                                        <span class="badge badge-pill-soft bg-soft-info">{{ $m->sisa_hari }} Hari</span>
+                                        <span class="badge badge-pill-soft bg-soft-info">{{ $m->sisa_hari }}</span>
                                     @else
                                         <span class="badge badge-pill-soft bg-soft-danger">Berakhir</span>
                                     @endif
@@ -329,10 +380,10 @@
                                 <a href="{{ route('mahasiswa.edit', $m->id) }}" class="action-btn" title="Edit">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
-                                <form action="{{ route('mahasiswa.destroy', $m->id) }}" method="POST" class="d-inline">
+                                <form action="{{ route('mahasiswa.destroy', $m->id) }}" method="POST"
+                                    class="d-inline delete-form">
                                     @csrf @method('DELETE')
-                                    <button class="action-btn delete" onclick="return confirm('Hapus data ini?')"
-                                        title="Hapus">
+                                    <button type="button" class="action-btn delete btn-delete" title="Hapus">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
@@ -359,21 +410,28 @@
     </div>
 
     @if (session('success'))
-        <div style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
-            <div class="toast show shadow-lg border-0" role="alert" aria-live="assertive" aria-atomic="true"
-                style="min-width: 300px;">
-                <div class="toast-header bg-success text-white">
-                    <i class="bi bi-check-circle-fill mr-2"></i>
-                    <strong class="mr-auto">Berhasil</strong>
-                    <button type="button" class="ml-2 mb-1 close text-white" data-dismiss="toast" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="toast-body bg-white">
-                    {{ session('success') }}
-                </div>
-            </div>
-        </div>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session('success') }}',
+                showConfirmButton: false,
+                timer: 1800,
+                toast: true,
+                position: 'top-end'
+            });
+        </script>
+    @endif
+
+    @if (session('error'))
+        <script>
+            Swal.fire({
+                icon: 'warning',
+                title: 'Perhatian!',
+                text: '{{ session('error') }}',
+                showConfirmButton: true
+            });
+        </script>
     @endif
 
 @endsection
@@ -381,22 +439,32 @@
 @section('scripts')
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
     <script>
         // --- Toastify Helper ---
         function showToast(message, type = 'success') {
-            const colors = { success: "#00b09b", error: "#ff5f6d", info: "#2193b0" };
+            const colors = {
+                success: "#00b09b",
+                error: "#ff5f6d",
+                info: "#2193b0"
+            };
             Toastify({
-                text: message, duration: 3000, gravity: "bottom", position: "right",
-                style: { background: colors[type] || colors.info },
+                text: message,
+                duration: 3000,
+                gravity: "bottom",
+                position: "right",
+                style: {
+                    background: colors[type] || colors.info
+                },
                 className: "rounded shadow-lg"
             }).showToast();
         }
 
         // --- 1. MANUAL DROPDOWN SCRIPT ---
         function toggleTools(e) {
-            if(e) e.stopPropagation();
+            if (e) e.stopPropagation();
             var menu = document.getElementById('toolsDropdownMenu');
             menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
         }
@@ -435,7 +503,7 @@
                         return;
                     }
                     const message = data.map(m => `${m.nama}: ${m.link}`).join('\n');
-                    
+
                     // Coba pakai API modern dulu
                     if (navigator.clipboard && window.isSecureContext) {
                         navigator.clipboard.writeText(message).then(() => {
@@ -459,7 +527,7 @@
         function fallbackCopyTextToClipboard(text) {
             var textArea = document.createElement("textarea");
             textArea.value = text;
-            
+
             // Pastikan elemen tidak terlihat tapi ada di DOM
             textArea.style.top = "0";
             textArea.style.left = "0";
@@ -471,7 +539,7 @@
 
             try {
                 var successful = document.execCommand('copy');
-                if(successful) {
+                if (successful) {
                     showToast("Link berhasil disalin!", "success");
                 } else {
                     showToast("Gagal menyalin link (Browser memblokir).", "error");
@@ -493,12 +561,15 @@
             reader.onload = function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                    const workbook = XLSX.read(data, {
+                        type: 'array',
+                        cellDates: true
+                    });
                     const firstSheetName = workbook.SheetNames[0];
-                    const json = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName], { 
-                        defval: '', 
+                    const json = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName], {
+                        defval: '',
                         dateNF: 'yyyy-mm-dd',
-                        raw: false 
+                        raw: false
                     });
 
                     if (json.length === 0) {
@@ -510,12 +581,12 @@
                     json.forEach(row => {
                         // Helper untuk memastikan format YYYY-MM-DD
                         const norm = val => {
-                            if(!val) return null;
+                            if (!val) return null;
                             if (val instanceof Date) return val.toISOString().split('T')[0];
                             // Jika string/text excel
-                            return val.toString().trim(); 
+                            return val.toString().trim();
                         };
-                        
+
                         // Mapping nama kolom (Case Insensitive sederhana)
                         row['Tanggal Mulai'] = norm(row['Tanggal Mulai'] || row['tanggal mulai']);
                         row['Tanggal Berakhir'] = norm(row['Tanggal Berakhir'] || row['tanggal berakhir']);
@@ -524,33 +595,35 @@
                     const fd = new FormData();
                     fd.append('_token', '{{ csrf_token() }}');
                     fd.append('data', JSON.stringify(json));
-                    
+
                     showToast("Sedang memproses data...", "info");
-                    
-                    fetch('{{ route('mahasiswa.store') }}', { 
-                        method: 'POST', 
-                        body: fd, 
-                        headers: { 'Accept': 'application/json' } 
-                    })
-                    .then(r => r.json())
-                    .then(res => {
-                        if (res.success) { 
-                            showToast(res.message, 'success'); 
-                            setTimeout(() => location.reload(), 1500); 
-                        } else { 
-                            console.error(res);
-                            // Tampilkan error detail jika ada array errors
-                            let msg = res.message;
-                            if(res.errors && Array.isArray(res.errors)) {
-                                msg += ": " + res.errors[0]; // Ambil error pertama
+
+                    fetch('{{ route('mahasiswa.import_excel') }}', {
+                            method: 'POST',
+                            body: fd,
+                            headers: {
+                                'Accept': 'application/json'
                             }
-                            showToast('Gagal: ' + msg, 'error'); 
-                        }
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        showToast('Terjadi kesalahan server (Cek Console).', 'error');
-                    });
+                        })
+                        .then(r => r.json())
+                        .then(res => {
+                            if (res.success) {
+                                showToast(res.message, 'success');
+                                setTimeout(() => location.reload(), 1500);
+                            } else {
+                                console.error(res);
+                                // Tampilkan error detail jika ada array errors
+                                let msg = res.message;
+                                if (res.errors && Array.isArray(res.errors)) {
+                                    msg += ": " + res.errors[0]; // Ambil error pertama
+                                }
+                                showToast('Gagal: ' + msg, 'error');
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            showToast('Terjadi kesalahan server (Cek Console).', 'error');
+                        });
 
                 } catch (error) {
                     console.error(error);
@@ -586,13 +659,15 @@
                 ]);
 
                 const ws = XLSX.utils.aoa_to_sheet([
-                    ['Nama', 'Universitas', 'Prodi', 'Ruangan', 'Tanggal Mulai', 'Tanggal Berakhir', 'Status', 'Link Absensi']
+                    ['Nama', 'Universitas', 'Prodi', 'Ruangan', 'Tanggal Mulai', 'Tanggal Berakhir', 'Status',
+                        'Link Absensi'
+                    ]
                 ].concat(data));
-                
+
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, 'Mahasiswa');
                 XLSX.writeFile(wb, `Data_Mahasiswa_${new Date().toISOString().split('T')[0]}.xlsx`);
-                
+
                 showToast("Berhasil export Excel!", "success");
             } catch (e) {
                 console.error(e);
@@ -622,13 +697,20 @@
             univInput.addEventListener('input', function(e) {
                 clearTimeout(timeout);
                 const q = e.target.value.trim();
-                if (!q) { dropdown.style.display = 'none'; univHidden.value = ''; return; }
+                if (!q) {
+                    dropdown.style.display = 'none';
+                    univHidden.value = '';
+                    return;
+                }
                 timeout = setTimeout(() => {
                     fetch(`{{ route('mahasiswa.search.universitas') }}?q=${encodeURIComponent(q)}`)
                         .then(r => r.json())
                         .then(list => {
-                            if (!list.length) dropdown.innerHTML = '<div class="dropdown-item text-muted small">Tidak ada hasil</div>';
-                            else dropdown.innerHTML = list.map(u => `<div class="dropdown-item" data-val="${u}"><i class="bi bi-building me-2 text-muted"></i>${u}</div>`).join('');
+                            if (!list.length) dropdown.innerHTML =
+                                '<div class="dropdown-item text-muted small">Tidak ada hasil</div>';
+                            else dropdown.innerHTML = list.map(u =>
+                                `<div class="dropdown-item" data-val="${u}"><i class="bi bi-building me-2 text-muted"></i>${u}</div>`
+                            ).join('');
                             dropdown.style.display = 'block';
                         });
                 }, 300);
@@ -638,11 +720,37 @@
                 const it = e.target.closest('.dropdown-item');
                 if (!it) return;
                 const val = it.dataset.val || it.textContent.trim();
-                univInput.value = val; univHidden.value = val; dropdown.style.display = 'none';
+                univInput.value = val;
+                univHidden.value = val;
+                dropdown.style.display = 'none';
             });
-            document.addEventListener('click', e => { 
-                if (!e.target.closest('.position-relative')) dropdown.style.display = 'none'; 
+            document.addEventListener('click', e => {
+                if (!e.target.closest('.position-relative')) dropdown.style.display = 'none';
             });
         })();
+        document.addEventListener('DOMContentLoaded', () => {
+            const deleteButtons = document.querySelectorAll('.btn-delete');
+            deleteButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const form = this.closest('form');
+
+                    Swal.fire({
+                        title: 'Yakin hapus data?',
+                        text: "Data mahasiswa ini akan dihapus permanen.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#7c1316',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Ya, hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
     </script>
 @endsection
