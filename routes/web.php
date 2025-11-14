@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\RuanganController;
 use App\Http\Controllers\AbsensiController;
+use App\Http\Controllers\MouController;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,6 +57,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/{mahasiswa}/edit', [MahasiswaController::class, 'edit'])->name('edit');
         Route::put('/{mahasiswa}', [MahasiswaController::class, 'update'])->name('update');
         Route::delete('/{mahasiswa}', [MahasiswaController::class, 'destroy'])->name('destroy');
+    });
+
+    // Mou Routes
+    Route::prefix('mou')->name('mou.')->group(function () {    
+        Route::get('/', [MouController::class, 'index'])->name('index');
+        Route::get('/create', [MouController::class, 'create'])->name('create');
+        Route::post('/', [MouController::class, 'store'])->name('store');
+        Route::get('/{mou}', [MouController::class, 'show'])->name('show');
+        Route::get('/{mou}/edit', [MouController::class, 'edit'])->name('edit');
+        Route::put('/{mou}', [MouController::class, 'update'])->name('update');
+        Route::delete('/{mou}', [MouController::class, 'destroy'])->name('destroy');
     });
 
     // Admin: view today's absensi with filters

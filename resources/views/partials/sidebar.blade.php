@@ -51,10 +51,10 @@
                     {{-- Sub-menu --}}
                     <div class="collapse sub-menu {{ $isMouActive ? 'show' : '' }}" id="menuMou">
                         {{-- Ganti href="#" dengan route yang sesuai --}}
-                        <a class="nav-link {{ request()->is('mou/create*') ? 'active' : '' }}" href="#">
+                        <a class="nav-link {{ request()->is('mou/create*') ? 'active' : '' }}" href="{{ route('mou.create') }}">
                             <span class="sidebar-text">Tambah MOU</span>
                         </a>
-                        <a class="nav-link {{ request()->is('mou') ? 'active' : '' }}" href="#">
+                        <a class="nav-link {{ request()->is('mou') ? 'active' : '' }}" href="{{ route('mou.index') }}">
                             <span class="sidebar-text">List MOU</span>
                         </a>
                     </div>
