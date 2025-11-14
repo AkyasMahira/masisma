@@ -28,8 +28,11 @@ class AbsensiController extends Controller
     public function toggle($token)
     {
         $mahasiswa = Mahasiswa::where('share_token', $token)->firstOrFail();
-        $today = Carbon::today();
-        $sekarang = now();
+        $today     = Carbon::today();
+        $sekarang  = now();
+
+        // Ambil jadwal khusus IT (kalau bukan IT => null)
+        $jadwalIT = $this->getJadwalIT($mahasiswa, $today);
 
         // Ambil absensi terakhir hari ini
         $lastAbsen = Absensi::where('mahasiswa_id', $mahasiswa->id)
@@ -39,13 +42,33 @@ class AbsensiController extends Controller
 
         // --- Jika belum ada absen hari ini, buat absen masuk ---
         if (!$lastAbsen) {
-            Absensi::create([
+            // Simpan dulu absensi masuk
+            $absen = Absensi::create([
                 'mahasiswa_id' => $mahasiswa->id,
-                'jam_masuk' => $sekarang,
-                'type' => 'masuk'
+                'jam_masuk'    => $sekarang,
+                'type'         => 'masuk',
             ]);
 
-            return back()->with('success', 'Absensi masuk berhasil direkam! Kamu sedang dalam fase praktik, tunggu 3 jam sebelum absen keluar.');
+            // Jika dia ruangan IT DAN hari kerja yang ada jadwal => cek telat masuk
+            if ($jadwalIT && isset($jadwalIT['masuk'])) {
+                $jamMasukIdeal = $jadwalIT['masuk']->copy();
+
+                if ($sekarang->gt($jamMasukIdeal)) {
+                    // Telat berapa menit
+                    $menitTelat = $sekarang->diffInMinutes($jamMasukIdeal);
+
+                    return back()->with(
+                        'success',
+                        "Anda telat {$menitTelat} menit. Besok jangan telat ya 😊"
+                    );
+                }
+            }
+
+            // Default kalau tidak telat / bukan ruangan IT
+            return back()->with(
+                'success',
+                'Absensi masuk berhasil direkam! Kamu sedang dalam fase praktik, tunggu 3 jam sebelum absen keluar.'
+            );
         }
 
         // --- Jika terakhir adalah absen masuk ---
@@ -56,52 +79,90 @@ class AbsensiController extends Controller
             $cooldownBerakhir = $jamMasuk->copy()->addHours(3);
             if ($sekarang->lt($cooldownBerakhir)) {
                 $menitTersisa = $sekarang->diffInMinutes($cooldownBerakhir);
-                $jamTersisa = floor($menitTersisa / 60);
-                $sisaMenit = $menitTersisa % 60;
+                $jamTersisa   = floor($menitTersisa / 60);
+                $sisaMenit    = $menitTersisa % 60;
 
-                return back()->with('error', "Kamu sudah absen masuk hari ini. Tunggu sekitar {$jamTersisa} jam {$sisaMenit} menit lagi sebelum bisa absen keluar.");
+                return back()->with(
+                    'error',
+                    "Kamu sudah absen masuk hari ini. Tunggu sekitar {$jamTersisa} jam {$sisaMenit} menit lagi sebelum bisa absen keluar."
+                );
             }
 
-            // Hitung durasi
+            // Hitung durasi total menit
             $durasiMenit = $jamMasuk->diffInMinutes($sekarang);
 
             // Simpan absen keluar
             Absensi::create([
-                'mahasiswa_id' => $mahasiswa->id,
-                'jam_masuk' => $jamMasuk,
-                'jam_keluar' => $sekarang,
-                'type' => 'keluar',
-                'durasi_menit' => $durasiMenit
+                'mahasiswa_id'  => $mahasiswa->id,
+                'jam_masuk'     => $jamMasuk,
+                'jam_keluar'    => $sekarang,
+                'type'          => 'keluar',
+                'durasi_menit'  => $durasiMenit,
             ]);
 
-            $message = "Absensi keluar berhasil direkam! Durasi: " .
+            // Pesan default (kalau bukan IT / tidak telat pulang)
+            $defaultMessage = "Absensi keluar berhasil direkam! Durasi: " .
                 floor($durasiMenit / 60) . " jam " .
                 ($durasiMenit % 60) . " menit. Kamu sedang dalam fase cooldown, tunggu 3 jam sebelum bisa absen lagi.";
 
-            return back()->with('success', $message);
+            // Kalau ruangan IT + ada jadwal keluar, cek telat pulang
+            if ($jadwalIT && isset($jadwalIT['keluar'])) {
+                $jamKeluarIdeal = $jadwalIT['keluar']->copy();
+
+                if ($sekarang->gt($jamKeluarIdeal)) {
+                    // Telat absen pulang => pakai pesan spesial
+                    return back()->with(
+                        'success',
+                        'Terimakasih atas kerja kerasmu hari ini! 🤝'
+                    );
+                }
+            }
+
+            // Kalau tidak telat / bukan ruangan IT
+            return back()->with('success', $defaultMessage);
         }
 
         // --- Jika terakhir adalah absen keluar ---
         if ($lastAbsen->type === 'keluar') {
-            $jamKeluar = Carbon::parse($lastAbsen->jam_keluar);
+            $jamKeluar        = Carbon::parse($lastAbsen->jam_keluar);
             $cooldownBerakhir = $jamKeluar->copy()->addHours(3);
 
             if ($sekarang->lt($cooldownBerakhir)) {
                 $menitTersisa = $sekarang->diffInMinutes($cooldownBerakhir);
-                $jamTersisa = floor($menitTersisa / 60);
-                $sisaMenit = $menitTersisa % 60;
+                $jamTersisa   = floor($menitTersisa / 60);
+                $sisaMenit    = $menitTersisa % 60;
 
-                return back()->with('error', "Kamu sudah absen keluar hari ini. Tunggu sekitar {$jamTersisa} jam {$sisaMenit} menit lagi sebelum bisa absen masuk kembali.");
+                return back()->with(
+                    'error',
+                    "Kamu sudah absen keluar hari ini. Tunggu sekitar {$jamTersisa} jam {$sisaMenit} menit lagi sebelum bisa absen masuk kembali."
+                );
             }
 
             // Buat absen masuk baru setelah cooldown
             Absensi::create([
                 'mahasiswa_id' => $mahasiswa->id,
-                'jam_masuk' => $sekarang,
-                'type' => 'masuk'
+                'jam_masuk'    => $sekarang,
+                'type'         => 'masuk',
             ]);
 
-            return back()->with('success', 'Absensi masuk berhasil direkam kembali setelah masa cooldown!');
+            // Kalau ruangan IT + telat masuk (misal setelah jam ideal)
+            if ($jadwalIT && isset($jadwalIT['masuk'])) {
+                $jamMasukIdeal = $jadwalIT['masuk']->copy();
+
+                if ($sekarang->gt($jamMasukIdeal)) {
+                    $menitTelat = $sekarang->diffInMinutes($jamMasukIdeal);
+
+                    return back()->with(
+                        'success',
+                        "Anda telat {$menitTelat} menit. Besok jangan telat ya 😊"
+                    );
+                }
+            }
+
+            return back()->with(
+                'success',
+                'Absensi masuk berhasil direkam kembali setelah masa cooldown!'
+            );
         }
 
         // Jika terjadi kondisi tak terduga
@@ -120,28 +181,78 @@ class AbsensiController extends Controller
 
         $query = Absensi::with(['mahasiswa', 'mahasiswa.ruangan']);
 
+        // Filter ruangan
         if ($request->filled('ruangan_id')) {
             $query->whereHas('mahasiswa', function ($q) use ($request) {
                 $q->where('ruangan_id', $request->ruangan_id);
             });
         }
 
+        // Filter type
         if ($request->filled('type')) {
             $query->where('type', $request->type);
         }
 
-        if ($request->filled('start_date')) {
-            $query->whereDate('created_at', '>=', $request->start_date);
+        // Cek apakah user menggunakan filter date range
+        $useDateFilter = $request->filled('start_date') || $request->filled('end_date');
+
+        if ($useDateFilter) {
+            // Jika pakai filter, maka jalankan filter yang dipilih user
+            if ($request->filled('start_date')) {
+                $query->whereDate('created_at', '>=', $request->start_date);
+            }
+
+            if ($request->filled('end_date')) {
+                $query->whereDate('created_at', '<=', $request->end_date);
+            }
+        } else {
+            // Kalau TIDAK pakai filter tanggal → tampilkan hanya data hari ini
+            $query->whereDate('created_at', now()->toDateString());
         }
 
-        if ($request->filled('end_date')) {
-            $query->whereDate('created_at', '<=', $request->end_date);
-        }
-
+        // Urut & paginate
         $absensi = $query->orderBy('created_at', 'desc')
             ->paginate(10)
             ->withQueryString();
 
         return view('absensi.index', compact('absensi', 'ruangans'));
+    }
+
+
+    /**
+     * Jadwal khusus ruangan IT:
+     * - Senin–Kamis : 07:15–15:30
+     * - Jumat       : 07:00–14:30
+     * - Sabtu/Minggu: tidak pakai aturan khusus (return null)
+     */
+    private function getJadwalIT(Mahasiswa $mahasiswa, Carbon $today)
+    {
+        $namaRuangan = strtolower($mahasiswa->ruangan->nm_ruangan ?? $mahasiswa->nm_ruangan);
+
+        if ($namaRuangan !== 'it') {
+            return null;
+        }
+
+        // dayOfWeekIso: 1=Senin ... 7=Minggu
+        $hari = $today->dayOfWeekIso;
+
+        // Senin–Kamis
+        if ($hari >= 1 && $hari <= 4) {
+            return [
+                'masuk'  => $today->copy()->setTime(7, 15),
+                'keluar' => $today->copy()->setTime(15, 30),
+            ];
+        }
+
+        // Jumat
+        if ($hari === 5) {
+            return [
+                'masuk'  => $today->copy()->setTime(7, 0),
+                'keluar' => $today->copy()->setTime(14, 30),
+            ];
+        }
+
+        // Sabtu / Minggu => tidak ada rule khusus
+        return null;
     }
 }

@@ -360,7 +360,7 @@
                                 <i class="bi bi-search text-muted"></i>
                             </span>
                             <input type="text" id="searchModal" class="form-control bg-light border-left-0"
-                                placeholder="Filter nama mahasiswa..." onkeyup="filterList()">
+                                placeholder="Filter nama mahasiswa..." oninput="filterList()">
                         </div>
                     </div>
 
@@ -432,6 +432,9 @@
             const namaRuangan = element.dataset.nama;
             const mahasiswa = JSON.parse(element.dataset.mahasiswa);
 
+            const searchInput = document.getElementById('searchModal');
+            searchInput.value = '';
+
             document.getElementById('modalTitle').innerText = `Penghuni ${namaRuangan}`;
             const listContainer = document.getElementById('listMahasiswa');
             listContainer.innerHTML = "";
@@ -478,7 +481,16 @@
                 const nameEl = li[i].getElementsByClassName('student-name')[0];
                 if (nameEl) {
                     const txtValue = nameEl.textContent || nameEl.innerText;
-                    li[i].style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? "" : "none";
+
+                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                        // JIKA COCOK: Tampilkan
+                        li[i].classList.remove('d-none'); // Hapus class sembunyi
+                        li[i].classList.add('d-flex'); // Pastikan layout flex aktif
+                    } else {
+                        // JIKA TIDAK COCOK: Sembunyikan
+                        li[i].classList.remove('d-flex'); // Hapus class flex agar tidak bentrok
+                        li[i].classList.add('d-none'); // Paksa sembunyi
+                    }
                 }
             }
         }
