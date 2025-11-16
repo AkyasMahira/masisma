@@ -16,7 +16,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/choices.js/1.1.6/styles/css/choices.min.css"
         integrity="sha512-+8K1k6gM6+6a2r9oQwB+8u8Zxq2u1Jp0xFhZkq6Ykq1F0s3rVw1Z3QXw6k3Qw6s1y2z7x7Y9G6q2K1M1Q=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+    </head>
     {{-- Chart.js untuk visualisasi data --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 

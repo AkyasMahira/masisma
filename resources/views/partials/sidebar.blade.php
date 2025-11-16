@@ -104,8 +104,8 @@
                     </a>
                     {{-- Sub-menu --}}
                     <div class="collapse sub-menu {{ $isPelatihanActive ? 'show' : '' }}" id="menuPelatihan">
-                        <a class="nav-link {{ request()->is('pelatihan*') ? 'active' : '' }}"
-                            href="#">
+                        <a class="nav-link {{ request()->is('pelatihan') ? 'active' : '' }}"
+                            href="{{ route('pelatihan.index') }}">
                             <span class="sidebar-text">List Pelatihan</span>
                         </a>
                     </div>
@@ -123,7 +123,7 @@
                         <span class="sidebar-text">Penelitian</span>
                         <i class="bi bi-chevron-down sidebar-arrow"></i>
                     </a>
-                    
+
                     <!-- Sub-menu -->
                     <div class="collapse sub-menu {{ $isPenelitianActive ? 'show' : '' }}" id="menuPenelitian">
                         <a class="nav-link {{ request()->is('penelitian*') ? 'active' : '' }}"
@@ -175,7 +175,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // 1. Temukan elemen input search
             const searchInput = document.querySelector('.sidebar-search .search-input');
-            
+
             // 2. Tambahkan event listener 'input' (lebih baik dari keyup)
             if (searchInput) {
                 searchInput.addEventListener('input', function(e) {
@@ -202,7 +202,7 @@
                 // Tutup semua sub-menu, KECUALI yang sedang aktif
                 navContainer.querySelectorAll('.sub-menu').forEach(sub => {
                     const parentLink = sub.closest('.nav-item-dropdown').querySelector('[data-bs-toggle="collapse"]');
-                    
+
                     // Jika parent-nya TIDAK punya class 'active-parent'
                     if (!parentLink.classList.contains('active-parent')) {
                         sub.classList.remove('show');
@@ -224,7 +224,7 @@
                 // Cek 1: Apakah teks link utama cocok? (Cth: "Pendidikan")
                 const mainLink = item.matches('.nav-link') ? item : item.querySelector('[data-bs-toggle="collapse"]');
                 const mainText = mainLink.querySelector('.sidebar-text')?.textContent.toLowerCase() || '';
-                
+
                 if (mainText.includes(text)) {
                     groupHasMatch = true;
                 }
@@ -232,7 +232,7 @@
                 // Cek 2: Apakah ada sub-link yang cocok? (Cth: "Mahasiswa")
                 if (item.matches('.nav-item-dropdown')) {
                     const subLinks = item.querySelectorAll('.sub-menu .nav-link');
-                    
+
                     subLinks.forEach(subLink => {
                         const subText = subLink.textContent.toLowerCase();
                         if (subText.includes(text)) {

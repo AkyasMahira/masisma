@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\RuanganController;
+use App\Http\Controllers\PelatihanController;
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\MouController;
 
@@ -43,6 +44,19 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{ruangan}', [RuanganController::class, 'destroy'])->name('destroy');
     });
 
+    // Pelatihan Routes
+    Route::prefix('pelatihan')->name('pelatihan.')->group(function () {
+        Route::get('/', [PelatihanController::class, 'index'])->name('index');
+        Route::get('/create', [PelatihanController::class, 'create'])->name('create');
+        Route::get('/export', [PelatihanController::class, 'export'])->name('export');
+        Route::post('/import-excel', [PelatihanController::class, 'import_excel'])->name('import_excel');
+        Route::post('/', [PelatihanController::class, 'store'])->name('store');
+        Route::get('/{pelatihan}', [PelatihanController::class, 'show'])->name('show');
+        Route::get('/{pelatihan}/edit', [PelatihanController::class, 'edit'])->name('edit');
+        Route::put('/{pelatihan}', [PelatihanController::class, 'update'])->name('update');
+        Route::delete('/{pelatihan}', [PelatihanController::class, 'destroy'])->name('destroy');
+    });
+
     // Mahasiswa Routes
     Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
         Route::get('/', [MahasiswaController::class, 'index'])->name('index');
@@ -60,7 +74,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Mou Routes
-    Route::prefix('mou')->name('mou.')->group(function () {    
+    Route::prefix('mou')->name('mou.')->group(function () {
         Route::get('/', [MouController::class, 'index'])->name('index');
         Route::get('/create', [MouController::class, 'create'])->name('create');
         Route::post('/', [MouController::class, 'store'])->name('store');
