@@ -161,7 +161,15 @@ Route::middleware(['auth', 'admin'])->group(function () {
     });
 
     // 4. Manajemen Ruangan
-    Route::resource('ruangan', RuanganController::class);
+    Route::prefix('ruangan')->name('ruangan.')->group(function () {
+        Route::get('/', [RuanganController::class, 'index'])->name('index');
+        Route::get('/create', [RuanganController::class, 'create'])->name('create');
+        Route::post('/', [RuanganController::class, 'store'])->name('store');
+        Route::get('/{ruangan}', [RuanganController::class, 'show'])->name('show');
+        Route::get('/{ruangan}/edit', [RuanganController::class, 'edit'])->name('edit');
+        Route::put('/{ruangan}', [RuanganController::class, 'update'])->name('update');
+        Route::delete('/{ruangan}', [RuanganController::class, 'destroy'])->name('destroy');
+    });
 
     // 5. Manajemen Pelatihan
     Route::prefix('pelatihan')->name('pelatihan.')->group(function () {
