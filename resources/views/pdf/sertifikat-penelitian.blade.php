@@ -90,7 +90,7 @@
                 <div class="subtitle">Pra-Penelitian</div>
 
                 <div class="recipient">Diberikan Kepada:</div>
-                <div class="name">{{ $presentasi->user->name }}</div>
+                <div class="name">{{ $nama_penerima ?? $presentasi->user->name }}</div>
 
                 <div class="description">
                     Telah menyelesaikan kegiatan pra-penelitian dengan judul:<br>

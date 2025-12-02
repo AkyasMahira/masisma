@@ -263,19 +263,33 @@ class PresentasiController extends Controller
     }
 
     /**
-     * Generate Surat Selesai & Sertifikat
+     * Generate Surat Selesai & Sertifikat untuk Pengajuan dan Semua Anggota
      */
     private function generateSuratSelesai($presentasi)
     {
-        // Generate PDF Surat Selesai
-        $pdf = Pdf::loadView('pdf.surat-selesai', ['presentasi' => $presentasi]);
-        $fileName = 'surat_selesai_' . $presentasi->user->name . '_' . time() . '.pdf';
+        // Load anggota dari pra penelitian
+        $praPenelitian = $presentasi->praPenelitian()->with('anggotas')->first();
+
+        // Daftar nama penerima: user utama + semua anggota
+        $daftarPenerima = [
+            ['nama' => $presentasi->user->name, 'tipe' => 'pengajuan'],
+        ];
+
+        if ($praPenelitian && $praPenelitian->anggotas) {
+            foreach ($praPenelitian->anggotas as $anggota) {
+                $daftarPenerima[] = ['nama' => $anggota->nama, 'tipe' => 'anggota'];
+            }
+        }
+
+        // Generate untuk pengajuan utama (untuk penyimpanan di tabel presentasi)
+        $pdf = Pdf::loadView('pdf.surat-selesai', ['presentasi' => $presentasi, 'nama_penerima' => $presentasi->user->name]);
+        $fileName = 'surat_selesai_' . str_replace(' ', '_', $presentasi->user->name) . '_' . time() . '.pdf';
         $path = 'surat_selesai/' . $fileName;
         Storage::put('public/' . $path, $pdf->output());
 
-        // Generate Sertifikat
-        $pdfCert = Pdf::loadView('pdf.sertifikat-penelitian', ['presentasi' => $presentasi]);
-        $certName = 'sertifikat_' . $presentasi->user->name . '_' . time() . '.pdf';
+        // Generate Sertifikat untuk pengajuan utama
+        $pdfCert = Pdf::loadView('pdf.sertifikat-penelitian', ['presentasi' => $presentasi, 'nama_penerima' => $presentasi->user->name]);
+        $certName = 'sertifikat_' . str_replace(' ', '_', $presentasi->user->name) . '_' . time() . '.pdf';
         $certPath = 'sertifikat/' . $certName;
         Storage::put('public/' . $certPath, $pdfCert->output());
 
@@ -283,6 +297,23 @@ class PresentasiController extends Controller
             'surat_selesai' => $path,
             'sertifikat' => $certPath,
         ]);
+
+        // Generate untuk setiap anggota
+        if ($praPenelitian && $praPenelitian->anggotas) {
+            foreach ($praPenelitian->anggotas as $anggota) {
+                // Surat Selesai untuk anggota
+                $pdfAnggota = Pdf::loadView('pdf.surat-selesai', ['presentasi' => $presentasi, 'nama_penerima' => $anggota->nama]);
+                $fileNameAnggota = 'surat_selesai_' . str_replace(' ', '_', $anggota->nama) . '_' . time() . '.pdf';
+                $pathAnggota = 'surat_selesai/' . $fileNameAnggota;
+                Storage::put('public/' . $pathAnggota, $pdfAnggota->output());
+
+                // Sertifikat untuk anggota
+                $pdfCertAnggota = Pdf::loadView('pdf.sertifikat-penelitian', ['presentasi' => $presentasi, 'nama_penerima' => $anggota->nama]);
+                $certNameAnggota = 'sertifikat_' . str_replace(' ', '_', $anggota->nama) . '_' . time() . '.pdf';
+                $certPathAnggota = 'sertifikat/' . $certNameAnggota;
+                Storage::put('public/' . $certPathAnggota, $pdfCertAnggota->output());
+            }
+        }
     }
 
     /**
@@ -296,5 +327,45 @@ class PresentasiController extends Controller
             ->paginate(15);
 
         return view('admin.presentasi.index', compact('presentasi'));
+    }
+
+    /**
+     * Download Sertifikat untuk Anggota Spesifik
+     */
+    public function downloadSertifikatAnggota($id, $namaAnggota)
+    {
+        $presentasi = Presentasi::with(['praPenelitian.anggotas'])->findOrFail($id);
+
+        // Decode nama dari URL
+        $namaAnggota = urldecode($namaAnggota);
+
+        // Generate sertifikat dengan nama anggota
+        $pdf = Pdf::loadView('pdf.sertifikat-penelitian', [
+            'presentasi' => $presentasi,
+            'nama_penerima' => $namaAnggota
+        ]);
+
+        $fileName = 'sertifikat_' . str_replace(' ', '_', $namaAnggota) . '.pdf';
+        return $pdf->download($fileName);
+    }
+
+    /**
+     * Download Surat Selesai untuk Anggota Spesifik
+     */
+    public function downloadSuratSelesaiAnggota($id, $namaAnggota)
+    {
+        $presentasi = Presentasi::with(['praPenelitian.anggotas'])->findOrFail($id);
+
+        // Decode nama dari URL
+        $namaAnggota = urldecode($namaAnggota);
+
+        // Generate surat selesai dengan nama anggota
+        $pdf = Pdf::loadView('pdf.surat-selesai', [
+            'presentasi' => $presentasi,
+            'nama_penerima' => $namaAnggota
+        ]);
+
+        $fileName = 'surat_selesai_' . str_replace(' ', '_', $namaAnggota) . '.pdf';
+        return $pdf->download($fileName);
     }
 }

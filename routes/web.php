@@ -190,6 +190,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::post('/{pengajuan}', [PresentasiController::class, 'store'])->name('store');
         Route::get('/detail/{id}', [PresentasiController::class, 'detail'])->name('detail');
         Route::post('/{id}/review-laporan', [PresentasiController::class, 'reviewLaporan'])->name('review-laporan');
+        Route::get('/{id}/sertifikat/{nama_anggota}', [PresentasiController::class, 'downloadSertifikatAnggota'])->name('download-sertifikat');
+        Route::get('/{id}/surat-selesai/{nama_anggota}', [PresentasiController::class, 'downloadSuratSelesaiAnggota'])->name('download-surat-selesai');
     });
 
     // 8. Admin Utilities (Notes, Absensi Rekap, Users)
