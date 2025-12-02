@@ -228,6 +228,14 @@
                             </td>
 
                             <td class="text-center">
+                                                                    {{-- delete button --}}
+                                    <form action="{{ route('admin.pengajuan.destroy', $p->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn-action btn-delete" title="Hapus" onclick="return confirm('Yakin ingin menghapus pengajuan ini?')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
                                 @if ($p->status === 'pending')
                                     <div class="d-flex justify-content-center gap-2">
                                         {{-- Tombol Approve --}}

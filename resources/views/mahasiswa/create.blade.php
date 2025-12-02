@@ -195,21 +195,35 @@
 
         {{-- --}}
         <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Asal Universitas <span class="text-danger">*</span></label>
-                <div class="input-group">
-                    {{-- Icon Universitas --}}
-                    <span class="input-group-text"><i class="bi bi-building"></i></span> 
-                    <select name="mou_id" class="form-select" required>
-                        <option value="">-- Pilih Universitas --</option>
-                        @foreach ($mous as $mou)
-                            <option value="{{ $mou->id }}" {{ old('mou_id') == $mou->id ? 'selected' : '' }}>
-                                {{ $mou->nama_universitas }}
-                            </option>
-                        @endforeach
-                    </select>
+                @if(auth()->user() && auth()->user()->role === 'admin')
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Asal Universitas <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        {{-- Icon Universitas --}}
+                        <span class="input-group-text"><i class="bi bi-building"></i></span>
+                        <select name="mou_id" class="form-select" required>
+                            <option value="">-- Pilih Universitas --</option>
+                            @foreach ($mous as $mou)
+                                <option value="{{ $mou->id }}" {{ old('mou_id') == $mou->id ? 'selected' : '' }}>
+                                    {{ $mou->nama_universitas }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
-            </div>
+                @else
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Asal Universitas</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-building"></i></span>
+                        <select class="form-select" disabled>
+                            <option>-- Diisi oleh Admin --</option>
+                        </select>
+                    </div>
+                    <input type="hidden" name="mou_id" value="">
+                    <div class="small text-muted mt-2">Asal universitas akan diatur oleh admin setelah proses verifikasi.</div>
+                </div>
+                @endif
             
             <div class="col-md-6 mb-3">
                 <label class="form-label">Program Studi</label>
@@ -228,6 +242,7 @@
             Penempatan & Durasi</h6>
 
         <div class="row">
+            @if(auth()->user() && auth()->user()->role === 'admin')
             <div class="col-md-6 mb-4">
                 <label class="form-label">Tanggal Mulai <span class="text-danger">*</span></label>
                 <div class="input-group">
@@ -244,8 +259,27 @@
                         value="{{ old('tanggal_berakhir') }}" required>
                 </div>
             </div>
+            @else
+            <div class="col-md-6 mb-4">
+                <input type="hidden" name="tanggal_mulai" value="">
+                <label class="form-label text-muted">Tanggal Mulai</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-calendar-plus"></i></span>
+                    <input type="text" class="form-control" value="-- Diisi oleh Admin --" disabled>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <input type="hidden" name="tanggal_berakhir" value="">
+                <label class="form-label text-muted">Tanggal Berakhir</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
+                    <input type="text" class="form-control" value="-- Diisi oleh Admin --" disabled>
+                </div>
+            </div>
+            @endif
         </div>
 
+        @if(auth()->user() && auth()->user()->role === 'admin')
         <div class="form-group mb-4" style="padding-top: 10px;">
             <div class="form-check form-switch" style="padding-left: 2.5em;">
                 <input class="form-check-input" type="checkbox" role="switch" name="weekend_aktif"
@@ -260,6 +294,14 @@
                 Jika dicentang, Sabtu & Minggu akan dihitung sebagai hari magang.
             </small>
         </div>
+        @else
+        <input type="hidden" name="weekend_aktif" value="0">
+        <div class="form-group mb-4" style="padding-top: 10px;">
+            <div class="small text-muted" style="padding-left: 0.5em;">
+                Weekend akan dikonfigurasi oleh admin.
+            </div>
+        </div>
+        @endif
 
         <div class="d-flex justify-content-between align-items-center pt-3">
             <a href="{{ route('dashboard') }}" class="btn btn-light-custom shadow-sm">
