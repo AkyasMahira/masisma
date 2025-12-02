@@ -59,6 +59,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/pra', [PengajuanController::class, 'ajukanPra'])->name('pra');
         Route::post('/magang', [PengajuanController::class, 'ajukanMagang'])->name('magang');
         Route::post('/{pengajuan}/upload-bukti', [PengajuanController::class, 'uploadBuktiPembayaran'])->name('upload-bukti');
+        // Allow user to delete their pengajuan (cleanup and allow re-apply)
+        Route::delete('/{pengajuan}', [PengajuanController::class, 'destroy'])->name('destroy');
     });
 
     // Sertifikat & Absensi (User View)
@@ -128,6 +130,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::post('/{pengajuan}/kirim-galasan', [PengajuanController::class, 'kirimGalasan'])->name('kirim-galasan');
         Route::post('/{pengajuan}/approve-pembayaran', [PengajuanController::class, 'approvePembayaran'])->name('approve-pembayaran');
         Route::get('/{pengajuan}', [PengajuanController::class, 'show'])->name('show');
+        // Admin can also delete pengajuan
+        Route::delete('/{pengajuan}', [PengajuanController::class, 'destroy'])->name('destroy');
     });
 
     // 2. Manajemen Mahasiswa (Admin View)

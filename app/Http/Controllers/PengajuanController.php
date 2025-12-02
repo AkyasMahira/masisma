@@ -198,4 +198,58 @@ class PengajuanController extends Controller
 
         return view('pengajuan.detail', compact('pengajuan', 'jenis'));
     }
+
+    public function destroy(Pengajuan $pengajuan)
+    {
+        $user = auth()->user();
+
+        // authorize: owner or admin
+        if (!$user || ($user->id !== $pengajuan->user_id && $user->role !== 'admin')) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Delete any uploaded files
+        if ($pengajuan->surat_balasan && Storage::exists($pengajuan->surat_balasan)) {
+            Storage::delete($pengajuan->surat_balasan);
+        }
+        if ($pengajuan->invoice && Storage::exists($pengajuan->invoice)) {
+            Storage::delete($pengajuan->invoice);
+        }
+        if ($pengajuan->bukti_pembayaran && Storage::exists($pengajuan->bukti_pembayaran)) {
+            Storage::delete($pengajuan->bukti_pembayaran);
+        }
+
+        // Remove related Presentasi (and its files)
+        $presentasi = \App\Models\Presentasi::where('pengajuan_id', $pengajuan->id)->first();
+        if ($presentasi) {
+            // delete presentasi files
+            if ($presentasi->file_ppt && Storage::exists($presentasi->file_ppt)) Storage::delete($presentasi->file_ppt);
+            if ($presentasi->file_laporan && Storage::exists($presentasi->file_laporan)) Storage::delete($presentasi->file_laporan);
+            if ($presentasi->sertifikat && Storage::exists('public/' . $presentasi->sertifikat)) Storage::delete('public/' . $presentasi->sertifikat);
+            if ($presentasi->surat_selesai && Storage::exists('public/' . $presentasi->surat_selesai)) Storage::delete('public/' . $presentasi->surat_selesai);
+
+            // delete presentasi record
+            $presentasi->delete();
+        }
+
+        // Remove PraPenelitian and related records (anggotas, konsultasi)
+        $pra = PraPenelitian::where('user_id', $pengajuan->user_id)->first();
+        if ($pra) {
+            // delete konsultasi
+            \App\Models\Konsultasi::where('pra_penelitian_id', $pra->id)->delete();
+            // delete anggota
+            \App\Models\PraPenelitianAnggota::where('pra_penelitian_id', $pra->id)->delete();
+            // finally delete pra penelitian
+            $pra->delete();
+        }
+
+        // finally delete pengajuan
+        $pengajuan->delete();
+
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.pengajuan.index')->with('success', 'Pengajuan berhasil dihapus.');
+        }
+
+        return redirect()->route('pengajuan.index')->with('success', 'Pengajuan berhasil dihapus. Anda bisa mengajukan kembali.');
+    }
 }
