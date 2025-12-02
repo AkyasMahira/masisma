@@ -32,6 +32,10 @@ Route::put('/input-data-pelatihan/{pelatihan}', [PelatihanController::class, 'pu
 Route::get('/penilaian/{token}', [PresentasiController::class, 'formPenilaian'])->name('ci.penilaian');
 Route::post('/penilaian/{token}', [PresentasiController::class, 'submitPenilaian'])->name('ci.submit-penilaian');
 
+// Download Sertifikat & Surat Selesai (Public - untuk semua user)
+Route::get('/presentasi/{id}/sertifikat/{nama_anggota}', [PresentasiController::class, 'downloadSertifikatAnggota'])->name('presentasi.download-sertifikat');
+Route::get('/presentasi/{id}/surat-selesai/{nama_anggota}', [PresentasiController::class, 'downloadSuratSelesaiAnggota'])->name('presentasi.download-surat-selesai');
+
 
 // Authentication
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -105,6 +109,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [PresentasiController::class, 'show'])->name('show');
         Route::post('/{id}/upload-ppt', [PresentasiController::class, 'uploadPpt'])->name('upload-ppt');
         Route::post('/{id}/upload-laporan', [PresentasiController::class, 'uploadLaporan'])->name('upload-laporan');
+        Route::get('/{id}/sertifikat/{nama_anggota}', [PresentasiController::class, 'downloadSertifikatAnggota'])->name('download-sertifikat');
+        Route::get('/{id}/surat-selesai/{nama_anggota}', [PresentasiController::class, 'downloadSuratSelesaiAnggota'])->name('download-surat-selesai');
     });
 });
 
@@ -190,8 +196,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::post('/{pengajuan}', [PresentasiController::class, 'store'])->name('store');
         Route::get('/detail/{id}', [PresentasiController::class, 'detail'])->name('detail');
         Route::post('/{id}/review-laporan', [PresentasiController::class, 'reviewLaporan'])->name('review-laporan');
-        Route::get('/{id}/sertifikat/{nama_anggota}', [PresentasiController::class, 'downloadSertifikatAnggota'])->name('download-sertifikat');
-        Route::get('/{id}/surat-selesai/{nama_anggota}', [PresentasiController::class, 'downloadSuratSelesaiAnggota'])->name('download-surat-selesai');
     });
 
     // 8. Admin Utilities (Notes, Absensi Rekap, Users)

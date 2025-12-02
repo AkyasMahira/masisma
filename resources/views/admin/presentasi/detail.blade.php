@@ -368,10 +368,10 @@
                                                 <td><span class="badge bg-light text-dark">{{ $anggota->jenjang }}</span></td>
                                                 <td>
                                                     <div class="d-flex gap-2">
-                                                        <a href="{{ route('admin.presentasi.download-sertifikat', [$presentasi->id, urlencode($anggota->nama)]) }}" class="btn btn-sm btn-outline-success" title="Download Sertifikat">
+                                                        <a href="{{ route('presentasi.download-sertifikat', [$presentasi->id, urlencode($anggota->nama)]) }}" class="btn btn-sm btn-outline-success" title="Download Sertifikat">
                                                             <i class="bi bi-award-fill me-1"></i> Sertifikat
                                                         </a>
-                                                        <a href="{{ route('admin.presentasi.download-surat-selesai', [$presentasi->id, urlencode($anggota->nama)]) }}" class="btn btn-sm btn-outline-secondary" title="Download Surat Selesai">
+                                                        <a href="{{ route('presentasi.download-surat-selesai', [$presentasi->id, urlencode($anggota->nama)]) }}" class="btn btn-sm btn-outline-secondary" title="Download Surat Selesai">
                                                             <i class="bi bi-file-pdf me-1"></i> Surat
                                                         </a>
                                                     </div>
