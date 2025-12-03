@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
 @section('title', 'Data MOU')
-@section('page-title', 'Data MOU') {{-- Ini mungkin tidak terpakai oleh style baru --}}
+@section('page-title', 'Data MOU')
 
 @section('content')
     {{--
       =====================================================
-      STYLE KUSTOM (DARI CONTOH 'Pelatihan Dasar')
+      STYLE KUSTOM
       =====================================================
     --}}
     <style>
@@ -29,7 +29,7 @@
             margin-bottom: 2rem;
             border-left: 5px solid var(--custom-maroon);
             position: relative;
-            z-index: 1050; /* Pastikan dropdown di atas */
+            z-index: 1050;
             overflow: visible;
         }
 
@@ -109,6 +109,7 @@
             text-transform: uppercase;
             font-size: 0.85rem;
             letter-spacing: 0.5px;
+            white-space: nowrap; /* Mencegah header turun baris */
         }
 
         .table tbody td {
@@ -119,7 +120,7 @@
         }
 
         .table-hover tbody tr:hover {
-            background-color: #fff5f6; /* custom-maroon-subtle */
+            background-color: #fff5f6;
         }
 
         .action-btn {
@@ -158,14 +159,6 @@
             }
         }
     </style>
-    {{-- ================= END STYLE ================= --}}
-
-
-    {{--
-      =====================================================
-      STRUKTUR HTML BARU UNTUK LIST MOU
-      =====================================================
-    --}}
 
     {{-- 1. HEADER HALAMAN --}}
     <div class="page-header-wrapper d-flex flex-wrap justify-content-between align-items-center gap-3 animate-up">
@@ -212,37 +205,38 @@
             <i class="bi bi-funnel-fill me-2"></i> Filter & Pencarian
         </div>
         <div class="card-body p-4">
-            {{-- Form Filter --}}
             <form id="filterForm" method="GET" action="{{ route('mou.index') }}">
                 <div class="row">
                     <div class="col-md-4 mb-3 mb-md-0">
                         <label class="small text-muted fw-bold text-uppercase">Cari Nama Instansi</label>
                         <div class="input-group shadow-sm">
-                            <span class="input-group-text bg-light border-0 border-end-0"><i class="bi bi-search"></i></span>
+                            <span class="input-group-text bg-light border-0 border-end-0"><i
+                                    class="bi bi-search"></i></span>
                             <input type="text" class="form-control bg-light border-0" name="search"
                                 placeholder="Nama instansi..." value="{{ request('search') }}">
                         </div>
                     </div>
                     <div class="col-md-4 mb-3 mb-md-0">
                         <label class="small text-muted fw-bold text-uppercase">Dari Tanggal</label>
-                         <div class="input-group shadow-sm">
-                            <span class="input-group-text bg-light border-0 border-end-0"><i class="bi bi-calendar-plus"></i></span>
+                        <div class="input-group shadow-sm">
+                            <span class="input-group-text bg-light border-0 border-end-0"><i
+                                    class="bi bi-calendar-plus"></i></span>
                             <input type="date" class="form-control bg-light border-0" name="tanggal_mulai"
                                 value="{{ request('tanggal_mulai') }}">
                         </div>
                     </div>
                     <div class="col-md-4 mb-3 mb-md-0">
                         <label class="small text-muted fw-bold text-uppercase">Sampai Tanggal</label>
-                         <div class="input-group shadow-sm">
-                             <span class="input-group-text bg-light border-0 border-end-0"><i class="bi bi-calendar-check"></i></span>
+                        <div class="input-group shadow-sm">
+                            <span class="input-group-text bg-light border-0 border-end-0"><i
+                                    class="bi bi-calendar-check"></i></span>
                             <input type="date" class="form-control bg-light border-0" name="tanggal_selesai"
                                 value="{{ request('tanggal_selesai') }}">
                         </div>
                     </div>
                     <div class="col-md-12 d-flex gap-2 mt-3">
                         <button type="submit" class="btn btn-maroon shadow-sm">Terapkan</button>
-                        <a href="{{ route('mou.index') }}" class="btn btn-light border shadow-sm"
-                            title="Reset Filter">
+                        <a href="{{ route('mou.index') }}" class="btn btn-light border shadow-sm" title="Reset Filter">
                             <i class="bi bi-arrow-counterclockwise"></i> Reset
                         </a>
                     </div>
@@ -259,80 +253,123 @@
                     <tr>
                         <th class="text-center" width="5%">No</th>
                         <th>Instansi</th>
+                        {{-- KOLOM BARU KHUSUS NOMOR PKS --}}
+                        <th style="min-width: 180px;">Nomor PKS</th>
                         <th>Jenis</th>
                         <th>Durasi</th>
                         <th>Dokumen</th>
-                        <th>Rencana Kerja Sama</th>
-                        <th class="text-center" width="15%">Aksi</th>
+                        <th style="min-width: 200px;">Rencana Kerja Sama</th>
+                        <th class="text-center" width="10%">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($mous as $index => $mou)
                         <tr>
                             <td class="text-center text-muted fw-bold">
-                                {{-- Nomor urut berdasarkan pagination --}}
                                 {{ ($mous->currentPage() - 1) * $mous->perPage() + $index + 1 }}
                             </td>
                             <td>
                                 <span class="fw-bold text-dark d-block">{{ $mou->nama_instansi }}</span>
-                                @if($mou->alamat_instansi)
-                                    <small class="d-block text-muted">{{ $mou->alamat_instansi }}</small>
+                                @if ($mou->alamat_instansi)
+                                    <small class="d-block text-muted mt-1">{{ $mou->alamat_instansi }}</small>
                                 @endif
-                                @if($mou->nama_pic_instansi)
-                                    <small class="d-block text-muted">PIC: {{ $mou->nama_pic_instansi }} @if($mou->nomor_kontak_pic) &middot; {{ $mou->nomor_kontak_pic }} @endif</small>
+                                @if ($mou->nama_pic_instansi)
+                                    <small class="d-block text-muted text-nowrap mt-1">
+                                        <i class="bi bi-person-circle me-1"></i> {{ $mou->nama_pic_instansi }}
+                                        @if ($mou->nomor_kontak_pic)
+                                            <br><i class="bi bi-telephone me-1"></i> {{ $mou->nomor_kontak_pic }}
+                                        @endif
+                                    </small>
+                                @endif
+                            </td>
+
+                            {{-- ==========================================
+                                 KOLOM BARU: NOMOR PKS
+                                 ========================================== --}}
+                            <td class="align-top">
+                                @if ($mou->no_pks)
+                                    <div class="mb-2">
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill mb-1" style="font-size: 0.65rem;">INTERNAL</span>
+                                        <div class="fw-bold text-dark" style="font-size: 0.85rem;">
+                                            {{ $mou->no_pks }}
+                                        </div>
+                                    </div>
+                                @endif
+                                @if ($mou->no_pks_instansi)
+                                    <div class="mb-1">
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill mb-1" style="font-size: 0.65rem;">INSTANSI</span>
+                                        <div class="text-muted" style="font-size: 0.85rem;">
+                                            {{ $mou->no_pks_instansi }}
+                                        </div>
+                                    </div>
+                                @endif
+                                @if (!$mou->no_pks && !$mou->no_pks_instansi)
+                                    <span class="text-muted small">-</span>
+                                @endif
+                            </td>
+                            {{-- ========================================== --}}
+
+                            <td>
+                                <span class="small text-dark d-block text-nowrap">{{ $mou->jenis_instansi ?? '-' }}</span>
+                                @if ($mou->jenis_instansi_lainnya && $mou->jenis_instansi === 'Lainnya')
+                                    <small class="text-muted d-block text-nowrap">( {{ $mou->jenis_instansi_lainnya }} )</small>
                                 @endif
                             </td>
                             <td>
-                                <span class="small text-dark d-block">{{ $mou->jenis_instansi ?? '-' }}
-                                @if($mou->jenis_instansi_lainnya && $mou->jenis_instansi === 'Lainnya')
-                                    <small class="text-muted d-block">( {{ $mou->jenis_instansi_lainnya }} )</small>
-                                @endif
-                                </span>
+                                <div class="d-flex flex-column gap-1">
+                                    <span class="badge bg-light text-dark border">
+                                        {{ $mou->tanggal_masuk ? $mou->tanggal_masuk->format('d M Y') : '-' }}
+                                    </span>
+                                    <div class="text-center text-muted small"><i class="bi bi-arrow-down"></i></div>
+                                    <span class="badge bg-light text-dark border">
+                                        {{ $mou->tanggal_keluar ? $mou->tanggal_keluar->format('d M Y') : '-' }}
+                                    </span>
+                                </div>
                             </td>
                             <td>
-                                <span class="badge bg-light text-dark border p-2">
-                                    {{ $mou->tanggal_masuk ? $mou->tanggal_masuk->format('d M Y') : '-' }}
-                                </span>
-                                <i class="bi bi-arrow-right mx-1 text-muted"></i>
-                                <span class="badge bg-light text-dark border p-2">
-                                    {{ $mou->tanggal_keluar ? $mou->tanggal_keluar->format('d M Y') : '-' }}
-                                </span>
-                            </td>
-                            <td>
-                                <div class="d-flex flex-wrap gap-2">
-                                    @if($mou->surat_permohonan)
-                                        <a href="{{ Storage::url($mou->surat_permohonan) }}" target="_blank" class="btn btn-sm btn-outline-dark rounded-pill px-2" title="Surat Permohonan">
+                                <div class="d-flex flex-wrap gap-2" style="max-width: 120px;">
+                                    @if ($mou->surat_permohonan)
+                                        <a href="{{ Storage::url($mou->surat_permohonan) }}" target="_blank"
+                                            class="btn btn-sm btn-outline-dark rounded-pill px-2"
+                                            title="Surat Permohonan">
                                             <i class="bi bi-file-earmark-text"></i>
                                         </a>
                                     @endif
-                                    @if($mou->sk_pengangkatan_pimpinan)
-                                        <a href="{{ Storage::url($mou->sk_pengangkatan_pimpinan) }}" target="_blank" class="btn btn-sm btn-outline-dark rounded-pill px-2" title="SK Pengangkatan">
+                                    @if ($mou->sk_pengangkatan_pimpinan)
+                                        <a href="{{ Storage::url($mou->sk_pengangkatan_pimpinan) }}" target="_blank"
+                                            class="btn btn-sm btn-outline-dark rounded-pill px-2"
+                                            title="SK Pengangkatan">
                                             <i class="bi bi-journal-richtext"></i>
                                         </a>
                                     @endif
-                                    @if($mou->sertifikat_akreditasi_prodi)
-                                        <a href="{{ Storage::url($mou->sertifikat_akreditasi_prodi) }}" target="_blank" class="btn btn-sm btn-outline-dark rounded-pill px-2" title="Sertifikat Akreditasi">
+                                    @if ($mou->sertifikat_akreditasi_prodi)
+                                        <a href="{{ Storage::url($mou->sertifikat_akreditasi_prodi) }}" target="_blank"
+                                            class="btn btn-sm btn-outline-dark rounded-pill px-2"
+                                            title="Sertifikat Akreditasi">
                                             <i class="bi bi-award"></i>
                                         </a>
                                     @endif
-                                    @if($mou->draft_mou)
-                                        <a href="{{ Storage::url($mou->draft_mou) }}" target="_blank" class="btn btn-sm btn-outline-dark rounded-pill px-2" title="Draft MoU">
+                                    @if ($mou->draft_mou)
+                                        <a href="{{ Storage::url($mou->draft_mou) }}" target="_blank"
+                                            class="btn btn-sm btn-outline-dark rounded-pill px-2" title="Draft MoU">
                                             <i class="bi bi-file-earmark-pdf"></i>
                                         </a>
                                     @endif
-                                    @if(!$mou->surat_permohonan && !$mou->sk_pengangkatan_pimpinan && !$mou->sertifikat_akreditasi_prodi && !$mou->draft_mou)
-                                        -
+                                    @if (
+                                        !$mou->surat_permohonan &&
+                                            !$mou->sk_pengangkatan_pimpinan &&
+                                            !$mou->sertifikat_akreditasi_prodi &&
+                                            !$mou->draft_mou)
+                                        <span class="text-muted small">-</span>
                                     @endif
                                 </div>
                             </td>
                             <td>
-                                <div style="max-width: 18rem;">
+                                <div style="max-width: 250px; white-space: normal;">
                                     {{ \Illuminate\Support\Str::limit($mou->rencana_kerja_sama ?? '', 80) }}
                                 </div>
                             </td>
-                            {{-- Keterangan column intentionally removed --}}
                             <td class="text-center">
-                                {{-- Tombol Aksi (Style Baru) --}}
                                 <a href="{{ route('mou.edit', $mou->id) }}" class="action-btn" title="Edit">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
@@ -346,14 +383,13 @@
                             </td>
                         </tr>
                     @empty
-                        {{-- Tampilan Data Kosong --}}
                         <tr>
-                            <td colspan="7" class="text-center py-5">
+                            <td colspan="8" class="text-center py-5">
                                 <div class="d-flex flex-column align-items-center">
                                     <i class="bi bi-folder-x display-4 text-muted mb-3" style="opacity: 0.5;"></i>
                                     <h5 class="text-muted fw-bold">Tidak ada data ditemukan</h5>
                                     <p class="text-muted small">
-                                        @if(request()->has('search') || request()->has('tanggal_mulai'))
+                                        @if (request()->has('search') || request()->has('tanggal_mulai'))
                                             Coba reset filter atau gunakan kata kunci lain.
                                         @else
                                             Tambahkan data MOU baru terlebih dahulu.
@@ -370,16 +406,10 @@
 
     {{-- 4. PAGINATION --}}
     <div class="d-flex justify-content-center mt-4 animate-up" style="animation-delay: 0.3s;">
-        {{-- Pastikan Anda mengirim data $mous dengan ->paginate() dari controller --}}
         {{ $mous->links() }}
     </div>
 
-
-    {{--
-      =====================================================
-      SCRIPT UNTUK SWEETALERT (Menggantikan alert biasa)
-      =====================================================
-    --}}
+    {{-- SWEETALERT --}}
     @if (session('success'))
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -408,15 +438,9 @@
             });
         </script>
     @endif
-
 @endsection
 
 @section('scripts')
-    {{--
-      =====================================================
-      SEMUA SCRIPT DARI 'Pelatihan Dasar'
-      =====================================================
-    --}}
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -461,8 +485,7 @@
             }
         });
 
-
-        // 3. Fungsi Export (Diadaptasi untuk MOU)
+        // 3. Fungsi Export (DIUPDATE untuk NO PKS)
         function exportMOU() {
             try {
                 // Ambil data $mous dari Laravel
@@ -478,8 +501,10 @@
                 const data = dataList.map(mou => {
                     return [
                         mou.nama_instansi || mou.nama_universitas || '',
-                        mou.tanggal_masuk ? mou.tanggal_masuk.split('T')[0] : '', // Format YYYY-MM-DD
-                        mou.tanggal_keluar ? mou.tanggal_keluar.split('T')[0] : '', // Format YYYY-MM-DD
+                        mou.no_pks || '', // Added
+                        mou.no_pks_instansi || '', // Added
+                        mou.tanggal_masuk ? mou.tanggal_masuk.split('T')[0] : '',
+                        mou.tanggal_keluar ? mou.tanggal_keluar.split('T')[0] : '',
                         mou.surat_permohonan || '',
                         mou.sk_pengangkatan_pimpinan || '',
                         mou.sertifikat_akreditasi_prodi || '',
@@ -490,7 +515,10 @@
 
                 // Buat worksheet
                 const ws = XLSX.utils.aoa_to_sheet([
-                    ['Nama Instansi', 'Tanggal Masuk', 'Tanggal Keluar', 'Surat Permohonan', 'SK Pengangkatan Pimpinan', 'Sertifikat Akreditasi Prodi', 'Draft MoU', 'Keterangan']
+                    ['Nama Instansi', 'No PKS Internal', 'No PKS Instansi', 'Tanggal Masuk', 'Tanggal Keluar',
+                        'Surat Permohonan', 'SK Pengangkatan Pimpinan', 'Sertifikat Akreditasi Prodi',
+                        'Draft MoU', 'Keterangan'
+                    ]
                 ].concat(data));
 
                 const wb = XLSX.utils.book_new();
@@ -504,11 +532,11 @@
             }
         }
 
-        // 4. Fungsi Download Template (Diadaptasi untuk MOU)
+        // 4. Fungsi Download Template
         function downloadTemplateMOU() {
             const ws = XLSX.utils.aoa_to_sheet([
                 ['Nama Instansi', 'Tanggal Masuk (YYYY-MM-DD)', 'Tanggal Keluar (YYYY-MM-DD)', 'Keterangan'],
-                    ['Universitas Contoh', '2025-01-01', '2025-12-31', 'Kerjasama penelitian', 'Surat Permohonan', 'SK Pengangkatan Pimpinan', 'Sertifikat Akreditasi Prodi', 'Draft MoU'],
+                ['Universitas Contoh', '2025-01-01', '2025-12-31', 'Kerjasama penelitian'],
                 ['Institut Teknologi Kedua', '2024-06-15', '2025-06-14', '']
             ]);
             const wb = XLSX.utils.book_new();
@@ -517,7 +545,7 @@
             showToast("Template berhasil diunduh!", "success");
         }
 
-        // 5. Fungsi Import (Diadaptasi untuk MOU)
+        // 5. Fungsi Import
         function importMOU(input) {
             const file = input.files[0];
             if (!file) return;
@@ -526,9 +554,15 @@
             reader.onload = function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                    const workbook = XLSX.read(data, {
+                        type: 'array',
+                        cellDates: true
+                    });
                     const firstSheetName = workbook.SheetNames[0];
-                    const json = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName], { defval: '', raw: false });
+                    const json = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName], {
+                        defval: '',
+                        raw: false
+                    });
 
                     if (json.length === 0) {
                         showToast('File Excel kosong atau format salah.', 'error');
@@ -541,26 +575,27 @@
 
                     showToast("Sedang memproses data...", "info");
 
-                    // Pastikan route 'mou.import_excel' ada di web.php
                     fetch('{{ route('mou.import_excel') }}', {
-                        method: 'POST',
-                        body: fd,
-                        headers: { 'Accept': 'application/json' }
-                    })
-                    .then(r => r.json())
-                    .then(res => {
-                        if (res.success) {
-                            showToast(res.message, 'success');
-                            setTimeout(() => location.reload(), 1500);
-                        } else {
-                            console.error(res);
-                            showToast('Gagal: ' + (res.message || 'Import gagal'), 'error');
-                        }
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        showToast('Terjadi kesalahan server.', 'error');
-                    });
+                            method: 'POST',
+                            body: fd,
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(r => r.json())
+                        .then(res => {
+                            if (res.success) {
+                                showToast(res.message, 'success');
+                                setTimeout(() => location.reload(), 1500);
+                            } else {
+                                console.error(res);
+                                showToast('Gagal: ' + (res.message || 'Import gagal'), 'error');
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            showToast('Terjadi kesalahan server.', 'error');
+                        });
 
                 } catch (error) {
                     console.error(error);
@@ -568,17 +603,15 @@
                 }
             };
             reader.readAsArrayBuffer(file);
-            input.value = ''; // Reset file input
+            input.value = '';
         }
 
-        // 6. Fungsi Copy URL Publik MOU
+        // 6. Copy URL
         function copyPublicMouUrl() {
             const publicUrl = '{{ route('public.mou.create') }}';
-
             navigator.clipboard.writeText(publicUrl).then(() => {
                 showToast('URL publik berhasil disalin ke clipboard!', 'success');
             }).catch(() => {
-                // Fallback untuk browser lama
                 const textarea = document.createElement('textarea');
                 textarea.value = publicUrl;
                 document.body.appendChild(textarea);
@@ -589,7 +622,7 @@
             });
         }
 
-        // 7. Fungsi Delete Confirmation (SweetAlert)
+        // 7. Delete Confirmation
         document.addEventListener('DOMContentLoaded', () => {
             const deleteButtons = document.querySelectorAll('.btn-delete');
             deleteButtons.forEach(btn => {
@@ -602,7 +635,7 @@
                         text: "Data MOU ini akan dihapus permanen.",
                         icon: 'warning',
                         showCancelButton: true,
-                        confirmButtonColor: '#7c1316', // --custom-maroon
+                        confirmButtonColor: '#7c1316',
                         cancelButtonColor: '#6c757d',
                         confirmButtonText: 'Ya, hapus!',
                         cancelButtonText: 'Batal'
@@ -613,8 +646,6 @@
                     });
                 });
             });
-
-            // Hapus inisialisasi Popover karena tidak dipakai di tabel MOU
         });
     </script>
 @endsection

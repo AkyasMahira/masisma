@@ -32,7 +32,8 @@ class Mou extends Model
         'nomor_kontak_pic',
         'jenis_instansi',
         'jenis_instansi_lainnya',
-        // File uploads for pengajuan
+        'no_pks',
+        'no_pks_instansi',
         'surat_permohonan',
         'sk_pengangkatan_pimpinan',
         'sertifikat_akreditasi_prodi',

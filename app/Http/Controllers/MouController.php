@@ -61,6 +61,8 @@ class MouController extends Controller
             // Accept new field name `nama_instansi` and fallback to old `nama_universitas`
             'nama_instansi' => 'nullable|string|max:255',
             'nama_universitas' => 'nullable|string|max:255',
+            'no_pks' => 'nullable|string|max:255',
+            'no_pks_instansi' => 'nullable|string|max:255',
             'tanggal_masuk'    => 'required|date',
             'tanggal_keluar'   => 'required|date|after_or_equal:tanggal_masuk',
             'surat_permohonan' => 'required|file|mimes:pdf,doc,docx|max:5120',
@@ -86,6 +88,8 @@ class MouController extends Controller
             // Prefer `nama_instansi`, otherwise fallback to legacy field value
             'nama_instansi' => $request->input('nama_instansi') ?? $request->input('nama_universitas'),
             'nama_universitas' => $request->input('nama_universitas') ?? $request->input('nama_instansi'),
+            'no_pks' => $request->input('no_pks'),
+            'no_pks_instansi' => $request->input('no_pks_instansi'),
             'tanggal_masuk'    => $request->tanggal_masuk,
             'tanggal_keluar'   => $request->tanggal_keluar,
             'keterangan'       => $request->keterangan,
@@ -126,6 +130,8 @@ class MouController extends Controller
         $request->validate([
             'nama_instansi' => 'nullable|string|max:255',
             'nama_universitas' => 'nullable|string|max:255',
+            'no_pks' => 'nullable|string|max:255',
+            'no_pks_instansi' => 'nullable|string|max:255',
             'tanggal_masuk'    => 'required|date',
             'tanggal_keluar'   => 'required|date|after_or_equal:tanggal_masuk',
             'surat_permohonan' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
@@ -146,6 +152,8 @@ class MouController extends Controller
         $data = [];
         if ($request->filled('nama_instansi')) $data['nama_instansi'] = $request->input('nama_instansi');
         if ($request->filled('nama_universitas')) $data['nama_universitas'] = $request->input('nama_universitas');
+        if ($request->filled('no_pks')) $data['no_pks'] = $request->input('no_pks');
+        if ($request->filled('no_pks_instansi')) $data['no_pks_instansi'] = $request->input('no_pks_instansi');
         if ($request->filled('tanggal_masuk')) $data['tanggal_masuk'] = $request->input('tanggal_masuk');
         if ($request->filled('tanggal_keluar')) $data['tanggal_keluar'] = $request->input('tanggal_keluar');
         if ($request->has('keterangan')) $data['keterangan'] = $request->input('keterangan');
@@ -250,6 +258,8 @@ class MouController extends Controller
                     Mou::create([
                     'nama_instansi' => $namaUniversitas,
                     'nama_universitas' => $row['Nama Universitas'] ?? $namaUniversitas,
+                    'no_pks' => $row['No PKS'] ?? null,
+                    'no_pks_instansi' => $row['No PKS Instansi'] ?? null,
                     'tanggal_masuk'    => $tglMasuk,
                     'tanggal_keluar'   => $tglKeluar,
                     'keterangan'       => $row['Keterangan'] ?? null,
@@ -312,6 +322,8 @@ class MouController extends Controller
         $request->validate([
             'nama_instansi' => 'nullable|string|max:255',
             'nama_universitas' => 'nullable|string|max:255',
+            'no_pks' => 'nullable|string|max:255',
+            'no_pks_instansi' => 'nullable|string|max:255',
             'tanggal_masuk'    => 'required|date',
             'tanggal_keluar'   => 'required|date|after_or_equal:tanggal_masuk',
             'surat_permohonan' => 'required|file|mimes:pdf,doc,docx|max:5120',
@@ -335,6 +347,8 @@ class MouController extends Controller
         Mou::create([
             'nama_instansi' => $request->input('nama_instansi') ?? $request->input('nama_universitas'),
             'nama_universitas' => $request->input('nama_universitas') ?? $request->input('nama_instansi'),
+            'no_pks' => $request->input('no_pks'),
+            'no_pks_instansi' => $request->input('no_pks_instansi'),
             'tanggal_masuk'    => $request->tanggal_masuk,
             'tanggal_keluar'   => $request->tanggal_keluar,
             'keterangan'       => $request->keterangan,
@@ -371,6 +385,8 @@ class MouController extends Controller
         $request->validate([
             'nama_instansi' => 'nullable|string|max:255',
             'nama_universitas' => 'nullable|string|max:255',
+            'no_pks' => 'nullable|string|max:255',
+            'no_pks_instansi' => 'nullable|string|max:255',
             'tanggal_masuk'    => 'required|date',
             'tanggal_keluar'   => 'required|date|after_or_equal:tanggal_masuk',
             'surat_permohonan' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
@@ -389,6 +405,8 @@ class MouController extends Controller
         $data = [];
         if ($request->filled('nama_instansi')) $data['nama_instansi'] = $request->input('nama_instansi');
         if ($request->filled('nama_universitas')) $data['nama_universitas'] = $request->input('nama_universitas');
+        if ($request->filled('no_pks')) $data['no_pks'] = $request->input('no_pks');
+        if ($request->filled('no_pks_instansi')) $data['no_pks_instansi'] = $request->input('no_pks_instansi');
         if ($request->filled('tanggal_masuk')) $data['tanggal_masuk'] = $request->input('tanggal_masuk');
         if ($request->filled('tanggal_keluar')) $data['tanggal_keluar'] = $request->input('tanggal_keluar');
         if ($request->has('keterangan')) $data['keterangan'] = $request->input('keterangan');

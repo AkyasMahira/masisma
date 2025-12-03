@@ -191,7 +191,7 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-building"></i></span>
                                 <input type="text" class="form-control @error('nama_instansi') is-invalid @enderror"
-                                    name="nama_instansi" value="{{ old('nama_instansi') }}" required>
+                                    name="nama_instansi" value="{{ old('nama_instansi') }}"placeholder="Contoh: Instansi Pendidikan Teknologi Cemerlang" required>
                             </div>
                             @error('nama_instansi')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -232,11 +232,40 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
                                 <input type="text" class="form-control @error('alamat_instansi') is-invalid @enderror"
-                                    name="alamat_instansi" value="{{ old('alamat_instansi') }}">
+                                    name="alamat_instansi" value="{{ old('alamat_instansi') }}"
+                                        placeholder="Alamat lengkap instansi terkait">
                             </div>
                             @error('alamat_instansi')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
+                        </div>
+
+                        {{-- TAMBAHAN FIELD NO PKS --}}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nomor PKS (Rsud)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                                    <input type="text" class="form-control @error('no_pks') is-invalid @enderror"
+                                        name="no_pks" value="{{ old('no_pks') }}"
+                                        placeholder="Nomor PKS dari Rsud">
+                                </div>
+                                @error('no_pks')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nomor PKS (Instansi)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                                    <input type="text" class="form-control @error('no_pks_instansi') is-invalid @enderror"
+                                        name="no_pks_instansi" value="{{ old('no_pks_instansi') }}"
+                                        placeholder="Nomor PKS dari Instansi terkait">
+                                </div>
+                                @error('no_pks_instansi')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
 
                         <div class="row">
@@ -282,7 +311,7 @@
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-person"></i></span>
                                     <input type="text" class="form-control @error('nama_pic_instansi') is-invalid @enderror"
-                                        name="nama_pic_instansi" value="{{ old('nama_pic_instansi') }}">
+                                        name="nama_pic_instansi" value="{{ old('nama_pic_instansi') }} ">
                                 </div>
                                 @error('nama_pic_instansi')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>

@@ -219,6 +219,7 @@
                             @enderror
                         </div>
 
+
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label class="form-label">Jenis Instansi <span class="text-danger">*</span></label>
@@ -257,6 +258,33 @@
                             @enderror
                         </div>
 
+                        {{-- TAMBAHAN FIELD NO PKS --}}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nomor PKS (Rsud)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                                    <input type="text" class="form-control @error('no_pks') is-invalid @enderror"
+                                        name="no_pks" value="{{ old('no_pks') }}"
+                                        placeholder="Nomor PKS Rsud">
+                                </div>
+                                @error('no_pks')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nomor PKS (Instansi)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                                    <input type="text" class="form-control @error('no_pks_instansi') is-invalid @enderror"
+                                        name="no_pks_instansi" value="{{ old('no_pks_instansi') }}"
+                                        placeholder="Nomor PKS dari Instansi terkait">
+                                </div>
+                                @error('no_pks_instansi')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
