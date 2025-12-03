@@ -297,4 +297,36 @@ class PresentasiController extends Controller
 
         return view('admin.presentasi.index', compact('presentasi'));
     }
+
+    public function apiLaporan()
+{
+    // Ambil semua presentasi yang sudah punya file laporan
+    $presentasi = Presentasi::with([
+            'user.mou',          // relasi user + mou
+            'praPenelitian.mou', // relasi pra_penelitian + mou
+        ])
+        ->whereNotNull('file_laporan')
+        ->get();
+
+    // Mapping ke bentuk JSON yang rapi
+    $data = $presentasi->map(function ($item) {
+        // Prioritas ambil MOU dari pra_penelitian, kalau nggak ada baru dari user
+        $mou = $item->praPenelitian->mou ?? $item->user->mou;
+
+        return [
+            'nama_user'             => $item->user->name,
+            'tanggal_upload_laporan'=> optional($item->laporan_uploaded_at)->format('Y-m-d'),
+            'judul'                 => optional($item->praPenelitian)->judul,
+            'nama_instansi'         => $mou ? $mou->nama_instansi : null, // accessor nama_instansi sudah handle nama_universitas
+            'program_studi'         => $item->praPenelitian->prodi ?? $item->user->program_studi,
+            'file_laporan_url'      => $item->file_laporan 
+                                        ? asset('storage/' . $item->file_laporan) 
+                                        : null,
+        ];
+    });
+
+    // Balikkan dalam bentuk JSON murni
+    return response()->json($data, 200);
+}
+
 }
