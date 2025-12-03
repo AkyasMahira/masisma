@@ -15,14 +15,32 @@ class CreateAbsensisTable extends Migration
     {
         Schema::create('absensis', function (Blueprint $table) {
             $table->bigIncrements('id');
+
             $table->unsignedBigInteger('mahasiswa_id');
+
+            // jenis absen
             $table->enum('type', ['masuk', 'keluar']);
+
+            // waktu absen
             $table->dateTime('jam_masuk')->nullable();
             $table->dateTime('jam_keluar')->nullable();
+
+            // durasi total menit (untuk absen keluar)
             $table->integer('durasi_menit')->nullable();
+
+            // === LOKASI (GEOFENCE) ===
+            $table->decimal('latitude', 11, 8)->nullable();
+            $table->decimal('longitude', 11, 8)->nullable();
+            // akurasi dari browser (meter)
+            $table->integer('location_accuracy')->nullable();
+
             $table->timestamps();
 
-            $table->foreign('mahasiswa_id')->references('id')->on('mahasiswas')->onDelete('cascade');
+            $table
+                ->foreign('mahasiswa_id')
+                ->references('id')
+                ->on('mahasiswas')
+                ->onDelete('cascade');
         });
     }
 

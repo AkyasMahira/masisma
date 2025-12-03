@@ -14,7 +14,10 @@ class Absensi extends Model
         'jam_masuk',
         'jam_keluar',
         'type',
-        'durasi_menit'
+        'durasi_menit',
+        'latitude',
+        'longitude',
+        'location_accuracy',
     ];
 
     protected $casts = [
