@@ -1,8 +1,6 @@
-{{-- Sidebar --}}
 <div class="sidebar">
     <div class="sidebar-inner">
         <div class="sidebar-header">
-            {{-- Pastikan file 'icon.png' ada di public folder --}}
             <img class="image-sidebar" src="{{ asset('icon.png') }}" alt="Logo">
             <button class="sidebar-toggle" id="sidebarToggle">
                 <i class="bi bi-chevron-left"></i>
@@ -18,12 +16,9 @@
 
         <nav class="nav flex-column sidebar-nav-container">
 
-            {{-- ========================================== --}}
-            {{-- MENU KHUSUS ADMIN                          --}}
-            {{-- ========================================== --}}
+            {{-- ========== MENU ADMIN ========== --}}
             @if (auth()->check() && auth()->user()->role === 'admin')
-                
-                {{-- GRUP 1: UTAMA --}}
+
                 <div class="sidebar-heading">
                     <span class="sidebar-text">Menu Utama</span>
                 </div>
@@ -39,75 +34,78 @@
                 </a>
 
                 <a class="nav-link {{ request()->is('admin/pengajuan*') ? 'active' : '' }}"
-                    href="{{ route('admin.pengajuan.index') }}">
+                   href="{{ route('admin.pengajuan.index') }}">
                     <i class="bi bi-hourglass-split"></i>
                     <span class="sidebar-text">Approval Pengajuan</span>
                 </a>
 
-                                <a class="nav-link {{ request()->is('surat-balasan*') ? 'active' : '' }}"
-                    href="{{ route('surat-balasan.index') }}">
+                <a class="nav-link {{ request()->is('surat-balasan*') ? 'active' : '' }}"
+                   href="{{ route('surat-balasan.index') }}">
                     <i class="bi bi-envelope-paper"></i>
                     <span class="sidebar-text">Surat Balasan</span>
                 </a>
 
-                {{-- GRUP 2: MOU --}}
+                {{-- MoU --}}
                 @php $isMouActive = request()->is('mou*'); @endphp
                 <div class="nav-item-dropdown">
-                    <a class="nav-link {{ $isMouActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
-                        href="#menuMou" role="button" aria-expanded="{{ $isMouActive ? 'true' : 'false' }}">
+                    <a class="nav-link {{ $isMouActive ? 'active-parent' : '' }}"
+                       data-bs-toggle="collapse" href="#menuMou" role="button"
+                       aria-expanded="{{ $isMouActive ? 'true' : 'false' }}">
                         <i class="bi bi-file-earmark-text"></i>
                         <span class="sidebar-text">MoU</span>
                         <i class="bi bi-chevron-down sidebar-arrow"></i>
                     </a>
                     <div class="collapse sub-menu {{ $isMouActive ? 'show' : '' }}" id="menuMou">
                         <a class="nav-link {{ request()->is('mou') ? 'active' : '' }}"
-                            href="{{ route('mou.index') }}">
+                           href="{{ route('mou.index') }}">
                             <span class="sidebar-text">List MOU</span>
                         </a>
                     </div>
                 </div>
 
-                {{-- GRUP 3: PENDIDIKAN --}}
+                {{-- Pendidikan --}}
                 @php
-                    $isPendidikanActive = request()->is('mahasiswa*') || request()->is('ruangan*') || request()->is('absensi*');
+                    $isPendidikanActive = request()->is('mahasiswa*') ||
+                                          request()->is('ruangan*') ||
+                                          request()->is('absensi*');
                 @endphp
                 <div class="nav-item-dropdown">
-                    <a class="nav-link {{ $isPendidikanActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
-                        href="#menuPendidikan" role="button"
-                        aria-expanded="{{ $isPendidikanActive ? 'true' : 'false' }}">
+                    <a class="nav-link {{ $isPendidikanActive ? 'active-parent' : '' }}"
+                       data-bs-toggle="collapse" href="#menuPendidikan" role="button"
+                       aria-expanded="{{ $isPendidikanActive ? 'true' : 'false' }}">
                         <i class="bi bi-mortarboard"></i>
                         <span class="sidebar-text">Pendidikan</span>
                         <i class="bi bi-chevron-down sidebar-arrow"></i>
                     </a>
                     <div class="collapse sub-menu {{ $isPendidikanActive ? 'show' : '' }}" id="menuPendidikan">
                         <a class="nav-link {{ request()->is('mahasiswa*') ? 'active' : '' }}"
-                            href="{{ route('mahasiswa.index') }}">
+                           href="{{ route('mahasiswa.index') }}">
                             <span class="sidebar-text">Mahasiswa</span>
                         </a>
                         <a class="nav-link {{ request()->is('ruangan*') ? 'active' : '' }}"
-                            href="{{ route('ruangan.index') }}">
+                           href="{{ route('ruangan.index') }}">
                             <span class="sidebar-text">Ruangan</span>
                         </a>
                         <a class="nav-link {{ request()->is('absensi*') ? 'active' : '' }}"
-                            href="{{ route('absensi.index') }}">
+                           href="{{ route('absensi.index') }}">
                             <span class="sidebar-text">Riwayat Absensi</span>
                         </a>
                     </div>
                 </div>
 
-                {{-- GRUP 4: PELATIHAN --}}
+                {{-- Pelatihan --}}
                 @php $isPelatihanActive = request()->is('pelatihan*'); @endphp
                 <div class="nav-item-dropdown">
-                    <a class="nav-link {{ $isPelatihanActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
-                        href="#menuPelatihan" role="button"
-                        aria-expanded="{{ $isPelatihanActive ? 'true' : 'false' }}">
+                    <a class="nav-link {{ $isPelatihanActive ? 'active-parent' : '' }}"
+                       data-bs-toggle="collapse" href="#menuPelatihan" role="button"
+                       aria-expanded="{{ $isPelatihanActive ? 'true' : 'false' }}">
                         <i class="bi bi-people"></i>
                         <span class="sidebar-text">Pelatihan</span>
                         <i class="bi bi-chevron-down sidebar-arrow"></i>
                     </a>
                     <div class="collapse sub-menu {{ $isPelatihanActive ? 'show' : '' }}" id="menuPelatihan">
                         <a class="nav-link {{ request()->is('pelatihan') ? 'active' : '' }}"
-                            href="{{ route('pelatihan.index') }}">
+                           href="{{ route('pelatihan.index') }}">
                             <span class="sidebar-text">List Pelatihan</span>
                         </a>
                         <a class="nav-link" href="{{ route('public.pelatihan.index') }}">
@@ -116,97 +114,89 @@
                     </div>
                 </div>
 
-                {{-- GRUP 5: PENELITIAN --}}
-                @php $isPenelitianActive = request()->is('pra-penelitian*') || request()->is('admin/presentasi*'); @endphp
+                {{-- Penelitian --}}
+                @php
+                    $isPenelitianActive = request()->is('pra-penelitian*') ||
+                                          request()->is('admin/presentasi*');
+                @endphp
                 <div class="nav-item-dropdown">
-                    <a class="nav-link {{ $isPenelitianActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
-                        href="#menuPenelitian" role="button"
-                        aria-expanded="{{ $isPenelitianActive ? 'true' : 'false' }}">
+                    <a class="nav-link {{ $isPenelitianActive ? 'active-parent' : '' }}"
+                       data-bs-toggle="collapse" href="#menuPenelitian" role="button"
+                       aria-expanded="{{ $isPenelitianActive ? 'true' : 'false' }}">
                         <i class="bi bi-journal-richtext"></i>
                         <span class="sidebar-text">Penelitian</span>
                         <i class="bi bi-chevron-down sidebar-arrow"></i>
                     </a>
                     <div class="collapse sub-menu {{ $isPenelitianActive ? 'show' : '' }}" id="menuPenelitian">
                         <a class="nav-link {{ request()->is('pra-penelitian*') ? 'active' : '' }}"
-                            href="{{ route('pra-penelitian.index') }}">
+                           href="{{ route('pra-penelitian.index') }}">
                             <span class="sidebar-text">Pra-Penelitian</span>
                         </a>
-                         <a class="nav-link {{ request()->is('admin/presentasi*') ? 'active' : '' }}"
-                            href="{{ route('admin.presentasi.index') }}">
+                        <a class="nav-link {{ request()->is('admin/presentasi*') ? 'active' : '' }}"
+                           href="{{ route('admin.presentasi.index') }}">
                             <span class="sidebar-text">Presentasi</span>
                         </a>
                     </div>
                 </div>
-
-                {{-- Menu Tambahan (Jika perlu tetap ada) --}}
-                {{-- <div class="sidebar-heading mt-3">
-                    <span class="sidebar-text">Lainnya</span>
-                </div> --}}
-
             @endif
 
-            {{-- ========================================== --}}
-            {{-- MENU KHUSUS USER                           --}}
-            {{-- ========================================== --}}
+            {{-- ========== MENU USER ========== --}}
             @if (auth()->check() && auth()->user()->role === 'user')
-                
-                {{-- Dashboard User juga butuh link Dashboard umum --}}
-                 <div class="sidebar-heading">
+
+                <div class="sidebar-heading">
                     <span class="sidebar-text">Menu Utama</span>
                 </div>
+
                 <a class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                     <i class="bi bi-house-door"></i>
                     <span class="sidebar-text">Dashboard</span>
                 </a>
 
                 @php
-                    $userId = auth()->id();
-                    $pra = \App\Models\Pengajuan::where('user_id', $userId)->where('jenis', 'pra_penelitian')->latest()->first();
-                    $magang = \App\Models\Pengajuan::where('user_id', $userId)->where('jenis', 'magang')->latest()->first();
+                    $userId       = auth()->id();
+                    $pra          = \App\Models\Pengajuan::where('user_id', $userId)->where('jenis', 'pra_penelitian')->latest()->first();
+                    $magang       = \App\Models\Pengajuan::where('user_id', $userId)->where('jenis', 'magang')->latest()->first();
                     $hasPraAccess = $pra && $pra->status === 'approved';
                     $hasMagangAccess = $magang && $magang->status === 'approved';
-                    $hasCIAccess = $hasPraAccess && $pra->ci_nama;
-                    $presentasi = $hasCIAccess ? \App\Models\Presentasi::where('user_id', $userId)->first() : null;
+                    $hasCIAccess  = $hasPraAccess && $pra->ci_nama;
+                    $presentasi   = $hasCIAccess ? \App\Models\Presentasi::where('user_id', $userId)->first() : null;
                 @endphp
 
                 <div class="sidebar-heading mt-2">
                     <span class="sidebar-text">Layanan</span>
                 </div>
 
-                {{-- 1. MENU STATUS & PENGAJUAN --}}
                 <a class="nav-link {{ request()->is('pengajuan') && !request()->is('pengajuan/detail*') ? 'active' : '' }}"
-                    href="{{ route('pengajuan.index') }}">
+                   href="{{ route('pengajuan.index') }}">
                     <i class="bi bi-grid-1x2"></i>
                     <span class="sidebar-text">Pengajuan & Status</span>
                 </a>
 
-                {{-- 2. MENU AKSES MAGANG --}}
                 @if ($hasMagangAccess)
                     <div class="sidebar-heading mt-2">
                         <span class="sidebar-text">Aktivitas Magang</span>
                     </div>
                     <a class="nav-link {{ request()->routeIs('mahasiswa.dashboard') ? 'active' : '' }}"
-                        href="{{ route('mahasiswa.dashboard') }}">
+                       href="{{ route('mahasiswa.dashboard') }}">
                         <i class="bi bi-briefcase"></i>
                         <span class="sidebar-text">Dashboard Magang</span>
                     </a>
                 @endif
 
-                {{-- 3. MENU AKSES PRA-PENELITIAN --}}
                 @if ($hasPraAccess)
                     <div class="sidebar-heading mt-2">
                         <span class="sidebar-text">Aktivitas Penelitian</span>
                     </div>
 
                     <a class="nav-link {{ request()->is('pengajuan/detail/pra_penelitian') ? 'active' : '' }}"
-                        href="{{ route('pengajuan.detail', 'pra_penelitian') }}">
+                       href="{{ route('pengajuan.detail', 'pra_penelitian') }}">
                         <i class="bi bi-bar-chart-line"></i>
                         <span class="sidebar-text">Detail Penelitian</span>
                     </a>
 
                     @if ($hasCIAccess)
                         <a class="nav-link {{ request()->is('konsultasi*') ? 'active' : '' }}"
-                            href="{{ route('konsultasi.index') }}">
+                           href="{{ route('konsultasi.index') }}">
                             <i class="bi bi-chat-dots"></i>
                             <span class="sidebar-text">Konsultasi</span>
                         </a>
@@ -214,7 +204,7 @@
 
                     @if ($presentasi)
                         <a class="nav-link {{ request()->is('presentasi*') ? 'active' : '' }}"
-                            href="{{ route('presentasi.show') }}">
+                           href="{{ route('presentasi.show') }}">
                             <i class="bi bi-easel"></i>
                             <span class="sidebar-text">Presentasi</span>
                         </a>
@@ -224,11 +214,10 @@
         </nav>
     </div>
 
-    {{-- User Profile di Bawah --}}
     <div class="sidebar-footer">
         <div class="p-3 sidebar-user-profile">
             <a class="nav-link logout-link" href="#"
-                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                 <i class="bi bi-box-arrow-right"></i>
                 <span class="sidebar-text">Logout</span>
             </a>
@@ -251,11 +240,11 @@
 
                     @if ($hasFoto)
                         <img src="{{ asset($mahasiswa->foto_path) }}"
-                            class="rounded-circle me-2 object-fit-cover" 
-                            width="40" height="40" alt="User">
+                             class="rounded-circle me-2 object-fit-cover"
+                             width="40" height="40" alt="User">
                     @else
                         <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=7c1316&color=fff"
-                            class="rounded-circle me-2" width="40" height="40" alt="User">
+                             class="rounded-circle me-2" width="40" height="40" alt="User">
                     @endif
 
                     <div class="sidebar-text">
@@ -264,7 +253,7 @@
                     </div>
                 @else
                     <img src="https://ui-avatars.com/api/?name=Guest&background=7c1316&color=fff"
-                        class="rounded-circle me-2" width="40" height="40" alt="Guest">
+                         class="rounded-circle me-2" width="40" height="40" alt="Guest">
                     <div class="sidebar-text">
                         <div class="fw-bold">Guest</div>
                         <small>Visitor</small>
@@ -276,22 +265,12 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // 1. Fitur Search Sidebar
+    // HANYA SEARCH / FILTER SIDEBAR DI SINI
+    document.addEventListener('DOMContentLoaded', function () {
         const searchInput = document.querySelector('.sidebar-search .search-input');
         if (searchInput) {
             searchInput.addEventListener('input', function(e) {
                 filterSidebar(e.target.value);
-            });
-        }
-
-        // 2. Toggle Sidebar
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const sidebar = document.querySelector('.sidebar');
-
-        if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('collapsed');
             });
         }
     });
@@ -299,20 +278,21 @@
     function filterSidebar(filterText) {
         const text = filterText.toLowerCase();
         const navContainer = document.querySelector('.sidebar-nav-container');
+        if (!navContainer) return;
+
         const headings = navContainer.querySelectorAll('.sidebar-heading');
         const items = navContainer.querySelectorAll(
-            '.sidebar-nav-container > .nav-link, .sidebar-nav-container > .nav-item-dropdown');
+            '.sidebar-nav-container > .nav-link, .sidebar-nav-container > .nav-item-dropdown'
+        );
         const allSubLinks = navContainer.querySelectorAll('.sub-menu .nav-link');
 
-        // RESET STATE
         if (text === '') {
             headings.forEach(h => h.style.display = 'block');
             items.forEach(item => item.style.display = 'block');
             allSubLinks.forEach(sub => sub.style.display = '');
 
             navContainer.querySelectorAll('.sub-menu').forEach(sub => {
-                const parentLink = sub.closest('.nav-item-dropdown').querySelector(
-                    '[data-bs-toggle="collapse"]');
+                const parentLink = sub.closest('.nav-item-dropdown').querySelector('[data-bs-toggle="collapse"]');
                 if (!parentLink.classList.contains('active-parent')) {
                     sub.classList.remove('show');
                     parentLink.setAttribute('aria-expanded', 'false');
@@ -321,14 +301,12 @@
             return;
         }
 
-        // FILTERING
         headings.forEach(h => h.style.display = 'none');
         allSubLinks.forEach(sub => sub.style.display = 'none');
 
         items.forEach(item => {
             let groupHasMatch = false;
-            const mainLink = item.matches('.nav-link') ? item : item.querySelector(
-                '[data-bs-toggle="collapse"]');
+            const mainLink = item.matches('.nav-link') ? item : item.querySelector('[data-bs-toggle="collapse"]');
             const mainText = mainLink.querySelector('.sidebar-text')?.textContent.toLowerCase() || '';
 
             if (mainText.includes(text)) {
@@ -352,7 +330,6 @@
                     item.querySelector('.sub-menu').classList.add('show');
                     item.querySelector('[data-bs-toggle="collapse"]').setAttribute('aria-expanded', 'true');
                 }
-                // Show Heading
                 let heading = item.previousElementSibling;
                 while (heading) {
                     if (heading.classList.contains('sidebar-heading')) {
@@ -369,9 +346,6 @@
 </script>
 
 <style>
-    /* ========================================= */
-    /* --- STYLING SIDEBAR (PILL UI/UX) --- */
-    /* ========================================= */
     :root {
         --maroon: #7c1316;
         --maroon-light: #a3191d;
@@ -385,7 +359,6 @@
         text-decoration: none !important;
     }
 
-    /* --- Sidebar Container (Flexbox + Scroll) --- */
     .sidebar {
         width: 250px;
         height: 100vh;
@@ -406,7 +379,6 @@
         width: 80px;
     }
 
-    /* --- Sidebar Inner (Scrollable Area) --- */
     .sidebar-inner {
         flex: 1;
         overflow-y: auto;
@@ -416,7 +388,6 @@
         scroll-behavior: smooth;
     }
 
-    /* Custom Scrollbar */
     .sidebar-inner::-webkit-scrollbar {
         width: 6px;
     }
@@ -436,13 +407,11 @@
         background: rgba(255, 255, 255, 0.5);
     }
 
-    /* Firefox Scrollbar */
     .sidebar-inner {
         scrollbar-width: thin;
         scrollbar-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0.2);
     }
 
-    /* --- Header & Logo --- */
     .sidebar-header {
         text-align: center;
         padding: 1.5rem 1rem;
@@ -488,10 +457,6 @@
         z-index: 1001;
     }
 
-    .sidebar.collapsed .sidebar-toggle {
-        right: -15px;
-    }
-
     .sidebar-toggle:hover {
         background: var(--maroon);
         color: white;
@@ -499,15 +464,6 @@
         transform: translateY(-50%) scale(1.1);
     }
 
-    .sidebar-toggle i {
-        transition: transform var(--transition-speed) ease;
-    }
-
-    .sidebar.collapsed .sidebar-toggle i {
-        transform: rotate(180deg);
-    }
-
-    /* --- Search Bar --- */
     .sidebar-search {
         padding: 1rem;
         flex-shrink: 0;
@@ -550,14 +506,12 @@
         display: none;
     }
 
-    /* --- Navigasi Container (Scrollable) --- */
     .sidebar-nav-container {
         flex-grow: 1;
         padding: 0 1rem 1rem 1rem;
         overflow-y: visible;
     }
 
-    /* Judul Grup */
     .sidebar-heading {
         font-size: 0.7rem;
         font-weight: 600;
@@ -570,16 +524,10 @@
         transition: opacity var(--transition-speed);
     }
 
-    .sidebar.collapsed .sidebar-heading {
-        padding-top: 1rem;
-        padding-bottom: 0;
-    }
-
     .sidebar.collapsed .sidebar-heading .sidebar-text {
         display: none;
     }
 
-    /* --- Link Navigasi (Pill Style) --- */
     .nav-link {
         color: var(--sidebar-text-color);
         padding: 0.7rem 0.8rem;
@@ -592,6 +540,7 @@
         white-space: nowrap;
         overflow: hidden;
         text-decoration: none;
+        animation: fadeIn 0.3s ease;
     }
 
     .nav-link i {
@@ -618,7 +567,6 @@
         color: var(--sidebar-text-active);
     }
 
-    /* --- Style Saat Collapsed --- */
     .sidebar.collapsed .nav-link {
         padding: 0.7rem 0;
         justify-content: center;
@@ -641,7 +589,6 @@
         display: none !important;
     }
 
-    /* --- Dropdown Arrow --- */
     .sidebar-arrow {
         font-size: 0.8rem;
         margin-left: auto;
@@ -652,7 +599,6 @@
         transform: rotate(180deg);
     }
 
-    /* --- Sub-Menu (Line-and-Dot Style) --- */
     .sub-menu {
         position: relative;
         padding-left: 2.1rem;
@@ -690,18 +636,8 @@
         transition: all var(--transition-speed);
     }
 
-    .sub-menu .nav-link:hover {
-        color: var(--sidebar-text-active);
-    }
-
     .sub-menu .nav-link:hover::before {
         background: var(--sidebar-text-active);
-    }
-
-    .sub-menu .nav-link.active {
-        color: var(--sidebar-text-active);
-        font-weight: 500;
-        background: transparent !important;
     }
 
     .sub-menu .nav-link.active::before {
@@ -709,7 +645,6 @@
         transform: translateY(-50%) scale(1.3);
     }
 
-    /* --- Sidebar Footer (Fixed at Bottom) --- */
     .sidebar-footer {
         flex-shrink: 0;
         border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -720,10 +655,6 @@
         padding: 1rem;
     }
 
-    .sidebar.collapsed .sidebar-user-profile {
-        padding: 0.5rem;
-    }
-
     .sidebar.collapsed .sidebar-user-profile .sidebar-text,
     .sidebar.collapsed .sidebar-user-profile .logout-divider {
         display: none;
@@ -731,10 +662,6 @@
 
     .sidebar.collapsed .sidebar-user-profile .logout-link {
         justify-content: center;
-    }
-
-    .sidebar.collapsed .sidebar-user-profile .logout-link .sidebar-text {
-        display: none;
     }
 
     .logout-link {
@@ -769,7 +696,6 @@
         margin: 0.5rem 0 1rem;
     }
 
-    /* --- Responsive: Mobile --- */
     @media (max-width: 768px) {
         .sidebar {
             width: 80px;
@@ -785,7 +711,6 @@
         }
     }
 
-    /* --- Animation --- */
     @keyframes fadeIn {
         from {
             opacity: 0;
@@ -795,9 +720,5 @@
             opacity: 1;
             transform: translateY(0);
         }
-    }
-
-    .nav-link {
-        animation: fadeIn 0.3s ease;
     }
 </style>
