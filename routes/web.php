@@ -227,4 +227,14 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::post('/users/{id}/approve', [UserController::class, 'approve'])->name('users.approve');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+
+    // 9. Manajemen Jadwal Rolling Ruangan Mahasiswa
+    Route::prefix('room-schedules')->name('room_schedules.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\RoomScheduleController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\RoomScheduleController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\RoomScheduleController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [\App\Http\Controllers\RoomScheduleController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [\App\Http\Controllers\RoomScheduleController::class, 'update'])->name('update');
+        Route::delete('/{id}', [\App\Http\Controllers\RoomScheduleController::class, 'destroy'])->name('destroy');
+    });
 });
