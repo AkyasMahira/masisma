@@ -232,15 +232,17 @@ class PengajuanController extends Controller
             $presentasi->delete();
         }
 
-        // Remove PraPenelitian and related records (anggotas, konsultasi)
-        $pra = PraPenelitian::where('user_id', $pengajuan->user_id)->first();
-        if ($pra) {
-            // delete konsultasi
-            \App\Models\Konsultasi::where('pra_penelitian_id', $pra->id)->delete();
-            // delete anggota
-            \App\Models\PraPenelitianAnggota::where('pra_penelitian_id', $pra->id)->delete();
-            // finally delete pra penelitian
-            $pra->delete();
+        // Only remove PraPenelitian if this pengajuan was a Pra-Penelitian
+        if ($pengajuan->jenis === 'pra_penelitian') {
+            $pra = PraPenelitian::where('user_id', $pengajuan->user_id)->first();
+            if ($pra) {
+                // delete konsultasi
+                \App\Models\Konsultasi::where('pra_penelitian_id', $pra->id)->delete();
+                // delete anggota
+                \App\Models\PraPenelitianAnggota::where('pra_penelitian_id', $pra->id)->delete();
+                // finally delete pra penelitian
+                $pra->delete();
+            }
         }
 
         // finally delete pengajuan

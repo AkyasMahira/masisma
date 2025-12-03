@@ -339,7 +339,15 @@
                             </td>
                             <td>
                                 <div class="d-flex flex-column">
-                                    <span class="text-dark">{{ $m->mou ? ($m->mou->nama_instansi ?? $m->mou->nama_universitas) : '-' }}</span>
+                                    <span class="text-dark">
+                                        @php
+                                            // Prioritaskan data MOU dari record pendaftaran (user->mou)
+                                            $registeredMou = $m->user && $m->user->mou ? $m->user->mou : null;
+                                            $mahasiswaMou = $m->mou ?? null;
+                                            $displayMou = $registeredMou ?? $mahasiswaMou;
+                                        @endphp
+                                        {{ $displayMou ? ($displayMou->nama_instansi ?? $displayMou->nama_universitas ?? '-') : '-' }}
+                                    </span>
                                     <small class="text-muted">{{ $m->prodi }}</small>
                                 </div>
                             </td>
@@ -599,8 +607,35 @@
                         .then(r => r.json())
                         .then(res => {
                             if (res.success) {
-                                showToast(res.message, 'success');
-                                setTimeout(() => location.reload(), 1500);
+                                // If server returned created credentials, prepare a CSV and show modal
+                                if (res.created && Array.isArray(res.created) && res.created.length > 0) {
+                                    // Build CSV content
+                                    const csvHeader = 'Nama,Email,Password\n';
+                                    const csvRows = res.created.map(c => `${c.nama.replace(/,/g,'')},${c.email},${c.password}`).join('\n');
+                                    const csvContent = csvHeader + csvRows;
+
+                                    // Trigger CSV download
+                                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                                    const url = URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = `Mahasiswa_Credentials_${new Date().toISOString().split('T')[0]}.csv`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    URL.revokeObjectURL(url);
+
+                                    // Show Swal with count
+                                    Swal.fire({
+                                        title: 'Import Selesai',
+                                        html: `<p>Berhasil memproses ${res.created.length} akun mahasiswa. File kredensial telah diunduh.</p>`,
+                                        icon: 'success'
+                                    });
+                                    setTimeout(() => location.reload(), 1200);
+                                } else {
+                                    showToast(res.message, 'success');
+                                    setTimeout(() => location.reload(), 1500);
+                                }
                             } else {
                                 console.error(res);
                                 let msg = res.message;
@@ -664,8 +699,8 @@
 
         function downloadTemplateMahasiswa() {
             const ws = XLSX.utils.aoa_to_sheet([
-                ['Nama', 'Universitas', 'Prodi', 'Ruangan', 'Tanggal Mulai', 'Tanggal Berakhir', 'Status'],
-                ['Budi Santoso', 'Univ Merdeka', 'Informatika', 'Ruang Mawar', '2025-01-01', '2025-06-01', 'aktif']
+                ['Nama', 'No HP', 'Universitas', 'Prodi', 'Ruangan', 'Tanggal Mulai', 'Tanggal Berakhir', 'Status'],
+                ['Budi Santoso', '08123456789', 'Univ Merdeka', 'Informatika', 'Ruang Mawar', '2025-01-01', '2025-06-01', 'aktif']
             ]);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Template');

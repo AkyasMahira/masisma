@@ -159,6 +159,7 @@
 
 <div class="container py-4">
 
+    {{-- OPTIONAL: Jika sudah pakai SweetAlert Flash Message, blok Alert HTML ini bisa dihapus agar tidak muncul double --}}
     {{-- Alert Success --}}
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show animate-up mb-4" role="alert"
@@ -231,13 +232,13 @@
                             </div>
                             <form action="{{ route('pengajuan.pra') }}" method="POST" class="w-100 mt-3">
                                 @csrf
-                                <button type="submit" class="btn btn-outline-danger w-100 btn-sm"
-                                    onclick="return confirm('Ajukan Ulang Pra Penelitian?')">
+                                {{-- PERBAIKAN TOMBOL RE-APPLY PRA --}}
+                                <button type="submit" class="btn btn-outline-danger w-100 btn-sm btn-confirm"
+                                    data-confirm-text="Apakah Anda yakin ingin mengajukan ulang Pra Penelitian?">
                                     <i class="bi bi-arrow-repeat me-1"></i> Ajukan Ulang
                                 </button>
                             </form>
                         @elseif ($pra->status === 'approved')
-                            {{-- Tampilkan tombol untuk lihat detail --}}
                             <div class="text-center mt-3">
                                 <a href="{{ route('pengajuan.detail', 'pra_penelitian') }}" class="btn btn-maroon btn-sm w-100">
                                     <i class="bi bi-eye me-1"></i> Lihat Detail & Kelola
@@ -262,8 +263,9 @@
                     </p>
                     <form action="{{ route('pengajuan.pra') }}" method="POST" class="w-100 mt-auto">
                         @csrf
-                        <button type="submit" class="btn btn-maroon w-100"
-                            onclick="return confirm('Ajukan Pra Penelitian?')">
+                        {{-- PERBAIKAN TOMBOL AJUKAN PRA --}}
+                        <button type="submit" class="btn btn-maroon w-100 btn-confirm"
+                            data-confirm-text="Apakah Anda yakin ingin mengajukan Pra Penelitian?">
                             Pilih Layanan <i class="bi bi-arrow-right ms-2"></i>
                         </button>
                     </form>
@@ -308,36 +310,37 @@
                             </div>
                             <form action="{{ route('pengajuan.magang') }}" method="POST" class="w-100 mt-3">
                                 @csrf
-                                <button type="submit" class="btn btn-outline-danger w-100 btn-sm"
-                                    onclick="return confirm('Ajukan Ulang Magang?')">
+                                {{-- PERBAIKAN TOMBOL RE-APPLY MAGANG --}}
+                                <button type="submit" class="btn btn-outline-danger w-100 btn-sm btn-confirm"
+                                    data-confirm-text="Apakah Anda yakin ingin mengajukan ulang Magang?">
                                     <i class="bi bi-arrow-repeat me-1"></i> Ajukan Ulang
                                 </button>
                             </form>
-@elseif ($magang->status === 'approved')
-    @php
-        $mahasiswa = App\Models\Mahasiswa::where('user_id', auth()->id())->first();
-    @endphp
+                        @elseif ($magang->status === 'approved')
+                            @php
+                                $mahasiswa = App\Models\Mahasiswa::where('user_id', auth()->id())->first();
+                            @endphp
 
-    @if (!$mahasiswa)
-        <div class="alert alert-info small py-2">
-            <i class="bi bi-info-circle me-1"></i> Silakan lengkapi biodata magang terlebih dahulu
-        </div>
-        <div class="text-center mt-3">
-            <a href="{{ route('mahasiswa.create') }}" class="btn btn-maroon btn-sm w-100">
-                <i class="bi bi-pencil-square me-1"></i> Lengkapi Biodata Magang
-            </a>
-        </div>
-    @else
-        <div class="alert alert-success small py-2">
-            <i class="bi bi-check-circle me-1"></i> Biodata magang telah lengkap
-        </div>
-        <div class="text-center mt-3">
-            <a href="{{ route('mahasiswa.dashboard') }}" class="btn btn-maroon btn-sm w-100">
-                <i class="bi bi-speedometer2 me-1"></i> Lihat Dashboard Magang
-            </a>
-        </div>
-    @endif
-@endif
+                            @if (!$mahasiswa)
+                                <div class="alert alert-info small py-2">
+                                    <i class="bi bi-info-circle me-1"></i> Silakan lengkapi biodata magang terlebih dahulu
+                                </div>
+                                <div class="text-center mt-3">
+                                    <a href="{{ route('mahasiswa.create') }}" class="btn btn-maroon btn-sm w-100">
+                                        <i class="bi bi-pencil-square me-1"></i> Lengkapi Biodata Magang
+                                    </a>
+                                </div>
+                            @else
+                                <div class="alert alert-success small py-2">
+                                    <i class="bi bi-check-circle me-1"></i> Biodata magang telah lengkap
+                                </div>
+                                <div class="text-center mt-3">
+                                    <a href="{{ route('mahasiswa.dashboard') }}" class="btn btn-maroon btn-sm w-100">
+                                        <i class="bi bi-speedometer2 me-1"></i> Lihat Dashboard Magang
+                                    </a>
+                                </div>
+                            @endif
+                        @endif
                     </div>
                 </div>
             @else
@@ -352,8 +355,9 @@
                     </p>
                     <form action="{{ route('pengajuan.magang') }}" method="POST" class="w-100 mt-auto">
                         @csrf
-                        <button type="submit" class="btn btn-maroon w-100"
-                            onclick="return confirm('Ajukan Magang?')">
+                        {{-- PERBAIKAN TOMBOL AJUKAN MAGANG --}}
+                        <button type="submit" class="btn btn-maroon w-100 btn-confirm"
+                            data-confirm-text="Apakah Anda yakin ingin mengajukan Magang?">
                             Pilih Layanan <i class="bi bi-arrow-right ms-2"></i>
                         </button>
                     </form>

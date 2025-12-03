@@ -44,6 +44,17 @@ class PraPenelitianController extends Controller
 
     public function store(Request $request)
     {
+        // Business rule: if user has a previous PraPenelitian with status 'Selesai',
+        // they must wait 1 x 24 jam before creating another.
+        $recentFinished = PraPenelitian::where('user_id', auth()->id())
+            ->where('status', 'Selesai')
+            ->where('updated_at', '>=', now()->subDay())
+            ->first();
+
+        if ($recentFinished) {
+            return back()->withInput()->with('error', 'Anda harus menunggu 1 x 24 jam setelah pengajuan Pra-Penelitian sebelumnya selesai sebelum mengajukan kembali.');
+        }
+
         $request->validate([
             // Data Utama
             'judul' => 'required|string|max:255',
