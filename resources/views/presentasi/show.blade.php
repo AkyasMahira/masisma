@@ -370,11 +370,69 @@
                             </div>
 
                             <div class="mt-4 small text-white-50 fst-italic">
-                                <i class="bi bi-info-circle me-1"></i> Silakan hubungi admin jika ada aset fisik yang perlu diambil.
+                                <i class="bi bi-info-circle me-1"></i> Seluruh aset penelitian diambil / disimpan di instansi kami.
                             </div>
                         </div>
                     </div>
                 @endif
+
+                {{-- 5. Dokumen Anggota Tim (Tambahan untuk Mahasiswa) --}}
+                @if ($presentasi->praPenelitian && $presentasi->praPenelitian->anggotas->count() > 0)
+                    <div class="custom-card mt-4">
+                        <div class="card-header-custom bg-gradient-blue">
+                            <span><i class="bi bi-people-fill me-2"></i>Dokumen Anggota Tim</span>
+                        </div>
+                        <div class="p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0 align-middle">
+                                    <thead class="bg-light text-muted small text-uppercase">
+                                        <tr>
+                                            <th class="ps-4 py-3" width="5%">No</th>
+                                            <th class="py-3">Nama Anggota</th>
+                                            <th class="py-3">Jenjang</th>
+                                            <th class="pe-4 py-3 text-end">Download</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($presentasi->praPenelitian->anggotas as $index => $anggota)
+                                            <tr>
+                                                <td class="ps-4 text-muted">{{ $index + 1 }}</td>
+                                                <td class="fw-bold text-dark">{{ $anggota->nama }}</td>
+                                                <td>
+                                                    <span class="badge bg-light text-dark border fw-normal">
+                                                        {{ $anggota->jenjang }}
+                                                    </span>
+                                                </td>
+                                                <td class="pe-4 text-end">
+                                                    <div class="d-flex gap-2 justify-content-end">
+                                                        {{-- Sertifikat --}}
+                                                        <a href="{{ route('presentasi.download-sertifikat', [$presentasi->id, urlencode($anggota->nama)]) }}" 
+                                                           class="btn btn-sm btn-outline-success" 
+                                                           title="Download Sertifikat" 
+                                                           target="_blank">
+                                                            <i class="bi bi-award-fill"></i> 
+                                                            <span class="d-none d-md-inline ms-1">Sertifikat</span>
+                                                        </a>
+                                                        
+                                                        {{-- Surat Selesai --}}
+                                                        <a href="{{ route('presentasi.download-surat-selesai', [$presentasi->id, urlencode($anggota->nama)]) }}" 
+                                                           class="btn btn-sm btn-outline-secondary" 
+                                                           title="Download Surat Selesai" 
+                                                           target="_blank">
+                                                            <i class="bi bi-file-pdf"></i> 
+                                                            <span class="d-none d-md-inline ms-1">Surat</span>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
 
             </div>
         </div>
