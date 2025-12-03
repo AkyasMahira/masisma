@@ -4,7 +4,7 @@
 @section('page-title', 'Edit Data MOU') {{-- Tetap di sini jika layout Anda membutuhkannya --}}
 
 @section('content')
-    {{-- 
+    {{--
       =====================================================
       STYLE KUSTOM STANDAR (Maroon Header & Pill Button)
       =====================================================
@@ -121,7 +121,7 @@
     {{-- ================= END STYLE ================= --}}
 
 
-    {{-- 
+    {{--
       =====================================================
       STRUKTUR HTML BARU MENGIKUTI STYLE STANDAR
       =====================================================
@@ -163,14 +163,14 @@
                         </h6>
 
                         <div class="mb-3">
-                            <label class="form-label">Nama Universitas <span class="text-danger">*</span></label>
+                            <label class="form-label">Nama Instansi <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-building"></i></span>
-                                <input type="text" class="form-control @error('nama_universitas') is-invalid @enderror"
-                                    name="nama_universitas" value="{{ old('nama_universitas', $mou->nama_universitas) }}"
+                                <input type="text" class="form-control @error('nama_instansi') is-invalid @enderror"
+                                    name="nama_instansi" value="{{ old('nama_instansi', $mou->nama_instansi) }}"
                                     required>
                             </div>
-                            @error('nama_universitas')
+                            @error('nama_instansi')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
@@ -203,46 +203,157 @@
                         </div>
 
                         <hr class="my-4 border-light">
-
-                        {{-- SEKSI 2 --}}
-                        <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">
-                            Upload Dokumen (Opsional)
-                        </h6>
-
                         <div class="mb-3">
-                            <label class="form-label">Upload File MOU <span class="text-info">(Opsional)</span></label>
+                            <label class="form-label">Rencana Kerja Sama</label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-file-earmark-pdf-fill"></i></span>
-                                <input type="file" class="form-control @error('file_mou') is-invalid @enderror"
-                                    name="file_mou">
+                                <span class="input-group-text align-items-start pt-3"><i class="bi bi-clipboard-data"></i></span>
+                                <textarea class="form-control @error('rencana_kerja_sama') is-invalid @enderror" name="rencana_kerja_sama" rows="3" placeholder="Jelaskan singkat rencana kerja sama">{{ old('rencana_kerja_sama', $mou->rencana_kerja_sama) }}</textarea>
                             </div>
-                            <small class="form-text text-muted ms-1">
-                                File saat ini: <a href="{{ Storage::url($mou->file_mou) }}" target="_blank">Lihat File</a>
-                                <br>
-                                Kosongkan jika tidak ingin mengubah file. (PDF/DOCX, Maks 5MB)
-                            </small>
-                            @error('file_mou')
+                            @error('rencana_kerja_sama')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Jenis Instansi</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-bank"></i></span>
+                                    <select name="jenis_instansi" id="jenis_instansi" class="form-select @error('jenis_instansi') is-invalid @enderror">
+                                        <option value="">-- Pilih Jenis Instansi --</option>
+                                        <option value="Instansi Pemerintah" {{ old('jenis_instansi', $mou->jenis_instansi) == 'Instansi Pemerintah' ? 'selected' : '' }}>Instansi Pemerintah</option>
+                                        <option value="Instansi Swasta" {{ old('jenis_instansi', $mou->jenis_instansi) == 'Instansi Swasta' ? 'selected' : '' }}>Instansi Swasta</option>
+                                        <option value="Instansi Internasional" {{ old('jenis_instansi', $mou->jenis_instansi) == 'Instansi Internasional' ? 'selected' : '' }}>Instansi Internasional</option>
+                                        <option value="Lainnya" {{ old('jenis_instansi', $mou->jenis_instansi) == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
+                                    </select>
+                                </div>
+                                @error('jenis_instansi')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div id="jenisInstansiLainnyaWrapper" class="mb-3" style="display: none;">
+                            <label class="form-label">Jenis Instansi (lainnya)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-buildings"></i></span>
+                                <input type="text" class="form-control @error('jenis_instansi_lainnya') is-invalid @enderror" name="jenis_instansi_lainnya" value="{{ old('jenis_instansi_lainnya', $mou->jenis_instansi_lainnya) }}" placeholder="Tuliskan jenis instansi">
+                            </div>
+                            @error('jenis_instansi_lainnya')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Upload Surat Keterangan <span
-                                    class="text-info">(Opsional)</span></label>
+                            <label class="form-label">Alamat Instansi</label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-file-earmark-image-fill"></i></span>
-                                <input type="file" class="form-control @error('surat_keterangan') is-invalid @enderror"
-                                    name="surat_keterangan">
+                                <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                                <input type="text" class="form-control @error('alamat_instansi') is-invalid @enderror" name="alamat_instansi" value="{{ old('alamat_instansi', $mou->alamat_instansi) }}" placeholder="Alamat lengkap instansi">
                             </div>
-                            <small class="form-text text-muted ms-1">
-                                File saat ini: <a href="{{ Storage::url($mou->surat_keterangan) }}" target="_blank">Lihat
-                                    Surat</a>
-                                <br>
-                                Kosongkan jika tidak ingin mengubah file. (PDF/JPG/PNG, Maks 5MB)
-                            </small>
-                            @error('surat_keterangan')
+                            @error('alamat_instansi')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
+                        </div>
+
+                        {{-- SEKSI 2 --}}
+                        <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">
+                            Upload Dokumen Kerjasama
+                        </h6>
+
+                        {{-- Download Center --}}
+                        <div class="mb-3">
+                            <div class="alert alert-info shadow-sm" role="alert">
+                                <h6 class="fw-bold mb-2">Pusat Unduhan Template</h6>
+                                <div class="d-flex flex-column">
+                                    <a href="{{ asset('storage/pdfmou/draft_mou_smk.pdf') }}" target="_blank" class="file-download-box text-decoration-none mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-file-earmark-pdf-fill text-danger fs-3 me-3"></i>
+                                            <div>
+                                                <div class="fw-bold text-dark">Contoh Draft MoU SMK</div>
+                                                <small class="text-muted">Download contoh draft untuk SMK</small>
+                                            </div>
+                                        </div>
+                                        <i class="bi bi-download text-secondary"></i>
+                                    </a>
+                                    <a href="{{ asset('storage/pdfmou/draft_mou_universitas.pdf') }}" target="_blank" class="file-download-box text-decoration-none mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-file-earmark-pdf-fill text-danger fs-3 me-3"></i>
+                                            <div>
+                                                <div class="fw-bold text-dark">Contoh Draft MoU Universitas</div>
+                                                <small class="text-muted">Download contoh draft untuk Universitas</small>
+                                            </div>
+                                        </div>
+                                        <i class="bi bi-download text-secondary"></i>
+                                    </a>
+                                    <a href="{{ asset('storage/pdfmou/tata_tertib_magang.pdf') }}" target="_blank" class="file-download-box text-decoration-none">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-file-earmark-pdf-fill text-danger fs-3 me-3"></i>
+                                            <div>
+                                                <div class="fw-bold text-dark">Tata Tertib Pelaksanaan Magang/PKL/PKM/TPM</div>
+                                                <small class="text-muted">Aturan & panduan pelaksanaan kegiatan</small>
+                                            </div>
+                                        </div>
+                                        <i class="bi bi-download text-secondary"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Upload Surat Permohonan Kerjasama <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-file-earmark-text-fill"></i></span>
+                                    <input type="file" class="form-control @error('surat_permohonan') is-invalid @enderror" name="surat_permohonan" accept=".pdf,.doc,.docx">
+                                </div>
+                                @if($mou->surat_permohonan)
+                                <small class="form-text text-muted ms-1">File saat ini: <a href="{{ Storage::url($mou->surat_permohonan) }}" target="_blank">Lihat</a></small>
+                                @endif
+                                @error('surat_permohonan')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Upload SK Pengangkatan Pimpinan Instansi</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-file-earmark-fill"></i></span>
+                                    <input type="file" class="form-control @error('sk_pengangkatan_pimpinan') is-invalid @enderror" name="sk_pengangkatan_pimpinan" accept=".pdf,.doc,.docx">
+                                </div>
+                                @if($mou->sk_pengangkatan_pimpinan)
+                                <small class="form-text text-muted ms-1">File saat ini: <a href="{{ Storage::url($mou->sk_pengangkatan_pimpinan) }}" target="_blank">Lihat</a></small>
+                                @endif
+                                @error('sk_pengangkatan_pimpinan')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Upload Sertifikat Akreditasi Prodi</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-award-fill"></i></span>
+                                    <input type="file" class="form-control @error('sertifikat_akreditasi_prodi') is-invalid @enderror" name="sertifikat_akreditasi_prodi" accept=".pdf,.jpg,.jpeg,.png">
+                                </div>
+                                @if($mou->sertifikat_akreditasi_prodi)
+                                <small class="form-text text-muted ms-1">File saat ini: <a href="{{ Storage::url($mou->sertifikat_akreditasi_prodi) }}" target="_blank">Lihat</a></small>
+                                @endif
+                                @error('sertifikat_akreditasi_prodi')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Upload Draft MoU</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-file-earmark-pdf-fill"></i></span>
+                                    <input type="file" class="form-control @error('draft_mou') is-invalid @enderror" name="draft_mou" accept=".pdf,.doc,.docx">
+                                </div>
+                                @if($mou->draft_mou)
+                                <small class="form-text text-muted ms-1">File saat ini: <a href="{{ Storage::url($mou->draft_mou) }}" target="_blank">Lihat</a></small>
+                                @endif
+                                @error('draft_mou')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
 
                         <hr class="my-4 border-light">
@@ -263,6 +374,29 @@
                             @error('keterangan')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nama PIC Instansi</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    <input type="text" class="form-control @error('nama_pic_instansi') is-invalid @enderror" name="nama_pic_instansi" value="{{ old('nama_pic_instansi', $mou->nama_pic_instansi) }}" placeholder="Nama PIC">
+                                </div>
+                                @error('nama_pic_instansi')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nomor Kontak PIC</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-telephone-fill"></i></span>
+                                    <input type="text" class="form-control @error('nomor_kontak_pic') is-invalid @enderror" name="nomor_kontak_pic" value="{{ old('nomor_kontak_pic', $mou->nomor_kontak_pic) }}" placeholder="Nomor telepon/WA PIC">
+                                </div>
+                                @error('nomor_kontak_pic')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
 
                         {{-- TOMBOL AKSI --}}
@@ -315,4 +449,22 @@
 @section('scripts')
     {{-- Pastikan SweetAlert di-load, jika belum ada di layout utama --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const jenisSelect = document.getElementById('jenis_instansi');
+            const wrapper = document.getElementById('jenisInstansiLainnyaWrapper');
+            function toggleLainnya() {
+                if (!jenisSelect) return;
+                if (jenisSelect.value === 'Lainnya') {
+                    wrapper.style.display = 'block';
+                } else {
+                    wrapper.style.display = 'none';
+                }
+            }
+            if (jenisSelect) {
+                jenisSelect.addEventListener('change', toggleLainnya);
+                toggleLainnya();
+            }
+        });
+    </script>
 @endsection

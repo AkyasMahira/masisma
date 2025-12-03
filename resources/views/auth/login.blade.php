@@ -249,9 +249,9 @@
                 <div class="input-group" style="overflow: visible;">
                     <span class="input-group-text"><i class="bi bi-building-fill"></i></span>
                     <select name="mou_id" class="form-select" id="universitas-select" required>
-                        <option value="" placeholder>Pilih Universitas</option>
+                        <option value="" placeholder>Pilih Instansi</option>
                         @foreach ($universitas as $u)
-                            <option value="{{ $u->id }}">{{ $u->nama_universitas }}</option>
+                            <option value="{{ $u->id }}">{{ $u->nama_instansi ?? $u->nama_universitas }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -301,12 +301,12 @@
         // Inisialisasi Choices.js
         document.addEventListener('DOMContentLoaded', function() {
             const element = document.getElementById('universitas-select');
-            const choices = new Choices(element, {
+                    const choices = new Choices(element, {
                 searchEnabled: true,
                 itemSelectText: '', // Menghapus teks 'Press to select'
                 placeholder: true,
-                placeholderValue: 'Pilih Universitas',
-                searchPlaceholderValue: 'Cari universitas...',
+                        placeholderValue: 'Pilih Instansi',
+                        searchPlaceholderValue: 'Cari instansi...',
                 noResultsText: 'Tidak ditemukan',
                 shouldSort: false,
             });

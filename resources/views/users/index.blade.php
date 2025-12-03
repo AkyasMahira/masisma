@@ -36,7 +36,7 @@
         <ul class="nav nav-tabs card-header-tabs" id="userTab" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">
-                    <i class="bi bi-hourglass-split me-1"></i> Menunggu Approval 
+                    <i class="bi bi-hourglass-split me-1"></i> Menunggu Approval
                     @if($pendingUsers->count() > 0)
                         <span class="badge rounded-pill bg-danger ms-1">{{ $pendingUsers->count() }}</span>
                     @endif
@@ -59,7 +59,7 @@
         @endif
 
         <div class="tab-content" id="userTabContent">
-            
+
             {{-- TAB 1: PENDING APPROVAL --}}
             <div class="tab-pane fade show active" id="pending" role="tabpanel">
                 @if($pendingUsers->isEmpty())
@@ -89,7 +89,7 @@
                                         </div>
                                     </td>
                                     <td>{{ $user->email }}</td>
-                                    <td>{{ $user->mou ? $user->mou->nama_universitas : '-' }}</td> 
+                                    <td>{{ $user->mou ? ($user->mou->nama_instansi ?? $user->mou->nama_universitas) : '-' }}</td>
                                     <td>{{ $user->created_at->diffForHumans() }}</td>
                                     <td class="text-end">
                                         <form action="{{ route('users.approve', $user->id) }}" method="POST" class="d-inline">

@@ -31,7 +31,8 @@ class MahasiswaController extends Controller
         // 1. Filter by Universitas (Via Relasi)
         if ($request->has('univ_asal') && !empty($request->univ_asal)) {
             $query->whereHas('mou', function ($q) use ($request) {
-                $q->where('nama_universitas', 'like', '%' . $request->univ_asal . '%');
+                $q->where('nama_instansi', 'like', '%' . $request->univ_asal . '%')
+                  ->orWhere('nama_universitas', 'like', '%' . $request->univ_asal . '%');
             });
         }
 
@@ -60,7 +61,7 @@ class MahasiswaController extends Controller
     public function create()
     {
         $ruangans = Ruangan::all();
-        $mous = Mou::orderBy('nama_universitas', 'asc')->get(); // Ambil data MOU
+        $mous = Mou::orderBy('nama_instansi', 'asc')->get(); // Ambil data MOU (kolom baru)
         return view('mahasiswa.create', compact('ruangans', 'mous'));
     }
 
@@ -132,7 +133,9 @@ class MahasiswaController extends Controller
                 // 2. Cari ID MOU (Universitas)
                 $mouId = null;
                 if ($univName) {
-                    $mouDb = Mou::where('nama_universitas', 'like', '%' . $univName . '%')->first();
+                    $mouDb = Mou::where('nama_instansi', 'like', '%' . $univName . '%')
+                        ->orWhere('nama_universitas', 'like', '%' . $univName . '%')
+                        ->first();
                     if ($mouDb) {
                         $mouId = $mouDb->id;
                     }
@@ -313,7 +316,7 @@ class MahasiswaController extends Controller
     {
         $mahasiswa = Mahasiswa::findOrFail($id);
         $ruangans = Ruangan::all();
-        $mous = Mou::orderBy('nama_universitas', 'asc')->get(); // Data untuk dropdown
+        $mous = Mou::orderBy('nama_instansi', 'asc')->get(); // Data untuk dropdown (kolom baru)
         return view('mahasiswa.edit', compact('mahasiswa', 'ruangans', 'mous'));
     }
 
@@ -390,7 +393,7 @@ class MahasiswaController extends Controller
 
                 if ($tersedia <= 0) {
                     // Karena di dalam transaction, kita throw exception atau return redirect with error
-                    // Note: return di sini akan membatalkan commit otomatis jika tidak dihandle, 
+                    // Note: return di sini akan membatalkan commit otomatis jika tidak dihandle,
                     // tapi karena ini return response object, Laravel menganggapnya sukses tereksekusi.
                     // Sebaiknya gunakan redirect back.
                     return back()->withErrors(['ruangan_id' => 'Ruangan tujuan penuh.'])->withInput();
@@ -477,9 +480,11 @@ class MahasiswaController extends Controller
     {
         $search = $request->query('q', '');
         // Cari di tabel mous
-        $universitas = Mou::where('nama_universitas', 'like', '%' . $search . '%')
+        $universitas = Mou::where('nama_instansi', 'like', '%' . $search . '%')
+            ->orWhere('nama_universitas', 'like', '%' . $search . '%')
             ->limit(10)
-            ->pluck('nama_universitas'); // Kembalikan nama saja untuk autocomplete text
+            ->get()
+            ->map(function($m){ return $m->nama_instansi ?? $m->nama_universitas; });
 
         return response()->json($universitas);
     }
@@ -491,7 +496,8 @@ class MahasiswaController extends Controller
         // Filter relasi MOU
         if ($request->has('univ_asal') && !empty($request->univ_asal)) {
             $query->whereHas('mou', function ($q) use ($request) {
-                $q->where('nama_universitas', 'like', '%' . $request->univ_asal . '%');
+                $q->where('nama_instansi', 'like', '%' . $request->univ_asal . '%')
+                  ->orWhere('nama_universitas', 'like', '%' . $request->univ_asal . '%');
             });
         }
         if ($request->has('ruangan_id') && !empty($request->ruangan_id)) {

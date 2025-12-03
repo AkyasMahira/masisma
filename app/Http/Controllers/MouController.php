@@ -21,7 +21,10 @@ class MouController extends Controller
 
         // 1. Filter Nama Universitas
         if ($request->filled('search')) {
-            $query->where('nama_universitas', 'like', '%' . $request->search . '%');
+            $query->where(function($q) use ($request) {
+                $q->where('nama_instansi', 'like', '%' . $request->search . '%')
+                  ->orWhere('nama_universitas', 'like', '%' . $request->search . '%');
+            });
         }
 
         // 2. Filter Dari Tanggal
@@ -55,27 +58,47 @@ class MouController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_universitas' => 'required|string|max:255',
+            // Accept new field name `nama_instansi` and fallback to old `nama_universitas`
+            'nama_instansi' => 'nullable|string|max:255',
+            'nama_universitas' => 'nullable|string|max:255',
             'tanggal_masuk'    => 'required|date',
             'tanggal_keluar'   => 'required|date|after_or_equal:tanggal_masuk',
-            'file_mou'         => 'required|file|mimes:pdf,doc,docx|max:5120',
-            'surat_keterangan' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'surat_permohonan' => 'required|file|mimes:pdf,doc,docx|max:5120',
+            'sk_pengangkatan_pimpinan' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'sertifikat_akreditasi_prodi' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'draft_mou' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
             'keterangan'       => 'nullable|string',
+            'alamat_instansi'  => 'nullable|string|max:1024',
+            'rencana_kerja_sama'=> 'nullable|string',
+            'nama_pic_instansi'=> 'nullable|string|max:255',
+            'nomor_kontak_pic' => 'nullable|string|max:50',
+            'jenis_instansi' => 'nullable|string|in:Instansi Pemerintah,Instansi Swasta,Instansi Internasional,Lainnya',
+            'jenis_instansi_lainnya' => 'nullable|required_if:jenis_instansi,Lainnya|string|max:255',
         ]);
 
-        // Simpan file_mou, path akan jadi 'public/file_mou/namafile.pdf'
-        $pathMou = $request->file('file_mou')->store('public/file_mou');
-
-        // Simpan surat_keterangan
-        $pathSurat = $request->file('surat_keterangan')->store('public/surat_keterangan');
+        // Simpan file-file baru
+        $pathSuratPermohonan = $request->file('surat_permohonan')->store('mou_documents/surat_permohonan', 'public');
+        $pathSK = $request->hasFile('sk_pengangkatan_pimpinan') ? $request->file('sk_pengangkatan_pimpinan')->store('mou_documents/sk_pengangkatan_pimpinan', 'public') : null;
+        $pathSertifikat = $request->hasFile('sertifikat_akreditasi_prodi') ? $request->file('sertifikat_akreditasi_prodi')->store('mou_documents/sertifikat_akreditasi_prodi', 'public') : null;
+        $pathDraft = $request->hasFile('draft_mou') ? $request->file('draft_mou')->store('mou_documents/draft_mou', 'public') : null;
 
         Mou::create([
-            'nama_universitas' => $request->nama_universitas,
+            // Prefer `nama_instansi`, otherwise fallback to legacy field value
+            'nama_instansi' => $request->input('nama_instansi') ?? $request->input('nama_universitas'),
+            'nama_universitas' => $request->input('nama_universitas') ?? $request->input('nama_instansi'),
             'tanggal_masuk'    => $request->tanggal_masuk,
             'tanggal_keluar'   => $request->tanggal_keluar,
             'keterangan'       => $request->keterangan,
-            'file_mou'         => $pathMou,
-            'surat_keterangan' => $pathSurat,
+            'surat_permohonan' => $pathSuratPermohonan,
+            'sk_pengangkatan_pimpinan' => $pathSK,
+            'sertifikat_akreditasi_prodi' => $pathSertifikat,
+            'draft_mou' => $pathDraft,
+            'alamat_instansi' => $request->input('alamat_instansi'),
+            'rencana_kerja_sama' => $request->input('rencana_kerja_sama'),
+            'nama_pic_instansi' => $request->input('nama_pic_instansi'),
+            'nomor_kontak_pic' => $request->input('nomor_kontak_pic'),
+            'jenis_instansi' => $request->input('jenis_instansi'),
+            'jenis_instansi_lainnya' => $request->input('jenis_instansi_lainnya'),
         ]);
 
         return redirect()->route('mou.index')
@@ -101,31 +124,62 @@ class MouController extends Controller
         // 1. Validasi
         // 'nullable' berarti jika tidak ada file baru, file lama tetap dipakai
         $request->validate([
-            'nama_universitas' => 'required|string|max:255',
+            'nama_instansi' => 'nullable|string|max:255',
+            'nama_universitas' => 'nullable|string|max:255',
             'tanggal_masuk'    => 'required|date',
             'tanggal_keluar'   => 'required|date|after_or_equal:tanggal_masuk',
-            'file_mou'         => 'nullable|file|mimes:pdf,doc,docx|max:5120', // Boleh kosong
-            'surat_keterangan' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120', // Boleh kosong
+            'surat_permohonan' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'sk_pengangkatan_pimpinan' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'sertifikat_akreditasi_prodi' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'draft_mou' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
             'keterangan'       => 'nullable|string',
+            'alamat_instansi'  => 'nullable|string|max:1024',
+            'rencana_kerja_sama'=> 'nullable|string',
+            'nama_pic_instansi'=> 'nullable|string|max:255',
+            'nomor_kontak_pic' => 'nullable|string|max:50',
+            'jenis_instansi' => 'nullable|string|in:Instansi Pemerintah,Instansi Swasta,Instansi Internasional,Lainnya',
+            'jenis_instansi_lainnya' => 'nullable|required_if:jenis_instansi,Lainnya|string|max:255',
         ]);
 
         // 2. Ambil semua data input
-        $data = $request->only('nama_universitas', 'tanggal_masuk', 'tanggal_keluar', 'keterangan');
+        // Build data so we don't inadvertently overwrite legacy column with null.
+        $data = [];
+        if ($request->filled('nama_instansi')) $data['nama_instansi'] = $request->input('nama_instansi');
+        if ($request->filled('nama_universitas')) $data['nama_universitas'] = $request->input('nama_universitas');
+        if ($request->filled('tanggal_masuk')) $data['tanggal_masuk'] = $request->input('tanggal_masuk');
+        if ($request->filled('tanggal_keluar')) $data['tanggal_keluar'] = $request->input('tanggal_keluar');
+        if ($request->has('keterangan')) $data['keterangan'] = $request->input('keterangan');
+        if ($request->filled('alamat_instansi')) $data['alamat_instansi'] = $request->input('alamat_instansi');
+        if ($request->has('rencana_kerja_sama')) $data['rencana_kerja_sama'] = $request->input('rencana_kerja_sama');
+        if ($request->filled('nama_pic_instansi')) $data['nama_pic_instansi'] = $request->input('nama_pic_instansi');
+        if ($request->filled('nomor_kontak_pic')) $data['nomor_kontak_pic'] = $request->input('nomor_kontak_pic');
+        if ($request->filled('jenis_instansi')) $data['jenis_instansi'] = $request->input('jenis_instansi');
+        if ($request->filled('jenis_instansi_lainnya')) $data['jenis_instansi_lainnya'] = $request->input('jenis_instansi_lainnya');
 
-        // 3. Cek jika ada file MOU baru
-        if ($request->hasFile('file_mou')) {
-            // Hapus file lama
-            Storage::delete($mou->file_mou);
-            // Simpan file baru
-            $data['file_mou'] = $request->file('file_mou')->store('public/file_mou');
+        // 3. Cek jika ada file baru dan replace
+        if ($request->hasFile('surat_permohonan')) {
+            if ($mou->surat_permohonan && Storage::disk('public')->exists($mou->surat_permohonan)) {
+                Storage::disk('public')->delete($mou->surat_permohonan);
+            }
+            $data['surat_permohonan'] = $request->file('surat_permohonan')->store('mou_documents/surat_permohonan', 'public');
         }
-
-        // 4. Cek jika ada file Surat Keterangan baru
-        if ($request->hasFile('surat_keterangan')) {
-            // Hapus file lama
-            Storage::delete($mou->surat_keterangan);
-            // Simpan file baru
-            $data['surat_keterangan'] = $request->file('surat_keterangan')->store('public/surat_keterangan');
+        if ($request->hasFile('sk_pengangkatan_pimpinan')) {
+            if ($mou->sk_pengangkatan_pimpinan && Storage::disk('public')->exists($mou->sk_pengangkatan_pimpinan)) {
+                Storage::disk('public')->delete($mou->sk_pengangkatan_pimpinan);
+            }
+            $data['sk_pengangkatan_pimpinan'] = $request->file('sk_pengangkatan_pimpinan')->store('mou_documents/sk_pengangkatan_pimpinan', 'public');
+        }
+        if ($request->hasFile('sertifikat_akreditasi_prodi')) {
+            if ($mou->sertifikat_akreditasi_prodi && Storage::disk('public')->exists($mou->sertifikat_akreditasi_prodi)) {
+                Storage::disk('public')->delete($mou->sertifikat_akreditasi_prodi);
+            }
+            $data['sertifikat_akreditasi_prodi'] = $request->file('sertifikat_akreditasi_prodi')->store('mou_documents/sertifikat_akreditasi_prodi', 'public');
+        }
+        if ($request->hasFile('draft_mou')) {
+            if ($mou->draft_mou && Storage::disk('public')->exists($mou->draft_mou)) {
+                Storage::disk('public')->delete($mou->draft_mou);
+            }
+            $data['draft_mou'] = $request->file('draft_mou')->store('mou_documents/draft_mou', 'public');
         }
 
         // 5. Update data di database
@@ -142,9 +196,11 @@ class MouController extends Controller
     public function destroy(Mou $mou) // Gunakan Route Model Binding
     {
         try {
-            // 1. Hapus file dari storage
-            Storage::delete($mou->file_mou);
-            Storage::delete($mou->surat_keterangan);
+            // 1. Hapus file lama (jika ada)
+            Storage::disk('public')->delete($mou->surat_permohonan);
+            Storage::disk('public')->delete($mou->sk_pengangkatan_pimpinan);
+            Storage::disk('public')->delete($mou->sertifikat_akreditasi_prodi);
+            Storage::disk('public')->delete($mou->draft_mou);
 
             // 2. Hapus data dari database
             $mou->delete();
@@ -180,7 +236,8 @@ class MouController extends Controller
         foreach ($data as $index => $row) {
             try {
                 // Sesuaikan nama kolom dengan template Excel Anda
-                $namaUniversitas = $row['Nama Universitas'] ?? null;
+                // Support both new and old headers
+                $namaUniversitas = $row['Nama Instansi'] ?? $row['Nama Universitas'] ?? null;
                 $tglMasuk = $row['Tanggal Masuk (YYYY-MM-DD)'] ?? null;
                 $tglKeluar = $row['Tanggal Keluar (YYYY-MM-DD)'] ?? null;
 
@@ -189,14 +246,17 @@ class MouController extends Controller
                     throw new Exception("Data tidak lengkap di baris " . ($index + 2));
                 }
 
-                // Karena tidak ada upload file via Excel, kita set default/null
-                Mou::create([
-                    'nama_universitas' => $namaUniversitas,
+                // Karena tidak ada upload file via Excel, set file uploads ke null
+                    Mou::create([
+                    'nama_instansi' => $namaUniversitas,
+                    'nama_universitas' => $row['Nama Universitas'] ?? $namaUniversitas,
                     'tanggal_masuk'    => $tglMasuk,
                     'tanggal_keluar'   => $tglKeluar,
                     'keterangan'       => $row['Keterangan'] ?? null,
-                    'file_mou'         => 'imported/default.pdf', // Path default
-                    'surat_keterangan' => 'imported/default.pdf', // Path default
+                    'surat_permohonan' => null,
+                    'sk_pengangkatan_pimpinan' => null,
+                    'sertifikat_akreditasi_prodi' => null,
+                    'draft_mou' => null,
                 ]);
 
                 $successCount++;
@@ -217,5 +277,156 @@ class MouController extends Controller
             'success' => true,
             'message' => "Berhasil mengimpor $successCount data MOU."
         ]);
+    }
+
+    /**
+     * PUBLIC: Search / Index for MOU (no sidebar)
+     */
+    public function publicIndex(Request $request)
+    {
+        $query = Mou::query();
+        if ($request->filled('search')) {
+            $query->where('nama_instansi', 'like', '%' . $request->search . '%')
+                  ->orWhere('nama_universitas', 'like', '%' . $request->search . '%');
+        }
+
+        $mous = $query->orderBy('tanggal_masuk', 'desc')->paginate(10)->withQueryString();
+        $searchPerformed = $request->has('search');
+        return view('mou.public_index', compact('mous', 'searchPerformed'));
+    }
+
+    /**
+     * PUBLIC: Show create form for MOU
+     */
+    public function publicCreate()
+    {
+        return view('mou.public_create');
+    }
+
+    /**
+     * PUBLIC: Store new MOU from public form
+     */
+    public function publicStore(Request $request)
+    {
+        // Reuse admin store validation but redirect to public route
+        $request->validate([
+            'nama_instansi' => 'nullable|string|max:255',
+            'nama_universitas' => 'nullable|string|max:255',
+            'tanggal_masuk'    => 'required|date',
+            'tanggal_keluar'   => 'required|date|after_or_equal:tanggal_masuk',
+            'surat_permohonan' => 'required|file|mimes:pdf,doc,docx|max:5120',
+            'sk_pengangkatan_pimpinan' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'sertifikat_akreditasi_prodi' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'draft_mou' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'keterangan'       => 'nullable|string',
+            'alamat_instansi'  => 'nullable|string|max:1024',
+            'rencana_kerja_sama'=> 'nullable|string',
+            'nama_pic_instansi'=> 'nullable|string|max:255',
+            'nomor_kontak_pic' => 'nullable|string|max:50',
+            'jenis_instansi' => 'nullable|string|in:Instansi Pemerintah,Instansi Swasta,Instansi Internasional,Lainnya',
+            'jenis_instansi_lainnya' => 'nullable|required_if:jenis_instansi,Lainnya|string|max:255',
+        ]);
+
+        $pathSuratPermohonan = $request->file('surat_permohonan')->store('mou_documents/surat_permohonan', 'public');
+        $pathSK = $request->hasFile('sk_pengangkatan_pimpinan') ? $request->file('sk_pengangkatan_pimpinan')->store('mou_documents/sk_pengangkatan_pimpinan', 'public') : null;
+        $pathSertifikat = $request->hasFile('sertifikat_akreditasi_prodi') ? $request->file('sertifikat_akreditasi_prodi')->store('mou_documents/sertifikat_akreditasi_prodi', 'public') : null;
+        $pathDraft = $request->hasFile('draft_mou') ? $request->file('draft_mou')->store('mou_documents/draft_mou', 'public') : null;
+
+        Mou::create([
+            'nama_instansi' => $request->input('nama_instansi') ?? $request->input('nama_universitas'),
+            'nama_universitas' => $request->input('nama_universitas') ?? $request->input('nama_instansi'),
+            'tanggal_masuk'    => $request->tanggal_masuk,
+            'tanggal_keluar'   => $request->tanggal_keluar,
+            'keterangan'       => $request->keterangan,
+            'surat_permohonan' => $pathSuratPermohonan,
+            'sk_pengangkatan_pimpinan' => $pathSK,
+            'sertifikat_akreditasi_prodi' => $pathSertifikat,
+            'draft_mou' => $pathDraft,
+            'alamat_instansi' => $request->input('alamat_instansi'),
+            'rencana_kerja_sama' => $request->input('rencana_kerja_sama'),
+            'nama_pic_instansi' => $request->input('nama_pic_instansi'),
+            'nomor_kontak_pic' => $request->input('nomor_kontak_pic'),
+            'jenis_instansi' => $request->input('jenis_instansi'),
+            'jenis_instansi_lainnya' => $request->input('jenis_instansi_lainnya'),
+        ]);
+
+        return redirect()->route('public.mou.create')
+            ->with('success', 'Berhasil mengajukan MOU. Terima kasih!');
+    }
+
+    /**
+     * PUBLIC: Edit page (no auth) for MOU
+     */
+    public function publicEdit(Mou $mou)
+    {
+        return view('mou.public_edit', compact('mou'));
+    }
+
+    /**
+     * PUBLIC: Update MOU from public page
+     */
+    public function publicUpdate(Request $request, Mou $mou)
+    {
+        // Reuse same validation as admin update
+        $request->validate([
+            'nama_instansi' => 'nullable|string|max:255',
+            'nama_universitas' => 'nullable|string|max:255',
+            'tanggal_masuk'    => 'required|date',
+            'tanggal_keluar'   => 'required|date|after_or_equal:tanggal_masuk',
+            'surat_permohonan' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'sk_pengangkatan_pimpinan' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'sertifikat_akreditasi_prodi' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'draft_mou' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'keterangan'       => 'nullable|string',
+            'alamat_instansi'  => 'nullable|string|max:1024',
+            'rencana_kerja_sama'=> 'nullable|string',
+            'nama_pic_instansi'=> 'nullable|string|max:255',
+            'nomor_kontak_pic' => 'nullable|string|max:50',
+            'jenis_instansi' => 'nullable|string|in:Instansi Pemerintah,Instansi Swasta,Instansi Internasional,Lainnya',
+            'jenis_instansi_lainnya' => 'nullable|required_if:jenis_instansi,Lainnya|string|max:255',
+        ]);
+
+        $data = [];
+        if ($request->filled('nama_instansi')) $data['nama_instansi'] = $request->input('nama_instansi');
+        if ($request->filled('nama_universitas')) $data['nama_universitas'] = $request->input('nama_universitas');
+        if ($request->filled('tanggal_masuk')) $data['tanggal_masuk'] = $request->input('tanggal_masuk');
+        if ($request->filled('tanggal_keluar')) $data['tanggal_keluar'] = $request->input('tanggal_keluar');
+        if ($request->has('keterangan')) $data['keterangan'] = $request->input('keterangan');
+        if ($request->filled('alamat_instansi')) $data['alamat_instansi'] = $request->input('alamat_instansi');
+        if ($request->has('rencana_kerja_sama')) $data['rencana_kerja_sama'] = $request->input('rencana_kerja_sama');
+        if ($request->filled('nama_pic_instansi')) $data['nama_pic_instansi'] = $request->input('nama_pic_instansi');
+        if ($request->filled('nomor_kontak_pic')) $data['nomor_kontak_pic'] = $request->input('nomor_kontak_pic');
+        if ($request->filled('jenis_instansi')) $data['jenis_instansi'] = $request->input('jenis_instansi');
+        if ($request->filled('jenis_instansi_lainnya')) $data['jenis_instansi_lainnya'] = $request->input('jenis_instansi_lainnya');
+
+        if ($request->hasFile('surat_permohonan')) {
+            if ($mou->surat_permohonan && Storage::disk('public')->exists($mou->surat_permohonan)) {
+                Storage::disk('public')->delete($mou->surat_permohonan);
+            }
+            $data['surat_permohonan'] = $request->file('surat_permohonan')->store('mou_documents/surat_permohonan', 'public');
+        }
+        if ($request->hasFile('sk_pengangkatan_pimpinan')) {
+            if ($mou->sk_pengangkatan_pimpinan && Storage::disk('public')->exists($mou->sk_pengangkatan_pimpinan)) {
+                Storage::disk('public')->delete($mou->sk_pengangkatan_pimpinan);
+            }
+            $data['sk_pengangkatan_pimpinan'] = $request->file('sk_pengangkatan_pimpinan')->store('mou_documents/sk_pengangkatan_pimpinan', 'public');
+        }
+        if ($request->hasFile('sertifikat_akreditasi_prodi')) {
+            if ($mou->sertifikat_akreditasi_prodi && Storage::disk('public')->exists($mou->sertifikat_akreditasi_prodi)) {
+                Storage::disk('public')->delete($mou->sertifikat_akreditasi_prodi);
+            }
+            $data['sertifikat_akreditasi_prodi'] = $request->file('sertifikat_akreditasi_prodi')->store('mou_documents/sertifikat_akreditasi_prodi', 'public');
+        }
+        if ($request->hasFile('draft_mou')) {
+            if ($mou->draft_mou && Storage::disk('public')->exists($mou->draft_mou)) {
+                Storage::disk('public')->delete($mou->draft_mou);
+            }
+            $data['draft_mou'] = $request->file('draft_mou')->store('mou_documents/draft_mou', 'public');
+        }
+
+        $mou->update($data);
+
+        return redirect()->route('public.mou.index')
+            ->with('success', 'Data MOU berhasil diperbarui.');
     }
 }

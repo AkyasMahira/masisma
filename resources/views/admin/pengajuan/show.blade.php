@@ -76,7 +76,7 @@
             transition: var(--transition);
             opacity: 0.6; /* Default redup (disabled look) */
         }
-        
+
         .process-card.active {
             opacity: 1;
             border-color: var(--custom-maroon-light);
@@ -100,11 +100,11 @@
         /* --- Forms & Buttons --- */
         .form-label { font-weight: 600; font-size: 0.9rem; }
         .form-control { border-radius: 8px; padding: 0.6rem 1rem; }
-        
+
         .btn-action { padding: 0.6rem 1.5rem; border-radius: 8px; font-weight: 600; transition: var(--transition); border: none; }
         .btn-primary-custom { background-color: var(--custom-maroon); color: white; }
         .btn-primary-custom:hover { background-color: var(--custom-maroon-light); color: white; }
-        
+
         .btn-success-custom { background-color: #059669; color: white; }
         .btn-success-custom:hover { background-color: #047857; color: white; }
 
@@ -161,7 +161,7 @@
 
         {{-- KOLOM KIRI: Informasi Detail (Read Only) --}}
         <div class="col-lg-4 animate-up" style="animation-delay: 0.1s;">
-            
+
             {{-- 1. Info User --}}
             <div class="info-card">
                 <div class="info-header bg-maroon">
@@ -175,7 +175,7 @@
                     <div class="value-field">{{ $pengajuan->user->email }}</div>
 
                     <div class="label-field">Universitas</div>
-                    <div class="value-field">{{ $pengajuan->user->mou->nama_universitas ?? '-' }}</div>
+                    <div class="value-field">{{ $pengajuan->user->mou ? ($pengajuan->user->mou->nama_instansi ?? $pengajuan->user->mou->nama_universitas) : '-' }}</div>
 
                     <div class="label-field">Jenis Pengajuan</div>
                     <div class="value-field"><span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill">{{ ucwords(str_replace('_', ' ', $pengajuan->jenis)) }}</span></div>
@@ -228,7 +228,7 @@
         {{-- KOLOM KANAN: Workflow Admin --}}
         <div class="col-lg-8 animate-up" style="animation-delay: 0.2s;">
 
-            {{-- 
+            {{--
                LOGIKA TAMPILAN:
                Step 1: Approval Data Pra-Penelitian
                Step 2: Kirim Galasan (Hanya jika Step 1 Approved)
@@ -425,7 +425,7 @@
                                         </div>
                                     </div>
                                     <div class="mt-4 text-end">
-                                        <button type="submit" class="btn btn-action btn-success-custom" 
+                                        <button type="submit" class="btn btn-action btn-success-custom"
                                                 onclick="return confirm('Verifikasi pembayaran?')"
                                                 {{ !$pengajuan->bukti_pembayaran ? 'disabled' : '' }}>
                                             <i class="bi bi-patch-check-fill me-2"></i> Verifikasi & Selesai

@@ -167,7 +167,7 @@
                         <div class="col-6">
                             <div class="info-group">
                                 <div class="info-label"><i class="bi bi-building me-1"></i> Universitas</div>
-                                <div class="info-value">{{ $mahasiswa->mou ? $mahasiswa->mou->nama_universitas : '-' }}</div>
+                                <div class="info-value">{{ $mahasiswa->mou ? ($mahasiswa->mou->nama_instansi ?? $mahasiswa->mou->nama_universitas) : '-' }}</div>
                             </div>
                             <div class="info-group">
                                 <div class="info-label"><i class="bi bi-book me-1"></i> Program Studi</div>

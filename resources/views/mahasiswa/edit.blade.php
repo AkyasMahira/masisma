@@ -182,7 +182,7 @@
                             <span class="input-group-text"><i class="bi bi-person-lock"></i></span>
                             {{-- Jika Admin: Tidak ada readonly. Jika User: Readonly --}}
                             <input type="text" name="nm_mahasiswa" class="form-control"
-                                value="{{ old('nm_mahasiswa', $mahasiswa->nm_mahasiswa) }}" 
+                                value="{{ old('nm_mahasiswa', $mahasiswa->nm_mahasiswa) }}"
                                 {{ $isAdmin ? '' : 'readonly' }}>
                         </div>
                     </div>
@@ -193,7 +193,7 @@
                             <label class="form-label">Asal Universitas</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-building-lock"></i></span>
-                                
+
                                 @if($isAdmin)
                                     {{-- JIKA ADMIN: TAMPILKAN DROPDOWN SELECT --}}
                                     <select name="mou_id" class="form-select">
@@ -201,14 +201,14 @@
                                         @foreach ($mous as $mou)
                                             <option value="{{ $mou->id }}"
                                                 {{ old('mou_id', $mahasiswa->mou_id) == $mou->id ? 'selected' : '' }}>
-                                                {{ $mou->nama_universitas }}
+                                                {{ $mou->nama_instansi ?? $mou->nama_universitas }}
                                             </option>
                                         @endforeach
                                     </select>
                                 @else
                                     {{-- JIKA USER: TAMPILKAN INPUT READONLY + HIDDEN ID --}}
                                     <input type="text" class="form-control"
-                                        value="{{ $mahasiswa->mou->nama_universitas ?? 'Tidak Ada Data' }}" readonly>
+                                        value="{{ $mahasiswa->mou ? ($mahasiswa->mou->nama_instansi ?? $mahasiswa->mou->nama_universitas) : 'Tidak Ada Data' }}" readonly>
                                     <input type="hidden" name="mou_id" value="{{ $mahasiswa->mou_id }}">
                                 @endif
                             </div>
@@ -220,7 +220,7 @@
                                 <span class="input-group-text"><i class="bi bi-book"></i></span>
                                 {{-- Jika Admin: Tidak ada readonly. Jika User: Readonly --}}
                                 <input type="text" name="prodi" class="form-control"
-                                    value="{{ old('prodi', $mahasiswa->prodi) }}" 
+                                    value="{{ old('prodi', $mahasiswa->prodi) }}"
                                     {{ $isAdmin ? '' : 'readonly' }}>
                             </div>
                         </div>
@@ -229,7 +229,7 @@
                     {{-- ======================================================== --}}
                     {{-- 2. INFORMASI EDITABLE (BISA DIEDIT USER) --}}
                     {{-- ======================================================== --}}
-                    
+
                     {{-- NOMOR HP --}}
                     <div class="mb-3">
                         <label class="form-label">Nomor WhatsApp / HP <span class="text-danger">*</span></label>
@@ -252,7 +252,7 @@
                     {{-- FOTO --}}
                     <div class="mb-4">
                         <label class="form-label">Pas Foto 3x4</label>
-                        
+
                         {{-- Tampilkan Foto Lama (Jika Ada) --}}
                         @if ($mahasiswa->foto_path)
                             <div class="mb-2 d-flex align-items-center">
@@ -280,7 +280,7 @@
                             </div>
                             <div class="small text-muted mt-1 fst-italic">Preview Foto Baru</div>
                         </div>
-                        
+
                         @error('foto')
                             <div class="text-danger small">{{ $message }}</div>
                         @enderror
@@ -291,7 +291,7 @@
 {{-- ======================================================== --}}
 
 @if(auth()->user()->role === 'admin')
-    
+
     {{-- === TAMPILAN KHUSUS ADMIN (BISA EDIT) === --}}
     <hr class="my-4 border-light">
     <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">
@@ -377,7 +377,7 @@
 
     {{-- === LOGIKA KHUSUS USER BIASA (HIDDEN FIELDS) === --}}
     {{-- User biasa tidak melihat form di atas, tapi data lama tetap dikirim agar validasi Controller lolos --}}
-    
+
     <input type="hidden" name="ruangan_id" value="{{ $mahasiswa->ruangan_id }}">
     <input type="hidden" name="nm_ruangan" value="{{ $mahasiswa->nm_ruangan }}">
     <input type="hidden" name="tanggal_mulai" value="{{ $mahasiswa->tanggal_mulai ? $mahasiswa->tanggal_mulai->format('Y-m-d') : '' }}">
@@ -391,7 +391,7 @@
 
                     {{-- TOMBOL AKSI --}}
                     <div class="d-flex justify-content-between align-items-center pt-3">
-                        <a href="{{ auth()->user()->role === 'admin' ? route('mahasiswa.index') : route('dashboard') }}" 
+                        <a href="{{ auth()->user()->role === 'admin' ? route('mahasiswa.index') : route('dashboard') }}"
                            class="btn btn-light-custom shadow-sm">
                             <i class="bi bi-arrow-left me-2"></i> Kembali
                         </a>

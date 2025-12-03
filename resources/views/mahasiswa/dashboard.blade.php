@@ -72,7 +72,7 @@
             text-align: left;
         }
         .info-item:last-child { border-bottom: none; }
-        
+
         .info-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 8px; }
         .info-value { font-size: 0.9rem; color: var(--text-dark); font-weight: 600; text-align: right; max-width: 60%; }
 
@@ -159,7 +159,7 @@
     @endif
 
     <div class="row g-4">
-        
+
         {{-- KOLOM KIRI: Profil --}}
         <div class="col-lg-4 animate-up" style="animation-delay: 0.1s;">
             <div class="profile-card h-100">
@@ -176,10 +176,10 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="profile-body">
                     <h5 class="fw-bold text-dark mb-1">{{ $mahasiswa->nm_mahasiswa }}</h5>
-                    <p class="text-muted small mb-4">{{ $mahasiswa->mou->nama_universitas ?? 'Universitas Tidak Diketahui' }}</p>
+                    <p class="text-muted small mb-4">{{ $mahasiswa->mou ? ($mahasiswa->mou->nama_instansi ?? $mahasiswa->mou->nama_universitas) : 'Instansi Tidak Diketahui' }}</p>
 
                     <div class="info-item">
                         <span class="info-label"><i class="bi bi-book"></i> Prodi</span>
@@ -192,15 +192,15 @@
                     <div class="info-item">
                         <span class="info-label"><i class="bi bi-calendar-range"></i> Periode</span>
                         <span class="info-value">
-                            {{ \Carbon\Carbon::parse($mahasiswa->tanggal_mulai)->format('d M Y') }} - 
+                            {{ \Carbon\Carbon::parse($mahasiswa->tanggal_mulai)->format('d M Y') }} -
                             {{ \Carbon\Carbon::parse($mahasiswa->tanggal_berakhir)->format('d M Y') }}
                         </span>
                     </div>
-                    
+
                     <div class="mt-4 text-start p-3 bg-light rounded-3">
                         <small class="text-muted fw-bold text-uppercase d-block mb-2">Pembimbing</small>
                         <div class="d-flex align-items-center gap-2 mb-1">
-                            <i class="bi bi-person-badge text-secondary"></i> 
+                            <i class="bi bi-person-badge text-secondary"></i>
                             <span class="text-dark fw-bold">{{ $mahasiswa->dosen_pembimbing ?? '-' }}</span>
                         </div>
                         <a href="tel:{{ $mahasiswa->no_hp_dospem }}" class="text-decoration-none small text-success">
@@ -219,7 +219,7 @@
 
         {{-- KOLOM KANAN: Statistik & Grafik --}}
         <div class="col-lg-8">
-            
+
             {{-- 1. Statistik Cards --}}
             <div class="row g-3 mb-4 animate-up" style="animation-delay: 0.2s;">
                 <div class="col-md-4">
@@ -339,13 +339,13 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const ctx = document.getElementById('kehadiranChart').getContext('2d');
-            
+
             // Data dummy jika chartLabels kosong (untuk preview)
             const labels = {!! json_encode($chartLabels ?? []) !!};
             const data = {!! json_encode($chartData ?? []) !!};
 
             if (labels.length === 0) {
-                document.getElementById('kehadiranChart').parentNode.innerHTML = 
+                document.getElementById('kehadiranChart').parentNode.innerHTML =
                     '<div class="text-center text-muted py-5">Belum cukup data untuk menampilkan grafik.</div>';
                 return;
             }

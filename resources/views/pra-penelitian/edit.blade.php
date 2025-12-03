@@ -72,7 +72,7 @@
             position: relative;
             transition: border-color 0.3s;
         }
-        
+
         .dynamic-section:hover {
             border-color: var(--custom-maroon-light);
         }
@@ -184,7 +184,7 @@
                 </div>
 
                 <div class="card-body p-4 p-md-5">
-                    
+
                     @if ($errors->any())
                         <div class="alert alert-danger rounded-3 shadow-sm mb-4">
                             <ul class="mb-0 small">
@@ -205,11 +205,11 @@
                                 <label class="form-label">Judul Pra Penelitian <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-type-h1"></i></span>
-                                    <input type="text" name="judul" class="form-control" 
+                                    <input type="text" name="judul" class="form-control"
                                            value="{{ old('judul', $praPenelitian->judul) }}" required>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <label class="form-label">Universitas <span class="text-danger">*</span></label>
                                 <div class="input-group">
@@ -217,9 +217,9 @@
                                     <select name="mou_id" class="form-select" required>
                                         <option value="">-- Pilih Universitas --</option>
                                         @foreach ($mous as $mou)
-                                            <option value="{{ $mou->id }}" 
+                                            <option value="{{ $mou->id }}"
                                                 {{ old('mou_id', $praPenelitian->mou_id) == $mou->id ? 'selected' : '' }}>
-                                                {{ $mou->nama_universitas }}
+                                                {{ $mou->nama_instansi ?? $mou->nama_universitas }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -244,7 +244,7 @@
                                 <label class="form-label">Program Studi</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-book"></i></span>
-                                    <input type="text" name="prodi" class="form-control" 
+                                    <input type="text" name="prodi" class="form-control"
                                            value="{{ old('prodi', $praPenelitian->prodi) }}" required>
                                 </div>
                             </div>
@@ -252,7 +252,7 @@
                                 <label class="form-label">Tanggal Mulai Penelitian</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
-                                    <input type="date" name="tanggal_mulai" class="form-control" 
+                                    <input type="date" name="tanggal_mulai" class="form-control"
                                            value="{{ old('tanggal_mulai', $praPenelitian->tanggal_mulai->format('Y-m-d')) }}" required>
                                 </div>
                             </div>
@@ -264,11 +264,11 @@
                                 <label class="form-label">Tgl. Rencana Skripsi</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
-                                    <input type="date" name="tanggal_rencana_skripsi" class="form-control" 
+                                    <input type="date" name="tanggal_rencana_skripsi" class="form-control"
                                            value="{{ old('tanggal_rencana_skripsi', $praPenelitian->tanggal_rencana_skripsi->format('Y-m-d')) }}" required>
                                 </div>
                             </div>
-                            
+
                             {{-- File Kerangka --}}
                             <div class="col-md-4">
                                 <label class="form-label">Update Kerangka (PDF)</label>
@@ -301,7 +301,7 @@
                         {{-- 3. SECTION DATA MAHASISWA (DINAMIS) --}}
                         <div class="dynamic-section">
                             <span class="section-badge">Data Mahasiswa</span>
-                            
+
                             <div class="d-flex justify-content-end mb-3">
                                 <button type="button" id="tambah-mahasiswa" class="btn-add-row">
                                     <i class="bi bi-plus-lg"></i> Tambah Anggota
@@ -316,8 +316,8 @@
                             </div>
 
                             <div id="mahasiswa-list">
-                                {{-- 
-                                    LOGIKA PENTING: 
+                                {{--
+                                    LOGIKA PENTING:
                                     Ambil data dari 'old' jika validasi gagal.
                                     Jika tidak, ambil dari database relasi 'anggotas'.
                                 --}}
@@ -337,21 +337,21 @@
                                         <div class="col-md-4">
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                                <input type="text" name="mahasiswas[{{ $index }}][nama]" class="form-control" 
+                                                <input type="text" name="mahasiswas[{{ $index }}][nama]" class="form-control"
                                                        value="{{ $nama }}" placeholder="Nama Lengkap" required>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="input-group">
                                                 <span class="input-group-text">+62</span>
-                                                <input type="tel" name="mahasiswas[{{ $index }}][no_telpon]" class="form-control" 
+                                                <input type="tel" name="mahasiswas[{{ $index }}][no_telpon]" class="form-control"
                                                        value="{{ $telp }}" placeholder="812xxxx" required>
                                             </div>
                                         </div>
                                         <div class="col-md-3">
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-mortarboard"></i></span>
-                                                <input type="text" name="mahasiswas[{{ $index }}][jenjang]" class="form-control" 
+                                                <input type="text" name="mahasiswas[{{ $index }}][jenjang]" class="form-control"
                                                        value="{{ $jenjang }}" placeholder="S1" required>
                                             </div>
                                         </div>
@@ -368,7 +368,7 @@
                         {{-- 4. SECTION DOSEN PEMBIMBING --}}
                         <div class="dynamic-section">
                             <span class="section-badge">Dosen Pembimbing</span>
-                            
+
                             <div class="row g-3 mt-1">
                                 {{-- Dosen 1 --}}
                                 <div class="col-md-6">
@@ -378,7 +378,7 @@
                                             <label class="small text-muted fw-bold">Nama Lengkap</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
-                                                <input type="text" name="dosen1_nama" class="form-control" 
+                                                <input type="text" name="dosen1_nama" class="form-control"
                                                        value="{{ old('dosen1_nama', $praPenelitian->dosen1_nama) }}" required>
                                             </div>
                                         </div>
@@ -386,7 +386,7 @@
                                             <label class="small text-muted fw-bold">Nomor HP</label>
                                             <div class="input-group">
                                                 <span class="input-group-text">+62</span>
-                                                <input type="tel" name="dosen1_hp" class="form-control" 
+                                                <input type="tel" name="dosen1_hp" class="form-control"
                                                        value="{{ old('dosen1_hp', $praPenelitian->dosen1_hp) }}" required>
                                             </div>
                                         </div>
@@ -401,7 +401,7 @@
                                             <label class="small text-muted fw-bold">Nama Lengkap</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
-                                                <input type="text" name="dosen2_nama" class="form-control" 
+                                                <input type="text" name="dosen2_nama" class="form-control"
                                                        value="{{ old('dosen2_nama', $praPenelitian->dosen2_nama) }}" required>
                                             </div>
                                         </div>
@@ -409,7 +409,7 @@
                                             <label class="small text-muted fw-bold">Nomor HP</label>
                                             <div class="input-group">
                                                 <span class="input-group-text">+62</span>
-                                                <input type="tel" name="dosen2_hp" class="form-control" 
+                                                <input type="tel" name="dosen2_hp" class="form-control"
                                                        value="{{ old('dosen2_hp', $praPenelitian->dosen2_hp) }}" required>
                                             </div>
                                         </div>
@@ -472,9 +472,9 @@
             const list = document.getElementById('mahasiswa-list');
             const addButton = document.getElementById('tambah-mahasiswa');
             const template = document.getElementById('mahasiswa-template');
-            
+
             // Start index dari jumlah data yg ada agar ID unik tidak bentrok
-            let index = {{ count($mahasiswa ?? []) > 0 ? count($mahasiswa) : 100 }}; 
+            let index = {{ count($mahasiswa ?? []) > 0 ? count($mahasiswa) : 100 }};
 
             // Format No HP
             function formatPhoneNumber(input) {

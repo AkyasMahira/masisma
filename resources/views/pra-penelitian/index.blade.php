@@ -254,7 +254,7 @@
                         <tr>
                             <td class="text-center text-muted font-weight-bold">{{ $loop->iteration }}</td>
                             <td>{{ $item->judul }}</td>
-                            <td>{{ $item->mou->nama_universitas ?? 'N/A' }}</td>
+                            <td>{{ $item->mou ? ($item->mou->nama_instansi ?? $item->mou->nama_universitas) : 'N/A' }}</td>
                             {{-- Asumsi kolom exp date di tabel MOU adalah 'tanggal_keluar' --}}
                             <td>{{ $item->mou->tanggal_keluar ? $item->mou->tanggal_keluar->format('d M Y') : 'N/A' }}</td>
                             <td>{{ $item->tanggal_mulai ? $item->tanggal_mulai->format('d M Y') : 'N/A' }}</td>

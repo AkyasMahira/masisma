@@ -175,7 +175,7 @@
             <tr>
                 <td class="label">Asal Universitas</td>
                 <td class="separator">:</td>
-                <td>{{ $data->mou->nama_universitas ?? '-' }}</td>
+                <td>{{ $data->mou ? ($data->mou->nama_instansi ?? $data->mou->nama_universitas) : '-' }}</td>
             </tr>
             <tr>
                 <td class="label">No. WhatsApp</td>

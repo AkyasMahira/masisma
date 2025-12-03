@@ -126,7 +126,7 @@
                             <select name="mou_id" class="form-select" required>
                                 <option value="">-- Pilih Universitas --</option>
                                 @foreach ($mous as $m)
-                                    <option value="{{ $m->id }}">{{ $m->nama_universitas }}</option>
+                                    <option value="{{ $m->id }}">{{ $m->nama_instansi ?? $m->nama_universitas }}</option>
                                 @endforeach
                             </select>
                         </div>

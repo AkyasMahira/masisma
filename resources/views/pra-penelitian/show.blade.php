@@ -120,7 +120,7 @@
             flex: 1;
             overflow: hidden;
         }
-        
+
         .file-name {
             font-weight: 600;
             color: var(--text-dark);
@@ -129,7 +129,7 @@
             text-overflow: ellipsis;
             font-size: 0.9rem;
         }
-        
+
         .file-action {
             font-size: 0.75rem;
             color: var(--text-muted);
@@ -189,8 +189,8 @@
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
                 <span class="badge rounded-pill text-uppercase
-                    {{ $praPenelitian->status == 'Pending' ? 'bg-pending' : 
-                      ($praPenelitian->status == 'Approved' ? 'bg-approved' : 
+                    {{ $praPenelitian->status == 'Pending' ? 'bg-pending' :
+                      ($praPenelitian->status == 'Approved' ? 'bg-approved' :
                       ($praPenelitian->status == 'Rejected' ? 'bg-rejected' : 'bg-active')) }}">
                     {{ $praPenelitian->status }}
                 </span>
@@ -212,10 +212,10 @@
     </div>
 
     <div class="row animate-up" style="animation-delay: 0.1s;">
-        
+
         {{-- KOLOM KIRI: Informasi Utama & Dosen --}}
         <div class="col-lg-8">
-            
+
             {{-- 1. Detail Informasi --}}
             <div class="detail-card">
                 <div class="detail-header">
@@ -227,8 +227,8 @@
                         <div class="col-md-6">
                             <div class="label-text">Universitas</div>
                             <div class="value-text fw-bold">
-                                <i class="bi bi-building me-1 text-muted"></i> 
-                                {{ $praPenelitian->mou->nama_universitas ?? '-' }}
+                                <i class="bi bi-building me-1 text-muted"></i>
+                                {{ $praPenelitian->mou ? ($praPenelitian->mou->nama_instansi ?? $praPenelitian->mou->nama_universitas) : '-' }}
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -310,7 +310,7 @@
 
         {{-- KOLOM KANAN: Timeline & File --}}
         <div class="col-lg-4">
-            
+
             {{-- 4. Timeline --}}
             <div class="detail-card">
                 <div class="detail-header">
@@ -383,11 +383,11 @@
             @if(auth()->user()->role === 'admin' && $praPenelitian->status === 'Pending')
             <div class="d-grid gap-2">
                 {{-- Jika Anda punya route untuk approve/reject di controller khusus --}}
-                {{-- 
+                {{--
                 <form action="{{ route('pengajuan.approve', $praPenelitian->id) }}" method="POST">
                     @csrf
                     <button class="btn btn-success w-100 fw-bold py-2">Setujui Pengajuan</button>
-                </form> 
+                </form>
                 --}}
             </div>
             @endif

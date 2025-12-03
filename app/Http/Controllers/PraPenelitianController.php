@@ -36,7 +36,7 @@ class PraPenelitianController extends Controller
     {
         // Ambil MOU yang masih berlaku
         $mous = Mou::where('tanggal_keluar', '>=', now()->toDateString())
-            ->orderBy('nama_universitas', 'asc')
+            ->orderBy('nama_instansi', 'asc')
             ->get();
 
         return view('pra-penelitian.create', compact('mous'));
@@ -53,7 +53,7 @@ class PraPenelitianController extends Controller
             'tanggal_mulai' => 'required|date',
             'tanggal_rencana_skripsi' => 'required|date',
 
-            // File Upload 
+            // File Upload
             'kerangka_penelitian' => 'required|mimes:pdf|max:2048',
             'surat_pengantar' => 'required|mimes:pdf|max:2048',
 
@@ -63,7 +63,7 @@ class PraPenelitianController extends Controller
             'dosen2_nama' => 'required|string',
             'dosen2_hp' => 'required|string',
 
-            // Data Mahasiswa 
+            // Data Mahasiswa
             'mahasiswas' => 'required|array|min:1',
             'mahasiswas.*.nama' => 'required|string',
             'mahasiswas.*.no_telpon' => 'required|string',

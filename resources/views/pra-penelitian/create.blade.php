@@ -228,7 +228,7 @@
                                         @foreach ($mous as $mou)
                                             <option value="{{ $mou->id }}"
                                                 {{ old('mou_id') == $mou->id ? 'selected' : '' }}>
-                                                {{ $mou->nama_universitas }} (Exp:
+                                                {{ $mou->nama_instansi ?? $mou->nama_universitas }} (Exp:
                                                 {{ $mou->tanggal_keluar->format('d M Y') }})
                                             </option>
                                         @endforeach

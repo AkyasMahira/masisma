@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Penilaian Presentasi - {{ $presentasi->user->name }}</title>
-    
+
     {{-- Fonts & Icons --}}
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -89,7 +89,7 @@
 
         /* --- Grade Selection (Radio Cards) --- */
         .grade-selector { display: none; }
-        
+
         .grade-card {
             display: block;
             cursor: pointer;
@@ -102,10 +102,10 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .grade-title { font-size: 2rem; font-weight: 800; line-height: 1; margin-bottom: 0.25rem; }
         .grade-desc { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
-        
+
         /* Colors per Grade */
         .grade-A .grade-title { color: #16a34a; }
         .grade-B .grade-title { color: #16a34a; }
@@ -114,7 +114,7 @@
 
         /* Active States */
         .grade-selector:checked + .grade-card { border-width: 2px; transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        
+
         .grade-selector[value="A"]:checked + .grade-card { border-color: #16a34a; background-color: #f0fdf4; }
         .grade-selector[value="B"]:checked + .grade-card { border-color: #16a34a; background-color: #f0fdf4; }
         .grade-selector[value="C"]:checked + .grade-card { border-color: #ca8a04; background-color: #fefce8; }
@@ -125,7 +125,7 @@
             background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem;
             position: relative; margin-bottom: 1rem; animation: fadeIn 0.3s ease-out;
         }
-        
+
         .btn-remove-item {
             position: absolute; top: 10px; right: 10px;
             width: 30px; height: 30px; border-radius: 50%; background: #fee2e2; color: #dc2626;
@@ -147,7 +147,7 @@
             transition: var(--transition); font-size: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         .btn-maroon:hover { background-color: var(--maroon-light); transform: translateY(-2px); }
-        
+
         .btn-outline-dashed {
             border: 2px dashed #cbd5e1; background: transparent; color: var(--text-muted);
             border-radius: 12px; width: 100%; padding: 0.8rem; font-weight: 600; transition: 0.2s;
@@ -172,7 +172,7 @@
 
     <div class="container">
         <div class="row g-4">
-            
+
             {{-- KOLOM KIRI: Detail Mahasiswa --}}
             <div class="col-lg-4">
                 <div class="custom-card">
@@ -185,15 +185,15 @@
 
                         <div class="info-label">Universitas & Prodi</div>
                         <div class="info-value">
-                            {{ $praPenelitian->mou->nama_universitas ?? '-' }} <br>
+                            {{ $praPenelitian->mou ? ($praPenelitian->mou->nama_instansi ?? $praPenelitian->mou->nama_universitas) : '-' }} <br>
                             <span class="fw-normal text-muted">{{ $praPenelitian->prodi }}</span>
                         </div>
 
                         <div class="info-label">Judul Penelitian</div>
                         <div class="info-value">{{ $presentasi->praPenelitian->judul }}</div>
-                        
+
                         <hr class="my-3 border-light">
-                        
+
                         <div class="info-label">Tim Peneliti</div>
                         @if ($praPenelitian->anggotas->count() > 0)
                             <ul class="list-unstyled mb-0">
@@ -240,7 +240,7 @@
                 @if ($presentasi->status_penilaian == 'pending')
                     <form action="{{ route('ci.submit-penilaian', $presentasi->id) }}" method="POST" id="formPenilaian">
                         @csrf
-                        
+
                         {{-- Card 1: Nilai Akhir --}}
                         <div class="custom-card">
                             <div class="card-header-custom">
@@ -248,7 +248,7 @@
                             </div>
                             <div class="card-body-custom">
                                 <p class="text-muted small mb-3">Silakan pilih hasil akhir presentasi berdasarkan performa mahasiswa.</p>
-                                
+
                                 <div class="row g-3">
                                     <div class="col-6 col-md-3">
                                         <input type="radio" class="grade-selector" name="nilai" id="nilaiA" value="A" required>
@@ -332,7 +332,7 @@
                         </div>
                         <h2 class="fw-bold text-dark mb-2">Terima Kasih!</h2>
                         <p class="text-muted">Anda telah menyelesaikan penilaian untuk mahasiswa ini.</p>
-                        
+
                         <div class="d-inline-block bg-light px-4 py-2 rounded-3 border mt-3">
                             <span class="text-muted small text-uppercase fw-bold d-block">Nilai Yang Diberikan</span>
                             <span class="fs-1 fw-bold {{ $presentasi->nilai == 'C' ? 'text-warning' : ($presentasi->nilai == 'D' ? 'text-danger' : 'text-success') }}">

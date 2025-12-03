@@ -103,7 +103,7 @@
         .btn-approve:hover { background-color: #059669; transform: translateY(-2px); }
         .btn-reject { background-color: #ef4444; }
         .btn-reject:hover { background-color: #dc2626; transform: translateY(-2px); }
-        
+
         .btn-detail {
             background-color: white; border: 1px solid #e2e8f0; color: var(--text-dark);
             padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 500;
@@ -167,7 +167,7 @@
                                 </div>
                             </td>
                             <td>
-                                <span class="text-dark">{{ $p->user->mou ? $p->user->mou->nama_universitas : '-' }}</span>
+                                <span class="text-dark">{{ $p->user->mou ? ($p->user->mou->nama_instansi ?? $p->user->mou->nama_universitas) : '-' }}</span>
                             </td>
                             <td>
                                 <span class="badge bg-light text-dark border">
@@ -194,7 +194,7 @@
                                     </span>
                                 @endif
                             </td>
-                            
+
                             {{-- Status Surat Balasan --}}
                             <td class="text-center">
                                 @if ($p->status === 'approved')

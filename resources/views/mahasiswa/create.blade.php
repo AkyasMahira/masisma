@@ -172,6 +172,15 @@
             </div>
         </div>
 
+         <div class="mb-3">
+            <label class="form-label">No HP <span class="text-danger">*</span></label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" name="no_hp" class="form-control"
+                    value="{{ old('no_hp') }}" placeholder="Contoh: 123456789" required>
+            </div>
+        </div>
+
         {{-- Input Foto (Tetap sama) --}}
         <div class="mb-4">
             <label class="form-label">Pas Foto 3x4 (Opsional)</label>
@@ -192,48 +201,54 @@
                 <div class="text-danger small">{{ $message }}</div>
             @enderror
         </div>
+        
+<div class="row">
 
-        {{-- --}}
-        <div class="row">
-                @if(auth()->user() && auth()->user()->role === 'admin')
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Asal Universitas <span class="text-danger">*</span></label>
-                    <div class="input-group">
-                        {{-- Icon Universitas --}}
-                        <span class="input-group-text"><i class="bi bi-building"></i></span>
-                        <select name="mou_id" class="form-select" required>
-                            <option value="">-- Pilih Universitas --</option>
-                            @foreach ($mous as $mou)
-                                <option value="{{ $mou->id }}" {{ old('mou_id') == $mou->id ? 'selected' : '' }}>
-                                    {{ $mou->nama_universitas }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-                @else
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Asal Universitas</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-building"></i></span>
-                        <select class="form-select" disabled>
-                            <option>-- Diisi oleh Admin --</option>
-                        </select>
-                    </div>
-                    <input type="hidden" name="mou_id" value="">
-                    <div class="small text-muted mt-2">Asal universitas akan diatur oleh admin setelah proses verifikasi.</div>
-                </div>
-                @endif
-            
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Program Studi</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-book"></i></span>
-                    <input type="text" name="prodi" class="form-control" value="{{ old('prodi') }}"
-                        placeholder="Jurusan/Prodi">
-                </div>
+    {{-- ASAL UNIVERSITAS / INSTANSI --}}
+    @if(auth()->user() && auth()->user()->role === 'admin')
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Asal Universitas / Instansi <span class="text-danger">*</span></label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-building"></i></span>
+                <select name="mou_id" class="form-select" required>
+                    <option value="">-- Pilih Universitas / Instansi --</option>
+                    @foreach ($mous as $mou)
+                        <option value="{{ $mou->id }}" {{ old('mou_id') == $mou->id ? 'selected' : '' }}>
+                            {{ $mou->nama_instansi ?? $mou->nama_universitas }}
+                        </option>
+                    @endforeach
+                </select>
             </div>
         </div>
+    @else
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Asal Universitas / Instansi</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-building"></i></span>
+                <select class="form-select" disabled>
+                    <option>-- Diisi oleh Admin --</option>
+                </select>
+            </div>
+
+            {{-- Important: hidden value tetap dikirim --}}
+            <input type="hidden" name="mou_id" value="">
+
+            <small class="text-muted mt-2">Asal universitas akan diatur oleh admin setelah proses verifikasi.</small>
+        </div>
+    @endif
+
+
+    {{-- PROGRAM STUDI --}}
+    <div class="col-md-6 mb-3">
+        <label class="form-label">Program Studi</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-book"></i></span>
+            <input type="text" name="prodi" class="form-control" value="{{ old('prodi') }}"
+                placeholder="Jurusan/Prodi">
+        </div>
+    </div>
+
+</div>
 
         <hr class="my-4 border-light">
 

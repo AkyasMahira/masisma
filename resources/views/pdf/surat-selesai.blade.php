@@ -86,7 +86,7 @@
                 </tr>
                 <tr>
                     <td>Universitas</td>
-                    <td>: {{ $presentasi->praPenelitian->mou->nama_universitas ?? '-' }}</td>
+                    <td>: {{ $presentasi->praPenelitian->mou ? ($presentasi->praPenelitian->mou->nama_instansi ?? $presentasi->praPenelitian->mou->nama_universitas) : '-' }}</td>
                 </tr>
                 <tr>
                     <td>Program Studi</td>

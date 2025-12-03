@@ -13,7 +13,7 @@ class AuthController extends Controller
     // Menampilkan halaman login & register (1 halaman gabung)
     public function showLoginForm()
     {
-        $universitas = Mou::orderBy('nama_universitas')->get();
+        $universitas = Mou::orderBy('nama_instansi')->get();
         return view('auth.login', compact('universitas'));
     }
 

@@ -18,8 +18,8 @@ class CreateMousTable extends Migration
             $table->string('nama_universitas');
             $table->date('tanggal_masuk');
             $table->date('tanggal_keluar');
-            $table->string('file_mou'); // Menyimpan path ke file
-            $table->string('surat_keterangan'); // Menyimpan path ke file
+            // $table->string('file_mou'); // Menyimpan path ke file
+            // $table->string('surat_keterangan'); // Menyimpan path ke file
             $table->text('keterangan')->nullable();
             $table->timestamps();
         });

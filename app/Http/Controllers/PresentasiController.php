@@ -329,43 +329,71 @@ class PresentasiController extends Controller
         return view('admin.presentasi.index', compact('presentasi'));
     }
 
-    /**
-     * Download Sertifikat untuk Anggota Spesifik
-     */
-    public function downloadSertifikatAnggota($id, $namaAnggota)
-    {
-        $presentasi = Presentasi::with(['praPenelitian.anggotas'])->findOrFail($id);
 
-        // Decode nama dari URL
-        $namaAnggota = urldecode($namaAnggota);
+  /**
+ * Download Sertifikat untuk Anggota Spesifik
+ */
+public function downloadSertifikatAnggota($id, $namaAnggota)
+{
+    $presentasi = Presentasi::with(['praPenelitian.anggotas'])->findOrFail($id);
 
-        // Generate sertifikat dengan nama anggota
-        $pdf = Pdf::loadView('pdf.sertifikat-penelitian', [
-            'presentasi' => $presentasi,
-            'nama_penerima' => $namaAnggota
-        ]);
+    $namaAnggota = urldecode($namaAnggota);
 
-        $fileName = 'sertifikat_' . str_replace(' ', '_', $namaAnggota) . '.pdf';
-        return $pdf->download($fileName);
-    }
+    $pdf = Pdf::loadView('pdf.sertifikat-penelitian', [
+        'presentasi'    => $presentasi,
+        'nama_penerima' => $namaAnggota
+    ]);
 
-    /**
-     * Download Surat Selesai untuk Anggota Spesifik
-     */
-    public function downloadSuratSelesaiAnggota($id, $namaAnggota)
-    {
-        $presentasi = Presentasi::with(['praPenelitian.anggotas'])->findOrFail($id);
+    $fileName = 'sertifikat_' . str_replace(' ', '_', $namaAnggota) . '.pdf';
+    return $pdf->download($fileName);
+}
 
-        // Decode nama dari URL
-        $namaAnggota = urldecode($namaAnggota);
+/**
+ * Download Surat Selesai untuk Anggota Spesifik
+ */
+public function downloadSuratSelesaiAnggota($id, $namaAnggota)
+{
+    $presentasi = Presentasi::with(['praPenelitian.anggotas'])->findOrFail($id);
 
-        // Generate surat selesai dengan nama anggota
-        $pdf = Pdf::loadView('pdf.surat-selesai', [
-            'presentasi' => $presentasi,
-            'nama_penerima' => $namaAnggota
-        ]);
+    $namaAnggota = urldecode($namaAnggota);
 
-        $fileName = 'surat_selesai_' . str_replace(' ', '_', $namaAnggota) . '.pdf';
-        return $pdf->download($fileName);
-    }
+    $pdf = Pdf::loadView('pdf.surat-selesai', [
+        'presentasi'    => $presentasi,
+        'nama_penerima' => $namaAnggota
+    ]);
+
+    $fileName = 'surat_selesai_' . str_replace(' ', '_', $namaAnggota) . '.pdf';
+    return $pdf->download($fileName);
+}
+
+
+/**
+ * API Laporan – mengambil data laporan yang sudah diupload
+ */
+public function apiLaporan()
+{
+    $presentasi = Presentasi::with([
+            'user.mou',
+            'praPenelitian.mou',
+        ])
+        ->whereNotNull('file_laporan')
+        ->get();
+
+    $data = $presentasi->map(function ($item) {
+        $mou = $item->praPenelitian->mou ?? $item->user->mou;
+
+        return [
+            'nama_user'              => $item->user->name,
+            'tanggal_upload_laporan' => optional($item->laporan_uploaded_at)->format('Y-m-d'),
+            'judul'                  => optional($item->praPenelitian)->judul,
+            'nama_instansi'          => $mou->nama_instansi ?? $mou->nama_universitas ?? null,
+            'program_studi'          => $item->praPenelitian->prodi ?? $item->user->program_studi,
+            'file_laporan_url'       => $item->file_laporan 
+                                        ? asset('storage/' . $item->file_laporan)
+                                        : null,
+        ];
+    });
+
+    return response()->json($data, 200);
+}
 }

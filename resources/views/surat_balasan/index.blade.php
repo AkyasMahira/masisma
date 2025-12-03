@@ -214,7 +214,7 @@
 
                             <td>
                                 <span class="badge bg-light text-dark border">
-                                    {{ $row->mou->nama_universitas ?? '-' }}
+                                    {{ $row->mou ? ($row->mou->nama_instansi ?? $row->mou->nama_universitas) : '-' }}
                                 </span>
                             </td>
 
