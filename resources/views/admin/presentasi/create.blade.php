@@ -189,12 +189,42 @@
                             @endif
                         </div>
 
+                        {{-- Update Bagian Dosen + Nomor HP --}}
                         <div class="info-group mt-3">
-                            <div class="info-label">Dosen Pembimbing</div>
-                            <ul class="list-unstyled small mb-0 text-dark">
-                                <li class="mb-1"><i class="bi bi-person-badge me-2 text-muted"></i> {{ $praPenelitian->dosen1_nama }}</li>
+                            <div class="info-label mb-2">Dosen Pembimbing</div>
+                            <ul class="list-group list-group-flush border rounded-3">
+                                {{-- Dosen 1 --}}
+                                <li class="list-group-item">
+                                    <div class="fw-bold text-dark mb-1">
+                                        <i class="bi bi-person-badge me-2 text-muted"></i> {{ $praPenelitian->dosen1_nama }}
+                                    </div>
+                                    @if(!empty($praPenelitian->dosen1_hp))
+                                        <div class="small ms-4">
+                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $praPenelitian->dosen1_hp) }}" target="_blank" class="text-decoration-none text-muted">
+                                                <i class="bi bi-whatsapp text-success me-1"></i> {{ $praPenelitian->dosen1_hp }}
+                                            </a>
+                                        </div>
+                                    @else
+                                        <div class="small ms-4 text-muted fst-italic">No. HP tidak tersedia</div>
+                                    @endif
+                                </li>
+
+                                {{-- Dosen 2 (Jika Ada) --}}
                                 @if ($praPenelitian->dosen2_nama)
-                                    <li><i class="bi bi-person-badge me-2 text-muted"></i> {{ $praPenelitian->dosen2_nama }}</li>
+                                    <li class="list-group-item">
+                                        <div class="fw-bold text-dark mb-1">
+                                            <i class="bi bi-person-badge me-2 text-muted"></i> {{ $praPenelitian->dosen2_nama }}
+                                        </div>
+                                        @if(!empty($praPenelitian->dosen2_hp))
+                                            <div class="small ms-4">
+                                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $praPenelitian->dosen2_hp) }}" target="_blank" class="text-decoration-none text-muted">
+                                                    <i class="bi bi-whatsapp text-success me-1"></i> {{ $praPenelitian->dosen2_hp }}
+                                                </a>
+                                            </div>
+                                        @else
+                                            <div class="small ms-4 text-muted fst-italic">No. HP tidak tersedia</div>
+                                        @endif
+                                    </li>
                                 @endif
                             </ul>
                         </div>
@@ -264,7 +294,7 @@
                             <div class="alert alert-info border-0 d-flex align-items-start mb-4 bg-opacity-10" style="background-color: #e0f2fe; color: #0369a1;">
                                 <i class="bi bi-info-circle-fill me-2 mt-1"></i>
                                 <div class="small">
-                                    <strong>Catatan:</strong> Setelah disimpan, link penilaian akan otomatis dibuat dan dikirimkan ke notifikasi mahasiswa/dosen.
+                                    <strong>Catatan:</strong> Setelah disimpan, link penilaian akan otomatis dibuat dan kirimkan ke CI.
                                 </div>
                             </div>
 

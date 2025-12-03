@@ -98,11 +98,17 @@
             border-radius: 8px;
             display: inline-flex; align-items: center; justify-content: center;
             transition: var(--transition); border: none; color: white;
+            cursor: pointer;
         }
         .btn-approve { background-color: #10b981; }
         .btn-approve:hover { background-color: #059669; transform: translateY(-2px); }
+        
         .btn-reject { background-color: #ef4444; }
         .btn-reject:hover { background-color: #dc2626; transform: translateY(-2px); }
+
+        /* --- PENAMBAHAN STYLE UNTUK TOMBOL DELETE --- */
+        .btn-delete { background-color: #94a3b8; } /* Warna abu-abu netral */
+        .btn-delete:hover { background-color: #dc2626; transform: translateY(-2px); } /* Merah saat di-hover */
 
         .btn-detail {
             background-color: white; border: 1px solid #e2e8f0; color: var(--text-dark);
@@ -116,7 +122,6 @@
         @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
     </style>
 
-    <!-- Header Section -->
     <div class="page-header-wrapper animate-up">
         <div>
             <h4 class="fw-bold mb-1" style="color: var(--custom-maroon);">Daftar Pengajuan</h4>
@@ -124,7 +129,6 @@
         </div>
     </div>
 
-    <!-- Alert Messages -->
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show animate-up" role="alert" style="border-radius: 12px;">
             <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
@@ -139,7 +143,6 @@
         </div>
     @endif
 
-    <!-- Table Section -->
     <div class="custom-table-card animate-up" style="animation-delay: 0.1s;">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
@@ -196,19 +199,25 @@
                             </td>
 
                             {{-- Status Surat Balasan --}}
-                            <td class="text-center">
-                                @if ($p->status === 'approved')
-                                    @if ($p->status_galasan === 'pending')
-                                        <span class="badge-pill-soft bg-soft-gray">Belum Kirim</span>
-                                    @else
-                                        <span class="badge-pill-soft bg-soft-purple">
-                                            <i class="bi bi-send-fill me-1"></i> Terkirim
-                                        </span>
-                                    @endif
-                                @else
-                                    <span class="text-muted small">-</span>
-                                @endif
-                            </td>
+<td class="text-center">
+
+    @if ($p->jenis === 'magang')
+        <span class="text-muted small">-</span>
+
+    @elseif ($p->status === 'approved')
+        @if ($p->status_galasan === 'pending')
+            <span class="badge-pill-soft bg-soft-gray">Belum Kirim</span>
+        @else
+            <span class="badge-pill-soft bg-soft-purple">
+                <i class="bi bi-send-fill me-1"></i> Terkirim
+            </span>
+        @endif
+
+    @else
+        <span class="text-muted small">-</span>
+    @endif
+
+</td>
 
                             {{-- Status Pembayaran --}}
                             <td class="text-center">
@@ -228,16 +237,9 @@
                             </td>
 
                             <td class="text-center">
-                                                                    {{-- delete button --}}
-                                    <form action="{{ route('admin.pengajuan.destroy', $p->id) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-action btn-delete" title="Hapus" onclick="return confirm('Yakin ingin menghapus pengajuan ini?')">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                @if ($p->status === 'pending')
-                                    <div class="d-flex justify-content-center gap-2">
+                                {{-- PENYESUAIAN: Menggunakan d-flex agar semua tombol sejajar rapi --}}
+                                <div class="d-flex justify-content-center align-items-center gap-2">
+                                    @if ($p->status === 'pending')
                                         {{-- Tombol Approve --}}
                                         <form action="{{ route('admin.pengajuan.approve', $p->id) }}" method="POST">
                                             @csrf
@@ -253,14 +255,24 @@
                                                 <i class="bi bi-x-lg"></i>
                                             </button>
                                         </form>
-                                    </div>
-                                @elseif ($p->status === 'approved')
-                                    <a href="{{ route('admin.pengajuan.show', $p->id) }}" class="btn-detail">
-                                        <i class="bi bi-eye"></i> Detail
-                                    </a>
-                                @else
-                                    <span class="text-muted small fst-italic">Selesai</span>
-                                @endif
+                                    @elseif ($p->status === 'approved')
+                                        <a href="{{ route('admin.pengajuan.show', $p->id) }}" class="btn-detail">
+                                            <i class="bi bi-eye"></i> Detail
+                                        </a>
+                                    @else
+                                        <span class="text-muted small fst-italic">Selesai</span>
+                                    @endif
+
+                                    {{-- delete button (Sekarang sudah ada stylenya dan sejajar) --}}
+                                    <form action="{{ route('admin.pengajuan.destroy', $p->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        {{-- Perbaikan sedikit pada onclick agar lebih aman --}}
+                                        <button type="submit" class="btn-action btn-delete" title="Hapus" onclick="return confirm('Yakin ingin menghapus pengajuan ini? Data yang dihapus tidak dapat dikembalikan.')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
