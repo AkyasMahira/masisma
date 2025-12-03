@@ -4,336 +4,379 @@
 @section('page-title', 'Presentasi Penelitian')
 
 @section('content')
-<div class="container py-4">
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
+    <style>
+        :root {
+            --primary-maroon: #7c1316;
+            --primary-maroon-hover: #5e0e10;
+            --bg-light: #f8fafc;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --card-radius: 16px;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
 
-    @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
+        body { background-color: var(--bg-light); }
 
-    <div class="mb-4">
-        <a href="{{ route('pengajuan.detail', 'pra_penelitian') }}" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-arrow-left me-1"></i> Kembali
-        </a>
-    </div>
+        /* --- Global Cards --- */
+        .custom-card {
+            background: #fff;
+            border: none;
+            border-radius: var(--card-radius);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        .custom-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
 
-    <div class="row g-4">
-        {{-- Info Jadwal --}}
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-maroon text-white">
-                    <h5 class="mb-0"><i class="bi bi-calendar-event me-2"></i>Jadwal Presentasi</h5>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <small class="text-muted d-block"><i class="bi bi-calendar3 me-1"></i>Tanggal</small>
-                        <h5 class="mb-0">{{ $presentasi->tanggal_presentasi->format('d F Y') }}</h5>
-                    </div>
-                    <div class="mb-3">
-                        <small class="text-muted d-block"><i class="bi bi-clock me-1"></i>Waktu</small>
-                        <strong>{{ $presentasi->waktu_mulai }} - {{ $presentasi->waktu_selesai }}</strong>
-                    </div>
-                    <div class="mb-3">
-                        <small class="text-muted d-block"><i class="bi bi-geo-alt me-1"></i>Tempat</small>
-                        <strong>{{ $presentasi->tempat }}</strong>
-                    </div>
-                    @if ($presentasi->keterangan_admin)
-                        <div class="mb-3">
-                            <small class="text-muted d-block"><i class="bi bi-info-circle me-1"></i>Keterangan</small>
-                            <p class="small mb-0">{{ $presentasi->keterangan_admin }}</p>
-                        </div>
-                    @endif
+        .card-header-custom {
+            padding: 1rem 1.5rem;
+            font-weight: 700;
+            color: white;
+            display: flex; align-items: center; gap: 10px;
+        }
 
-                    <hr>
+        .bg-gradient-maroon { background: linear-gradient(135deg, #7c1316 0%, #a3191d 100%); }
+        .bg-gradient-blue { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); } /* Untuk PPT */
+        .bg-gradient-purple { background: linear-gradient(135deg, #6b21a8 0%, #a855f7 100%); } /* Untuk Nilai */
+        .bg-gradient-green { background: linear-gradient(135deg, #065f46 0%, #10b981 100%); } /* Untuk Laporan */
 
-                    <div class="mb-3">
-                        <small class="text-muted d-block">Pembimbing (CI)</small>
-                        <strong>{{ $pengajuan->ci_nama }}</strong><br>
-                        <a href="tel:{{ $pengajuan->ci_no_hp }}" class="text-decoration-none small">
-                            <i class="bi bi-telephone-fill me-1"></i>{{ $pengajuan->ci_no_hp }}
-                        </a>
-                    </div>
+        .card-body-custom { padding: 1.5rem; }
 
-                    <div>
-    <small class="text-muted d-block mb-1">Link Penilaian CI</small>
-    
-    <div class="input-group">
-        <input type="text" class="form-control form-control-sm" value="{{ route('ci.penilaian', $presentasi->id) }}" id="inputLinkPenilaian" readonly>
+        /* --- Info List (Left Side) --- */
+        .info-item { margin-bottom: 1.25rem; }
+        .info-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 0.25rem; letter-spacing: 0.5px; }
+        .info-value { font-size: 1rem; color: var(--text-dark); font-weight: 500; }
+        .info-value i { width: 20px; text-align: center; margin-right: 5px; color: var(--primary-maroon); }
+
+        /* --- Upload Zone --- */
+        .upload-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            background-color: #f8fafc;
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+        }
+        .upload-zone:hover { border-color: var(--primary-maroon); background-color: #fff; }
+        .upload-icon { font-size: 2.5rem; color: #94a3b8; margin-bottom: 1rem; display: block; }
         
-        <button class="btn btn-sm btn-outline-primary" type="button" onclick="copyLink()">
-            <i class="bi bi-clipboard" id="iconCopy"></i> <span id="textCopy">Salin</span>
-        </button>
-    </div>
+        /* --- Buttons --- */
+        .btn-maroon { background-color: var(--primary-maroon); color: white; border: none; padding: 0.6rem 1.5rem; border-radius: 8px; font-weight: 600; transition: var(--transition); }
+        .btn-maroon:hover { background-color: var(--primary-maroon-hover); color: white; }
+        
+        .btn-outline-back { border: 1px solid #e2e8f0; background: white; color: var(--text-dark); border-radius: 8px; padding: 0.5rem 1rem; font-weight: 500; text-decoration: none; transition: var(--transition); display: inline-flex; align-items: center; }
+        .btn-outline-back:hover { background: #f1f5f9; border-color: #cbd5e1; color: var(--primary-maroon); }
 
-    <small class="text-muted d-block mt-1">Klik tombol salin dan kirim ke CI Anda</small>
-</div>
+        /* --- Grade Display --- */
+        .grade-box {
+            text-align: center; padding: 1.5rem; border-radius: 12px;
+            background: #fff; border: 1px solid #e2e8f0;
+        }
+        .grade-value { font-size: 3rem; font-weight: 800; line-height: 1; }
+        
+        .text-success-custom { color: #059669; }
+        .text-warning-custom { color: #d97706; }
+        .text-danger-custom { color: #dc2626; }
+
+        /* Animation */
+        .animate-up { animation: fadeInUp 0.5s ease-out forwards; opacity: 0; transform: translateY(15px); }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+    </style>
+
+    <div class="container py-4">
+
+        {{-- Alerts --}}
+        @if (session('success'))
+            <div class="alert alert-success border-0 shadow-sm animate-up d-flex align-items-center mb-4" role="alert">
+                <i class="bi bi-check-circle-fill me-2 fs-5"></i> {{ session('success') }}
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger border-0 shadow-sm animate-up d-flex align-items-center mb-4" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i> {{ session('error') }}
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        <div class="d-flex justify-content-between align-items-center mb-4 animate-up">
+            <h4 class="fw-bold mb-0 text-dark">Detail Presentasi</h4>
+            <a href="{{ route('pengajuan.detail', 'pra_penelitian') }}" class="btn-outline-back">
+                <i class="bi bi-arrow-left me-2"></i> Kembali
+            </a>
+        </div>
+
+        <div class="row g-4">
+            
+            {{-- KOLOM KIRI: JADWAL & CI --}}
+            <div class="col-lg-4 animate-up" style="animation-delay: 0.1s;">
+                <div class="custom-card h-100">
+                    <div class="card-header-custom bg-gradient-maroon">
+                        <i class="bi bi-calendar-check"></i> Jadwal & Lokasi
+                    </div>
+                    <div class="card-body-custom">
+                        <div class="info-item">
+                            <div class="info-label">Tanggal</div>
+                            <div class="info-value"><i class="bi bi-calendar3"></i> {{ $presentasi->tanggal_presentasi->format('d F Y') }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Waktu</div>
+                            <div class="info-value"><i class="bi bi-clock"></i> {{ $presentasi->waktu_mulai }} - {{ $presentasi->waktu_selesai }} WIB</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Tempat / Ruangan</div>
+                            <div class="info-value"><i class="bi bi-geo-alt"></i> {{ $presentasi->tempat }}</div>
+                        </div>
+
+                        @if ($presentasi->keterangan_admin)
+                            <div class="alert alert-light border mb-4">
+                                <div class="info-label text-muted mb-1"><i class="bi bi-info-circle me-1"></i> Catatan Admin</div>
+                                <p class="small mb-0 text-dark">{{ $presentasi->keterangan_admin }}</p>
+                            </div>
+                        @endif
+
+                        <hr class="border-light my-4">
+
+                        <div class="info-item mb-0">
+                            <div class="info-label">Pembimbing Lapangan (CI)</div>
+                            <div class="d-flex align-items-center mt-2">
+                                <div class="bg-light rounded-circle p-2 me-3 text-maroon">
+                                    <i class="bi bi-person-badge fs-4"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">{{ $pengajuan->ci_nama }}</div>
+                                    <a href="tel:{{ $pengajuan->ci_no_hp }}" class="text-decoration-none small text-muted">
+                                        <i class="bi bi-whatsapp text-success me-1"></i> {{ $pengajuan->ci_no_hp }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {{-- LINK PENILAIAN DIHAPUS DARI SINI SESUAI PERMINTAAN --}}
+
+                    </div>
                 </div>
             </div>
-        </div>
 
-        {{-- Upload & Status --}}
-        <div class="col-lg-8">
-            {{-- Step 1: Upload PPT --}}
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                    <h5 class="mb-0">
-                        <i class="bi bi-1-circle me-2"></i>Upload File Presentasi (PPT)
-                    </h5>
-                </div>
-                <div class="card-body">
-                    @if (!$presentasi->file_ppt)
-                        {{-- Form Upload --}}
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle me-2"></i> 
-                            Silakan upload file presentasi Anda. File hanya bisa diupload sekali.
+            {{-- KOLOM KANAN: FLOW MAHASISWA --}}
+            <div class="col-lg-8 animate-up" style="animation-delay: 0.2s;">
+                
+                {{-- Step 1: Upload PPT --}}
+                <div class="custom-card">
+                    <div class="card-header-custom bg-gradient-blue">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <span><i class="bi bi-file-earmark-slides me-2"></i>1. File Presentasi (PPT)</span>
+                            @if($presentasi->file_ppt)<span class="badge bg-white text-primary rounded-pill"><i class="bi bi-check-circle-fill me-1"></i>Uploaded</span>@endif
                         </div>
-                        <form action="{{ route('presentasi.upload-ppt', $presentasi->id) }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Pilih File PPT/PDF</label>
-                                <input type="file" name="file_ppt" class="form-control @error('file_ppt') is-invalid @enderror" accept=".ppt,.pptx,.pdf" required>
-                                @error('file_ppt')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                <small class="text-muted">Format: PPT, PPTX, atau PDF (Max 10MB)</small>
-                            </div>
-                            <button type="submit" class="btn btn-maroon" onclick="return confirm('Upload file presentasi? File hanya bisa diupload sekali.')">
-                                <i class="bi bi-upload me-1"></i> Upload File
-                            </button>
-                        </form>
-                    @else
-                        {{-- File Sudah Diupload --}}
-                        <div class="alert alert-success">
-                            <i class="bi bi-check-circle-fill me-2"></i> File presentasi sudah diupload
-                        </div>
-                        <a href="{{ Storage::url($presentasi->file_ppt) }}" target="_blank" class="btn btn-outline-primary">
-                            <i class="bi bi-download me-1"></i> Download File Anda
-                        </a>
-                        <small class="d-block mt-2 text-muted">
-                            Diupload: {{ $presentasi->uploaded_at->format('d M Y H:i') }}
-                        </small>
-
-                        @if ($presentasi->nilai == 'C')
-                            {{-- Revisi: Bisa Upload Ulang --}}
-                            <hr>
-                            <div class="alert alert-warning">
-                                <i class="bi bi-exclamation-triangle-fill me-2"></i> 
-                                <strong>Revisi Diperlukan!</strong><br>
-                                Silakan upload ulang file presentasi yang sudah diperbaiki.
-                            </div>
+                    </div>
+                    <div class="card-body-custom">
+                        @if (!$presentasi->file_ppt)
                             <form action="{{ route('presentasi.upload-ppt', $presentasi->id) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">Upload File Revisi</label>
-                                    <input type="file" name="file_ppt" class="form-control" accept=".ppt,.pptx,.pdf" required>
-                                    <small class="text-muted">Format: PPT, PPTX, atau PDF (Max 10MB)</small>
+                                <div class="upload-zone" onclick="document.getElementById('filePpt').click()">
+                                    <i class="bi bi-cloud-arrow-up upload-icon"></i>
+                                    <h6 class="fw-bold">Klik untuk upload file PPT Anda</h6>
+                                    <p class="text-muted small mb-0">Format: PPT, PPTX, PDF (Max 10MB)</p>
+                                    <input type="file" id="filePpt" name="file_ppt" class="d-none" accept=".ppt,.pptx,.pdf" required onchange="this.form.submit()">
                                 </div>
-                                <button type="submit" class="btn btn-warning">
-                                    <i class="bi bi-upload me-1"></i> Upload File Revisi
-                                </button>
+                                <div class="text-center mt-3">
+                                    <small class="text-danger fst-italic">*File hanya bisa diupload sekali, pastikan sudah final.</small>
+                                </div>
                             </form>
-                        @endif
-                    @endif
-                </div>
-            </div>
-
-            {{-- Step 2: Hasil Penilaian --}}
-            @if ($presentasi->nilai)
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
-                        <h5 class="mb-0">
-                            <i class="bi bi-2-circle me-2"></i>Hasil Penilaian CI
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="alert alert-{{ $presentasi->nilai == 'A' || $presentasi->nilai == 'B' ? 'success' : ($presentasi->nilai == 'C' ? 'warning' : 'danger') }} mb-3">
-                            <h3 class="mb-0">
-                                <i class="bi bi-trophy-fill me-2"></i>Nilai: <strong>{{ $presentasi->nilai }}</strong>
-                            </h3>
-                        </div>
-
-                        @if ($presentasi->nilai == 'D')
-                            <div class="alert alert-danger">
-                                <i class="bi bi-x-circle-fill me-2"></i>
-                                <strong>Penelitian Ditolak</strong><br>
-                                Anda harus mengulang dari awal (pengajuan pra penelitian).
-                            </div>
-                        @elseif ($presentasi->nilai == 'C')
-                            <div class="alert alert-warning">
-                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                <strong>Revisi Diperlukan</strong><br>
-                                Silakan perbaiki file presentasi Anda dan upload ulang.
-                            </div>
                         @else
-                            <div class="alert alert-success">
-                                <i class="bi bi-check-circle-fill me-2"></i>
-                                <strong>Selamat! Anda lulus presentasi.</strong><br>
-                                Lanjutkan dengan mengupload laporan akhir.
-                            </div>
-                        @endif
-
-                        @if ($presentasi->hasil_penilaian)
-                            <h6 class="fw-bold mb-3">Detail Penilaian:</h6>
-                            @foreach ($presentasi->hasil_penilaian as $index => $item)
-                                <div class="card mb-2 border-0 shadow-sm">
-                                    <div class="card-body p-3">
-                                        <h6 class="fw-bold mb-1 text-primary">{{ $index + 1 }}. {{ $item['judul'] }}</h6>
-                                        <p class="mb-0 small">{{ $item['keterangan'] }}</p>
+                            <div class="d-flex justify-content-between align-items-center p-3 border rounded bg-light">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-file-earmark-ppt-fill text-danger fs-1 me-3"></i>
+                                    <div>
+                                        <div class="fw-bold text-dark">File Presentasi</div>
+                                        <small class="text-muted">Diupload: {{ $presentasi->uploaded_at->format('d M Y H:i') }}</small>
                                     </div>
                                 </div>
-                            @endforeach
-                        @endif
-
-                        <small class="text-muted d-block mt-3">
-                            Dinilai oleh: {{ $pengajuan->ci_nama }}<br>
-                            Waktu: {{ $presentasi->dinilai_at->format('d F Y H:i') }}
-                        </small>
-                    </div>
-                </div>
-            @endif
-
-            {{-- Step 3: Upload Laporan (Jika A/B) --}}
-            @if (in_array($presentasi->nilai, ['A', 'B']))
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
-                        <h5 class="mb-0">
-                            <i class="bi bi-3-circle me-2"></i>Upload Laporan Akhir
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        @if (!$presentasi->file_laporan)
-                            <div class="alert alert-info">
-                                <i class="bi bi-info-circle me-2"></i> 
-                                Silakan upload laporan akhir penelitian Anda dalam format PDF atau DOCX.
+                                <a href="{{ Storage::url($presentasi->file_ppt) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-download me-1"></i> Download
+                                </a>
                             </div>
-                            <form action="{{ route('presentasi.upload-laporan', $presentasi->id) }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">Pilih File Laporan</label>
-                                    <input type="file" name="file_laporan" class="form-control @error('file_laporan') is-invalid @enderror" accept=".pdf,.doc,.docx" required>
-                                    @error('file_laporan')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                    <small class="text-muted">Format: PDF, DOC, atau DOCX (Max 10MB)</small>
-                                </div>
-                                <button type="submit" class="btn btn-success" onclick="return confirm('Upload laporan akhir?')">
-                                    <i class="bi bi-upload me-1"></i> Upload Laporan
-                                </button>
-                            </form>
-                        @else
-                            <div class="alert alert-success">
-                                <i class="bi bi-check-circle-fill me-2"></i> Laporan sudah diupload
-                            </div>
-                            <a href="{{ Storage::url($presentasi->file_laporan) }}" target="_blank" class="btn btn-outline-primary">
-                                <i class="bi bi-download me-1"></i> Download Laporan Anda
-                            </a>
-                            <small class="d-block mt-2 text-muted">
-                                Diupload: {{ $presentasi->laporan_uploaded_at->format('d M Y H:i') }}
-                            </small>
 
-                            <hr>
-
-                            @if ($presentasi->status_laporan == 'pending')
-                                <div class="alert alert-warning">
-                                    <i class="bi bi-clock-history me-2"></i> Menunggu review dari admin
+                            @if ($presentasi->nilai == 'C')
+                                <div class="alert alert-warning mt-3 border-0 d-flex align-items-start">
+                                    <i class="bi bi-exclamation-triangle-fill fs-5 me-2 mt-1"></i>
+                                    <div>
+                                        <strong>Revisi Diperlukan!</strong><br>
+                                        Silakan upload ulang file presentasi yang sudah diperbaiki di bawah ini.
+                                    </div>
                                 </div>
-                            @elseif ($presentasi->status_laporan == 'revisi')
-                                <div class="alert alert-warning">
-                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                    <strong>Revisi Diperlukan</strong><br>
-                                    {{ $presentasi->keterangan_review }}
-                                </div>
-                                <form action="{{ route('presentasi.upload-laporan', $presentasi->id) }}" method="POST" enctype="multipart/form-data" class="mt-3">
+                                <form action="{{ route('presentasi.upload-ppt', $presentasi->id) }}" method="POST" enctype="multipart/form-data" class="mt-2">
                                     @csrf
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Upload Laporan Revisi</label>
-                                        <input type="file" name="file_laporan" class="form-control" accept=".pdf,.doc,.docx" required>
+                                    <div class="input-group">
+                                        <input type="file" name="file_ppt" class="form-control" accept=".ppt,.pptx,.pdf" required>
+                                        <button class="btn btn-warning text-white" type="submit"><i class="bi bi-upload me-1"></i> Upload Revisi</button>
                                     </div>
-                                    <button type="submit" class="btn btn-warning">
-                                        <i class="bi bi-upload me-1"></i> Upload Revisi
-                                    </button>
                                 </form>
-                            @elseif ($presentasi->status_laporan == 'approved')
-                                <div class="alert alert-success">
-                                    <i class="bi bi-check-circle-fill me-2"></i>
-                                    <strong>Laporan Disetujui!</strong>
-                                    @if ($presentasi->keterangan_review)
-                                        <br>{{ $presentasi->keterangan_review }}
+                            @endif
+                        @endif
+                    </div>
+                </div>
+
+                {{-- Step 2: Hasil Penilaian --}}
+                @if ($presentasi->nilai)
+                    <div class="custom-card">
+                        <div class="card-header-custom bg-gradient-purple">
+                            <span><i class="bi bi-award me-2"></i>2. Hasil Penilaian</span>
+                        </div>
+                        <div class="card-body-custom">
+                            <div class="row align-items-center">
+                                <div class="col-md-4 mb-3 mb-md-0">
+                                    <div class="grade-box">
+                                        <small class="text-muted d-block mb-2 font-weight-bold text-uppercase">Nilai Akhir</small>
+                                        <div class="grade-value {{ $presentasi->nilai == 'A' || $presentasi->nilai == 'B' ? 'text-success-custom' : ($presentasi->nilai == 'C' ? 'text-warning-custom' : 'text-danger-custom') }}">
+                                            {{ $presentasi->nilai }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    @if ($presentasi->nilai == 'D')
+                                        <div class="alert alert-danger border-0">
+                                            <h6 class="fw-bold"><i class="bi bi-x-circle-fill me-2"></i>Penelitian Ditolak</h6>
+                                            <p class="small mb-0">Maaf, Anda harus mengulang proses dari awal (pengajuan pra penelitian).</p>
+                                        </div>
+                                    @elseif ($presentasi->nilai == 'C')
+                                        <div class="alert alert-warning border-0">
+                                            <h6 class="fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Revisi Diperlukan</h6>
+                                            <p class="small mb-0">Silakan perbaiki file presentasi sesuai masukan penguji.</p>
+                                        </div>
+                                    @else
+                                        <div class="alert alert-success border-0 bg-success bg-opacity-10 text-success">
+                                            <h6 class="fw-bold"><i class="bi bi-check-circle-fill me-2"></i>Lulus Presentasi!</h6>
+                                            <p class="small mb-0">Selamat! Silakan lanjutkan ke tahap upload laporan akhir.</p>
+                                        </div>
                                     @endif
                                 </div>
-                            @endif
-                        @endif
-                    </div>
-                </div>
-            @endif
+                            </div>
 
-            {{-- Step 4: Dokumen Final (Jika Selesai) --}}
-            @if ($presentasi->status_final == 'selesai')
-                <div class="card border-0 shadow-sm mt-4" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                    <div class="card-body text-white text-center py-5">
-                        <i class="bi bi-trophy-fill display-1 mb-3"></i>
-                        <h3 class="fw-bold mb-3">Selamat! Penelitian Anda Selesai</h3>
-                        <p class="mb-4">Anda telah menyelesaikan seluruh tahapan penelitian dengan baik.</p>
-                        
-                        <div class="d-flex gap-3 justify-content-center flex-wrap">
-                            @if ($presentasi->surat_selesai)
-                                <a href="{{ Storage::url($presentasi->surat_selesai) }}" target="_blank" class="btn btn-light btn-lg">
-                                    <i class="bi bi-file-earmark-check me-2"></i> Download Surat Selesai
-                                </a>
-                            @endif
-                            @if ($presentasi->sertifikat)
-                                <a href="{{ Storage::url($presentasi->sertifikat) }}" target="_blank" class="btn btn-outline-light btn-lg">
-                                    <i class="bi bi-award me-2"></i> Download Sertifikat
-                                </a>
+                            @if ($presentasi->hasil_penilaian)
+                                <div class="mt-4">
+                                    <h6 class="fw-bold mb-3 text-muted text-uppercase text-xs ls-1">Detail Masukan Penguji</h6>
+                                    <div class="accordion" id="accordionEvaluasi">
+                                        @foreach ($presentasi->hasil_penilaian as $index => $item)
+                                            <div class="accordion-item border-0 shadow-sm mb-2 rounded overflow-hidden">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button collapsed bg-light text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $index }}">
+                                                        {{ $index + 1 }}. {{ $item['judul'] }}
+                                                    </button>
+                                                </h2>
+                                                <div id="collapse{{ $index }}" class="accordion-collapse collapse" data-bs-parent="#accordionEvaluasi">
+                                                    <div class="accordion-body text-muted small">
+                                                        {{ $item['keterangan'] }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
                             @endif
                         </div>
+                    </div>
+                @endif
 
-                        <div class="alert alert-light mt-4 text-dark">
-                            <i class="bi bi-info-circle me-2"></i>
-                            <strong>Penting:</strong> Seluruh aset penelitian (data, dokumen, dll) menjadi milik rumah sakit. 
-                            Silakan hubungi admin untuk pengambilan aset fisik.
+                {{-- Step 3: Upload Laporan --}}
+                @if (in_array($presentasi->nilai, ['A', 'B']))
+                    <div class="custom-card">
+                        <div class="card-header-custom bg-gradient-green">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <span><i class="bi bi-journal-check me-2"></i>3. Laporan Akhir</span>
+                                @if($presentasi->file_laporan)<span class="badge bg-white text-success rounded-pill"><i class="bi bi-check-circle-fill me-1"></i>Uploaded</span>@endif
+                            </div>
+                        </div>
+                        <div class="card-body-custom">
+                            @if (!$presentasi->file_laporan)
+                                <form action="{{ route('presentasi.upload-laporan', $presentasi->id) }}" method="POST" enctype="multipart/form-data">
+                                    @csrf
+                                    <div class="upload-zone" onclick="document.getElementById('fileLaporan').click()">
+                                        <i class="bi bi-cloud-arrow-up upload-icon text-success"></i>
+                                        <h6 class="fw-bold">Upload Laporan Akhir (PDF/DOC)</h6>
+                                        <p class="text-muted small mb-0">Pastikan format penulisan sudah sesuai pedoman.</p>
+                                        <input type="file" id="fileLaporan" name="file_laporan" class="d-none" accept=".pdf,.doc,.docx" required onchange="this.form.submit()">
+                                    </div>
+                                </form>
+                            @else
+                                <div class="d-flex justify-content-between align-items-center p-3 border rounded bg-light mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-file-earmark-text-fill text-success fs-1 me-3"></i>
+                                        <div>
+                                            <div class="fw-bold text-dark">File Laporan Akhir</div>
+                                            <small class="text-muted">Diupload: {{ $presentasi->laporan_uploaded_at->format('d M Y H:i') }}</small>
+                                        </div>
+                                    </div>
+                                    <a href="{{ Storage::url($presentasi->file_laporan) }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-download me-1"></i> Download
+                                    </a>
+                                </div>
+
+                                {{-- Status Laporan --}}
+                                @if ($presentasi->status_laporan == 'pending')
+                                    <div class="alert alert-warning border-0 d-flex align-items-center">
+                                        <div class="spinner-border spinner-border-sm me-2 text-warning" role="status"></div>
+                                        <div>Menunggu verifikasi admin</div>
+                                    </div>
+                                @elseif ($presentasi->status_laporan == 'revisi')
+                                    <div class="alert alert-danger border-0">
+                                        <h6 class="fw-bold"><i class="bi bi-pencil-square me-2"></i>Revisi Laporan Diperlukan</h6>
+                                        <p class="small mb-2">{{ $presentasi->keterangan_review }}</p>
+                                    </div>
+                                    <form action="{{ route('presentasi.upload-laporan', $presentasi->id) }}" method="POST" enctype="multipart/form-data">
+                                        @csrf
+                                        <label class="form-label small fw-bold">Upload File Revisi</label>
+                                        <div class="input-group">
+                                            <input type="file" name="file_laporan" class="form-control" accept=".pdf,.doc,.docx" required>
+                                            <button class="btn btn-danger" type="submit"><i class="bi bi-upload me-1"></i> Upload</button>
+                                        </div>
+                                    </form>
+                                @elseif ($presentasi->status_laporan == 'approved')
+                                    <div class="alert alert-success border-0">
+                                        <i class="bi bi-check-circle-fill me-2"></i> <strong>Laporan Disetujui!</strong>
+                                        <p class="small mb-0 mt-1">{{ $presentasi->keterangan_review }}</p>
+                                    </div>
+                                @endif
+                            @endif
                         </div>
                     </div>
-                </div>
-            @endif
+                @endif
+
+                {{-- Step 4: Selesai --}}
+                @if ($presentasi->status_final == 'selesai')
+                    <div class="custom-card border-0 bg-gradient-maroon text-white animate-up">
+                        <div class="card-body-custom text-center py-5">
+                            <i class="bi bi-award-fill display-3 mb-3 text-white-50"></i>
+                            <h3 class="fw-bold">Penelitian Selesai</h3>
+                            <p class="mb-4 text-white-50">Terima kasih telah melakukan penelitian di instansi kami.</p>
+                            
+                            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                                @if ($presentasi->surat_selesai)
+                                    <a href="{{ Storage::url($presentasi->surat_selesai) }}" target="_blank" class="btn btn-light shadow-sm fw-bold text-maroon">
+                                        <i class="bi bi-file-earmark-check me-2"></i> Surat Keterangan Selesai
+                                    </a>
+                                @endif
+                                @if ($presentasi->sertifikat)
+                                    <a href="{{ Storage::url($presentasi->sertifikat) }}" target="_blank" class="btn btn-outline-light fw-bold">
+                                        <i class="bi bi-patch-check me-2"></i> Sertifikat
+                                    </a>
+                                @endif
+                            </div>
+
+                            <div class="mt-4 small text-white-50 fst-italic">
+                                <i class="bi bi-info-circle me-1"></i> Silakan hubungi admin jika ada aset fisik yang perlu diambil.
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+            </div>
         </div>
     </div>
-</div>
-
-<script>
-    function copyLink() {
-        // 1. Ambil elemen input
-        var copyText = document.getElementById("inputLinkPenilaian");
-
-        // 2. Select teks di dalamnya
-        copyText.select();
-        copyText.setSelectionRange(0, 99999); // Untuk support mobile device
-
-        // 3. Salin ke clipboard
-        navigator.clipboard.writeText(copyText.value).then(function() {
-            // 4. Beri feedback (Ubah Ikon & Teks sementara)
-            var icon = document.getElementById("iconCopy");
-            var text = document.getElementById("textCopy");
-
-            icon.className = "bi bi-check-lg"; // Ganti ikon jadi centang
-            text.innerText = "Tersalin!";
-            
-            // Kembalikan ke semula setelah 2 detik
-            setTimeout(function() {
-                icon.className = "bi bi-clipboard";
-                text.innerText = "Salin";
-            }, 2000);
-        }, function(err) {
-            alert('Gagal menyalin link');
-        });
-    }
-</script>
 @endsection
