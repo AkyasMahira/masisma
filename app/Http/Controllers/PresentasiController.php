@@ -263,19 +263,33 @@ class PresentasiController extends Controller
     }
 
     /**
-     * Generate Surat Selesai & Sertifikat
+     * Generate Surat Selesai & Sertifikat untuk Pengajuan dan Semua Anggota
      */
     private function generateSuratSelesai($presentasi)
     {
-        // Generate PDF Surat Selesai
-        $pdf = Pdf::loadView('pdf.surat-selesai', ['presentasi' => $presentasi]);
-        $fileName = 'surat_selesai_' . $presentasi->user->name . '_' . time() . '.pdf';
+        // Load anggota dari pra penelitian
+        $praPenelitian = $presentasi->praPenelitian()->with('anggotas')->first();
+
+        // Daftar nama penerima: user utama + semua anggota
+        $daftarPenerima = [
+            ['nama' => $presentasi->user->name, 'tipe' => 'pengajuan'],
+        ];
+
+        if ($praPenelitian && $praPenelitian->anggotas) {
+            foreach ($praPenelitian->anggotas as $anggota) {
+                $daftarPenerima[] = ['nama' => $anggota->nama, 'tipe' => 'anggota'];
+            }
+        }
+
+        // Generate untuk pengajuan utama (untuk penyimpanan di tabel presentasi)
+        $pdf = Pdf::loadView('pdf.surat-selesai', ['presentasi' => $presentasi, 'nama_penerima' => $presentasi->user->name]);
+        $fileName = 'surat_selesai_' . str_replace(' ', '_', $presentasi->user->name) . '_' . time() . '.pdf';
         $path = 'surat_selesai/' . $fileName;
         Storage::put('public/' . $path, $pdf->output());
 
-        // Generate Sertifikat
-        $pdfCert = Pdf::loadView('pdf.sertifikat-penelitian', ['presentasi' => $presentasi]);
-        $certName = 'sertifikat_' . $presentasi->user->name . '_' . time() . '.pdf';
+        // Generate Sertifikat untuk pengajuan utama
+        $pdfCert = Pdf::loadView('pdf.sertifikat-penelitian', ['presentasi' => $presentasi, 'nama_penerima' => $presentasi->user->name]);
+        $certName = 'sertifikat_' . str_replace(' ', '_', $presentasi->user->name) . '_' . time() . '.pdf';
         $certPath = 'sertifikat/' . $certName;
         Storage::put('public/' . $certPath, $pdfCert->output());
 
@@ -283,6 +297,23 @@ class PresentasiController extends Controller
             'surat_selesai' => $path,
             'sertifikat' => $certPath,
         ]);
+
+        // Generate untuk setiap anggota
+        if ($praPenelitian && $praPenelitian->anggotas) {
+            foreach ($praPenelitian->anggotas as $anggota) {
+                // Surat Selesai untuk anggota
+                $pdfAnggota = Pdf::loadView('pdf.surat-selesai', ['presentasi' => $presentasi, 'nama_penerima' => $anggota->nama]);
+                $fileNameAnggota = 'surat_selesai_' . str_replace(' ', '_', $anggota->nama) . '_' . time() . '.pdf';
+                $pathAnggota = 'surat_selesai/' . $fileNameAnggota;
+                Storage::put('public/' . $pathAnggota, $pdfAnggota->output());
+
+                // Sertifikat untuk anggota
+                $pdfCertAnggota = Pdf::loadView('pdf.sertifikat-penelitian', ['presentasi' => $presentasi, 'nama_penerima' => $anggota->nama]);
+                $certNameAnggota = 'sertifikat_' . str_replace(' ', '_', $anggota->nama) . '_' . time() . '.pdf';
+                $certPathAnggota = 'sertifikat/' . $certNameAnggota;
+                Storage::put('public/' . $certPathAnggota, $pdfCertAnggota->output());
+            }
+        }
     }
 
     /**
@@ -298,35 +329,71 @@ class PresentasiController extends Controller
         return view('admin.presentasi.index', compact('presentasi'));
     }
 
-    public function apiLaporan()
+
+  /**
+ * Download Sertifikat untuk Anggota Spesifik
+ */
+public function downloadSertifikatAnggota($id, $namaAnggota)
 {
-    // Ambil semua presentasi yang sudah punya file laporan
+    $presentasi = Presentasi::with(['praPenelitian.anggotas'])->findOrFail($id);
+
+    $namaAnggota = urldecode($namaAnggota);
+
+    $pdf = Pdf::loadView('pdf.sertifikat-penelitian', [
+        'presentasi'    => $presentasi,
+        'nama_penerima' => $namaAnggota
+    ]);
+
+    $fileName = 'sertifikat_' . str_replace(' ', '_', $namaAnggota) . '.pdf';
+    return $pdf->download($fileName);
+}
+
+/**
+ * Download Surat Selesai untuk Anggota Spesifik
+ */
+public function downloadSuratSelesaiAnggota($id, $namaAnggota)
+{
+    $presentasi = Presentasi::with(['praPenelitian.anggotas'])->findOrFail($id);
+
+    $namaAnggota = urldecode($namaAnggota);
+
+    $pdf = Pdf::loadView('pdf.surat-selesai', [
+        'presentasi'    => $presentasi,
+        'nama_penerima' => $namaAnggota
+    ]);
+
+    $fileName = 'surat_selesai_' . str_replace(' ', '_', $namaAnggota) . '.pdf';
+    return $pdf->download($fileName);
+}
+
+
+/**
+ * API Laporan – mengambil data laporan yang sudah diupload
+ */
+public function apiLaporan()
+{
     $presentasi = Presentasi::with([
-            'user.mou',          // relasi user + mou
-            'praPenelitian.mou', // relasi pra_penelitian + mou
+            'user.mou',
+            'praPenelitian.mou',
         ])
         ->whereNotNull('file_laporan')
         ->get();
 
-    // Mapping ke bentuk JSON yang rapi
     $data = $presentasi->map(function ($item) {
-        // Prioritas ambil MOU dari pra_penelitian, kalau nggak ada baru dari user
         $mou = $item->praPenelitian->mou ?? $item->user->mou;
 
         return [
-            'nama_user'             => $item->user->name,
-            'tanggal_upload_laporan'=> optional($item->laporan_uploaded_at)->format('Y-m-d'),
-            'judul'                 => optional($item->praPenelitian)->judul,
-            'nama_instansi'         => $mou ? $mou->nama_instansi : null, // accessor nama_instansi sudah handle nama_universitas
-            'program_studi'         => $item->praPenelitian->prodi ?? $item->user->program_studi,
-            'file_laporan_url'      => $item->file_laporan 
-                                        ? asset('storage/' . $item->file_laporan) 
+            'nama_user'              => $item->user->name,
+            'tanggal_upload_laporan' => optional($item->laporan_uploaded_at)->format('Y-m-d'),
+            'judul'                  => optional($item->praPenelitian)->judul,
+            'nama_instansi'          => $mou->nama_instansi ?? $mou->nama_universitas ?? null,
+            'program_studi'          => $item->praPenelitian->prodi ?? $item->user->program_studi,
+            'file_laporan_url'       => $item->file_laporan 
+                                        ? asset('storage/' . $item->file_laporan)
                                         : null,
         ];
     });
 
-    // Balikkan dalam bentuk JSON murni
     return response()->json($data, 200);
 }
-
 }

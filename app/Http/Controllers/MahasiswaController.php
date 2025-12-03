@@ -235,21 +235,43 @@ class MahasiswaController extends Controller
 
     private function storeSingleMahasiswa(Request $request)
     {
-        $data = $request->validate([
+        $user = auth()->user();
+
+        // Build validation rules depending on role: non-admin users should not be
+        // able to set mou_id, tanggal_mulai/tanggal_berakhir or weekend_aktif.
+        $rules = [
             'nm_mahasiswa' => 'required|string|max:255',
-            'mou_id' => 'nullable|exists:mous,id',
             'prodi' => 'nullable|string|max:255',
             'nm_ruangan' => 'nullable|string|max:255',
             'ruangan_id' => 'nullable|exists:ruangans,id',
-            'tanggal_mulai' => 'date',
-            'tanggal_berakhir' => 'date|after:tanggal_mulai',
-            'weekend_aktif' => 'nullable|boolean',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
+        ];
 
-        $data['user_id'] = auth()->id(); // TAMBAHKAN INI
+        if ($user && $user->role === 'admin') {
+            $rules = array_merge($rules, [
+                'mou_id' => 'nullable|exists:mous,id',
+                'tanggal_mulai' => 'nullable|date',
+                'tanggal_berakhir' => 'nullable|date|after:tanggal_mulai',
+                'weekend_aktif' => 'nullable|boolean',
+            ]);
+        }
+
+        $data = $request->validate($rules);
+
+        // Ensure defaults exist so later code can safely reference keys
+        $data = array_merge([
+            'mou_id' => null,
+            'tanggal_mulai' => null,
+            'tanggal_berakhir' => null,
+            'weekend_aktif' => false,
+            'ruangan_id' => null,
+            'nm_ruangan' => null,
+        ], $data);
+
+        $data['user_id'] = auth()->id();
         $data['status'] = 'aktif';
-        $data['weekend_aktif'] = $request->boolean('weekend_aktif');
+        // Only take weekend_aktif if admin; otherwise force false
+        $data['weekend_aktif'] = ($user && $user->role === 'admin') ? $request->boolean('weekend_aktif') : false;
 
         // Upload Foto
         if ($request->hasFile('foto')) {
@@ -592,6 +614,7 @@ class MahasiswaController extends Controller
         // Ambil data absensi
         $absensi = Absensi::where('mahasiswa_id', $mahasiswa->id)
             ->orderBy('created_at', 'desc') // GANTI dari tanggal ke created_at
+            ->limit(2)
             ->get();
 
         // Hitung total hadir (yang punya jam_masuk & jam_keluar)

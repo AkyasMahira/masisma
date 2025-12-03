@@ -39,6 +39,10 @@ Route::post('/input-data-mou', [MouController::class, 'publicStore'])->name('pub
 Route::get('/penilaian/{token}', [PresentasiController::class, 'formPenilaian'])->name('ci.penilaian');
 Route::post('/penilaian/{token}', [PresentasiController::class, 'submitPenilaian'])->name('ci.submit-penilaian');
 
+// Download Sertifikat & Surat Selesai (Public - untuk semua user)
+Route::get('/presentasi/{id}/sertifikat/{nama_anggota}', [PresentasiController::class, 'downloadSertifikatAnggota'])->name('presentasi.download-sertifikat');
+Route::get('/presentasi/{id}/surat-selesai/{nama_anggota}', [PresentasiController::class, 'downloadSuratSelesaiAnggota'])->name('presentasi.download-surat-selesai');
+
 
 // Authentication
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -62,6 +66,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/pra', [PengajuanController::class, 'ajukanPra'])->name('pra');
         Route::post('/magang', [PengajuanController::class, 'ajukanMagang'])->name('magang');
         Route::post('/{pengajuan}/upload-bukti', [PengajuanController::class, 'uploadBuktiPembayaran'])->name('upload-bukti');
+        // Allow user to delete their pengajuan (cleanup and allow re-apply)
+        Route::delete('/{pengajuan}', [PengajuanController::class, 'destroy'])->name('destroy');
     });
 
     // Sertifikat & Absensi (User View)
@@ -112,6 +118,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [PresentasiController::class, 'show'])->name('show');
         Route::post('/{id}/upload-ppt', [PresentasiController::class, 'uploadPpt'])->name('upload-ppt');
         Route::post('/{id}/upload-laporan', [PresentasiController::class, 'uploadLaporan'])->name('upload-laporan');
+        Route::get('/{id}/sertifikat/{nama_anggota}', [PresentasiController::class, 'downloadSertifikatAnggota'])->name('download-sertifikat');
+        Route::get('/{id}/surat-selesai/{nama_anggota}', [PresentasiController::class, 'downloadSuratSelesaiAnggota'])->name('download-surat-selesai');
     });
 });
 
@@ -129,6 +137,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::post('/{pengajuan}/kirim-galasan', [PengajuanController::class, 'kirimGalasan'])->name('kirim-galasan');
         Route::post('/{pengajuan}/approve-pembayaran', [PengajuanController::class, 'approvePembayaran'])->name('approve-pembayaran');
         Route::get('/{pengajuan}', [PengajuanController::class, 'show'])->name('show');
+        // Admin can also delete pengajuan
+        Route::delete('/{pengajuan}', [PengajuanController::class, 'destroy'])->name('destroy');
     });
 
     // 2. Manajemen Mahasiswa (Admin View)
@@ -158,7 +168,15 @@ Route::middleware(['auth', 'admin'])->group(function () {
     });
 
     // 4. Manajemen Ruangan
-    Route::resource('ruangan', RuanganController::class);
+    Route::prefix('ruangan')->name('ruangan.')->group(function () {
+        Route::get('/', [RuanganController::class, 'index'])->name('index');
+        Route::get('/create', [RuanganController::class, 'create'])->name('create');
+        Route::post('/', [RuanganController::class, 'store'])->name('store');
+        Route::get('/{ruangan}', [RuanganController::class, 'show'])->name('show');
+        Route::get('/{ruangan}/edit', [RuanganController::class, 'edit'])->name('edit');
+        Route::put('/{ruangan}', [RuanganController::class, 'update'])->name('update');
+        Route::delete('/{ruangan}', [RuanganController::class, 'destroy'])->name('destroy');
+    });
 
     // 5. Manajemen Pelatihan
     Route::prefix('pelatihan')->name('pelatihan.')->group(function () {

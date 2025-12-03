@@ -78,7 +78,7 @@
             <table style="margin: 20px 0;">
                 <tr>
                     <td width="150">Nama</td>
-                    <td>: <strong>{{ $presentasi->user->name }}</strong></td>
+                    <td>: <strong>{{ $nama_penerima ?? $presentasi->user->name }}</strong></td>
                 </tr>
                 <tr>
                     <td>Email</td>

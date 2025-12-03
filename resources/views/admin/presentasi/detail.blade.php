@@ -341,6 +341,49 @@
                         </div>
                     </div>
                 </div>
+
+                {{-- 5. Dokumen Anggota (Jika ada) --}}
+                @if ($presentasi->praPenelitian && $presentasi->praPenelitian->anggotas->count() > 0)
+                    <div class="custom-card">
+                        <div class="card-header-main">
+                            <i class="bi bi-people-fill text-info fs-5"></i> Dokumen Anggota Penelitian
+                        </div>
+                        <div class="p-4">
+                            <p class="small text-muted mb-3">Download sertifikat dan surat selesai untuk setiap anggota:</p>
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Nama Anggota</th>
+                                            <th>Jenjang</th>
+                                            <th>Dokumen</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($presentasi->praPenelitian->anggotas as $index => $anggota)
+                                            <tr>
+                                                <td>{{ $index + 1 }}</td>
+                                                <td class="fw-bold">{{ $anggota->nama }}</td>
+                                                <td><span class="badge bg-light text-dark">{{ $anggota->jenjang }}</span></td>
+                                                <td>
+                                                    <div class="d-flex gap-2">
+                                                        <a href="{{ route('presentasi.download-sertifikat', [$presentasi->id, urlencode($anggota->nama)]) }}" class="btn btn-sm btn-outline-success" title="Download Sertifikat">
+                                                            <i class="bi bi-award-fill me-1"></i> Sertifikat
+                                                        </a>
+                                                        <a href="{{ route('presentasi.download-surat-selesai', [$presentasi->id, urlencode($anggota->nama)]) }}" class="btn btn-sm btn-outline-secondary" title="Download Surat Selesai">
+                                                            <i class="bi bi-file-pdf me-1"></i> Surat
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                @endif
             @endif
 
         </div>
