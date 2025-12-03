@@ -179,11 +179,23 @@
 
                 <div class="profile-body">
                     <h5 class="fw-bold text-dark mb-1">{{ $mahasiswa->nm_mahasiswa }}</h5>
-                    <p class="text-muted small mb-4">{{ $mahasiswa->mou ? ($mahasiswa->mou->nama_instansi ?? $mahasiswa->mou->nama_universitas) : 'Instansi Tidak Diketahui' }}</p>
+                    <p class="text-muted small mb-4">
+                        @php
+                            // Prefer MOU from the registered user first, then fallback to mahasiswa->mou
+                            $registeredMou = $mahasiswa->user && $mahasiswa->user->mou ? $mahasiswa->user->mou : null;
+                            $mahasiswaMou = $mahasiswa->mou ?? null;
+                            $displayMou = $registeredMou ?? $mahasiswaMou;
+                        @endphp
+                        {{ $displayMou ? ($displayMou->nama_instansi ?? $displayMou->nama_universitas ?? 'Instansi Tidak Diketahui') : 'Instansi Tidak Diketahui' }}
+                    </p>
 
                     <div class="info-item">
                         <span class="info-label"><i class="bi bi-book"></i> Prodi</span>
                         <span class="info-value">{{ $mahasiswa->prodi }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label"><i class="bi bi-telephone"></i> Nomor HP Mahasiswa</span>
+                        <span class="info-value">{{ $mahasiswa->no_hp ?? '-' }}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label"><i class="bi bi-door-open"></i> Ruangan</span>

@@ -10,6 +10,9 @@ use App\Models\Mou; // Model Universitas
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -21,12 +24,38 @@ class MahasiswaController extends Controller
         $this->middleware('auth');
     }
 
+    /**
+     * Create a User record for a mahasiswa and return the created user object.
+     * The returned object will include a `plain_password` attribute (not saved to DB)
+     * so admin can see the generated credentials immediately.
+     */
+    private function createUserForMahasiswa($name, $phone = null)
+    {
+        // Ensure unique email placeholder
+        $base = Str::slug(substr($name, 0, 50)) ?: 'mahasiswa';
+        $suffix = Str::random(4);
+        $email = $base . '.' . $suffix . '@mahasiswa.local';
+
+        $plain = Str::random(8);
+        $user = User::create([
+            'name' => $name,
+            'email' => $email,
+            'password' => Hash::make($plain),
+            'role' => 'user',
+            'is_approved' => 1,
+        ]);
+
+        // Attach plain password temporarily for admin display
+        $user->plain_password = $plain;
+        return $user;
+    }
+
     public function index(Request $request)
     {
         $ruangans = Ruangan::orderBy('nm_ruangan', 'asc')->get();
 
-        // Eager load 'mou' dan 'ruangan' agar query lebih ringan
-        $query = Mahasiswa::with(['mou', 'ruangan'])->where('status', 'aktif');
+        // Eager load 'mou', 'ruangan' dan user->mou agar query lebih ringan dan data register tersedia
+        $query = Mahasiswa::with(['mou', 'ruangan', 'user.mou'])->where('status', 'aktif');
 
         // 1. Filter by Universitas (Via Relasi)
         if ($request->has('univ_asal') && !empty($request->univ_asal)) {
@@ -98,6 +127,7 @@ class MahasiswaController extends Controller
             $rows = json_decode($request->data, true);
             $processed = 0;
             $errors = [];
+            $createdCredentials = []; // collect created user credentials for admin
 
             foreach ($rows as $i => $row) {
                 $name = $row['Nama'] ?? $row['nama'] ?? null;
@@ -218,7 +248,17 @@ class MahasiswaController extends Controller
                             $snapshot->decrement('tersedia');
                         }
                     }
+                    // Create a User account for the mahasiswa when importing
+                    $createdUser = $this->createUserForMahasiswa($name, $row['No HP'] ?? $row['no_hp'] ?? null);
+                    $dataToSave['user_id'] = $createdUser->id;
                     Mahasiswa::create($dataToSave);
+
+                    // Record credentials to return to admin
+                    $createdCredentials[] = [
+                        'nama' => $createdUser->name,
+                        'email' => $createdUser->email,
+                        'password' => $createdUser->plain_password,
+                    ];
                 }
                 $processed++;
             }
@@ -226,7 +266,8 @@ class MahasiswaController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => "Berhasil memproses $processed data.",
-                'errors' => $errors
+                'errors' => $errors,
+                'created' => $createdCredentials,
             ]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
@@ -244,6 +285,7 @@ class MahasiswaController extends Controller
             'prodi' => 'nullable|string|max:255',
             'nm_ruangan' => 'nullable|string|max:255',
             'ruangan_id' => 'nullable|exists:ruangans,id',
+            'no_hp' => 'nullable|string|max:20',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ];
 
@@ -268,7 +310,19 @@ class MahasiswaController extends Controller
             'nm_ruangan' => null,
         ], $data);
 
-        $data['user_id'] = auth()->id();
+        // If admin creates Mahasiswa, auto-generate a User account for them.
+        if ($user && $user->role === 'admin') {
+            $createdUser = $this->createUserForMahasiswa($data['nm_mahasiswa'], $request->input('no_hp'));
+            $data['user_id'] = $createdUser->id;
+            // Expose credentials briefly to admin via session flash
+            session()->flash('created_mahasiswa_credentials', [
+                'name' => $createdUser->name,
+                'email' => $createdUser->email,
+                'password' => $createdUser->plain_password,
+            ]);
+        } else {
+            $data['user_id'] = auth()->id();
+        }
         $data['status'] = 'aktif';
         // Only take weekend_aktif if admin; otherwise force false
         $data['weekend_aktif'] = ($user && $user->role === 'admin') ? $request->boolean('weekend_aktif') : false;
@@ -331,6 +385,7 @@ class MahasiswaController extends Controller
                 'mou_id'         => 'nullable|exists:mous,id',
                 'prodi'          => 'nullable|string|max:255',
                 'nm_ruangan'     => 'nullable|string|max:255',
+                'no_hp'          => 'nullable|string|max:20',
                 'ruangan_id'     => 'nullable|exists:ruangans,id',
                 'tanggal_mulai'  => 'required|date',
                 'tanggal_berakhir' => 'required|date|after:tanggal_mulai',

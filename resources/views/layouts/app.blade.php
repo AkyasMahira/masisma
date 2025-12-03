@@ -668,6 +668,7 @@
         });
     </script>
 
+    @include('partials.sweetalert')
     @stack('scripts')
     @yield('scripts')
 </body>

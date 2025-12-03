@@ -195,6 +195,10 @@
                                     @endif
                                 </div>
                             </div>
+                            <div class="info-group">
+                                <div class="info-label"><i class="bi bi-telephone me-1"></i> Nomor HP</div>
+                                <div class="info-value">{{ $mahasiswa->no_hp ?? '-' }}</div>
+                            </div>
                         </div>
                     </div>
 
