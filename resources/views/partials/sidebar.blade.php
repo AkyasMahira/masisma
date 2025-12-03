@@ -18,23 +18,20 @@
 
         <nav class="nav flex-column sidebar-nav-container">
 
-            {{-- GRUP 1: MENU UTAMA --}}
-            <div class="sidebar-heading">
-                <span class="sidebar-text">Menu Utama</span>
-            </div>
-
-            <a class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
-                <i class="bi bi-house-door"></i>
-                <span class="sidebar-text">Dashboard</span>
-            </a>
-
             {{-- ========================================== --}}
             {{-- MENU KHUSUS ADMIN                          --}}
             {{-- ========================================== --}}
             @if (auth()->check() && auth()->user()->role === 'admin')
+                
+                {{-- GRUP 1: UTAMA --}}
                 <div class="sidebar-heading">
-                    <span class="sidebar-text">Administrasi</span>
+                    <span class="sidebar-text">Menu Utama</span>
                 </div>
+
+                <a class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                    <i class="bi bi-house-door"></i>
+                    <span class="sidebar-text">Dashboard</span>
+                </a>
 
                 <a class="nav-link {{ request()->is('users*') ? 'active' : '' }}" href="{{ route('users.index') }}">
                     <i class="bi bi-person-gear"></i>
@@ -47,18 +44,19 @@
                     <span class="sidebar-text">Approval Pengajuan</span>
                 </a>
 
-                <a class="nav-link {{ request()->is('admin/presentasi*') ? 'active' : '' }}"
-                    href="{{ route('admin.presentasi.index') }}">
-                    <i class="bi bi-easel"></i>
-                    <span class="sidebar-text">Presentasi</span>
+                                <a class="nav-link {{ request()->is('surat-balasan*') ? 'active' : '' }}"
+                    href="{{ route('surat-balasan.index') }}">
+                    <i class="bi bi-envelope-paper"></i>
+                    <span class="sidebar-text">Surat Balasan</span>
                 </a>
 
+                {{-- GRUP 2: MOU --}}
                 @php $isMouActive = request()->is('mou*'); @endphp
                 <div class="nav-item-dropdown">
                     <a class="nav-link {{ $isMouActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
                         href="#menuMou" role="button" aria-expanded="{{ $isMouActive ? 'true' : 'false' }}">
                         <i class="bi bi-file-earmark-text"></i>
-                        <span class="sidebar-text">MOU</span>
+                        <span class="sidebar-text">MoU</span>
                         <i class="bi bi-chevron-down sidebar-arrow"></i>
                     </a>
                     <div class="collapse sub-menu {{ $isMouActive ? 'show' : '' }}" id="menuMou">
@@ -69,9 +67,9 @@
                     </div>
                 </div>
 
+                {{-- GRUP 3: PENDIDIKAN --}}
                 @php
-                    $isPendidikanActive =
-                        request()->is('mahasiswa*') || request()->is('ruangan*') || request()->is('absensi*');
+                    $isPendidikanActive = request()->is('mahasiswa*') || request()->is('ruangan*') || request()->is('absensi*');
                 @endphp
                 <div class="nav-item-dropdown">
                     <a class="nav-link {{ $isPendidikanActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
@@ -97,12 +95,7 @@
                     </div>
                 </div>
 
-                <a class="nav-link {{ request()->is('surat-balasan*') ? 'active' : '' }}"
-                    href="{{ route('surat-balasan.index') }}">
-                    <i class="bi bi-envelope-paper"></i>
-                    <span class="sidebar-text">Surat Balasan</span>
-                </a>
-
+                {{-- GRUP 4: PELATIHAN --}}
                 @php $isPelatihanActive = request()->is('pelatihan*'); @endphp
                 <div class="nav-item-dropdown">
                     <a class="nav-link {{ $isPelatihanActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
@@ -123,7 +116,8 @@
                     </div>
                 </div>
 
-                @php $isPenelitianActive = request()->is('pra-penelitian*'); @endphp
+                {{-- GRUP 5: PENELITIAN --}}
+                @php $isPenelitianActive = request()->is('pra-penelitian*') || request()->is('admin/presentasi*'); @endphp
                 <div class="nav-item-dropdown">
                     <a class="nav-link {{ $isPenelitianActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
                         href="#menuPenelitian" role="button"
@@ -137,44 +131,49 @@
                             href="{{ route('pra-penelitian.index') }}">
                             <span class="sidebar-text">Pra-Penelitian</span>
                         </a>
+                         <a class="nav-link {{ request()->is('admin/presentasi*') ? 'active' : '' }}"
+                            href="{{ route('admin.presentasi.index') }}">
+                            <span class="sidebar-text">Presentasi</span>
+                        </a>
                     </div>
                 </div>
+
+                {{-- Menu Tambahan (Jika perlu tetap ada) --}}
+                {{-- <div class="sidebar-heading mt-3">
+                    <span class="sidebar-text">Lainnya</span>
+                </div> --}}
+
             @endif
 
             {{-- ========================================== --}}
             {{-- MENU KHUSUS USER                           --}}
             {{-- ========================================== --}}
             @if (auth()->check() && auth()->user()->role === 'user')
+                
+                {{-- Dashboard User juga butuh link Dashboard umum --}}
+                 <div class="sidebar-heading">
+                    <span class="sidebar-text">Menu Utama</span>
+                </div>
+                <a class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                    <i class="bi bi-house-door"></i>
+                    <span class="sidebar-text">Dashboard</span>
+                </a>
 
                 @php
                     $userId = auth()->id();
-
-                    // Ambil data pengajuan
-                    $pra = \App\Models\Pengajuan::where('user_id', $userId)
-                        ->where('jenis', 'pra_penelitian')
-                        ->latest()
-                        ->first();
-                    $magang = \App\Models\Pengajuan::where('user_id', $userId)
-                        ->where('jenis', 'magang')
-                        ->latest()
-                        ->first();
-
-                    // Cek akses
+                    $pra = \App\Models\Pengajuan::where('user_id', $userId)->where('jenis', 'pra_penelitian')->latest()->first();
+                    $magang = \App\Models\Pengajuan::where('user_id', $userId)->where('jenis', 'magang')->latest()->first();
                     $hasPraAccess = $pra && $pra->status === 'approved';
                     $hasMagangAccess = $magang && $magang->status === 'approved';
-
-                    // Cek apakah sudah dapat CI (untuk presentasi)
                     $hasCIAccess = $hasPraAccess && $pra->ci_nama;
-
-                    // Cek apakah ada presentasi
                     $presentasi = $hasCIAccess ? \App\Models\Presentasi::where('user_id', $userId)->first() : null;
                 @endphp
 
-                <div class="sidebar-heading">
+                <div class="sidebar-heading mt-2">
                     <span class="sidebar-text">Layanan</span>
                 </div>
 
-                {{-- 1. MENU STATUS & PENGAJUAN (Selalu Muncul) --}}
+                {{-- 1. MENU STATUS & PENGAJUAN --}}
                 <a class="nav-link {{ request()->is('pengajuan') && !request()->is('pengajuan/detail*') ? 'active' : '' }}"
                     href="{{ route('pengajuan.index') }}">
                     <i class="bi bi-grid-1x2"></i>
@@ -243,23 +242,18 @@
                 @if (auth()->check())
                     @php
                         $user = auth()->user();
-                        
-                        // Cek foto untuk mahasiswa
                         $mahasiswa = null;
                         if ($user->role === 'user') {
                             $mahasiswa = \App\Models\Mahasiswa::where('user_id', $user->id)->first();
                         }
-                        
                         $hasFoto = $mahasiswa && !empty($mahasiswa->foto_path) && file_exists(public_path($mahasiswa->foto_path));
                     @endphp
 
                     @if ($hasFoto)
-                        {{-- Tampilkan Foto Upload User --}}
                         <img src="{{ asset($mahasiswa->foto_path) }}"
                             class="rounded-circle me-2 object-fit-cover" 
                             width="40" height="40" alt="User">
                     @else
-                        {{-- Fallback ke Inisial Nama (UI Avatars) --}}
                         <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=7c1316&color=fff"
                             class="rounded-circle me-2" width="40" height="40" alt="User">
                     @endif
@@ -269,7 +263,6 @@
                         <small>{{ ucfirst($user->role ?? 'user') }}</small>
                     </div>
                 @else
-                    {{-- Tampilan untuk Guest --}}
                     <img src="https://ui-avatars.com/api/?name=Guest&background=7c1316&color=fff"
                         class="rounded-circle me-2" width="40" height="40" alt="Guest">
                     <div class="sidebar-text">
