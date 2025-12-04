@@ -11,11 +11,13 @@ use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\KonsultasiController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\SuratBalasanController;
+use App\Http\Controllers\RoomSequenceController;
 use App\Http\Controllers\MouController;
 use App\Http\Controllers\PengajuanController;
 use App\Http\Controllers\PresentasiController;
 use App\Http\Controllers\ProgresController;
 use App\Http\Controllers\PublicController;
+use App\Http\Controllers\RoomScheduleController;
 use App\Http\Controllers\UserController;
 
 /*
@@ -68,6 +70,15 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{pengajuan}/upload-bukti', [PengajuanController::class, 'uploadBuktiPembayaran'])->name('upload-bukti');
         // Allow user to delete their pengajuan (cleanup and allow re-apply)
         Route::delete('/{pengajuan}', [PengajuanController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('/room_sequences')->name('room_sequences.')->group(function () {
+        Route::get('/', [RoomSequenceController::class, 'index'])->name('index');
+        Route::get('/create', [RoomSequenceController::class, 'create'])->name('create');
+        Route::post('/', [RoomSequenceController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [RoomSequenceController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [RoomSequenceController::class, 'update'])->name('update');
+        Route::delete('/{id}', [RoomSequenceController::class, 'destroy'])->name('destroy');
     });
 
     // Sertifikat & Absensi (User View)
@@ -221,6 +232,12 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/notes', [NoteController::class, 'index'])->name('notes.index');
     Route::post('/notes', [NoteController::class, 'store'])->name('notes.store');
     Route::delete('/notes/{id}', [NoteController::class, 'destroy'])->name('notes.destroy');
+
+
+    Route::prefix('room_schedules')->name('room_schedules.')->group(function () {
+        Route::get('/', [RoomScheduleController::class, 'index'])->name('index');
+        Route::delete('/{id}', [RoomScheduleController::class, 'destroy'])->name('destroy');
+    });
 
     Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi.index');
 

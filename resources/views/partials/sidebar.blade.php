@@ -67,6 +67,8 @@
                 @php
                     $isPendidikanActive = request()->is('mahasiswa*') ||
                                           request()->is('ruangan*') ||
+                                          request()->is('room_sequences*') ||
+                                          request()->is('room_schedules*') ||
                                           request()->is('absensi*');
                 @endphp
                 <div class="nav-item-dropdown">
@@ -85,6 +87,14 @@
                         <a class="nav-link {{ request()->is('ruangan*') ? 'active' : '' }}"
                            href="{{ route('ruangan.index') }}">
                             <span class="sidebar-text">Ruangan</span>
+                        </a>
+                        <a class="nav-link {{ request()->is('room_sequences*') ? 'active' : '' }}"
+                           href="{{ route('room_sequences.index') }}">
+                            <span class="sidebar-text">Jadwal Rolling Ruangan</span>
+                        </a>
+                        <a class="nav-link {{ request()->is('room_schedules*') ? 'active' : '' }}"
+                           href="{{ route('room_schedules.index') }}">
+                            <span class="sidebar-text">Jadwal Penghuni Aktual</span>
                         </a>
                         <a class="nav-link {{ request()->is('absensi*') ? 'active' : '' }}"
                            href="{{ route('absensi.index') }}">
