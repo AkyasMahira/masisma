@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use App\Models\Absensi;
 use App\Models\Ruangan;
+use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 
 class Mahasiswa extends Model
@@ -135,4 +136,48 @@ class Mahasiswa extends Model
         // Kembalikan 2 angka desimal, misal: 95.50
         return round($percentage, 2);
     }
+
+    // 1. Relasi ke RoomSchedule
+    public function schedules()
+    {
+        return $this->hasMany(RoomSchedule::class, 'mahasiswa_id');
+    }
+
+    // 2. Buat Atribut Kustom: "ruangan_aktif"
+    // Ini akan otomatis mencari ruangan berdasarkan tanggal hari ini
+    public function getRuanganAktifAttribute()
+    {
+        $today = Carbon::today()->format('Y-m-d');
+
+        // Cek apakah ada jadwal rolling aktif HARI INI?
+        $jadwalRolling = $this->schedules()
+            ->with('ruangan') // Load data ruangannya
+            ->where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->first();
+
+        if ($jadwalRolling) {
+            // PRIORITAS 1: Ambil dari Jadwal Rolling
+            return $jadwalRolling->ruangan; 
+        }
+
+        // PRIORITAS 2: Ambil dari data master (fallback)
+        return $this->ruangan; 
+    }
+
+    // 3. Helper untuk langsung ambil Namanya saja
+    public function getNamaRuanganSaatIniAttribute()
+    {
+        // Panggil logika di atas
+        $ruangan = $this->ruangan_aktif;
+
+        if ($ruangan) {
+            // Cek kolom nama ruangan di db kamu (nama_ruangan atau nm_ruangan)
+            return $ruangan->nama_ruangan ?? $ruangan->nm_ruangan ?? '-';
+        }
+
+        // PRIORITAS 3: Jika relasi null, cek kolom string nm_ruangan (legacy)
+        return $this->nm_ruangan ?? '-';
+    }
+
 }

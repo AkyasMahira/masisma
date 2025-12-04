@@ -354,7 +354,7 @@
                             <td>
                                 @if ($m->ruangan)
                                     <span class="badge badge-light border text-dark p-2">
-                                        <i class="bi bi-geo-alt mr-1"></i>{{ $m->ruangan->nm_ruangan }}
+                                        <i class="bi bi-geo-alt mr-1"></i>{{ $m->nama_ruangan_saat_ini }}
                                     </span>
                                 @else
                                     <span class="text-muted font-italic">-</span>

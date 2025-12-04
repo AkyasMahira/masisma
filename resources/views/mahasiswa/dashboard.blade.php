@@ -199,7 +199,7 @@
                     </div>
                     <div class="info-item">
                         <span class="info-label"><i class="bi bi-door-open"></i> Ruangan</span>
-                        <span class="info-value text-danger">{{ $mahasiswa->nm_ruangan ?? '-' }}</span>
+                        <span class="info-value text-danger">{{ $mahasiswa->nama_ruangan_saat_ini }}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label"><i class="bi bi-calendar-range"></i> Periode</span>

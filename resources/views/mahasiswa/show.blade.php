@@ -179,7 +179,7 @@
                                 <div class="info-label"><i class="bi bi-door-open me-1"></i> Ruangan</div>
                                 <div class="info-value">
                                     @if($mahasiswa->ruangan)
-                                        <span class="badge bg-light text-dark border">{{ $mahasiswa->ruangan->nm_ruangan }}</span>
+                                        <span class="badge bg-light text-dark border">{{ $mahasiswa->nama_ruangan_saat_ini }}</span>
                                     @else
                                         <span class="text-muted">-</span>
                                     @endif
