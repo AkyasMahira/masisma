@@ -358,9 +358,9 @@
                                     <span class="input-group-text"><i class="fas fa-id-badge"></i></span>
                                     <select id="status_pegawai" name="status_pegawai" class="form-select @error('status_pegawai') is-invalid @enderror" required>
                                         <option value="">-- Pilih Status --</option>
-                                        <option value="PNS" {{ old('status_pegawai') == 'PNS' ? 'selected' : '' }}>PNS</option>
-                                        <option value="P3K" {{ old('status_pegawai') == 'P3K' ? 'selected' : '' }}>P3K</option>
-                                        <option value="Non-PNS" {{ old('status_pegawai') == 'Non-PNS' ? 'selected' : '' }}>Non-PNS</option>
+                                        <option value="ASN" {{ old('status_pegawai') == 'ASN' ? 'selected' : '' }}>ASN</option>
+                                        <option value="KARYAWAN TETAP" {{ old('status_pegawai') == 'KARYAWAN TETAP' ? 'selected' : '' }}>KARYAWAN TETAP</option>
+                                        <option value="NON ASN" {{ old('status_pegawai') == 'NON ASN' ? 'selected' : '' }}>NON ASN</option>
                                     </select>
                                 </div>
                                 @error('status_pegawai') <div class="error-message">{{ $message }}</div> @enderror
@@ -531,7 +531,7 @@
             button.parentElement.remove();
         }
 
-        // --- LOGIKA STATUS PEGAWAI (PNS/P3K/NON-PNS) ---
+        // --- LOGIKA STATUS PEGAWAI (ASN/KARYAWAN TETAP/NON ASN) ---
         function toggleStatusFields() {
             const sel = document.getElementById('status_pegawai');
             const pnsContainer = document.getElementById('pnsFields');
@@ -560,8 +560,8 @@
             if(nirp) nirp.removeAttribute('required');
 
             // 3. Logika Pilihan
-            if (val === 'PNS') {
-                // Jika PNS: Tampilkan NIP, Golongan, PANGKAT
+            if (val === 'ASN') {
+                // Jika ASN: Tampilkan NIP, Golongan, PANGKAT
                 pnsContainer.style.display = 'block';
                 wrapperPangkat.style.display = 'block'; // Tampilkan Pangkat
 
@@ -569,17 +569,17 @@
                 if(golongan) golongan.setAttribute('required', 'required');
                 if(pangkat) pangkat.setAttribute('required', 'required');
 
-            } else if (val === 'P3K') {
-                // Jika P3K: Tampilkan NIP, Golongan SAJA
+            } else if (val === 'KARYAWAN TETAP') {
+                // Jika KARYAWAN TETAP: Tampilkan NIP, Golongan SAJA
                 pnsContainer.style.display = 'block';
                 wrapperPangkat.style.display = 'none'; // Sembunyikan Pangkat
 
                 if(nip) nip.setAttribute('required', 'required');
                 if(golongan) golongan.setAttribute('required', 'required');
-                // Pangkat tidak required untuk P3K
+                // Pangkat tidak required untuk KARYAWAN TETAP
 
-            } else if (val === 'Non-PNS') {
-                // Jika Non-PNS: Tampilkan NIRP
+            } else if (val === 'NON ASN') {
+                // Jika NON ASN: Tampilkan NIRP
                 nonPnsContainer.style.display = 'block';
                 if(nirp) nirp.setAttribute('required', 'required');
             }

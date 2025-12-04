@@ -64,17 +64,17 @@ class PelatihanController extends Controller
             'jabatan' => 'nullable|string|max:255',
             'unit' => 'nullable|string|max:255',
 
-            'status_pegawai' => 'required|in:PNS,P3K,Non-PNS',
+            'status_pegawai' => 'required|in:ASN,KARYAWAN TETAP,NON ASN',
 
-            // Validasi Kondisional PNS / P3K
-            'nip' => 'nullable|required_if:status_pegawai,PNS,P3K|string|max:50',
-            'golongan' => 'nullable|required_if:status_pegawai,PNS,P3K|string|max:100',
+            // Validasi Kondisional ASN / KARYAWAN TETAP
+            'nip' => 'nullable|required_if:status_pegawai,ASN,KARYAWAN TETAP|string|max:50',
+            'golongan' => 'nullable|required_if:status_pegawai,ASN,KARYAWAN TETAP|string|max:100',
 
-            // --- PERUBAHAN DISINI: Pangkat hanya required jika PNS, P3K tidak required ---
-            'pangkat' => 'nullable|required_if:status_pegawai,PNS|string|max:100',
+            // --- Pangkat hanya required jika ASN ---
+            'pangkat' => 'nullable|required_if:status_pegawai,ASN|string|max:100',
 
-            // Validasi Kondisional Non-PNS
-            'nirp' => 'nullable|required_if:status_pegawai,Non-PNS|string|max:50',
+            // Validasi Kondisional NON ASN
+            'nirp' => 'nullable|required_if:status_pegawai,NON ASN|string|max:50',
 
             // --- PELATIHAN DASAR ---
             'pelatihan_dasar' => 'nullable|array',
@@ -189,15 +189,15 @@ class PelatihanController extends Controller
             'jabatan' => 'nullable|string|max:255',
             'unit' => 'nullable|string|max:255',
 
-            'status_pegawai' => 'required|in:PNS,P3K,Non-PNS',
+            'status_pegawai' => 'required|in:ASN,KARYAWAN TETAP,NON ASN',
 
-            'nip' => 'nullable|required_if:status_pegawai,PNS,P3K|string|max:50',
-            'golongan' => 'nullable|required_if:status_pegawai,PNS,P3K|string|max:100',
+            'nip' => 'nullable|required_if:status_pegawai,ASN,KARYAWAN TETAP|string|max:50',
+            'golongan' => 'nullable|required_if:status_pegawai,ASN,KARYAWAN TETAP|string|max:100',
 
-            // --- PERUBAHAN DISINI: Pangkat hanya required jika PNS ---
-            'pangkat' => 'nullable|required_if:status_pegawai,PNS|string|max:100',
+            // --- Pangkat hanya required jika ASN ---
+            'pangkat' => 'nullable|required_if:status_pegawai,ASN|string|max:100',
 
-            'nirp' => 'nullable|required_if:status_pegawai,Non-PNS|string|max:50',
+            'nirp' => 'nullable|required_if:status_pegawai,NON ASN|string|max:50',
 
             // --- DASAR ---
             'pelatihan_dasar' => 'nullable|array',
@@ -393,7 +393,7 @@ class PelatihanController extends Controller
 
                 $daftarFileStr = implode('; ', $files);
 
-                $identitas = ($p->status_pegawai == 'PNS' || $p->status_pegawai == 'P3K') ? $p->nip : $p->nirp;
+                $identitas = ($p->status_pegawai == 'ASN' || $p->status_pegawai == 'KARYAWAN TETAP') ? $p->nip : $p->nirp;
 
                 $rowData = [
                     $p->nama, $p->bidang, $p->jabatan, $p->unit, $p->status_pegawai,
@@ -454,15 +454,15 @@ class PelatihanController extends Controller
             'bidang' => 'required|string|max:255',
             'jabatan' => 'nullable|string|max:255',
             'unit' => 'nullable|string|max:255',
-            'status_pegawai' => 'required|in:PNS,P3K,Non-PNS',
+            'status_pegawai' => 'required|in:ASN,KARYAWAN TETAP,NON ASN',
 
-            'nip' => 'nullable|required_if:status_pegawai,PNS,P3K|string|max:50',
-            'golongan' => 'nullable|required_if:status_pegawai,PNS,P3K|string|max:100',
+            'nip' => 'nullable|required_if:status_pegawai,ASN,KARYAWAN TETAP|string|max:50',
+            'golongan' => 'nullable|required_if:status_pegawai,ASN,KARYAWAN TETAP|string|max:100',
 
-            // --- PERUBAHAN DISINI: Pangkat hanya required jika PNS ---
-            'pangkat' => 'nullable|required_if:status_pegawai,PNS|string|max:100',
+            // --- Pangkat hanya required jika ASN ---
+            'pangkat' => 'nullable|required_if:status_pegawai,ASN|string|max:100',
 
-            'nirp' => 'nullable|required_if:status_pegawai,Non-PNS|string|max:50',
+            'nirp' => 'nullable|required_if:status_pegawai,NON ASN|string|max:50',
 
             // Validasi Array Pelatihan
             'pelatihan_dasar' => 'nullable|array',

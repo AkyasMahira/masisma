@@ -147,18 +147,18 @@
                         <div class="col-md-6">
                             <div class="info-label"><i class="bi bi-person-badge-fill me-1"></i> Status Kepegawaian</div>
                             <div class="info-value">
-                                @if($pelatihan->status_pegawai == 'PNS')
-                                    <span class="badge badge-status bg-primary">PNS</span>
-                                @elseif($pelatihan->status_pegawai == 'P3K')
-                                    <span class="badge badge-status bg-warning text-dark">P3K</span>
+                                @if($pelatihan->status_pegawai == 'ASN')
+                                    <span class="badge badge-status bg-primary">ASN</span>
+                                @elseif($pelatihan->status_pegawai == 'KARYAWAN TETAP')
+                                    <span class="badge badge-status bg-warning text-dark">KARYAWAN TETAP</span>
                                 @else
-                                    <span class="badge badge-status bg-secondary">Non-PNS</span>
+                                    <span class="badge badge-status bg-secondary">NON ASN</span>
                                 @endif
                             </div>
                         </div>
 
                         {{-- Logic Tampilan Detail Status --}}
-                        @if($pelatihan->status_pegawai == 'PNS')
+                        @if($pelatihan->status_pegawai == 'ASN')
                             <div class="col-md-4">
                                 <div class="info-label">NIP</div>
                                 <div class="info-value">{{ $pelatihan->nip }}</div>
@@ -172,7 +172,7 @@
                                 <div class="info-value">{{ $pelatihan->pangkat }}</div>
                             </div>
 
-                        @elseif($pelatihan->status_pegawai == 'P3K')
+                        @elseif($pelatihan->status_pegawai == 'KARYAWAN TETAP')
                             <div class="col-md-6">
                                 <div class="info-label">NIP</div>
                                 <div class="info-value">{{ $pelatihan->nip }}</div>
@@ -182,7 +182,7 @@
                                 <div class="info-value">{{ $pelatihan->golongan }}</div>
                             </div>
 
-                        @elseif($pelatihan->status_pegawai == 'Non-PNS')
+                        @elseif($pelatihan->status_pegawai == 'NON ASN')
                             <div class="col-md-12">
                                 <div class="info-label">NIRP</div>
                                 <div class="info-value">{{ $pelatihan->nirp ?? '-' }}</div>

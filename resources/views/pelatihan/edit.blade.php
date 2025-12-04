@@ -342,9 +342,9 @@
                                         class="form-select @error('status_pegawai') is-invalid @enderror" required>
                                         <option value="">-- Pilih Status --</option>
                                         @php $status = old('status_pegawai', $pelatihan->status_pegawai); @endphp
-                                        <option value="PNS" {{ $status == 'PNS' ? 'selected' : '' }}>PNS</option>
-                                        <option value="P3K" {{ $status == 'P3K' ? 'selected' : '' }}>P3K</option>
-                                        <option value="Non-PNS" {{ $status == 'Non-PNS' ? 'selected' : '' }}>Non-PNS
+                                        <option value="ASN" {{ $status == 'ASN' ? 'selected' : '' }}>ASN</option>
+                                        <option value="KARYAWAN TETAP" {{ $status == 'KARYAWAN TETAP' ? 'selected' : '' }}>KARYAWAN TETAP</option>
+                                        <option value="NON ASN" {{ $status == 'NON ASN' ? 'selected' : '' }}>NON ASN
                                         </option>
                                     </select>
                                 </div>
@@ -580,18 +580,18 @@
             if (pangkat) pangkat.removeAttribute('required');
             if (nirp) nirp.removeAttribute('required');
 
-            if (val === 'PNS') {
+            if (val === 'ASN') {
                 pnsContainer.style.display = 'block';
                 wrapperPangkat.style.display = 'block';
                 if (nip) nip.setAttribute('required', 'required');
                 if (golongan) golongan.setAttribute('required', 'required');
                 if (pangkat) pangkat.setAttribute('required', 'required');
-            } else if (val === 'P3K') {
+            } else if (val === 'KARYAWAN TETAP') {
                 pnsContainer.style.display = 'block';
                 wrapperPangkat.style.display = 'none';
                 if (nip) nip.setAttribute('required', 'required');
                 if (golongan) golongan.setAttribute('required', 'required');
-            } else if (val === 'Non-PNS') {
+            } else if (val === 'NON ASN') {
                 nonPnsContainer.style.display = 'block';
                 if (nirp) nirp.setAttribute('required', 'required');
             }

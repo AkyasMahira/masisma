@@ -128,16 +128,16 @@
                                                 <td class="align-top">
                                                     <div class="fw-bold text-dark" style="font-size: 1.05rem;">{{ $pelatihan->nama }}</div>
                                                     <div class="mt-2">
-                                                        @if ($pelatihan->status_pegawai === 'PNS')
-                                                            <span class="badge bg-primary">PNS</span>
+                                                        @if ($pelatihan->status_pegawai === 'ASN')
+                                                            <span class="badge bg-primary">ASN</span>
                                                             <div class="small text-muted mt-1">NIP: {{ $pelatihan->nip }}</div>
                                                             <div class="small text-muted">{{ $pelatihan->golongan }} / {{ $pelatihan->pangkat }}</div>
-                                                        @elseif ($pelatihan->status_pegawai === 'P3K')
-                                                            <span class="badge bg-warning text-dark">P3K</span>
+                                                        @elseif ($pelatihan->status_pegawai === 'KARYAWAN TETAP')
+                                                            <span class="badge bg-warning text-dark">KARYAWAN TETAP</span>
                                                             <div class="small text-muted mt-1">NIP: {{ $pelatihan->nip }}</div>
                                                             <div class="small text-muted">{{ $pelatihan->golongan }}</div>
                                                         @else
-                                                            <span class="badge bg-secondary">Non-PNS</span>
+                                                            <span class="badge bg-secondary">NON ASN</span>
                                                             <div class="small text-muted mt-1">NIRP: {{ $pelatihan->nirp }}</div>
                                                         @endif
                                                     </div>

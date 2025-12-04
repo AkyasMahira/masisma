@@ -316,23 +316,23 @@
                             <td>
                                 <span class="font-weight-bold text-dark d-block mb-1" style="font-size: 1rem;">{{ $pelatihan->nama }}</span>
 
-                                @if ($pelatihan->status_pegawai === 'PNS')
+                                @if ($pelatihan->status_pegawai === 'ASN')
                                     <span class="badge border bg-light text-primary p-1" style="font-size: 0.75rem;">
-                                        PNS | {{ $pelatihan->nip }}
+                                        ASN | {{ $pelatihan->nip }}
                                     </span>
                                     <div class="small text-muted mt-1">
                                         {{ $pelatihan->golongan }} - {{ $pelatihan->pangkat }}
                                     </div>
-                                @elseif ($pelatihan->status_pegawai === 'P3K')
+                                @elseif ($pelatihan->status_pegawai === 'KARYAWAN TETAP')
                                     <span class="badge border bg-light text-warning text-dark p-1" style="font-size: 0.75rem;">
-                                        P3K | {{ $pelatihan->nip }}
+                                        KARYAWAN TETAP | {{ $pelatihan->nip }}
                                     </span>
                                     <div class="small text-muted mt-1">
                                         {{ $pelatihan->golongan }}
                                     </div>
                                 @else
                                     <span class="badge border bg-light text-secondary p-1" style="font-size: 0.75rem;">
-                                        Non-PNS
+                                        NON ASN
                                     </span>
                                     @if($pelatihan->nirp)
                                         <div class="small text-muted mt-1">NIRP: {{ $pelatihan->nirp }}</div>
@@ -533,7 +533,7 @@
 
                     // Identitas
                     let identitas = "";
-                    if (p.status_pegawai === 'PNS' || p.status_pegawai === 'P3K') {
+                    if (p.status_pegawai === 'ASN' || p.status_pegawai === 'KARYAWAN TETAP') {
                         identitas = p.nip;
                     } else {
                         identitas = p.nirp;
@@ -541,7 +541,7 @@
 
                     return [
                         p.nama || '',
-                        p.status_pegawai || 'Non-PNS',
+                        p.status_pegawai || 'NON ASN',
                         identitas,
                         p.golongan || '',
                         p.pangkat || '',
@@ -570,9 +570,9 @@
         // ===== FUNGSI TEMPLATE DIPERBARUI =====
         function downloadTemplatePelatihan() {
             const ws = XLSX.utils.aoa_to_sheet([
-                ['Nama', 'Bidang', 'Jabatan', 'Unit', 'Status (PNS/P3K/Non-PNS)', 'NIP', 'NIRP', 'Golongan', 'Pangkat', 'Pelatihan_Dasar (pisahkan ;)', 'Pelatihan_Kompetensi (pisahkan ;)'],
-                ['Budi', 'Keperawatan', 'Perawat Ahli', 'IGD', 'PNS', '1990...', '', 'III/a', 'Penata Muda', 'Basic Safety; BTCLS', 'Manajemen Bangsal'],
-                ['Siti', 'Keuangan', 'Staf', 'Keuangan', 'Non-PNS', '', 'N-123...', '', '', 'Excel Basic', 'Akuntansi Dasar']
+                ['Nama', 'Bidang', 'Jabatan', 'Unit', 'Status (ASN/KARYAWAN TETAP/NON ASN)', 'NIP', 'NIRP', 'Golongan', 'Pangkat', 'Pelatihan_Dasar (pisahkan ;)', 'Pelatihan_Kompetensi (pisahkan ;)'],
+                ['Budi', 'Keperawatan', 'Perawat Ahli', 'IGD', 'ASN', '1990...', '', 'III/a', 'Penata Muda', 'Basic Safety; BTCLS', 'Manajemen Bangsal'],
+                ['Siti', 'Keuangan', 'Staf', 'Keuangan', 'NON ASN', '', 'N-123...', '', '', 'Excel Basic', 'Akuntansi Dasar']
             ]);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Template');
