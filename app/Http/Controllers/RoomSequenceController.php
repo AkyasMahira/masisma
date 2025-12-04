@@ -57,7 +57,6 @@ class RoomSequenceController extends Controller
             'end_date'     => 'required|date|after_or_equal:start_date',
         ]);
 
-        // VALIDASI ANTI-BENTROK
         // Cek apakah mahasiswa ini sudah punya rencana lain di rentang tanggal tersebut?
         $bentrok = RoomSequence::where('mahasiswa_id', $request->mahasiswa_id)
             ->where(function($query) use ($request) {
