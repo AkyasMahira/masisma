@@ -363,7 +363,20 @@ class MahasiswaController extends Controller
         }
 
         Mahasiswa::create($data);
-        return redirect()->route('mahasiswa.dashboard')->with('success', 'Biodata berhasil disimpan!'); // REDIRECT KE DASHBOARD
+
+        $user = auth()->user();
+
+        if ($user->role === 'admin') {
+            // ADMIN: balik ke index mahasiswa
+            return redirect()
+                ->route('mahasiswa.index')
+                ->with('success', 'Mahasiswa berhasil dibuat!');
+        }
+
+        // MAHASISWA: ke dashboard mahasiswa
+        return redirect()
+            ->route('mahasiswa.dashboard')
+            ->with('success', 'Biodata berhasil disimpan!');
     }
 
     public function edit($id)

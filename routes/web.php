@@ -72,6 +72,15 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/{pengajuan}', [PengajuanController::class, 'destroy'])->name('destroy');
     });
 
+    Route::prefix('/room_sequences')->name('room_sequences.')->group(function () {
+        Route::get('/', [RoomSequenceController::class, 'index'])->name('index');
+        Route::get('/create', [RoomSequenceController::class, 'create'])->name('create');
+        Route::post('/', [RoomSequenceController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [RoomSequenceController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [RoomSequenceController::class, 'update'])->name('update');
+        Route::delete('/{id}', [RoomSequenceController::class, 'destroy'])->name('destroy');
+    });
+
     // Sertifikat & Absensi (User View)
     Route::get('/sertifikat/download/{token}', [AbsensiController::class, 'generateSertifikatPublik'])->name('sertifikat.download');
     Route::get('/absensi/{token}', [AbsensiController::class, 'card'])->name('absensi.card');
@@ -224,14 +233,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/notes', [NoteController::class, 'store'])->name('notes.store');
     Route::delete('/notes/{id}', [NoteController::class, 'destroy'])->name('notes.destroy');
 
-    Route::prefix('/room_sequences')->name('room_sequences.')->group(function () {
-        Route::get('/', [RoomSequenceController::class, 'index'])->name('index');
-        Route::get('/create', [RoomSequenceController::class, 'create'])->name('create');
-        Route::post('/', [RoomSequenceController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [RoomSequenceController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [RoomSequenceController::class, 'update'])->name('update');
-        Route::delete('/{id}', [RoomSequenceController::class, 'destroy'])->name('destroy');
-    });
 
     Route::prefix('room_schedules')->name('room_schedules.')->group(function () {
         Route::get('/', [RoomScheduleController::class, 'index'])->name('index');

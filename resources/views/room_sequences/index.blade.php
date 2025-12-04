@@ -107,28 +107,28 @@
     </style>
 
     {{-- Header Section --}}
-    <div class="page-header-wrapper animate-up">
-        <div>
-            <h4 class="fw-bold mb-1" style="color: var(--custom-maroon);">Pengaturan Jadwal (Rolling)</h4>
-            <small class="text-muted">Kelola perpindahan ruangan mahasiswa.</small>
-        </div>
-        <div>
-            <a href="{{ route('room_sequences.create') }}" class="btn btn-maroon shadow-sm">
-                <i class="bi bi-plus-lg"></i> Tambah Jadwal
-            </a>
-        </div>
+<div class="page-header-wrapper animate-up">
+    <div>
+        <h4 class="fw-bold mb-1" style="color: var(--custom-maroon);">Pengaturan Jadwal (Rolling)</h4>
+        <small class="text-muted">Kelola perpindahan ruangan mahasiswa.</small>
     </div>
 
-    {{-- Alert Success --}}
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show animate-up shadow-sm border-0 mb-4" role="alert">
-            <div class="d-flex align-items-center">
-                <i class="bi bi-check-circle-fill fs-4 me-3"></i>
-                <div><strong>Berhasil!</strong> {{ session('success') }}</div>
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
+    <div>
+        <a href="{{ route('room_sequences.create') }}" class="btn btn-maroon shadow-sm">
+            <i class="bi bi-plus-lg"></i> Tambah Jadwal
+        </a>
+    </div>
+</div>
+
+{{-- ALERT SUCCESS --}}
+@if(session('success'))
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle-fill fs-5 me-2"></i>
+    <strong>Berhasil!</strong> {{ session('success') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
+
 
     {{-- Table Section --}}
     <div class="custom-table-card animate-up" style="animation-delay: 0.1s;">
@@ -184,16 +184,24 @@
 
                         <td class="text-center">
                             <div class="d-flex justify-content-center gap-2">
-                                <a href="{{ route('room_sequences.edit', $seq->id) }}" class="action-btn btn-edit" title="Edit">
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
-                                <form action="{{ route('room_sequences.destroy', $seq->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus jadwal ini?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="action-btn btn-delete" title="Hapus">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+                                @php
+                                    $user = auth()->user();
+                                    $isAdmin = $user->hasRole('admin');
+                                    $mahasiswa = $seq->mahasiswa;
+                                    $isOwner = $mahasiswa && $mahasiswa->user_id == $user->id;
+                                @endphp
+                                @if($isAdmin || $isOwner)
+                                    <a href="{{ route('room_sequences.edit', $seq->id) }}" class="action-btn btn-edit" title="Edit">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <form action="{{ route('room_sequences.destroy', $seq->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus jadwal ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="action-btn btn-delete" title="Hapus">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                         </td>
                     </tr>

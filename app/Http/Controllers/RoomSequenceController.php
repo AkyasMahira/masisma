@@ -5,25 +5,47 @@ namespace App\Http\Controllers;
 use App\Models\RoomSequence;
 use App\Models\Mahasiswa;
 use App\Models\Ruangan;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class RoomSequenceController extends Controller
 {
     public function index()
     {
-        // Urutkan berdasarkan tanggal rencana dimulai
-        $sequences = RoomSequence::with(['mahasiswa', 'ruangan'])
-                    ->orderBy('start_date', 'asc')
-                    ->get();
+        $user = auth()->user();
 
-        return view('admin.room_sequences.index', compact('sequences'));
+        // Role admin: langsung ambil semua sequences
+        if ($user->hasRole('admin')) {
+            $sequences = RoomSequence::with(['mahasiswa', 'ruangan'])
+                ->orderBy('start_date')
+                ->get();
+
+            return view('room_sequences.index', compact('sequences'));
+        }
+
+        // Role non-admin: cek apakah user ini mahasiswa
+        $mahasiswa = Mahasiswa::where('user_id', $user->id)->first();
+
+        // Kalau user bukan mahasiswa atau belum punya data mahasiswa → kosong
+        if (!$mahasiswa) {
+            $sequences = collect(); // kosong tapi tidak error
+            return view('room_sequences.index', compact('sequences'));
+        }
+
+        // User mahasiswa → ambil sequences sesuai mahasiswa_id
+        $sequences = RoomSequence::with(['mahasiswa', 'ruangan'])
+            ->where('mahasiswa_id', $mahasiswa->id)
+            ->orderBy('start_date')
+            ->get();
+
+        return view('room_sequences.index', compact('sequences'));
     }
 
     public function create()
     {
         $mahasiswas = Mahasiswa::all();
         $ruangans = Ruangan::all();
-        return view('admin.room_sequences.create', compact('mahasiswas', 'ruangans'));
+        return view('room_sequences.create', compact('mahasiswas', 'ruangans'));
     }
 
     public function store(Request $request)
@@ -62,7 +84,7 @@ class RoomSequenceController extends Controller
         $sequence = RoomSequence::findOrFail($id);
         $mahasiswas = Mahasiswa::all();
         $ruangans = Ruangan::all();
-        return view('admin.room_sequences.edit', compact('sequence', 'mahasiswas', 'ruangans'));
+        return view('room_sequences.edit', compact('sequence', 'mahasiswas', 'ruangans'));
     }
 
 public function update(Request $request, $id)

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Jadwal Rolling')
-@section('page-title', 'Tambah Jadwal Rolling')
+@section('title', 'Edit Jadwal Rolling')
+@section('page-title', 'Edit Jadwal Rolling')
 
 @section('content')
     <style>
@@ -105,50 +105,26 @@
         <div class="col-md-8 col-lg-6">
             <div class="form-card">
                 <div class="card-header-custom">
-                    <h4 class="mb-0 fw-bold"><i class="bi bi-calendar-plus me-2"></i> Tambah Jadwal Rolling</h4>
-                    <p class="mb-0 small opacity-75">Atur perpindahan ruangan mahasiswa secara terjadwal.</p>
+                    <h4 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i> Edit Rencana Jadwal</h4>
+                    <p class="mb-0 small opacity-75">Perbarui data jadwal rolling mahasiswa.</p>
                 </div>
 
                 <div class="card-body p-4 p-md-5">
                     
-                    {{-- Error Alert --}}
-                    @if($errors->any())
-                        <div class="alert alert-danger rounded-3 shadow-sm mb-4">
-                            <div class="d-flex align-items-center mb-2">
-                                <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
-                                <strong class="mb-0">Periksa Inputan!</strong>
-                            </div>
-                            <ul class="mb-0 small ps-3">
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-
-                    {{-- Info Box --}}
-                    <div class="alert alert-light border border-dashed d-flex align-items-center mb-4" style="background-color: var(--custom-maroon-subtle); border-color: var(--custom-maroon-light);">
-                        <i class="bi bi-info-circle-fill text-custom-maroon me-3 fs-4"></i>
-                        <div class="small text-muted">
-                            Sistem akan otomatis memindahkan mahasiswa ke ruangan tujuan pada tanggal yang ditentukan.
-                        </div>
-                    </div>
-
-                    <form action="{{ route('room_sequences.store') }}" method="POST">
+                    <form action="{{ route('room_sequences.update', $sequence->id) }}" method="POST">
                         @csrf
+                        @method('PUT')
                         
                         <div class="mb-4">
-                            <label class="form-label">Pilih Mahasiswa <span class="text-danger">*</span></label>
+                            <label class="form-label">Mahasiswa <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                <select name="mahasiswa_id" class="form-select @error('mahasiswa_id') is-invalid @enderror">
-                                    <option value="">-- Cari Nama Mahasiswa --</option>
-                                    @foreach($mahasiswas as $mhs)
-                                        <option value="{{ $mhs->id }}" {{ old('mahasiswa_id') == $mhs->id ? 'selected' : '' }}>
-                                            {{ $mhs->nm_mahasiswa ?? $mhs->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                @php
+                                    $user = auth()->user();
+                                    $mahasiswa = $mahasiswas->where('id', $sequence->mahasiswa_id)->first();
+                                @endphp
+                                <input type="hidden" name="mahasiswa_id" value="{{ $mahasiswa ? $mahasiswa->id : '' }}">
+                                <input type="text" class="form-control" value="{{ $mahasiswa ? $mahasiswa->nm_mahasiswa : '-' }}" readonly>
                             </div>
                             @error('mahasiswa_id')
                                 <div class="text-danger small mt-1">{{ $message }}</div>
@@ -157,12 +133,12 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-4">
-                                <label class="form-label">Tanggal Mulai (Masuk)</label>
+                                <label class="form-label">Tanggal Mulai (Check-in)</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
                                     <input type="date" name="start_date" 
                                         class="form-control @error('start_date') is-invalid @enderror" 
-                                        value="{{ old('start_date') }}" required>
+                                        value="{{ old('start_date', \Carbon\Carbon::parse($sequence->start_date)->format('Y-m-d')) }}">
                                 </div>
                                 @error('start_date')
                                     <div class="text-danger small mt-1">{{ $message }}</div>
@@ -170,12 +146,12 @@
                             </div>
 
                             <div class="col-md-6 mb-4">
-                                <label class="form-label">Tanggal Selesai (Keluar)</label>
+                                <label class="form-label">Tanggal Selesai (Check-out)</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
                                     <input type="date" name="end_date" 
                                         class="form-control @error('end_date') is-invalid @enderror" 
-                                        value="{{ old('end_date') }}" required>
+                                        value="{{ old('end_date', \Carbon\Carbon::parse($sequence->end_date)->format('Y-m-d')) }}">
                                 </div>
                                 @error('end_date')
                                     <div class="text-danger small mt-1">{{ $message }}</div>
@@ -184,14 +160,15 @@
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label">Ruangan Tujuan <span class="text-danger">*</span></label>
+                            <label class="form-label">Pilih Ruangan Tujuan <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-door-open"></i></span>
                                 <select name="ruangan_id" class="form-select @error('ruangan_id') is-invalid @enderror">
-                                    <option value="">-- Pilih Ruangan --</option>
                                     @foreach($ruangans as $room)
-                                        <option value="{{ $room->id }}" {{ old('ruangan_id') == $room->id ? 'selected' : '' }}>
-                                            {{ $room->nm_ruangan ?? $room->nama_ruangan }}
+                                        <option value="{{ $room->id }}" 
+                                            {{ old('ruangan_id', $sequence->ruangan_id) == $room->id ? 'selected' : '' }}>
+                                            {{-- Cek nama kolom di DB kamu --}}
+                                            {{ $room->nama_ruangan ?? $room->nm_ruangan }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -208,7 +185,7 @@
                                 <i class="bi bi-arrow-left me-2"></i> Kembali
                             </a>
                             <button type="submit" class="btn btn-maroon">
-                                Simpan Jadwal <i class="bi bi-check-lg ms-2"></i>
+                                Update Jadwal <i class="bi bi-check-lg ms-2"></i>
                             </button>
                         </div>
                     </form>

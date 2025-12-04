@@ -8,6 +8,11 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     use Notifiable;
+    
+    public function hasRole($role)
+    {
+        return $this->role === $role;
+    }
 
     protected $fillable = [
         'name',

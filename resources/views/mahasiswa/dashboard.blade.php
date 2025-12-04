@@ -221,6 +221,12 @@
                     </div>
 
                     <div class="mt-4">
+                        <a href="{{ route('room_sequences.index') }}" class="btn btn-outline-secondary w-100 rounded-pill">
+                            <i class="bi bi-list-task me-1"></i> Atur Jadwal Rolling Ruangan
+                        </a>
+                    </div>
+
+                    <div class="mt-4">
                         <a href="{{ route('mahasiswa.edit', $mahasiswa->id) }}" class="btn btn-outline-secondary w-100 rounded-pill">
                             <i class="bi bi-pencil-square me-1"></i> Edit Profil
                         </a>
