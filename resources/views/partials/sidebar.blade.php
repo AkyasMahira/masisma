@@ -124,6 +124,12 @@
                     </div>
                 </div>
 
+                    {{-- Kelola Diklat --}}
+                    <a class="nav-link {{ request()->is('diklat*') ? 'active' : '' }}" href="{{ route('diklat.index') }}">
+                        <i class="bi bi-clipboard-check"></i>
+                        <span class="sidebar-text">Kelola Diklat</span>
+                    </a>
+
                 {{-- Penelitian --}}
                 @php
                     $isPenelitianActive = request()->is('pra-penelitian*') ||

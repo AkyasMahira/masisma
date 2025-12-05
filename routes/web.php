@@ -245,3 +245,23 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/users/{id}/approve', [UserController::class, 'approve'])->name('users.approve');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 });
+
+// =====================
+// ROUTES DIKLAT FORM
+// =====================
+// ADMIN
+Route::middleware(['auth', 'admin'])->prefix('diklat')->name('diklat.')->group(function () {
+    Route::get('/', [App\Http\Controllers\DiklatFormController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\DiklatFormController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\DiklatFormController::class, 'store'])->name('store');
+    Route::get('/{id}', [App\Http\Controllers\DiklatFormController::class, 'show'])->name('show');
+    Route::get('/{id}/edit', [App\Http\Controllers\DiklatFormController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [App\Http\Controllers\DiklatFormController::class, 'update'])->name('update');
+    Route::delete('/{id}', [App\Http\Controllers\DiklatFormController::class, 'destroy'])->name('destroy');
+    Route::get('/{id}/rekap', [App\Http\Controllers\DiklatPesertaController::class, 'rekap'])->name('rekap');
+});
+
+// PUBLIC
+Route::get('/daftar-diklat/{public_link}', [App\Http\Controllers\DiklatPesertaController::class, 'publicForm'])->name('diklat.public.form');
+Route::post('/daftar-diklat/{public_link}', [App\Http\Controllers\DiklatPesertaController::class, 'register'])->name('diklat.public.register');
+Route::get('/daftar-diklat/{public_link}/sukses', [App\Http\Controllers\DiklatPesertaController::class, 'publicSuccess'])->name('diklat.public.success');
