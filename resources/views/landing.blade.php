@@ -1253,7 +1253,6 @@
                     <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
                         <a class="btn btn-primary-soft" href="{{ route('login') }}">Masuk ke aplikasi</a>
                         <a class="btn btn-ghost" href="#alur">Lihat alur kerja</a>
-                        <a class="btn btn-ghost" href="{{ route('evaluasi.public.form') }}"><i class="bi bi-clipboard2-check me-1"></i> Isi Evaluasi Diklat</a>
                     </div>
                     <div class="hero-pills">
                         <div class="pill">

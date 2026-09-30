@@ -24,7 +24,13 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('mahasiswa:update-status')->daily();
+        // 1) Nonaktifkan mahasiswa yang masa aktifnya sudah lewat
+        $schedule->command('mahasiswa:update-status')->dailyAt('00:05');
+
+        // 2) Rolling ruangan harian: pindahkan mahasiswa ke ruangan sesuai jadwal
+        //    hari ini, recalculate kuota, dan keluarkan dari ruangan bila periode habis.
+        //    (sebelumnya command ini tidak pernah dijadwalkan sehingga data ruangan basi)
+        $schedule->command('room:sync')->dailyAt('00:10');
     }
 
     /**

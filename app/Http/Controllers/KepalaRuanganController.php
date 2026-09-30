@@ -166,13 +166,18 @@ class KepalaRuanganController extends Controller
                         $info = 'Izin / Dispensasi';
                     
                     // 4. Kalau gak ada absen, gak libur, gak izin = ALFA
+                    //    KECUALI hari ini: hari berjalan belum berakhir, jangan langsung dihitung Alfa
+                    //    (mahasiswa masih punya kesempatan tap sampai jam pulang).
+                    } elseif ($dateLoop->isToday()) {
+                        $status = 'BELUM';
+                        $info = 'Belum absen (hari ini)';
                     } else {
-                        $status = 'ALFA'; 
-                        $countAlfa++; 
-                        $countTarget++; 
+                        $status = 'ALFA';
+                        $countAlfa++;
+                        $countTarget++;
                         $info = '-';
                     }
-                    
+
                 } else {
                     $status = 'FUTURE';
                     $info = '-';

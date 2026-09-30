@@ -9,6 +9,14 @@
         --soft-bg: #f8f9fa;
     }
     
+    /* --- Hero Header --- */
+    .page-hero { background: linear-gradient(135deg, #7c1316 0%, #5f0f12 100%); border-radius: 20px; padding: 26px 30px; margin-bottom: 1.75rem; color: #fff; box-shadow: 0 14px 34px rgba(124,19,22,.28); position: relative; overflow: hidden; }
+    .page-hero::after { content: ''; position: absolute; right: -40px; top: -40px; width: 180px; height: 180px; background: rgba(255,255,255,.06); border-radius: 50%; }
+    .page-hero h4 { font-weight: 800; margin: 0 0 6px; letter-spacing: .2px; }
+    .page-hero .period { opacity: .9; font-size: .9rem; margin: 0; }
+    .page-hero .btn-hero { background: rgba(255,255,255,.95); color: #7c1316; border: none; border-radius: 50px; font-weight: 700; padding: 10px 22px; transition: .25s; }
+    .page-hero .btn-hero:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.15); }
+
     /* --- Modern Cards & Layout --- */
     .dashboard-card { background: #fff; border: none; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); overflow: hidden; margin-bottom: 1.5rem; transition: 0.3s;}
     .dashboard-card:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.06); }
@@ -31,14 +39,23 @@
     .w-danger { background: #fff; border-bottom: 4px solid #ef4444; }
     .w-danger .summary-icon { background: #fee2e2; color: #ef4444; }
 
-    /* --- Table Styling --- */
-    .table-modern { margin-bottom: 0; border-collapse: separate; border-spacing: 0; }
-    .table-modern thead th { background: #f8fafc; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; padding: 15px; border-bottom: 2px solid #e2e8f0; letter-spacing: 0.5px; }
-    .table-modern tbody td { padding: 15px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-    .table-modern tbody tr:hover { background: #fcfdfe; }
+    /* --- Table Styling (baris = kartu mengambang) --- */
+    .table-modern { margin-bottom: 0; border-collapse: separate; border-spacing: 0 14px; }
+    .table-modern thead th { background: transparent; color: #94a3b8; font-size: 0.72rem; text-transform: uppercase; font-weight: 700; padding: 4px 18px; border: none; letter-spacing: 0.6px; }
+    .table-modern tbody tr { background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,.045); transition: 0.2s; }
+    .table-modern tbody tr:hover { box-shadow: 0 8px 22px rgba(124,19,22,.10); transform: translateY(-1px); }
+    .table-modern tbody td { padding: 20px 18px; border: none; vertical-align: top; background: transparent; }
+    .table-modern tbody td:first-child { border-radius: 16px 0 0 16px; }
+    .table-modern tbody td:last-child { border-radius: 0 16px 16px 0; }
+
+    /* --- Panel Penilaian & Histori --- */
+    .nilai-box { background: linear-gradient(180deg,#fcf2f2,#fff); border: 1px solid #f3dede; border-radius: 12px; padding: 12px; }
+    .histori-list { border: 1px solid #eef2f7; border-radius: 12px; overflow: hidden; }
+    .histori-list li { border-bottom: 1px solid #f1f5f9; }
+    .histori-list li:last-child { border-bottom: none; }
     
     /* --- Badges & Avatars --- */
-    .avatar-initial { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; background: var(--light-maroon); color: var(--primary-maroon); flex-shrink: 0; }
+    .avatar-initial { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.25rem; background: linear-gradient(135deg, #7c1316, #a3191d); color: #fff; flex-shrink: 0; box-shadow: 0 4px 10px rgba(124,19,22,.25); }
     .status-badge { padding: 6px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
     .status-in { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
     .status-out { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
@@ -60,13 +77,13 @@
 
 <div class="container-fluid pb-4">
 
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <div class="page-hero d-flex flex-wrap justify-content-between align-items-center gap-3">
         <div>
-            <h4 class="fw-bold mb-1" style="color: var(--primary-maroon);">Dashboard Ruangan {{ $ruangan->nm_ruangan ?? '' }}</h4>
-            <p class="text-muted small mb-0"><i class="bi bi-calendar3 me-1"></i> Periode: {{ \Carbon\Carbon::parse($startDate)->isoFormat('D MMM') }} - {{ \Carbon\Carbon::parse($endDate)->isoFormat('D MMM YYYY') }}</p>
+            <h4><i class="bi bi-hospital me-2"></i>Dashboard Ruangan {{ $ruangan->nm_ruangan ?? '' }}</h4>
+            <p class="period"><i class="bi bi-calendar3 me-1"></i> Periode: {{ \Carbon\Carbon::parse($startDate)->isoFormat('D MMM') }} - {{ \Carbon\Carbon::parse($endDate)->isoFormat('D MMM YYYY') }}</p>
         </div>
         <div class="d-flex gap-2">
-            <button onclick="exportToExcel()" class="btn btn-success rounded-pill fw-semibold shadow-sm px-4">
+            <button onclick="exportToExcel()" class="btn btn-hero shadow-sm">
                 <i class="bi bi-file-earmark-excel me-2"></i> Export Rekap
             </button>
         </div>
@@ -148,7 +165,7 @@
             </form>
         </div>
 
-        <div class="table-responsive" style="min-height: 400px;">
+        <div class="table-responsive" style="min-height: 400px; background:#fbfcfe; padding: 4px 12px 12px;">
             <table class="table table-modern w-100">
                 <thead>
                     <tr>
@@ -234,9 +251,9 @@
                                 $nilaiRuanganIni = $nilaiJson[$ruangan->id] ?? null; 
                             @endphp
 
-                            <div class="p-2 mb-2 bg-light rounded border border-light">
+                            <div class="nilai-box mb-2">
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <span class="small fw-bold text-dark"><i class="bi bi-pencil-square text-primary me-1"></i> Nilai Ruangan Ini:</span>
+                                    <span class="small fw-bold text-dark"><i class="bi bi-pencil-square me-1" style="color:var(--primary-maroon);"></i> Nilai Ruangan Ini:</span>
                                     <!--<form action="{{ route('kepala_ruangan.simpan_nilai', $mhs->id) }}" method="POST" class="m-0">-->
                                     <!--    @csrf-->
                                     <!--    <input type="number" -->
@@ -276,10 +293,10 @@
                                 @endphp
 
                                 @if($ruanganLain->isNotEmpty())
-                                    <ul class="list-unstyled mb-0 border rounded p-1">
+                                    <ul class="histori-list list-unstyled mb-0">
                                         @foreach($ruanganLain as $r_id => $r_nama)
                                             @php $nilaiLain = $nilaiJson[$r_id] ?? null; @endphp
-                                            <li class="d-flex justify-content-between align-items-center px-1 border-bottom border-dashed py-1" style="font-size: 0.75rem;">
+                                            <li class="d-flex justify-content-between align-items-center px-2 py-2" style="font-size: 0.75rem;">
                                                 <span class="text-secondary text-truncate pe-2" style="max-width: 150px;" title="{{ $r_nama }}"><i class="bi bi-door-open me-1"></i>{{ $r_nama }}</span>
                                                 @if($nilaiLain !== null)
                                                     <span class="badge bg-success shadow-sm">{{ $nilaiLain }}</span>
@@ -521,12 +538,24 @@
 
                     <div class="tab-pane fade" id="izin-{{ $mhs->id }}" role="tabpanel">
                         @php
-                            $dispensasis = $mhs->dispensasis ? collect($mhs->dispensasis)->where('status', 'approved')->sortByDesc('tanggal_mulai') : collect();
+                            $dispensasis = $mhs->dispensasis ? collect($mhs->dispensasis)->sortByDesc('tanggal_mulai') : collect();
                         @endphp
                         @forelse($dispensasis as $dispen)
-                            <div class="p-3 mb-2 bg-white border rounded-3 shadow-sm border-start border-4 border-warning">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="badge bg-warning text-dark px-2 py-1"><i class="bi bi-tag-fill me-1"></i>{{ $dispen->kategori }}</span>
+                            @php
+                                $st = $dispen->status;
+                                $stMap = [
+                                    'pending'  => ['warning','Menunggu','hourglass-split','warning'],
+                                    'approved' => ['success','Disetujui','check-circle','success'],
+                                    'rejected' => ['danger','Ditolak','x-circle','danger'],
+                                ];
+                                $meta = $stMap[$st] ?? ['secondary', ucfirst($st), 'question-circle','secondary'];
+                            @endphp
+                            <div class="p-3 mb-2 bg-white border rounded-3 shadow-sm border-start border-4 border-{{ $meta[3] }}">
+                                <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-{{ $meta[0] }} {{ $meta[0]=='warning' ? 'text-dark' : '' }} px-2 py-1"><i class="bi bi-{{ $meta[2] }} me-1"></i>{{ $meta[1] }}</span>
+                                        <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-tag-fill me-1"></i>{{ $dispen->kategori }}</span>
+                                    </div>
                                     <small class="text-muted fw-bold" style="font-size: 0.75rem;">
                                         {{ \Carbon\Carbon::parse($dispen->tanggal_mulai)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($dispen->tanggal_selesai)->format('d/m/Y') }}
                                     </small>
@@ -534,6 +563,31 @@
                                 <p class="mb-0 text-dark mt-2" style="font-size: 0.85rem; line-height: 1.5;">
                                     <strong>Ket:</strong> {{ $dispen->keterangan }}
                                 </p>
+                                @if($dispen->file_path)
+                                    <a href="{{ asset('storage/'.$dispen->file_path) }}" target="_blank" class="d-inline-block mt-2 small text-decoration-none"><i class="bi bi-paperclip me-1"></i>Lihat berkas</a>
+                                @endif
+                                @if($dispen->catatan_admin && $st !== 'pending')
+                                    <div class="mt-2 small text-muted"><i class="bi bi-chat-left-text me-1"></i>{{ $dispen->catatan_admin }}</div>
+                                @endif
+
+                                @if($st === 'pending')
+                                    <div class="d-flex gap-2 mt-3">
+                                        <form action="{{ route('kepala_ruangan.dispensasi.approve', $dispen->id) }}" method="POST" onsubmit="return confirm('Setujui dispensasi ini? Absensi akan terisi otomatis.');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-success btn-sm"><i class="bi bi-check-lg me-1"></i>Setujui</button>
+                                        </form>
+                                        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="collapse" data-bs-target="#tolak-{{ $dispen->id }}">
+                                            <i class="bi bi-x-lg me-1"></i>Tolak
+                                        </button>
+                                    </div>
+                                    <div class="collapse mt-2" id="tolak-{{ $dispen->id }}">
+                                        <form action="{{ route('kepala_ruangan.dispensasi.reject', $dispen->id) }}" method="POST">
+                                            @csrf
+                                            <textarea name="catatan_admin" class="form-control form-control-sm mb-2" rows="2" placeholder="Alasan penolakan (wajib diisi)..." required></textarea>
+                                            <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-send me-1"></i>Kirim Penolakan</button>
+                                        </form>
+                                    </div>
+                                @endif
                             </div>
                         @empty
                             <div class="text-center py-4 text-muted small">

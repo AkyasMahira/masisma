@@ -278,6 +278,14 @@
                     </a>
                 @endif
             @endif
+
+            {{-- Evaluasi Diklat: tersedia untuk semua akun --}}
+            @auth
+                <a class="nav-link animate-item {{ request()->is('evaluasi*') ? 'active' : '' }}" href="{{ route('evaluasi.public.form') }}" target="_blank">
+                    <i class="bi bi-clipboard2-check"></i>
+                    <span class="sidebar-text">Evaluasi Diklat</span>
+                </a>
+            @endauth
         </nav>
     </div>
 

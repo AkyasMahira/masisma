@@ -34,10 +34,10 @@ public function index()
             } elseif ($magang->status === 'approved') {
                 if (!$mahasiswaAktif) {
                     $isMagangActive = true; // Di-ACC tapi belum isi biodata
-                } elseif ($mahasiswaAktif->status === 'aktif') {
+                } elseif ($mahasiswaAktif->status === 'aktif' && !$this->periodeMagangSelesai($mahasiswaAktif)) {
                     $isMagangActive = true; // Sedang magang berjalan
                 }
-                // Jika status mahasiswanya 'nonaktif', maka $isMagangActive = false (Bisa daftar lagi)
+                // Jika status 'nonaktif' ATAU tanggal_berakhir sudah lewat, maka $isMagangActive = false (Bisa daftar lagi)
             }
         }
 
@@ -84,7 +84,7 @@ public function index()
             // Blokir jika di-ACC tapi magangnya belum dinyatakan 'nonaktif' (selesai)
             if ($latestMagang->status === 'approved') {
                 $mahasiswa = \App\Models\Mahasiswa::where('user_id', auth()->id())->latest()->first();
-                if (!$mahasiswa || $mahasiswa->status === 'aktif') {
+                if (!$mahasiswa || ($mahasiswa->status === 'aktif' && !$this->periodeMagangSelesai($mahasiswa))) {
                     return back()->with('error', 'Anda tidak bisa mendaftar karena masih memiliki program Magang yang SEDANG BERJALAN.');
                 }
             }
@@ -98,6 +98,18 @@ public function index()
         ]);
 
         return back()->with('success', 'Pengajuan magang periode baru berhasil dikirim.');
+    }
+
+    /**
+     * Periode magang dianggap selesai bila tanggal_berakhir sudah lewat,
+     * walau status belum sempat di-update command harian `mahasiswa:update-status`
+     * (mis. scheduler cron belum jalan di server). Ini mencegah mahasiswa
+     * yang periodenya sudah habis "terkunci" tidak bisa mengajukan magang lagi.
+     */
+    private function periodeMagangSelesai($mahasiswa)
+    {
+        return $mahasiswa->tanggal_berakhir
+            && \Carbon\Carbon::parse($mahasiswa->tanggal_berakhir)->startOfDay()->lt(\Carbon\Carbon::today());
     }
     public function ajukanPra()
     {

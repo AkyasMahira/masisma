@@ -235,7 +235,8 @@ class DispensasiController extends Controller
     public function approve($id)
     {
         $dispensasi = Dispensasi::findOrFail($id);
-        
+        abort_unless($this->bolehKelola($dispensasi), 403, 'Anda tidak berhak menyetujui dispensasi ini.');
+
         $dispensasi->update([
             'status' => 'approved',
             'catatan_admin' => 'Disetujui. Absensi otomatis terisi.',
@@ -249,14 +250,41 @@ class DispensasiController extends Controller
     public function reject(Request $request, $id)
     {
         $dispensasi = Dispensasi::findOrFail($id);
+        abort_unless($this->bolehKelola($dispensasi), 403, 'Anda tidak berhak menolak dispensasi ini.');
+
         $request->validate(['catatan_admin' => 'required|string']);
-        
+
         $dispensasi->update([
             'status' => 'rejected',
             'catatan_admin' => $request->catatan_admin,
         ]);
-        
+
         return redirect()->back()->with('success', 'Pengajuan ditolak.');
+    }
+
+    /**
+     * Boleh mengelola (ACC/tolak) dispensasi bila:
+     *  - user admin, ATAU
+     *  - user kepala ruangan (role 'ruangan') yang membawahi mahasiswa
+     *    pemilik dispensasi (via ruangan_id, roomSequences, atau shiftSchedules).
+     */
+    private function bolehKelola(Dispensasi $dispensasi)
+    {
+        $user = auth()->user();
+        if (!$user) return false;
+        if ($user->role === 'admin') return true;
+
+        if ($user->role === 'ruangan') {
+            $ruangan = \App\Models\Ruangan::where('user_id', $user->id)->first();
+            $mhs = $dispensasi->mahasiswa;
+            if (!$ruangan || !$mhs) return false;
+
+            if ((int) $mhs->ruangan_id === (int) $ruangan->id) return true;
+            if ($mhs->roomSequences()->where('ruangan_id', $ruangan->id)->exists()) return true;
+            if ($mhs->shiftSchedules()->where('ruangan_id', $ruangan->id)->exists()) return true;
+        }
+
+        return false;
     }
 
     // ==========================================================

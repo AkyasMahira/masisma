@@ -153,13 +153,16 @@ class AbsensiController extends Controller
         // if (!auth()->check()) return redirect()->route('login');
         
 $mahasiswa = Mahasiswa::with('user')->where('share_token', $token)->first();
+
+        // 1. CEK: Pastikan data mahasiswa ada (cegah error "property on null" saat token tidak valid)
+        if (!$mahasiswa) {
+            return back()->with('error', 'Data mahasiswa tidak ditemukan.');
+        }
+
+        // 2. CEK: Pastikan masa magang masih aktif
         if ($mahasiswa->status !== 'aktif') {
             return back()->with('error', 'Gagal: Masa magang untuk ID Card ini sudah tidak aktif. Silakan gunakan ID Card periode terbaru Anda dari Dashboard.');
         }
-        
-        if (!$mahasiswa) {
-        return back()->with('error', 'Data mahasiswa tidak ditemukan.');
-    }
 
     // 3. CEK: Pastikan relasi user ada
     if (!$mahasiswa->user) {
@@ -275,7 +278,16 @@ if ($lastAbsen && $lastAbsen->type === 'masuk') {
         // =====================================================================
         // SKENARIO MASUK
         // =====================================================================
-        
+
+        // Jika sesi MASUK sebelumnya tidak pernah checkout (>14 jam / beda hari),
+        // tandai record lama agar terlihat di laporan (tanpa memalsukan jam pulang).
+        if ($lastAbsen && $lastAbsen->type === 'masuk' && !$isCheckout) {
+            if (strpos((string) $lastAbsen->keterangan, 'Tanpa Checkout') === false) {
+                $lastAbsen->keterangan = trim(($lastAbsen->keterangan ?? '') . ' (Tanpa Checkout)');
+                $lastAbsen->save();
+            }
+        }
+
         $sequence = RoomSequence::where('mahasiswa_id', $mahasiswa->id)
             ->where('start_date', '<=', $today)->where('end_date', '>=', $today)
             ->with('ruangan')->first();

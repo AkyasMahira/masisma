@@ -512,4 +512,9 @@ Route::middleware(['auth', 'admin'])->prefix('diklat')->name('diklat.')->group(f
 Route::middleware(['auth'])->prefix('kepala-ruangan')->name('kepala_ruangan.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\KepalaRuanganController::class, 'dashboard'])->name('dashboard');
     Route::post('/ruangan/mahasiswa/{id}/nilai', [\App\Http\Controllers\KepalaRuanganController::class, 'simpanNilai'])->name('simpan_nilai');
+
+    // Kepala ruangan boleh ACC / tolak dispensasi mahasiswa di ruangannya
+    // (otorisasi kepemilikan ruangan dicek di DispensasiController::bolehKelola)
+    Route::post('/dispensasi/{id}/approve', [\App\Http\Controllers\DispensasiController::class, 'approve'])->name('dispensasi.approve');
+    Route::post('/dispensasi/{id}/reject', [\App\Http\Controllers\DispensasiController::class, 'reject'])->name('dispensasi.reject');
 });
