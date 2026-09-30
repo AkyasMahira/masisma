@@ -46,7 +46,7 @@
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead><tr><th>Ruangan</th><th class="text-center">Peserta</th><th>Periode</th><th class="text-center">Status</th><th>Catatan Admin</th></tr></thead>
+                <thead><tr><th>Ruangan</th><th class="text-center">Kuota</th><th>Periode</th><th class="text-center">Status</th><th class="text-center">Anak Magang</th><th>Catatan</th></tr></thead>
                 <tbody>
                     @forelse($bookings as $b)
                     <tr>
@@ -54,10 +54,15 @@
                         <td class="text-center">{{ $b->jumlah_peserta }}</td>
                         <td class="small">{{ optional($b->tanggal_mulai)->format('d/m/Y') }} - {{ optional($b->tanggal_selesai)->format('d/m/Y') }}</td>
                         <td class="text-center"><span class="pill b-{{ $b->status }}">{{ ['pending'=>'Menunggu','approved'=>'Disetujui','rejected'=>'Ditolak'][$b->status] ?? $b->status }}</span></td>
+                        <td class="text-center">
+                            <a href="{{ route('instansi.booking.peserta.index', $b->id) }}" class="btn btn-sm btn-outline-dark rounded-pill">
+                                <i class="bi bi-people me-1"></i>{{ $b->pesertas->count() }}/{{ $b->jumlah_peserta }} · Kelola
+                            </a>
+                        </td>
                         <td class="small text-muted">{{ $b->catatan_admin ?: '-' }}</td>
                     </tr>
                     @empty
-                    <tr><td colspan="5" class="text-center text-muted py-5"><i class="bi bi-inbox fs-3 d-block mb-2"></i>Belum ada booking. Klik "Booking Ruangan" untuk mengajukan.</td></tr>
+                    <tr><td colspan="6" class="text-center text-muted py-5"><i class="bi bi-inbox fs-3 d-block mb-2"></i>Belum ada booking. Klik "Booking Ruangan" untuk mengajukan.</td></tr>
                     @endforelse
                 </tbody>
             </table>

@@ -5,7 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\BookingRuangan;
 use App\Models\BookingPeserta;
 use App\Models\Ruangan;
+use App\Models\User;
+use App\Models\Mahasiswa;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 class InstansiController extends Controller
@@ -25,7 +30,7 @@ class InstansiController extends Controller
         $user = $this->instansi();
         $mou = $user->mou;
 
-        $bookings = BookingRuangan::with('ruangan')
+        $bookings = BookingRuangan::with('ruangan', 'pesertas')
             ->where('mou_id', $mou->id)
             ->orderBy('created_at', 'desc')
             ->get();
@@ -113,6 +118,11 @@ class InstansiController extends Controller
     {
         $booking = $this->ownBooking($bookingId);
 
+        // Batas pengisian yang ditetapkan admin
+        if (!$booking->pengisianDibuka()) {
+            return back()->with('error', 'Pengisian peserta sudah ditutup (melewati batas ' . optional($booking->batas_pengisian)->format('d/m/Y') . '). Hubungi admin diklat.');
+        }
+
         $data = $request->validate([
             'nama'          => 'required|string|max:255',
             'nim'           => 'nullable|string|max:100',
@@ -139,6 +149,9 @@ class InstansiController extends Controller
     {
         $booking = $this->ownBooking($bookingId);
         $peserta = BookingPeserta::where('booking_ruangan_id', $booking->id)->findOrFail($pesertaId);
+        if ($peserta->status === 'approved') {
+            return back()->with('error', 'Peserta yang sudah disetujui (jadi akun mahasiswa) tidak bisa dihapus.');
+        }
         $peserta->delete();
         return back()->with('success', 'Peserta magang dihapus.');
     }
@@ -147,7 +160,7 @@ class InstansiController extends Controller
 
     public function adminIndex(Request $request)
     {
-        $query = BookingRuangan::with(['mou', 'ruangan'])->orderBy('created_at', 'desc');
+        $query = BookingRuangan::with(['mou', 'ruangan', 'pesertas'])->orderBy('created_at', 'desc');
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -159,8 +172,12 @@ class InstansiController extends Controller
         return view('admin.booking.index', compact('bookings', 'jmlPending'));
     }
 
-    public function adminApprove($id)
+    public function adminApprove(Request $request, $id)
     {
+        $request->validate([
+            'batas_pengisian' => 'nullable|date',
+        ]);
+
         $booking = BookingRuangan::with('ruangan')->findOrFail($id);
 
         // Re-cek kuota saat approve (kondisi bisa berubah sejak diajukan)
@@ -170,8 +187,23 @@ class InstansiController extends Controller
                 "Tidak bisa menyetujui: sisa kuota {$booking->ruangan->nm_ruangan} tinggal {$sisa} orang untuk periode itu (diminta {$booking->jumlah_peserta}).");
         }
 
-        $booking->update(['status' => 'approved', 'catatan_admin' => 'Disetujui.']);
+        $booking->update([
+            'status'          => 'approved',
+            'catatan_admin'   => 'Disetujui.',
+            'batas_pengisian' => $request->batas_pengisian ?: null,
+        ]);
         return back()->with('success', 'Booking disetujui.');
+    }
+
+    /**
+     * Ubah batas tanggal pengisian peserta (khusus admin).
+     */
+    public function adminSetBatas(Request $request, $id)
+    {
+        $request->validate(['batas_pengisian' => 'nullable|date']);
+        $booking = BookingRuangan::findOrFail($id);
+        $booking->update(['batas_pengisian' => $request->batas_pengisian ?: null]);
+        return back()->with('success', 'Batas pengisian peserta diperbarui.');
     }
 
     public function adminReject(Request $request, $id)
@@ -182,6 +214,143 @@ class InstansiController extends Controller
         $booking = BookingRuangan::findOrFail($id);
         $booking->update(['status' => 'rejected', 'catatan_admin' => $request->catatan_admin]);
         return back()->with('success', 'Booking ditolak.');
+    }
+
+    /**
+     * Kalender booking ruangan (sisi admin) + rekap per ruangan.
+     */
+    public function adminKalender()
+    {
+        $bookings = BookingRuangan::with(['mou', 'ruangan', 'pesertas'])
+            ->where('status', '!=', 'rejected')
+            ->orderBy('tanggal_mulai')
+            ->get();
+
+        // Palet warna per ruangan (stabil berdasarkan id)
+        $palette = ['#7c1316', '#1d4ed8', '#15803d', '#b45309', '#7e22ce', '#0e7490', '#be123c', '#4d7c0f'];
+
+        $events = [];
+        $perRuangan = [];
+
+        foreach ($bookings as $b) {
+            $namaRuangan = optional($b->ruangan)->nm_ruangan ?? 'Tanpa Ruangan';
+            $namaInstansi = optional($b->mou)->nama_instansi ?? optional($b->mou)->nama_universitas ?? 'Instansi';
+            $warna = $palette[($b->ruangan_id ?? 0) % count($palette)];
+
+            $events[] = [
+                'title' => $namaInstansi . ' (' . $b->jumlah_peserta . ' org) · ' . $namaRuangan,
+                'start' => optional($b->tanggal_mulai)->format('Y-m-d'),
+                // FullCalendar: end bersifat eksklusif, +1 hari agar tanggal selesai ikut terwarnai
+                'end'   => optional($b->tanggal_selesai)->copy()->addDay()->format('Y-m-d'),
+                'color' => $b->status === 'pending' ? '#94a3b8' : $warna,
+                'extendedProps' => [
+                    'instansi' => $namaInstansi,
+                    'ruangan'  => $namaRuangan,
+                    'peserta'  => $b->jumlah_peserta,
+                    'status'   => $b->status,
+                ],
+            ];
+
+            $perRuangan[$namaRuangan][] = $b;
+        }
+
+        ksort($perRuangan);
+
+        return view('admin.booking.kalender', [
+            'events'     => $events,
+            'perRuangan' => $perRuangan,
+        ]);
+    }
+
+    /**
+     * ACC peserta magang oleh admin (mirip approve pengajuan magang):
+     * membuat akun User + record Mahasiswa dari data peserta & booking.
+     */
+    public function pesertaApprove($id)
+    {
+        $peserta = BookingPeserta::with('booking.ruangan', 'booking.mou')->findOrFail($id);
+
+        if ($peserta->status === 'approved') {
+            return back()->with('error', 'Peserta ini sudah disetujui sebelumnya.');
+        }
+
+        $booking = $peserta->booking;
+        if (!$booking || $booking->status !== 'approved') {
+            return back()->with('error', 'Booking peserta ini belum disetujui. Setujui booking-nya dulu.');
+        }
+
+        $result = DB::transaction(function () use ($peserta, $booking) {
+            // 1. Buat akun login untuk anak magang
+            $base = $peserta->nim ?: Str::slug($peserta->nama);
+            if ($base === '') $base = 'magang';
+            $email = $base . '@magang.rsudslg.id';
+            $i = 1;
+            while (User::where('email', $email)->exists()) {
+                $email = $base . $i . '@magang.rsudslg.id';
+                $i++;
+            }
+            $password = Str::random(8);
+
+            $user = User::create([
+                'name'        => $peserta->nama,
+                'email'       => $email,
+                'password'    => Hash::make($password),
+                'role'        => 'user',
+                'mou_id'      => $booking->mou_id,
+                'is_approved' => true,
+            ]);
+
+            // 2. Buat record Mahasiswa (biodata dari peserta + ruangan/periode dari booking)
+            do {
+                $token = (string) Str::uuid();
+            } while (Mahasiswa::where('share_token', $token)->exists());
+
+            $mahasiswa = Mahasiswa::create([
+                'user_id'          => $user->id,
+                'nm_mahasiswa'     => $peserta->nama,
+                'mou_id'           => $booking->mou_id,
+                'prodi'            => $peserta->prodi,
+                'no_hp'            => $peserta->no_hp ?: '-',
+                'ruangan_id'       => $booking->ruangan_id,
+                'status'           => 'aktif',
+                'share_token'      => $token,
+                'tanggal_mulai'    => $booking->tanggal_mulai,
+                'tanggal_berakhir' => $booking->tanggal_selesai,
+                'tipe_mahasiswa'   => 'Eksternal',
+            ]);
+
+            // 3. Auto-create RoomSequence dari booking (ruangan + periode) agar absensi langsung aktif.
+            //    Satu penempatan untuk seluruh periode; admin bisa menambah rotasi ruangan lain nanti.
+            if ($booking->ruangan_id && $booking->tanggal_mulai && $booking->tanggal_selesai) {
+                \App\Models\RoomSequence::create([
+                    'mahasiswa_id' => $mahasiswa->id,
+                    'ruangan_id'   => $booking->ruangan_id,
+                    'start_date'   => $booking->tanggal_mulai,
+                    'end_date'     => $booking->tanggal_selesai,
+                ]);
+            }
+
+            $peserta->update([
+                'status'       => 'approved',
+                'catatan_admin'=> 'Disetujui & akun mahasiswa dibuat.',
+                'user_id'      => $user->id,
+                'mahasiswa_id' => $mahasiswa->id,
+            ]);
+
+            return ['username' => $email, 'password' => $password, 'nama' => $peserta->nama];
+        });
+
+        return back()->with('success', 'Peserta disetujui — akun mahasiswa dibuat.')->with('akun_mahasiswa', $result);
+    }
+
+    public function pesertaReject(Request $request, $id)
+    {
+        $request->validate(['catatan_admin' => 'required|string'], [
+            'catatan_admin.required' => 'Alasan penolakan wajib diisi.',
+        ]);
+        $peserta = BookingPeserta::findOrFail($id);
+        $peserta->update(['status' => 'rejected', 'catatan_admin' => $request->catatan_admin]);
+        return back()->with('success', 'Peserta ditolak.');
     }
 
     /**

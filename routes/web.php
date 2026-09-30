@@ -452,8 +452,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Manajemen booking ruangan dari instansi mitra (sisi admin)
     Route::prefix('admin/booking')->name('admin.booking.')->group(function () {
         Route::get('/', [\App\Http\Controllers\InstansiController::class, 'adminIndex'])->name('index');
+        Route::get('/kalender', [\App\Http\Controllers\InstansiController::class, 'adminKalender'])->name('kalender');
         Route::post('/{id}/approve', [\App\Http\Controllers\InstansiController::class, 'adminApprove'])->name('approve');
         Route::post('/{id}/reject', [\App\Http\Controllers\InstansiController::class, 'adminReject'])->name('reject');
+        Route::post('/{id}/batas', [\App\Http\Controllers\InstansiController::class, 'adminSetBatas'])->name('batas');
+        // ACC/tolak peserta magang -> jadi akun mahasiswa
+        Route::post('/peserta/{id}/approve', [\App\Http\Controllers\InstansiController::class, 'pesertaApprove'])->name('peserta.approve');
+        Route::post('/peserta/{id}/reject', [\App\Http\Controllers\InstansiController::class, 'pesertaReject'])->name('peserta.reject');
     });
 
     Route::prefix('admin/presentasi')->name('admin.presentasi.')->group(function () {
@@ -536,7 +541,7 @@ Route::middleware(['auth'])->prefix('instansi')->name('instansi.')->group(functi
     Route::post('/booking', [\App\Http\Controllers\InstansiController::class, 'bookingStore'])->name('booking.store');
 
     // Daftar anak magang (peserta) per booking
-    Route::get('/booking/{booking}/peserta', [\App\Http\Controllers\InstansiController::class, 'pesertaIndex'])->name('booking.peserta.index');
-    Route::post('/booking/{booking}/peserta', [\App\Http\Controllers\InstansiController::class, 'pesertaStore'])->name('booking.peserta.store');
-    Route::delete('/booking/{booking}/peserta/{peserta}', [\App\Http\Controllers\InstansiController::class, 'pesertaDestroy'])->name('booking.peserta.destroy');
+    Route::get('/booking/{bookingId}/peserta', [\App\Http\Controllers\InstansiController::class, 'pesertaIndex'])->name('booking.peserta.index');
+    Route::post('/booking/{bookingId}/peserta', [\App\Http\Controllers\InstansiController::class, 'pesertaStore'])->name('booking.peserta.store');
+    Route::delete('/booking/{bookingId}/peserta/{pesertaId}', [\App\Http\Controllers\InstansiController::class, 'pesertaDestroy'])->name('booking.peserta.destroy');
 });
