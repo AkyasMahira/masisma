@@ -159,8 +159,20 @@
         }
     </style>
 
-  
-<div class="d-flex justify-content-between align-items-center" 
+
+@if(session('akun_instansi'))
+    @php $ak = session('akun_instansi'); @endphp
+    <div class="alert alert-success border-0 shadow-sm" style="border-left:5px solid #15803d !important; border-radius:10px;">
+        <h6 class="fw-bold mb-2"><i class="bi bi-check-circle me-1"></i> Akun Instansi Dibuat — {{ $ak['nama'] }}</h6>
+        <div class="small mb-2 text-muted">Serahkan kredensial ini ke instansi. <strong>Password hanya ditampilkan sekali.</strong></div>
+        <div class="d-flex flex-wrap gap-4">
+            <div><span class="text-muted small d-block">Username (login)</span><code style="font-size:.95rem;">{{ $ak['username'] }}</code></div>
+            <div><span class="text-muted small d-block">Password</span><code style="font-size:.95rem;">{{ $ak['password'] }}</code></div>
+        </div>
+    </div>
+@endif
+
+<div class="d-flex justify-content-between align-items-center"
      style="background: white; border-radius: 8px; border-left: 5px solid #7c1316; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
     <div>
         <h4 class="fw-bold mb-0 text-dark">Data MOU</h4>
@@ -410,6 +422,14 @@
     </div>
 </td>
                             <td class="text-center">
+                                @if($mou->akun)
+                                    <span class="action-btn" style="color:#15803d;" title="Akun instansi sudah dibuat: {{ $mou->akun->email }}"><i class="bi bi-person-check-fill"></i></span>
+                                @else
+                                    <form action="{{ route('mou.buat_akun', $mou->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Buatkan akun portal untuk instansi ini?');">
+                                        @csrf
+                                        <button type="submit" class="action-btn" style="color:#7c1316;" title="Buat Akun Instansi"><i class="bi bi-person-plus-fill"></i></button>
+                                    </form>
+                                @endif
                                 <a href="{{ route('mou.edit', $mou->id) }}" class="action-btn" title="Edit">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>

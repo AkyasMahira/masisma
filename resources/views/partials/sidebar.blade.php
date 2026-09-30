@@ -62,7 +62,15 @@
                         <i class="bi bi-file-earmark-text"></i>
                         <span class="sidebar-text">MOU</span>
                     </a>
-                </div> 
+                </div>
+
+                {{-- Booking Ruangan Instansi --}}
+                <div class="nav-item-dropdown animate-item">
+                    <a class="nav-link {{ request()->is('admin/booking*') ? 'active' : '' }}" href="{{ route('admin.booking.index') }}">
+                        <i class="bi bi-calendar-check"></i>
+                        <span class="sidebar-text">Booking Instansi</span>
+                    </a>
+                </div>
                 
 
  
@@ -277,6 +285,19 @@
                         <i class="bi bi-journal-richtext"></i> <span class="sidebar-text">Dashboard Penelitian</span>
                     </a>
                 @endif
+            @endif
+
+            {{-- Portal Instansi Mitra --}}
+            @if (auth()->check() && auth()->user()->role === 'instansi')
+                <div class="sidebar-heading animate-item"><span class="sidebar-text">Portal Instansi</span></div>
+                <a class="nav-link animate-item {{ request()->is('instansi/dashboard') ? 'active' : '' }}" href="{{ route('instansi.dashboard') }}">
+                    <i class="bi bi-buildings"></i>
+                    <span class="sidebar-text">Dashboard</span>
+                </a>
+                <a class="nav-link animate-item {{ request()->is('instansi/booking*') ? 'active' : '' }}" href="{{ route('instansi.booking.create') }}">
+                    <i class="bi bi-calendar-plus"></i>
+                    <span class="sidebar-text">Booking Ruangan</span>
+                </a>
             @endif
 
             {{-- Evaluasi Diklat: tersedia untuk semua akun --}}

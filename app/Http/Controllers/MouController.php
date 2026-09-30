@@ -3,13 +3,59 @@
 namespace App\Http\Controllers;
 
 use App\Models\Mou;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator; // Tambahkan ini
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Exception; // Tambahkan ini
 
 class MouController extends Controller
 {
+    /**
+     * Buat akun portal untuk instansi mitra dari sebuah MOU.
+     * Username berformat email sintetis (login berbasis email), password digenerate
+     * dan ditampilkan sekali ke admin untuk diserahkan ke instansi.
+     */
+    public function buatAkun(Mou $mou)
+    {
+        // Cegah duplikasi: satu MOU satu akun instansi
+        $existing = User::where('mou_id', $mou->id)->where('role', 'instansi')->first();
+        if ($existing) {
+            return back()->with('error', 'Akun instansi untuk MOU ini sudah dibuat sebelumnya (username: ' . $existing->email . ').');
+        }
+
+        $namaInstansi = $mou->nama_instansi ?: $mou->nama_universitas ?: 'instansi';
+
+        // Username = slug nama instansi + domain sintetis, dijamin unik
+        $base = Str::slug($namaInstansi);
+        if ($base === '') $base = 'instansi';
+        $username = $base . '@mitra.rsudslg.id';
+        $i = 1;
+        while (User::where('email', $username)->exists()) {
+            $username = $base . $i . '@mitra.rsudslg.id';
+            $i++;
+        }
+
+        $password = Str::random(10);
+
+        User::create([
+            'name'        => $namaInstansi,
+            'email'       => $username,
+            'password'    => Hash::make($password),
+            'role'        => 'instansi',
+            'mou_id'      => $mou->id,
+            'is_approved' => true,
+        ]);
+
+        // Tampilkan kredensial sekali (tidak disimpan sebagai plaintext)
+        return back()->with('akun_instansi', [
+            'nama'     => $namaInstansi,
+            'username' => $username,
+            'password' => $password,
+        ])->with('success', 'Akun instansi berhasil dibuat. Catat kredensial di bawah — password hanya ditampilkan sekali.');
+    }
     /**
      * Halaman LIST (Halaman Kedua)
      * KITA TAMBAHKAN LOGIKA FILTER DI SINI

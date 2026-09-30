@@ -130,6 +130,8 @@ public function resetPassword(Request $request)
                     return redirect()->intended('/dashboard');
                 } elseif ($user->role === 'ruangan') {
                     return redirect()->route('kepala_ruangan.dashboard');
+                } elseif ($user->role === 'instansi') {
+                    return redirect()->route('instansi.dashboard');
                 } else {
                     // Pastikan route 'dashboard' ini ada di web.php
                     return redirect()->route('dashboard'); 

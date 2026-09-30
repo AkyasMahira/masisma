@@ -446,6 +446,14 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/{mou}/edit', [MouController::class, 'edit'])->name('edit');
         Route::put('/{mou}', [MouController::class, 'update'])->name('update');
         Route::delete('/{mou}', [MouController::class, 'destroy'])->name('destroy');
+        Route::post('/{mou}/buat-akun', [MouController::class, 'buatAkun'])->name('buat_akun');
+    });
+
+    // Manajemen booking ruangan dari instansi mitra (sisi admin)
+    Route::prefix('admin/booking')->name('admin.booking.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\InstansiController::class, 'adminIndex'])->name('index');
+        Route::post('/{id}/approve', [\App\Http\Controllers\InstansiController::class, 'adminApprove'])->name('approve');
+        Route::post('/{id}/reject', [\App\Http\Controllers\InstansiController::class, 'adminReject'])->name('reject');
     });
 
     Route::prefix('admin/presentasi')->name('admin.presentasi.')->group(function () {
@@ -517,4 +525,18 @@ Route::middleware(['auth'])->prefix('kepala-ruangan')->name('kepala_ruangan.')->
     // (otorisasi kepemilikan ruangan dicek di DispensasiController::bolehKelola)
     Route::post('/dispensasi/{id}/approve', [\App\Http\Controllers\DispensasiController::class, 'approve'])->name('dispensasi.approve');
     Route::post('/dispensasi/{id}/reject', [\App\Http\Controllers\DispensasiController::class, 'reject'])->name('dispensasi.reject');
+});
+
+// =========================================================================
+// PORTAL INSTANSI MITRA (role 'instansi', otorisasi dicek di controller)
+// =========================================================================
+Route::middleware(['auth'])->prefix('instansi')->name('instansi.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\InstansiController::class, 'dashboard'])->name('dashboard');
+    Route::get('/booking/create', [\App\Http\Controllers\InstansiController::class, 'bookingCreate'])->name('booking.create');
+    Route::post('/booking', [\App\Http\Controllers\InstansiController::class, 'bookingStore'])->name('booking.store');
+
+    // Daftar anak magang (peserta) per booking
+    Route::get('/booking/{booking}/peserta', [\App\Http\Controllers\InstansiController::class, 'pesertaIndex'])->name('booking.peserta.index');
+    Route::post('/booking/{booking}/peserta', [\App\Http\Controllers\InstansiController::class, 'pesertaStore'])->name('booking.peserta.store');
+    Route::delete('/booking/{booking}/peserta/{peserta}', [\App\Http\Controllers\InstansiController::class, 'pesertaDestroy'])->name('booking.peserta.destroy');
 });

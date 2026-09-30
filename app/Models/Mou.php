@@ -61,4 +61,15 @@ class Mou extends Model
     {
         return $this->hasMany(PraPenelitian::class);
     }
+
+    // Akun portal instansi yang dibuat dari MOU ini (role 'instansi')
+    public function akun()
+    {
+        return $this->hasOne(User::class, 'mou_id')->where('role', 'instansi');
+    }
+
+    public function bookingRuangans()
+    {
+        return $this->hasMany(BookingRuangan::class, 'mou_id');
+    }
 }
