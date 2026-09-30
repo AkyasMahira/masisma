@@ -101,7 +101,7 @@
                         <a class="nav-link {{ request()->is('ruangan*') ? 'active' : '' }}" href="{{ route('ruangan.index') }}"><span class="sidebar-text">Ruangan</span></a>
                         <a class="nav-link {{ request()->is('admin.dispensasi*') ? 'active' : '' }}" href="{{ route('admin.dispensasi.index') }}"><span class="sidebar-text">Dispensasi</span></a>
                         <a class="nav-link {{ request()->is('absensi*') ? 'active' : '' }}" href="{{ route('absensi.index') }}"><span class="sidebar-text">Riwayat Absensi</span></a>
-                          <a class="nav-link {{ request()->is('evaluasi_institusi*') ? 'active' : '' }}" href="{{ route('admin.evaluasi_institusi') }}"><span class="sidebar-text">Evaluasi</span></a>
+                          <a class="nav-link {{ request()->is('evaluasi_institusi*') ? 'active' : '' }}" href="{{ route('admin.evaluasi_institusi') }}"><span class="sidebar-text">Evaluasi Institusi</span></a>
                           
                     </div>
                 </div>
