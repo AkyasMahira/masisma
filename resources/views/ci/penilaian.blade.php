@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Penilaian Presentasi - {{ $presentasi->user->name }}</title>
 
-    {{-- Fonts & Icons --}}
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -29,7 +28,6 @@
             padding-bottom: 40px;
         }
 
-        /* --- Navbar --- */
         .navbar-custom {
             background: #fff;
             box-shadow: 0 2px 15px rgba(0,0,0,0.04);
@@ -43,7 +41,6 @@
             display: flex; align-items: center; gap: 10px;
         }
 
-        /* --- Cards --- */
         .custom-card {
             background: #fff;
             border: none;
@@ -64,7 +61,6 @@
 
         .card-body-custom { padding: 1.5rem; }
 
-        /* --- Info Typography --- */
         .info-label {
             font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted);
             font-weight: 600; margin-bottom: 0.2rem; letter-spacing: 0.5px;
@@ -73,7 +69,6 @@
             font-size: 0.95rem; color: var(--text-dark); font-weight: 600; margin-bottom: 1rem;
         }
 
-        /* --- File Download --- */
         .file-card {
             display: flex; align-items: center; padding: 1rem;
             background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
@@ -87,40 +82,6 @@
             border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-right: 1rem;
         }
 
-        /* --- Grade Selection (Radio Cards) --- */
-        .grade-selector { display: none; }
-
-        .grade-card {
-            display: block;
-            cursor: pointer;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 1.2rem;
-            text-align: center;
-            transition: var(--transition);
-            background: #fff;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .grade-title { font-size: 2rem; font-weight: 800; line-height: 1; margin-bottom: 0.25rem; }
-        .grade-desc { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
-
-        /* Colors per Grade */
-        .grade-A .grade-title { color: #16a34a; }
-        .grade-B .grade-title { color: #16a34a; }
-        .grade-C .grade-title { color: #ca8a04; }
-        .grade-D .grade-title { color: #dc2626; }
-
-        /* Active States */
-        .grade-selector:checked + .grade-card { border-width: 2px; transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-
-        .grade-selector[value="A"]:checked + .grade-card { border-color: #16a34a; background-color: #f0fdf4; }
-        .grade-selector[value="B"]:checked + .grade-card { border-color: #16a34a; background-color: #f0fdf4; }
-        .grade-selector[value="C"]:checked + .grade-card { border-color: #ca8a04; background-color: #fefce8; }
-        .grade-selector[value="D"]:checked + .grade-card { border-color: #dc2626; background-color: #fef2f2; }
-
-        /* --- Assessment Items --- */
         .assessment-item {
             background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem;
             position: relative; margin-bottom: 1rem; animation: fadeIn 0.3s ease-out;
@@ -140,7 +101,6 @@
             border-color: var(--maroon); box-shadow: 0 0 0 3px rgba(124, 19, 22, 0.1);
         }
 
-        /* --- Buttons --- */
         .btn-maroon {
             background-color: var(--maroon); color: white; border: none;
             border-radius: 50px; padding: 0.8rem 2rem; font-weight: 700; width: 100%;
@@ -159,8 +119,6 @@
 </head>
 
 <body>
-
-    {{-- Navbar Sederhana --}}
     <nav class="navbar navbar-custom sticky-top">
         <div class="container">
             <span class="navbar-brand">
@@ -172,8 +130,7 @@
 
     <div class="container">
         <div class="row g-4">
-
-            {{-- KOLOM KIRI: Detail Mahasiswa --}}
+            {{-- KOLOM KIRI --}}
             <div class="col-lg-4">
                 <div class="custom-card">
                     <div class="card-header-custom">
@@ -210,7 +167,6 @@
                     </div>
                 </div>
 
-                {{-- Card File PPT --}}
                 <div class="custom-card">
                     <div class="card-header-custom">
                         <i class="bi bi-file-earmark-slides fs-5 text-danger"></i> Materi Presentasi
@@ -235,61 +191,41 @@
                 </div>
             </div>
 
-            {{-- KOLOM KANAN: Form Penilaian --}}
-            <div class="col-lg-8">
+            {{-- KOLOM KANAN --}}
+            <div class="col-lg-8" id="mainAssessmentContainer">
                 @if ($presentasi->status_penilaian == 'pending')
                     <form action="{{ route('ci.submit-penilaian', $presentasi->id) }}" method="POST" id="formPenilaian">
                         @csrf
-
-                        {{-- Card 1: Nilai Akhir --}}
                         <div class="custom-card">
                             <div class="card-header-custom">
                                 <i class="bi bi-trophy fs-5 text-warning"></i> Keputusan Penilaian
                             </div>
                             <div class="card-body-custom">
-                                <p class="text-muted small mb-3">Silakan pilih hasil akhir presentasi berdasarkan performa mahasiswa.</p>
+                                <div class="mb-4">
+                                    <label class="info-label">Nama Pemberi Nilai (CI)</label>
+                                    <input type="text" name="nama_ci" class="form-control" placeholder="Masukkan Nama Anda" required>
+                                </div>
 
-                                <div class="row g-3">
-                                    <div class="col-6 col-md-3">
-                                        <input type="radio" class="grade-selector" name="nilai" id="nilaiA" value="A" required>
-                                        <label class="grade-card grade-A" for="nilaiA">
-                                            <div class="grade-title">A</div>
-                                            <div class="grade-desc text-success">Sangat Baik</div>
-                                        </label>
-                                    </div>
-                                    <div class="col-6 col-md-3">
-                                        <input type="radio" class="grade-selector" name="nilai" id="nilaiB" value="B">
-                                        <label class="grade-card grade-B" for="nilaiB">
-                                            <div class="grade-title">B</div>
-                                            <div class="grade-desc text-success">Baik</div>
-                                        </label>
-                                    </div>
-                                    <div class="col-6 col-md-3">
-                                        <input type="radio" class="grade-selector" name="nilai" id="nilaiC" value="C">
-                                        <label class="grade-card grade-C" for="nilaiC">
-                                            <div class="grade-title">C</div>
-                                            <div class="grade-desc text-warning">Cukup / Revisi</div>
-                                        </label>
-                                    </div>
-                                    <div class="col-6 col-md-3">
-                                        <input type="radio" class="grade-selector" name="nilai" id="nilaiD" value="D">
-                                        <label class="grade-card grade-D" for="nilaiD">
-                                            <div class="grade-title">D</div>
-                                            <div class="grade-desc text-danger">Kurang / Tolak</div>
-                                        </label>
+                                <div class="info-label">Input Skor Angka (0-100)</div>
+                                <div class="mt-2">
+                                    <input type="number" name="skor_angka" class="form-control form-control-lg text-center" 
+                                           style="font-size: 2rem; font-weight: bold;" placeholder="0" min="0" max="100" required>
+                                    <div class="text-center mt-3 d-flex justify-content-center gap-2 flex-wrap">
+                                        <span class="badge bg-info">86-100: A</span>
+                                        <span class="badge bg-success">71-85: B</span>
+                                        <span class="badge bg-warning text-dark">50-70: C</span>
+                                        <span class="badge bg-danger">0-49: D</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Card 2: Detail Penilaian --}}
                         <div class="custom-card">
                             <div class="card-header-custom">
                                 <i class="bi bi-list-check fs-5 text-info"></i> Catatan & Feedback
                             </div>
                             <div class="card-body-custom">
                                 <div id="penilaianContainer">
-                                    {{-- Item Pertama (Wajib) --}}
                                     <div class="assessment-item">
                                         <div class="mb-3">
                                             <label class="form-label small text-muted fw-bold">Aspek Penilaian / Judul</label>
@@ -301,7 +237,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                                 <button type="button" class="btn-outline-dashed mt-2" onclick="tambahPenilaian()">
                                     <i class="bi bi-plus-circle me-1"></i> Tambah Poin Penilaian
                                 </button>
@@ -310,34 +245,28 @@
 
                         <div class="custom-card">
                             <div class="card-body-custom bg-light">
-                                <div class="d-flex align-items-start gap-3">
+                                <div class="d-flex align-items-start gap-3 mb-3">
                                     <i class="bi bi-info-circle-fill text-muted fs-5 mt-1"></i>
                                     <small class="text-muted">
-                                        Pastikan data yang diinput sudah benar. Penilaian yang sudah dikirim <strong>tidak dapat diubah kembali</strong>.
+                                        Pastikan data yang diinput sudah benar. Penilaian ini akan dikalkulasi secara kolektif oleh sistem.
                                     </small>
                                 </div>
-                                <hr class="my-3 border-light">
                                 <button type="submit" class="btn btn-maroon btn-lg">
                                     <i class="bi bi-send-fill me-2"></i> Kirim Penilaian
                                 </button>
                             </div>
                         </div>
-
                     </form>
                 @else
-                    {{-- Tampilan Jika Sudah Dinilai --}}
                     <div class="custom-card text-center py-5">
                         <div class="mb-3">
                             <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
                         </div>
-                        <h2 class="fw-bold text-dark mb-2">Terima Kasih!</h2>
-                        <p class="text-muted">Anda telah menyelesaikan penilaian untuk mahasiswa ini.</p>
-
+                        <h2 class="fw-bold text-dark mb-2">Penilaian Selesai</h2>
+                        <p class="text-muted">Admin telah melakukan finalisasi penilaian untuk mahasiswa ini.</p>
                         <div class="d-inline-block bg-light px-4 py-2 rounded-3 border mt-3">
-                            <span class="text-muted small text-uppercase fw-bold d-block">Nilai Yang Diberikan</span>
-                            <span class="fs-1 fw-bold {{ $presentasi->nilai == 'C' ? 'text-warning' : ($presentasi->nilai == 'D' ? 'text-danger' : 'text-success') }}">
-                                {{ $presentasi->nilai }}
-                            </span>
+                            <span class="text-muted small text-uppercase fw-bold d-block">Hasil Akhir</span>
+                            <span class="fs-1 fw-bold text-maroon">{{ $presentasi->nilai }}</span>
                         </div>
                     </div>
                 @endif
@@ -345,11 +274,39 @@
         </div>
     </div>
 
-    {{-- Scripts --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        let penilaianCount = 1;
+        // --- 1. HANDLING LOCAL STORAGE & UI STATE ---
+        document.addEventListener("DOMContentLoaded", function() {
+            const hasSubmitted = localStorage.getItem('submitted_penilaian_{{ $presentasi->id }}');
+            if (hasSubmitted && "{{ $presentasi->status_penilaian }}" === 'pending') {
+                const data = JSON.parse(hasSubmitted);
+                showSuccessState(data.nama, data.nilai);
+            }
+        });
 
+        function showSuccessState(nama, nilai) {
+            const container = document.getElementById('mainAssessmentContainer');
+            container.innerHTML = `
+                <div class="custom-card text-center py-5">
+                    <div class="mb-3">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <h2 class="fw-bold text-dark mb-2">Terima Kasih, ${nama}!</h2>
+                    <p class="text-muted">Anda telah mengirimkan nilai untuk mahasiswa ini.</p>
+                    <div class="d-inline-block bg-light px-4 py-2 rounded-3 border mt-3">
+                        <span class="text-muted small text-uppercase fw-bold d-block">Skor Yang Anda Berikan</span>
+                        <span class="fs-1 fw-bold text-maroon">${nilai}</span>
+                    </div>
+                    <div class="mt-4">
+                        <small class="text-muted italic">Menunggu finalisasi kalkulasi dari Admin.</small>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- 2. HANDLING DYNAMIC FORM ---
+        let penilaianCount = 1;
         function tambahPenilaian() {
             const container = document.getElementById('penilaianContainer');
             const div = document.createElement('div');
@@ -360,7 +317,7 @@
                 </button>
                 <div class="mb-3">
                     <label class="form-label small text-muted fw-bold">Aspek Penilaian / Judul</label>
-                    <input type="text" name="penilaian[${penilaianCount}][judul]" class="form-control" placeholder="Contoh: Kemampuan Presentasi" required>
+                    <input type="text" name="penilaian[${penilaianCount}][judul]" class="form-control" placeholder="Contoh: Kemampuan Komunikasi" required>
                 </div>
                 <div>
                     <label class="form-label small text-muted fw-bold">Komentar / Saran</label>
@@ -371,31 +328,43 @@
             penilaianCount++;
         }
 
-        // SweetAlert Confirmation
+        // --- 3. FORM SUBMISSION WITH SWEETALERT ---
         document.getElementById('formPenilaian')?.addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            const namaCi = this.nama_ci.value;
+            const skor = this.skor_angka.value;
+
             Swal.fire({
                 title: 'Kirim Penilaian?',
-                text: "Data yang dikirim tidak dapat diubah lagi.",
-                icon: 'warning',
+                text: `Anda akan memberikan skor ${skor} untuk mahasiswa ini.`,
+                icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#7c1316',
                 cancelButtonColor: '#64748b',
-                confirmButtonText: 'Ya, Kirim!',
-                cancelButtonText: 'Batal'
+                confirmButtonText: 'Ya, Kirim Sekarang!',
+                cancelButtonText: 'Cek Kembali'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // Simpan identitas ke LocalStorage sebelum submit
+                    const storageData = {
+                        nama: namaCi,
+                        nilai: skor,
+                        date: new Date().toISOString()
+                    };
+                    localStorage.setItem('submitted_penilaian_{{ $presentasi->id }}', JSON.stringify(storageData));
+                    
                     this.submit();
                 }
             });
         });
 
-        // Alert Success/Error jika ada flash session
+        // --- 4. FLASH SESSION ALERTS ---
         @if(session('success'))
-            Swal.fire('Berhasil', '{{ session("success") }}', 'success');
+            Swal.fire({ icon: 'success', title: 'Berhasil', text: '{{ session("success") }}', confirmButtonColor: '#7c1316' });
         @endif
         @if(session('error'))
-            Swal.fire('Gagal', '{{ session("error") }}', 'error');
+            Swal.fire({ icon: 'error', title: 'Gagal', text: '{{ session("error") }}', confirmButtonColor: '#7c1316' });
         @endif
     </script>
 </body>

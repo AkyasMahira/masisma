@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app') 
 
 @section('title', 'Ruangan')
 @section('page-title', 'Data Ruangan')
@@ -16,7 +16,6 @@
             --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* --- Header & Toolbar --- */
         .page-header-wrapper {
             background: #fff;
             border-radius: var(--card-radius);
@@ -24,14 +23,11 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
             margin-bottom: 2rem;
             border-left: 5px solid var(--custom-maroon);
-
-            /* FIX Z-INDEX: Agar dropdown muncul paling atas */
             position: relative;
             z-index: 1050;
             overflow: visible;
         }
 
-        /* --- Room Cards --- */
         .room-card {
             border: none;
             border-radius: var(--card-radius);
@@ -92,7 +88,21 @@
             line-height: 1;
         }
 
-        /* --- Buttons --- */
+        .user-info-badge {
+            background: #f8f9fa;
+            border: 1px dashed #ced4da;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            margin-top: 15px;
+            transition: 0.2s;
+        }
+        
+        .user-info-badge:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
         .btn-maroon {
             background-color: var(--custom-maroon);
             color: #fff;
@@ -151,7 +161,6 @@
             outline: none;
         }
 
-        /* --- Empty State --- */
         .empty-state-box {
             border: 2px dashed #e0e0e0;
             border-radius: var(--card-radius);
@@ -164,7 +173,6 @@
             background: #fff;
         }
 
-        /* --- Animation --- */
         .animate-up {
             animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
             opacity: 0;
@@ -178,7 +186,6 @@
             }
         }
 
-        /* --- Modal List --- */
         .student-list-item {
             border-left: 3px solid transparent;
             transition: 0.2s;
@@ -190,61 +197,79 @@
         }
     </style>
 
-    <div class="page-header-wrapper d-flex flex-wrap justify-content-between align-items-center gap-3 animate-up">
-        <div>
-            <h4 class="fw-bold text-dark mb-1">Manajemen Ruangan</h4>
-            <p class="text-muted mb-0 small">Kelola kapasitas dan penempatan mahasiswa.</p>
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show mb-4 animate-up" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-
+    @endif
+    
+    <div class="d-flex justify-content-between align-items-center" 
+         style="background: white; border-radius: 8px; border-left: 5px solid #7c1316; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <div>
+             <h4 class="fw-bold text-dark mb-1">Manajemen Ruangan</h4>
+                <p class="text-muted mb-0 small">Kelola kapasitas, shift, dan akun login ruangan.</p>
+        </div>
         <div class="d-flex flex-wrap gap-2 align-items-center">
-            <form method="GET" class="me-2">
-                <div class="input-group shadow-sm" style="width: 250px;">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text bg-white border-right-0"
-                            style="border-radius: 8px 0 0 8px; height: 100%;">
-                            <i class="bi bi-search text-muted"></i>
-                        </span>
+                <form method="GET" class="me-2">
+                    <div class="input-group shadow-sm" style="width: 250px;">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-white border-right-0"
+                                style="border-radius: 8px 0 0 8px; height: 100%;">
+                                <i class="bi bi-search text-muted"></i>
+                            </span>
+                        </div>
+                        <input type="text" name="search" class="form-control border-left-0" placeholder="Cari ruangan..."
+                            value="{{ request('search') }}" style="box-shadow: none; border-radius: 0 8px 8px 0;">
                     </div>
-                    <input type="text" name="search" class="form-control border-left-0" placeholder="Cari ruangan..."
-                        value="{{ request('search') }}" style="box-shadow: none; border-radius: 0 8px 8px 0;">
+                </form>
+
+                <form action="{{ route('ruangan.generate_users') }}" method="POST" class="me-1">
+                    @csrf
+                    <button type="submit" class="btn btn-warning text-white shadow-sm d-flex align-items-center gap-2" 
+                        onclick="return confirm('Buat akun untuk semua ruangan yang belum punya akun?')" title="Buat akun untuk ruangan lama">
+                        <i class="bi bi-person-plus-fill"></i> Generate Akun
+                    </button>
+                </form>
+
+                <div class="dropdown position-relative">
+                    <button class="btn btn-tool shadow-sm" type="button" id="toolsBtn" onclick="toggleTools(event)">
+                        <i class="bi bi-gear-fill text-secondary"></i> Tools
+                    </button>
+
+                    <div id="toolsDropdownMenu" class="dropdown-menu dropdown-menu-right shadow-sm border-0"
+                        style="border-radius: 12px; position: absolute; right: 0; top: 110%; z-index: 2000; display: none; min-width: 200px; background: white;">
+
+                        <a class="dropdown-item py-2" href="javascript:void(0)" onclick="exportToExcel(); closeTools();">
+                            <i class="bi bi-file-earmark-excel text-success mr-2"></i> Export Excel
+                        </a>
+                        <a class="dropdown-item py-2" href="javascript:void(0)" onclick="downloadTemplate(); closeTools();">
+                            <i class="bi bi-download text-primary mr-2"></i> Template
+                        </a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <label class="dropdown-item py-2 mb-0" style="cursor: pointer;">
+                            <i class="bi bi-upload text-warning mr-2"></i> Import Excel
+                            <input type="file" id="fileImport" style="display: none" accept=".xlsx,.xls"
+                                onchange="importExcel(this); closeTools();">
+                        </label>
+                    </div>
                 </div>
-            </form>
 
-            <div class="dropdown position-relative">
-                <button class="btn btn-tool shadow-sm" type="button" id="toolsBtn" onclick="toggleTools(event)">
-                    <i class="bi bi-gear-fill text-secondary"></i> Tools
-                </button>
-
-                <div id="toolsDropdownMenu" class="dropdown-menu dropdown-menu-right shadow-sm border-0"
-                    style="border-radius: 12px; position: absolute; right: 0; top: 110%; z-index: 2000; display: none; min-width: 200px; background: white;">
-
-                    <a class="dropdown-item py-2" href="javascript:void(0)" onclick="exportToExcel(); closeTools();">
-                        <i class="bi bi-file-earmark-excel text-success mr-2"></i> Export Excel
-                    </a>
-                    <a class="dropdown-item py-2" href="javascript:void(0)" onclick="downloadTemplate(); closeTools();">
-                        <i class="bi bi-download text-primary mr-2"></i> Template
-                    </a>
-
-                    <div class="dropdown-divider"></div>
-
-                    <label class="dropdown-item py-2 mb-0" style="cursor: pointer;">
-                        <i class="bi bi-upload text-warning mr-2"></i> Import Excel
-                        <input type="file" id="fileImport" style="display: none" accept=".xlsx,.xls"
-                            onchange="importExcel(this); closeTools();">
-                    </label>
-                </div>
-            </div>
-
-            <a href="{{ route('ruangan.create') }}" class="btn btn-maroon shadow-sm d-flex align-items-center gap-2">
-                <i class="bi bi-plus-lg"></i> Ruangan Baru
-            </a>
+                <a href="{{ route('ruangan.create') }}" class="btn btn-maroon shadow-sm d-flex align-items-center gap-2">
+                    <i class="bi bi-plus-lg"></i> Ruangan Baru
+                </a>
         </div>
     </div>
+   
 
     <div class="row g-4">
         @forelse ($ruangan as $room)
             @php
-                $terisi = $room->mahasiswa_count;
+                // OPTIMASI: Mengambil data count dari Controller yang sudah dioptimasi
+        $terisi = $room->mahasiswa_aktif_count ?? 0;
+                
                 $total = $room->kuota_ruangan;
                 $tersedia = max($total - $terisi, 0);
                 $persentaseIsi = $total > 0 ? ($terisi / $total) * 100 : 0;
@@ -269,14 +294,29 @@
                     data-mahasiswa='@json($room->mahasiswa)' onclick="openModal(this)">
 
                     <div>
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="card-icon-bg">
-                                <i class="bi bi-door-open-fill"></i>
-                            </div>
+                     <div class="d-flex justify-content-between align-items-start">
+                        <div class="card-icon-bg">
+                            <i class="bi bi-door-open-fill"></i>
+                        </div>
+                        
+                        <div class="d-flex flex-column align-items-end gap-1">
+                            {{-- Badge Status Penuh/Tersedia --}}
                             <span class="badge badge-pill badge-light text-{{ $statusColor }} px-3 py-2 shadow-sm">
                                 <i class="bi {{ $statusIcon }}"></i> {{ $statusText }}
                             </span>
+
+                            {{-- BADGE SHIFT / NON SHIFT --}}
+                            @if($room->kategori === 'shift')
+                                <span class="badge bg-primary rounded-pill" style="font-size: 0.7rem;">
+                                    <i class="bi bi-clock-history me-1"></i> Shift (24 Jam)
+                                </span>
+                            @else
+                                <span class="badge bg-info text-dark rounded-pill" style="font-size: 0.7rem;">
+                                    <i class="bi bi-briefcase-fill me-1"></i> Non-Shift (Kantor)
+                                </span>
+                            @endif
                         </div>
+                    </div>
 
                         <h5 class="room-title mt-3">{{ $room->nm_ruangan }}</h5>
 
@@ -284,7 +324,7 @@
                             <span class="capacity-text text-dark">{{ $terisi }}</span>
                             <span class="text-muted ml-2" style="font-size: 1.2rem;">/ {{ $total }}</span>
                         </div>
-                        <div class="text-muted small mb-2">Mahasiswa Terdaftar ({{ $tersedia }} tersedia)</div>
+                        <div class="text-muted small mb-2">Mahasiswa Aktif ({{ $tersedia }} slot tersedia)</div>
 
                         <div class="progress"
                             style="height: 10px; border-radius: 20px; background-color: #e9ecef; margin-top: 10px;">
@@ -293,23 +333,47 @@
                                 aria-valuemin="0" aria-valuemax="100">
                             </div>
                         </div>
+
+                        <div class="user-info-badge" onclick="event.stopPropagation()">
+                            @if($room->user)
+                                <div class="d-flex align-items-center mb-1 text-truncate">
+                                    <i class="bi bi-envelope-fill text-muted me-2"></i>
+                                    <span class="fw-bold text-dark" style="font-size: 0.9em;">{{ $room->user->email }}</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-key-fill text-muted me-2"></i>
+                                    <span class="text-muted small">Pass: 12345678</span>
+                                </div>
+                            @else
+                                <div class="text-danger small fw-bold">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Belum ada akun login
+                                </div>
+                            @endif
+                        </div>
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top border-light">
                         <small class="text-muted d-flex align-items-center gap-1">
-                            <i class="bi bi-info-circle"></i> Detail
+                            <i class="bi bi-info-circle"></i> Klik untuk detail
                         </small>
 
-                        <div onclick="event.stopPropagation()">
-                            <a href="{{ route('ruangan.edit', $room->id) }}" class="btn-icon-soft mr-1" title="Edit">
-                                <i class="bi bi-pencil-square"></i>
+                        <div class="d-flex align-items-center gap-1" onclick="event.stopPropagation()">
+                            
+                            {{-- TOMBOL ATUR JAM (DIPERBARUI) --}}
+                            <a href="{{ route('ruangan.shifts.index', $room->id) }}" 
+                               class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold me-1" 
+                               title="Atur Jam Kerja Ruangan">
+                                <i class="bi bi-clock-fill me-1"></i> Atur Jam
                             </a>
 
+                            <a href="{{ route('ruangan.edit', $room->id) }}" class="btn-icon-soft" title="Edit">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            
                             <form id="delete-form-{{ $room->id }}" action="{{ route('ruangan.destroy', $room->id) }}"
                                 method="POST" class="d-inline">
                                 @csrf
                                 @method('DELETE')
-
                                 <button type="button" class="btn-icon-soft delete" title="Hapus"
                                     onclick="confirmDelete('{{ $room->id }}')">
                                     <i class="bi bi-trash-fill"></i>
@@ -340,6 +404,7 @@
         {{ $ruangan->links('pagination.custom') }}
     </div>
 
+    {{-- MODAL DETAIL MAHASISWA --}}
     <div class="modal fade" id="modalMahasiswa" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow-lg rounded-4">
@@ -347,9 +412,8 @@
                 <div class="modal-header bg-white border-bottom-0 pb-0">
                     <div>
                         <h5 class="modal-title fw-bold text-dark" id="modalTitle">Detail Ruangan</h5>
-                        <p class="text-muted small mb-0">Daftar mahasiswa yang menempati ruangan ini.</p>
+                        <p class="text-muted small mb-0">Daftar mahasiswa yang terdaftar di ruangan ini.</p>
                     </div>
-                    <!-- FIX: tombol close pakai Bootstrap 5 -->
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
@@ -370,14 +434,12 @@
                 </div>
 
                 <div class="modal-footer border-top-0 pt-0">
-                    <!-- FIX: ganti data-dismiss jadi data-bs-dismiss -->
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Tutup</button>
                 </div>
 
             </div>
         </div>
     </div>
-
 
 @endsection
 
@@ -397,16 +459,14 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Cari form berdasarkan ID yang dikirim, lalu submit
                     document.getElementById('delete-form-' + id).submit();
                 }
             })
         }
-        // --- 1. MANUAL DROPDOWN SCRIPT (Supaya Tools Pasti Jalan) ---
+        
         function toggleTools(e) {
             if (e) e.stopPropagation();
             var menu = document.getElementById('toolsDropdownMenu');
-            // Toggle logic sederhana
             if (menu.style.display === 'block') {
                 menu.style.display = 'none';
             } else {
@@ -418,7 +478,6 @@
             document.getElementById('toolsDropdownMenu').style.display = 'none';
         }
 
-        // Tutup dropdown jika klik di luar
         window.addEventListener('click', function(e) {
             var menu = document.getElementById('toolsDropdownMenu');
             var btn = document.getElementById('toolsBtn');
@@ -427,7 +486,6 @@
             }
         });
 
-        // --- 2. MODAL & LIST SCRIPT ---
         function openModal(element) {
             const namaRuangan = element.dataset.nama;
             const mahasiswa = JSON.parse(element.dataset.mahasiswa);
@@ -447,6 +505,14 @@
             </div>`;
             } else {
                 mahasiswa.forEach(m => {
+                    // Logic status badge
+                    let statusBadge = '';
+                    if(m.status === 'aktif') {
+                        statusBadge = '<span class="badge bg-success rounded-pill" style="font-size: 0.7em">Aktif</span>';
+                    } else {
+                        statusBadge = '<span class="badge bg-secondary rounded-pill" style="font-size: 0.7em">Nonaktif</span>';
+                    }
+
                     listContainer.innerHTML += `
                 <li class="list-group-item student-list-item d-flex align-items-center py-3 px-2 border-bottom">
                     <div class="me-3">
@@ -454,8 +520,11 @@
                             <i class="bi bi-person-fill text-secondary" style="font-size: 1.2rem;"></i>
                         </div>
                     </div>
-                    <div>
-                        <h6 class="mb-0 fw-bold text-dark student-name">${m.nm_mahasiswa}</h6>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold text-dark student-name">${m.nm_mahasiswa}</h6>
+                            ${statusBadge}
+                        </div>
                         <small class="text-muted d-flex align-items-center gap-2">
                             <span><i class="bi bi-building me-1"></i> ${m.univ_asal ?? '-'}</span>
                             <span class="mx-1">&bull;</span>
@@ -466,7 +535,6 @@
                 });
             }
 
-            // --- Bootstrap 5 Modal (tanpa jQuery) ---
             const modalEl = document.getElementById('modalMahasiswa');
             const modal = new bootstrap.Modal(modalEl);
             modal.show();
@@ -481,27 +549,20 @@
                 const nameEl = li[i].getElementsByClassName('student-name')[0];
                 if (nameEl) {
                     const txtValue = nameEl.textContent || nameEl.innerText;
-
                     if (txtValue.toLowerCase().indexOf(filter) > -1) {
-                        // JIKA COCOK: Tampilkan
-                        li[i].classList.remove('d-none'); // Hapus class sembunyi
-                        li[i].classList.add('d-flex'); // Pastikan layout flex aktif
+                        li[i].classList.remove('d-none');
+                        li[i].classList.add('d-flex');
                     } else {
-                        // JIKA TIDAK COCOK: Sembunyikan
-                        li[i].classList.remove('d-flex'); // Hapus class flex agar tidak bentrok
-                        li[i].classList.add('d-none'); // Paksa sembunyi
+                        li[i].classList.remove('d-flex');
+                        li[i].classList.add('d-none');
                     }
                 }
             }
         }
 
-        // --- 3. EXCEL EXPORT/IMPORT (FIXED DATA STRUCTURE) ---
         function exportToExcel() {
             try {
-                // Ambil data mentah dari PHP
                 const rawData = @json($ruangan);
-
-                // FIX: Cek apakah data paginated (punya properti .data) atau array biasa
                 const dataToExport = rawData.data ? rawData.data : rawData;
 
                 if (!dataToExport || dataToExport.length === 0) {
@@ -513,7 +574,6 @@
                     ['Nama Ruangan', 'Kuota Ruangan']
                 ];
 
-                // Loop data yang sudah dinormalisasi
                 dataToExport.forEach(r => {
                     ws_data.push([r.nm_ruangan, r.kuota_ruangan]);
                 });
@@ -560,7 +620,6 @@
                 formData.append('_token', '{{ csrf_token() }}');
                 formData.append('data', JSON.stringify(jsonData));
 
-                // Tampilkan loading sederhana (optional)
                 const btn = document.getElementById('toolsBtn');
                 const originalText = btn.innerHTML;
                 btn.innerHTML = 'Importing...';

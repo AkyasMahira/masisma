@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Data MOU')
-@section('page-title', 'Data MOU')
+
 
 @section('content')
     {{--
@@ -29,7 +28,7 @@
             margin-bottom: 2rem;
             border-left: 5px solid var(--custom-maroon);
             position: relative;
-            z-index: 1050;
+            z-index: 99;
             overflow: visible;
         }
 
@@ -160,13 +159,14 @@
         }
     </style>
 
-    {{-- 1. HEADER HALAMAN --}}
-    <div class="page-header-wrapper d-flex flex-wrap justify-content-between align-items-center gap-3 animate-up">
-        <div>
-            <h4 class="fw-bold mb-1" style="color: var(--custom-maroon);">Data MOU</h4>
-            <small class="text-muted">Kelola data Memorandum of Understanding dengan universitas.</small>
-        </div>
-        <div class="d-flex align-items-center gap-2 flex-wrap">
+  
+<div class="d-flex justify-content-between align-items-center" 
+     style="background: white; border-radius: 8px; border-left: 5px solid #7c1316; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+    <div>
+        <h4 class="fw-bold mb-0 text-dark">Data MOU</h4>
+        <small class="text-muted">Kelola data Memorandum of Understanding dengan universitas.</small>
+    </div>
+       <div class="d-flex align-items-center gap-2 flex-wrap">
             {{-- Tombol Tools (Dropdown) --}}
             <div class="dropdown position-relative">
                 <button class="btn btn-tool shadow-sm" type="button" id="toolsBtn" onclick="toggleTools(event)">
@@ -177,6 +177,43 @@
                     <a class="dropdown-item py-2" href="javascript:void(0)" onclick="copyPublicMouUrl(); closeTools();">
                         <i class="bi bi-link-45deg text-info me-2"></i> Salin URL
                     </a>
+                    <a class="dropdown-item py-2" href="javascript:void(0)" onclick="copyMOUUrl(); closeTools();">
+    <i class="bi bi-clipboard text-primary me-2"></i> Salin URL MOU
+</a>
+
+<script>
+    function copyMOUUrl() {
+        const url = 'https://sindikat-rsudslg.kedirikab.go.id/mou-publik';
+
+        // --- Cara 1: Clipboard API (browser modern) ---
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(url)
+                .then(() => {
+                    alert('URL berhasil disalin!');
+                })
+                .catch(() => {
+                    fallbackCopy(url);
+                });
+        } 
+        // --- Cara 2: Fallback (pasti jalan) ---
+        else {
+            fallbackCopy(url);
+        }
+    }
+
+    function fallbackCopy(text) {
+        const tempInput = document.createElement('input');
+        tempInput.value = text;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        tempInput.setSelectionRange(0, 99999); 
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+
+        alert('URL berhasil disalin!');
+    }
+</script>
+
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item py-2" href="javascript:void(0)" onclick="exportMOU(); closeTools();">
                         <i class="bi bi-file-earmark-excel text-success me-2"></i> Export Excel
@@ -197,8 +234,7 @@
                 <i class="bi bi-plus-lg"></i> MOU Baru
             </a>
         </div>
-    </div>
-
+</div>
     {{-- 2. FILTER CARD --}}
     <div class="filter-card animate-up" style="animation-delay: 0.1s;">
         <div class="filter-header">
@@ -307,14 +343,18 @@
                                     <span class="text-muted small">-</span>
                                 @endif
                             </td>
-                            {{-- ========================================== --}}
 
-                            <td>
-                                <span class="small text-dark d-block text-nowrap">{{ $mou->jenis_instansi ?? '-' }}</span>
-                                @if ($mou->jenis_instansi_lainnya && $mou->jenis_instansi === 'Lainnya')
-                                    <small class="text-muted d-block text-nowrap">( {{ $mou->jenis_instansi_lainnya }} )</small>
-                                @endif
-                            </td>
+                          <td>
+    <span class="small text-dark d-block text-nowrap" title="{{ $mou->jenis_instansi ?? '-' }}">
+        {{ \Illuminate\Support\Str::limit(($mou->jenis_instansi ?? '-'), 20) }}
+    </span>
+    
+    @if ($mou->jenis_instansi_lainnya && $mou->jenis_instansi === 'Lainnya')
+        <small class="text-muted d-block text-nowrap" title="{{ $mou->jenis_instansi_lainnya }}">
+            ( {{ \Illuminate\Support\Str::limit($mou->jenis_instansi_lainnya, 30) }} )
+        </small>
+    @endif
+</td>
                             <td>
                                 <div class="d-flex flex-column gap-1">
                                     <span class="badge bg-light text-dark border">
@@ -329,28 +369,28 @@
                             <td>
                                 <div class="d-flex flex-wrap gap-2" style="max-width: 120px;">
                                     @if ($mou->surat_permohonan)
-                                        <a href="{{ Storage::url($mou->surat_permohonan) }}" target="_blank"
+                                        <a href="{{ asset('storage/' . $mou->surat_permohonan) }}" target="_blank"
                                             class="btn btn-sm btn-outline-dark rounded-pill px-2"
                                             title="Surat Permohonan">
                                             <i class="bi bi-file-earmark-text"></i>
                                         </a>
                                     @endif
                                     @if ($mou->sk_pengangkatan_pimpinan)
-                                        <a href="{{ Storage::url($mou->sk_pengangkatan_pimpinan) }}" target="_blank"
+                                        <a href="{{ asset('storage/' . $mou->sk_pengangkatan_pimpinan) }}" target="_blank"
                                             class="btn btn-sm btn-outline-dark rounded-pill px-2"
                                             title="SK Pengangkatan">
                                             <i class="bi bi-journal-richtext"></i>
                                         </a>
                                     @endif
                                     @if ($mou->sertifikat_akreditasi_prodi)
-                                        <a href="{{ Storage::url($mou->sertifikat_akreditasi_prodi) }}" target="_blank"
+                                        <a href="{{ asset('storage/' . $mou->sertifikat_akreditasi_prodi) }}" target="_blank"
                                             class="btn btn-sm btn-outline-dark rounded-pill px-2"
                                             title="Sertifikat Akreditasi">
                                             <i class="bi bi-award"></i>
                                         </a>
                                     @endif
                                     @if ($mou->draft_mou)
-                                        <a href="{{ Storage::url($mou->draft_mou) }}" target="_blank"
+                                        <a href="{{ asset('storage/' . $mou->draft_mou) }}" target="_blank"
                                             class="btn btn-sm btn-outline-dark rounded-pill px-2" title="Draft MoU">
                                             <i class="bi bi-file-earmark-pdf"></i>
                                         </a>
@@ -364,11 +404,11 @@
                                     @endif
                                 </div>
                             </td>
-                            <td>
-                                <div style="max-width: 250px; white-space: normal;">
-                                    {{ \Illuminate\Support\Str::limit($mou->rencana_kerja_sama ?? '', 80) }}
-                                </div>
-                            </td>
+<td>
+    <div style="max-width: 250px; white-space: normal;" title="{{ $mou->rencana_kerja_sama ?? '' }}">
+        {{ \Illuminate\Support\Str::limit(($mou->rencana_kerja_sama ?? ''), 80) }}
+    </div>
+</td>
                             <td class="text-center">
                                 <a href="{{ route('mou.edit', $mou->id) }}" class="action-btn" title="Edit">
                                     <i class="bi bi-pencil-square"></i>
@@ -607,21 +647,60 @@
         }
 
         // 6. Copy URL
+       // 6. Copy URL (Versi Diperbaiki & Lebih Stabil)
         function copyPublicMouUrl() {
-            const publicUrl = '{{ route('public.mou.create') }}';
-            navigator.clipboard.writeText(publicUrl).then(() => {
-                showToast('URL publik berhasil disalin ke clipboard!', 'success');
-            }).catch(() => {
-                const textarea = document.createElement('textarea');
-                textarea.value = publicUrl;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                showToast('URL publik berhasil disalin ke clipboard!', 'success');
-            });
+            // Pastikan menggunakan kutip dua " agar aman jika URL mengandung karakter aneh
+            const publicUrl = "{{ route('public.mou.create') }}";
+
+            // Cek dulu apakah URL valid/tidak kosong
+            if (!publicUrl) {
+                showToast('URL tidak ditemukan atau Route belum didefinisikan.', 'error');
+                return;
+            }
+
+            // Cara 1: Modern (Navigator API) - Biasanya butuh HTTPS
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(publicUrl).then(() => {
+                    showToast('URL publik berhasil disalin!', 'success');
+                }).catch(err => {
+                    console.error('Gagal copy clipboard modern:', err);
+                    // Jika gagal, lempar ke cara manual
+                    copyManual(publicUrl);
+                });
+            } else {
+                // Cara 2: Jika HTTP biasa atau Browser lama
+                copyManual(publicUrl);
+            }
         }
 
+        // Fungsi bantuan untuk copy manual (Fallback)
+        function copyManual(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            
+            // Sembunyikan textarea agar tidak mengganggu tampilan
+            textArea.style.position = "fixed";
+            textArea.style.left = "-9999px";
+            textArea.style.top = "0";
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast('URL publik berhasil disalin!', 'success');
+                } else {
+                    showToast('Gagal menyalin URL secara otomatis.', 'error');
+                }
+            } catch (err) {
+                console.error('Gagal copy manual:', err);
+                showToast('Browser Anda tidak mengizinkan salin otomatis.', 'error');
+            }
+
+            document.body.removeChild(textArea);
+        }
         // 7. Delete Confirmation
         document.addEventListener('DOMContentLoaded', () => {
             const deleteButtons = document.querySelectorAll('.btn-delete');

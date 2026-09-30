@@ -1,504 +1,663 @@
-@extends('layouts.public')
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Sindikat - {{ $mahasiswa->nm_mahasiswa }}</title>
+    
+    {{-- Fonts & Libraries --}}
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-@section('title', 'Absensi')
-
-@section('content')
     <style>
         :root {
-            --maroon: #7c1316;
-            --maroon-soft: #b83236;
-            --maroon-soft2: #e05959;
-            --ink: #111827;
-            --muted: #6b7280;
-            --border-soft: #e5e7eb;
-            --bg-soft: #f9fafb;
+            --primary: #8E1616;
+            --bg-body: #F3F4F6;
+            --surface: #FFFFFF;
+            --text-main: #1F2937;
+            --text-sub: #6B7280;
+            --success: #10B981;
+            --danger: #EF4444;
+            --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
-        body{
-            min-height:100vh;
-            margin:0;
-            padding:24px 16px;
-            font-family:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-            background:
-                radial-gradient(900px 520px at top, rgba(124,19,22,0.12), transparent 70%),
-                radial-gradient(720px 420px at bottom, rgba(220,38,38,0.08), transparent 70%),
-                #ffffff;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            position:relative;
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: #e5e5e5;
+            margin: 0; padding: 0;
+            display: flex; justify-content: center;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .absen-wrapper{width:100%;max-width:460px;position:relative;z-index:1;}
-
-        .rsud-logo-page{
-            position:fixed;right:-60px;bottom:-40px;width:260px;
-            opacity:0.12;pointer-events:none;user-select:none;z-index:0;
-        }
-        .rsud-logo-page img{width:100%;height:auto;object-fit:contain;}
-
-        .absen-shell{
-            padding:1.4px;border-radius:22px;
-            background:linear-gradient(135deg,
-                rgba(124,19,22,0.12),
-                rgba(248,113,113,0.18),
-                rgba(148,163,184,0.16));
-            box-shadow:0 18px 40px rgba(15,23,42,0.14);
-            animation:fadeIn .4s ease-out;
+        .mobile-frame {
+            width: 100%; max-width: 480px;
+            background: var(--bg-body);
+            height: 100%;
+            display: flex; flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.1);
         }
 
-        .absen-card{
-            position:relative;overflow:hidden;border-radius:20px;
-            background:linear-gradient(180deg,#ffffff 0%,#fff5f5 50%,#ffffff 100%);
-            padding:22px 18px 18px;color:var(--ink);
-            box-shadow:0 10px 30px rgba(15,23,42,0.12),0 0 0 1px rgba(229,231,235,0.9);
+        /* ========================================= */
+        /* 1. BAGIAN ATAS (STICKY / DIAM)            */
+        /* ========================================= */
+        .pinned-section {
+            flex-shrink: 0;
+            background: var(--bg-body);
+            z-index: 20;
+            max-height: 75vh; 
+            overflow-y: auto;
+            scrollbar-width: none;
         }
-        .absen-content{position:relative;z-index:1;}
+        .pinned-section::-webkit-scrollbar { display: none; }
 
-        .avatar-wrap{
-            display:flex;flex-direction:column;align-items:center;gap:6px;
-            margin-bottom:12px;margin-top:-4px;
+        .top-bar {
+            padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--bg-body);
         }
-        .avatar-wrap img{
-            width:147px;height:auto;object-fit:contain;
-            filter:drop-shadow(0 12px 22px rgba(15,23,42,0.22));
-        }
-        .avatar-caption{
-            font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);
-        }
-
-        .info-main{text-align:center;margin-bottom:10px;}
-        .info-main h4{margin:0;font-size:1.15rem;font-weight:700;color:var(--ink);}
-        .info-main p{margin:2px 0 0;font-size:.82rem;color:var(--muted);}
-        .info-main p i{font-size:.95rem;color:var(--maroon-soft);margin-right:4px;}
-
-        .chip-row{
-            display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:12px;
-        }
-        .chip{
-            font-size:.78rem;padding:6px 10px;border-radius:999px;
-            background:#f9fafb;color:var(--muted);
-            display:inline-flex;align-items:center;gap:6px;
-            border:1px solid rgba(148,163,184,0.6);
-        }
-        .chip i{font-size:.9rem;color:var(--maroon-soft);}
-        .chip-status-aktif{
-            background:linear-gradient(135deg,#ecfdf3,#dcfce7);
-            color:#166534;border-color:rgba(22,101,52,0.35);
-        }
-        .chip-status-aktif i{color:#16a34a;}
-        .chip-status-nonaktif{
-            background:linear-gradient(135deg,#f9fafb,#e5e7eb);
-            color:#4b5563;border-color:rgba(148,163,184,0.7);
+        .btn-icon {
+            width: 38px; height: 38px; border-radius: 12px;
+            background: white; border: 1px solid #e5e7eb;
+            color: var(--text-main); font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none; box-shadow: 0 2px 5px rgba(0,0,0,0.03);
         }
 
-        .absen-divider{
-            margin:16px 0 12px;height:1px;
-            background:linear-gradient(90deg,
-                rgba(148,163,184,0),
-                rgba(148,163,184,0.8),
-                rgba(148,163,184,0));
+        /* --- Sapaan & Animasi Awan --- */
+        .greeting-wrapper {
+            padding: 5px 20px 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        .greeting-text {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+            position: relative;
+            z-index: 2;
+        }
+        .greeting-sub {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .cloud-anim {
+            position: absolute;
+            color: rgba(142, 22, 22, 0.08); /* Awan sewarna merah primary, tapi sangat transparan */
+            z-index: 1;
+            animation: floatCloud linear infinite;
+        }
+        .c1 { font-size: 2.5rem; top: -5px; left: -50px; animation-duration: 22s; animation-delay: 0s; }
+        .c2 { font-size: 1.8rem; top: 15px; left: -100px; animation-duration: 28s; animation-delay: 5s; }
+        .c3 { font-size: 3rem; top: -10px; left: -80px; animation-duration: 25s; animation-delay: 12s; }
+
+        @keyframes floatCloud {
+            0% { transform: translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateX(500px); opacity: 0; }
         }
 
-        /* LOKASI + MAP */
-        .location-info{margin-bottom:14px;}
-        .location-title{
-            font-size:.78rem;font-weight:600;color:var(--muted);
-            margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase;
+        /* ID Card */
+        .card-container { padding: 5px 20px 20px; }
+        .digital-id {
+            background: linear-gradient(135deg, var(--primary), #5a0b0e);
+            border-radius: 24px; padding: 20px; color: white;
+            position: relative; overflow: hidden; box-shadow: var(--shadow-card);
         }
-        .location-ref{
-            font-size:.7rem;color:var(--muted);margin-bottom:6px;
+        .digital-id::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            pointer-events: none;
         }
-        .location-map{
-            height:220px;border-radius:14px;overflow:hidden;
-            border:1px solid rgba(148,163,184,0.7);margin-bottom:6px;
+        .id-header { display: flex; justify-content: space-between; margin-bottom: 15px; position: relative; z-index: 2; }
+        .chip {
+            background: rgba(255,255,255,0.2); backdrop-filter: blur(4px);
+            padding: 5px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 500;
+            display: flex; align-items: center; gap: 5px;
         }
-        .location-status-text{
-            font-size:.75rem;color:var(--muted);
+        .id-body { display: flex; gap: 12px; align-items: center; position: relative; z-index: 2; }
+        .avatar {
+            width: 56px; height: 56px; border-radius: 16px;
+            background: white; border: 2px solid rgba(255,255,255,0.3); object-fit: cover;
         }
-        .location-status-text .badge-ok{color:#166534;font-weight:600;}
-        .location-status-text .badge-no{color:#b91c1c;font-weight:600;}
-        .location-status-text .badge-warn{color:#b45309;font-weight:600;}
+        .info h2 { font-size: 1.1rem; font-weight: 700; margin: 0 0 2px; }
+        .info p { font-size: 0.8rem; margin: 0; opacity: 0.9; }
+        
+        .id-footer {
+            margin-top: 15px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.15);
+            display: flex; justify-content: space-between; position: relative; z-index: 2;
+        }
+        .stat-item label { display: block; font-size: 0.65rem; text-transform: uppercase; opacity: 0.7; margin-bottom: 2px; }
+        .stat-item span { font-weight: 700; font-size: 0.9rem; }
 
-        .absen-btn{
-            width:100%;border-radius:14px;padding:13px 14px;
-            font-weight:700;font-size:.98rem;border:none;
-            background:linear-gradient(135deg,var(--maroon),var(--maroon-soft2));
-            color:#fef2f2;letter-spacing:.02em;
-            box-shadow:0 14px 30px rgba(124,19,22,0.5),0 0 0 1px rgba(248,113,113,0.5);
-            display:inline-flex;align-items:center;justify-content:center;gap:8px;
-            cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,filter .18s ease;
+        /* Action Area (Map & Button) */
+        .action-area { padding: 0 20px 20px; }
+        .map-card {
+            height: 140px; border-radius: 18px; overflow: hidden;
+            position: relative; margin-bottom: 12px;
+            border: 2px solid #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-        .absen-btn i{font-size:1.1rem;}
-        .absen-btn:hover{
-            transform:translateY(-1px) scale(1.02);filter:brightness(1.04);
-            box-shadow:0 16px 34px rgba(124,19,22,0.6),0 0 0 1px rgba(248,113,113,0.7);
+        .gps-status {
+            position: absolute; bottom: 10px; left: 10px; z-index: 400;
+            background: rgba(255,255,255,0.95); padding: 5px 10px;
+            border-radius: 10px; font-size: 0.7rem; font-weight: 700;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 5px;
         }
-        .absen-btn:active,.absen-btn.touch-active{
-            transform:translateY(0) scale(.97);
-            box-shadow:0 8px 20px rgba(124,19,22,0.52),0 0 0 1px rgba(248,113,113,0.75);
+        .btn-swipe {
+            width: 100%; border: none; padding: 16px; border-radius: 18px;
+            font-size: 1rem; font-weight: 700; color: white; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            box-shadow: 0 8px 20px -5px rgba(0,0,0,0.2); transition: 0.2s;
+        }
+        .btn-swipe:active { transform: scale(0.97); }
+        .btn-swipe:disabled { opacity: 0.6; filter: grayscale(1); cursor: not-allowed; }
+        .grad-green { background: linear-gradient(135deg, #059669, #10B981); }
+        .grad-red { background: linear-gradient(135deg, #B91C1C, #EF4444); }
+
+        /* Alert Box */
+        .alert-box {
+            margin: 0 20px 15px; padding: 12px; border-radius: 12px; font-size: 0.8rem;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .alert-red { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
+        .alert-yellow { background: #FFFBEB; border: 1px solid #FCD34D; color: #92400E; }
+
+        /* ========================================= */
+        /* 2. BAGIAN BAWAH (SCROLLABLE)              */
+        /* ========================================= */
+        .scrollable-section {
+            flex-grow: 1;
+            overflow-y: auto;
+            background: white;
+            border-top-left-radius: 28px;
+            border-top-right-radius: 28px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
+            padding: 25px 20px 100px;
+            position: relative;
+            margin-top: -10px; 
+            z-index: 10;
         }
 
-        .history-card{margin-top:16px;display:flex;justify-content:space-between;gap:10px;}
-        .history-box{
-            flex:1;border-radius:14px;padding:9px 10px 10px;text-align:center;
-            border:1px solid rgba(148,163,184,0.7);background:#f9fafb;
-            position:relative;overflow:hidden;
+        .section-title { font-size: 0.9rem; font-weight: 700; color: var(--text-main); margin-bottom: 15px; }
+        
+        .h-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 0; border-bottom: 1px solid #F3F4F6;
         }
-        .history-box::before{
-            content:"";position:absolute;inset:0;
-            background:radial-gradient(circle at 0 0,rgba(248,113,113,0.16),transparent 60%);
-            opacity:.85;pointer-events:none;
+        .h-item:last-child { border-bottom: none; }
+        .h-icon {
+            width: 38px; height: 38px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;
         }
-        .history-box-inner{position:relative;z-index:1;}
-        .history-box h6{
-            margin:0;font-size:.78rem;font-weight:500;color:var(--muted);
-            display:flex;align-items:center;justify-content:space-between;gap:4px;
-        }
-        .history-box h6 i{font-size:.9rem;color:var(--maroon-soft);}
-        .history-box .time{font-size:1.15rem;font-weight:700;margin-top:5px;color:var(--ink);}
-        .history-box.empty .time{color:rgba(148,163,184,0.9);}
+        .bg-in { background: #DCFCE7; color: #166534; }
+        .bg-out { background: #FEE2E2; color: #991B1B; }
+        .h-title { font-weight: 700; font-size: 0.9rem; }
+        .h-sub { font-size: 0.75rem; color: var(--text-sub); }
+        .h-time { font-weight: 700; font-size: 0.85rem; color: var(--text-main); }
 
-        .absen-footer{
-            margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;
+        /* Bottom Nav */
+        .bottom-nav {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);
+            padding: 12px 25px; border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex; gap: 35px; align-items: center; z-index: 100;
+            border: 1px solid rgba(0,0,0,0.05);
         }
-        .footer-caption{font-size:.72rem;color:var(--muted);line-height:1.2;}
-        .footer-mini{font-size:.7rem;color:rgba(148,163,184,0.95);text-align:right;}
+        .nav-item { font-size: 1.4rem; color: #9CA3AF; transition: 0.2s; }
+        .nav-item.active { color: var(--primary); transform: translateY(-2px); }
 
-        @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-
-        @media(max-width:480px){
-            body{padding:18px 10px;}
-            .absen-card{padding:20px 14px 16px;}
-            .info-main h4{font-size:1.05rem;}
-            .history-box .time{font-size:1.05rem;}
-            .footer-caption{font-size:.68rem;}
-            .footer-mini{font-size:.66rem;}
-            .location-map{height:200px;}
+        /* Loading Overlay */
+        .loader {
+            position: absolute; inset: 0; background: var(--bg-body); z-index: 200;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
     </style>
+</head>
+<body>
 
-    {{-- Leaflet CSS --}}
-    <link rel="stylesheet"
-          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-          crossorigin=""/>
+<div class="mobile-frame">
+    
+    {{-- A. BAGIAN STICKY (HEADER + ID + ABSEN) --}}
+    <div class="pinned-section">
+        
+        {{-- Header --}}
+        <div class="top-bar">
+            <a href="#" onclick="history.back()" class="btn-icon">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            <div style="font-weight: 700; color: var(--primary);">Absensi {{ ucfirst($mahasiswa->status) }}</div>
+            <a href="#" onclick="location.reload()" class="btn-icon">
+                <i class="bi bi-arrow-clockwise"></i>
+            </a>
+        </div>
 
-    <div class="rsud-logo-page">
-        <img src="https://rsudslg.kedirikab.go.id/asset_compro/img/logo/Logo.png" alt="Logo RSUD SLG">
-    </div>
+        {{-- Sapaan Dinamis & Awan Animasi --}}
+        <div class="greeting-wrapper">
+            <i class="bi bi-cloud-fill cloud-anim c1"></i>
+            <i class="bi bi-clouds-fill cloud-anim c2"></i>
+            <i class="bi bi-cloud-fill cloud-anim c3"></i>
+            
+            <h1 class="greeting-text" id="greeting-msg">Halo,</h1>
+            <div class="greeting-sub">Sudah siap bertugas hari ini?</div>
+        </div>
 
-    <div class="absen-wrapper">
-        <div class="absen-shell">
-            <div class="absen-card">
-                <div class="absen-content">
-                    <div class="avatar-wrap">
-                        <img src="{{ asset('icon.png') }}" alt="Maskot Rakun">
-                        <div class="avatar-caption">ABSENSI MAHASISWA PRAKTIK</div>
+        {{-- ID Card --}}
+        <div class="card-container">
+            <div class="digital-id">
+                <div class="id-header">
+                    <div class="chip">
+                        <i class="bi bi-activity"></i> {{ ucfirst($mahasiswa->status) }}
+                    </div>
+                    <div class="chip">
+                        <i class="bi bi-building"></i> {{ $ruangan ? $ruangan->nm_ruangan : '-' }}
+                    </div>
+                </div>
+                <div class="id-body">
+                    <img src="{{ $mahasiswa->foto_path ? asset($mahasiswa->foto_path) : 'https://ui-avatars.com/api/?name='.urlencode($mahasiswa->nm_mahasiswa).'&background=fff&color=7c1316' }}" class="avatar">
+                    <div class="info">
+                        <h2>{{ \Illuminate\Support\Str::limit($mahasiswa->nm_mahasiswa, 18) }}</h2>
+                        <p>{{ $mahasiswa->univ_asal }}</p>
+                    </div>
+                </div>
+                <div class="id-footer">
+                    <div class="stat-item">
+                        <label>Jadwal</label>
+                        <span>{{ $scheduleInfo }}</span>
+                    </div>
+                    <div class="stat-item" style="text-align: right;">
+                        <label>Status</label>
+                        <span>{{ $absenHariIni && $absenHariIni->type == 'masuk' ? 'Sedang Kerja' : 'Belum Masuk' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Error / Info Device --}}
+        @if($error_state)
+            <div class="alert-box alert-red">
+                <i class="bi bi-shield-exclamation fs-5"></i>
+                <div><strong>Akses Dibatasi</strong><br>{{ $error_state }}</div>
+            </div>
+        @endif
+
+        {{-- Action UI (Dynamic) --}}
+        <div class="action-area">
+            
+            {{-- 1. Register Device --}}
+            <div id="device-register-ui" class="alert-box alert-yellow" style="display: none; flex-direction:column; text-align:center;">
+                <i class="bi bi-phone-vibrate fs-1 text-warning"></i>
+                <div>
+                    <strong>Device Belum Terdaftar</strong><br>
+                    Kunci akun Anda di perangkat ini agar aman.
+                </div>
+                <button onclick="registerCurrentDevice()" style="background:#F59E0B; border:none; color:white; padding:8px 20px; border-radius:8px; width:100%; font-weight:700;">Kunci Perangkat</button>
+            </div>
+
+            {{-- 2. Device Mismatch --}}
+            <div id="device-mismatch-ui" class="alert-box alert-red" style="display: none;">
+                <i class="bi bi-shield-x fs-1"></i>
+                <div><strong>Perangkat Salah!</strong><br>Gunakan perangkat yang pertama kali didaftarkan.</div>
+            </div>
+
+            {{-- 3. Attendance Ready --}}
+            <div id="attendance-ui" style="display: none;">
+                @if(!$dispensasiAktif) 
+                    
+                    {{-- Map --}}
+                    <div class="map-card">
+                        <div id="location-map" style="width: 100%; height: 100%;"></div>
+                        <div class="gps-status" id="gps-status-text">
+                            <span class="spinner-border spinner-border-sm text-secondary" style="width:10px;height:10px;"></span>
+                            <span style="margin-left:5px;">Cari GPS...</span>
+                        </div>
                     </div>
 
-                    <div class="info-main">
-                        <h4>{{ $mahasiswa->nm_mahasiswa }}</h4>
-                        <p>
-                            <i class="bi bi-mortarboard-fill"></i>
-                            {{ $mahasiswa->univ_asal }} • {{ $mahasiswa->prodi }}
-                        </p>
-                    </div>
-
-                    @php $isAktif = strtolower($mahasiswa->status) === 'aktif'; @endphp
-                    <div class="chip-row">
-                        <div class="chip">
-                            <i class="bi bi-door-open"></i>
-                            <span>Ruangan: {{ $mahasiswa->ruangan->nm_ruangan ?? $mahasiswa->nm_ruangan }}</span>
-                        </div>
-                        <div class="chip {{ $isAktif ? 'chip-status-aktif' : 'chip-status-nonaktif' }}">
-                            <i class="bi {{ $isAktif ? 'bi-activity' : 'bi-pause-circle' }}"></i>
-                            <span>Status: {{ $mahasiswa->status }}</span>
-                        </div>
-                    </div>
-
-                    <div class="absen-divider"></div>
-
-                    {{-- STATUS LOKASI + MAP --}}
-                    <div class="location-info">
-                        <div class="location-title">Status Lokasi</div>
-                        <div class="location-ref">
-                            Titik referensi RSUD SLG: <strong>-7.8215986, 112.0578523</strong>
-                        </div>
-                        <div id="location-map" class="location-map"></div>
-                        <div id="loc-status-text" class="location-status-text">
-                            Mengambil lokasi... izinkan akses GPS di browser untuk menampilkan posisi kamu terhadap RSUD Simpang Lima Gumul.
-                        </div>
-                    </div>
-
-                    {{-- FORM ABSEN --}}
+                    {{-- Form Absen --}}
                     <form id="absen-form" action="{{ route('absensi.toggle', $mahasiswa->share_token) }}" method="POST">
                         @csrf
                         <input type="hidden" name="lat" id="geo-lat">
                         <input type="hidden" name="lng" id="geo-lng">
                         <input type="hidden" name="acc" id="geo-acc">
+                        <input type="hidden" name="device_id" id="input-device-id">
 
-                        <button type="submit" class="absen-btn btn-press">
-                            <i class="bi bi-fingerprint"></i>
-                            <span>Absen Hari Ini</span>
-                        </button>
+                        @php 
+                            $btnState = ($absenHariIni && $absenHariIni->type === 'masuk') ? 'keluar' : 'masuk'; 
+                        @endphp
+
+                        @if($btnState == 'keluar')
+                            <button type="submit" class="btn-swipe grad-red" id="btn-submit" disabled>
+                                <i class="bi bi-box-arrow-right fs-4"></i> Checkout Pulang
+                            </button>
+                        @else
+                            <button type="submit" class="btn-swipe grad-green" id="btn-submit" disabled>
+                                <i class="bi bi-fingerprint fs-4"></i> Absen Masuk
+                            </button>
+                        @endif
                     </form>
 
-                    {{-- Riwayat Hari Ini --}}
-                    <div class="history-card">
-                        <div class="history-box {{ $absenHariIni && $absenHariIni->jam_masuk ? '' : 'empty' }}">
-                            <div class="history-box-inner">
-                                <h6><span>Masuk</span><i class="bi bi-box-arrow-in-right"></i></h6>
-                                <div class="time">
-                                    {{ $absenHariIni && $absenHariIni->jam_masuk ? $absenHariIni->jam_masuk->format('H:i') : '-' }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="history-box {{ $absenHariIni && $absenHariIni->jam_keluar ? '' : 'empty' }}">
-                            <div class="history-box-inner">
-                                <h6><span>Keluar</span><i class="bi bi-box-arrow-right"></i></h6>
-                                <div class="time">
-                                    {{ $absenHariIni && $absenHariIni->jam_keluar ? $absenHariIni->jam_keluar->format('H:i') : '-' }}
-                                </div>
-                            </div>
-                        </div>
+                @else
+                    {{-- Tampilan Jika Sedang Izin (Dispensasi) --}}
+                    <div style="background: #FFF1F2; border:1px solid #FECACA; border-radius:16px; padding:20px; text-align:center;">
+                        <i class="bi bi-calendar2-check fs-1 text-danger"></i>
+                        <h4 style="margin:10px 0 5px; color:#991B1B;">Sedang Izin</h4>
+                        <p style="margin:0; font-size:0.85rem; color:#7F1D1D;">{{ $dispensasiAktif->keterangan }}</p>
                     </div>
-
-                    <div class="absen-footer">
-                        <div class="footer-caption">
-                            <div>RSUD Simpang Lima Gumul</div>
-                            <div>Kabupaten Kediri</div>
-                        </div>
-                        <div class="footer-mini">
-                            Dibuat untuk kemudahan absensi<br>mahasiswa praktik
-                        </div>
-                    </div>
-                </div>
+                @endif
             </div>
         </div>
     </div>
 
-    {{-- @push('scripts') --}}
-        {{-- Leaflet JS --}}
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-                {{-- integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" --}}
-                crossorigin=""></script>
+    {{-- B. BAGIAN BAWAH (SCROLLABLE HISTORY) --}}
+    <div class="scrollable-section">
+        <div class="section-title">Riwayat Aktivitas</div>
+        
+        @forelse($riwayat as $log)
+            <div class="h-item">
+                <div class="h-icon {{ $log->type == 'masuk' ? 'bg-in' : 'bg-out' }}">
+                    <i class="bi {{ $log->type == 'masuk' ? 'bi-arrow-down-right' : 'bi-arrow-up-right' }}"></i>
+                </div>
+                <div class="h-info">
+                    <div class="h-title">{{ $log->type == 'masuk' ? 'Absen Masuk' : 'Absen Pulang' }}</div>
+                    <div class="h-sub">{{ \Carbon\Carbon::parse($log->created_at)->translatedFormat('l, d F') }}</div>
+                </div>
+                <div class="h-time">
+                    {{ $log->type == 'masuk' ? 
+                        ($log->jam_masuk ? \Carbon\Carbon::parse($log->jam_masuk)->format('H:i') : '-') : 
+                        ($log->jam_keluar ? \Carbon\Carbon::parse($log->jam_keluar)->format('H:i') : '-') 
+                    }}
+                </div>
+            </div>
+        @empty
+            <div style="text-align: center; padding: 30px; color: var(--text-sub); font-size: 0.85rem;">
+                <i class="bi bi-clock-history fs-1"></i><br>Belum ada riwayat.
+            </div>
+        @endforelse
+    </div>
 
-        {{-- SweetAlert2 --}}
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    {{-- BOTTOM NAV --}}
+    <div class="bottom-nav">
+        <a href="#" onclick="history.back()" class="nav-item">
+            <i class="bi bi-grid-fill"></i>
+        </a>
+        <a href="#" class="nav-item active">
+            <i class="bi bi-qr-code-scan"></i>
+        </a>
+        <a href="#" onclick="location.reload()" class="nav-item">
+            <i class="bi bi-arrow-repeat"></i>
+        </a>
+    </div>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const form = document.getElementById('absen-form');
-                const btn = form ? form.querySelector('button[type="submit"]') : null;
-                const statusEl = document.getElementById('loc-status-text');
+    {{-- LOADER OVERLAY --}}
+    <div id="loader" class="loader">
+        <div class="spinner-border text-danger" role="status"></div>
+        <p style="margin-top: 15px; font-size: 0.85rem; color: #666;">Memuat...</p>
+    </div>
 
-                // Titik referensi RSUD SLG (real)
-                const RSUD_LAT = -7.8215986;
-                const RSUD_LNG = 112.0578523;
-                const RADIUS_ALLOWED = 200;
-                const MAX_ACC = 150;
+</div>
 
-                let map = null;
-                let rsudMarker = null;
-                let radiusCircle = null;
-                let userMarker = null;
+{{-- SCRIPT --}}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
 
-                function haversine(lat1, lon1, lat2, lon2) {
-                    const R = 6371000;
-                    const toRad = d => d * Math.PI / 180;
-                    const dLat = toRad(lat2 - lat1);
-                    const dLon = toRad(lon2 - lon1);
-                    const a = Math.sin(dLat/2)**2 +
-                        Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
-                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                    return R * c;
-                }
+// --- Set Sapaan Dinamis Berdasarkan Jam (Lokal User) ---
+function setGreeting() {
+    const hour = new Date().getHours();
+    let greeting = 'Selamat Malam';
+    
+    if (hour >= 4 && hour < 11) {
+        greeting = 'Selamat Pagi';
+    } else if (hour >= 11 && hour < 15) {
+        greeting = 'Selamat Siang';
+    } else if (hour >= 15 && hour < 18) {
+        greeting = 'Selamat Sore';
+    }
+    
+    document.getElementById('greeting-msg').innerText = greeting + ',';
+}
 
-                function initMapBase() {
-                    const mapDiv = document.getElementById('location-map');
-                    if (!mapDiv) return;
-                    if (map) return;
+// --- Device ID ---
+function isInAppBrowser() {
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    return (ua.indexOf("WhatsApp") > -1) || 
+           (ua.indexOf("Line") > -1) || 
+           (ua.indexOf("Instagram") > -1) || 
+           (ua.indexOf("FBAN") > -1) || 
+           (ua.indexOf("FBAV") > -1);
+}
 
-                    map = L.map('location-map').setView([RSUD_LAT, RSUD_LNG], 18);
+function setCookie(name, value, days) {
+    let expires = "";
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/; secure; samesite=strict";
+}
 
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        maxZoom: 19,
-                        attribution: '&copy; OpenStreetMap contributors'
-                    }).addTo(map);
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for(let i=0;i < ca.length;i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
 
-                    rsudMarker = L.marker([RSUD_LAT, RSUD_LNG]).addTo(map)
-                        .bindPopup('RSUD Simpang Lima Gumul');
+function getDeviceId() {
+    const deviceKey = 'sindikat_device_id';
+    let id = localStorage.getItem(deviceKey);
 
-                    radiusCircle = L.circle([RSUD_LAT, RSUD_LNG], {
-                        radius: RADIUS_ALLOWED,
-                        color: '#7c1316',
-                        weight: 1,
-                        fillColor: '#f97373',
-                        fillOpacity: 0.18
-                    }).addTo(map);
-                }
+    if (!id) {
+        id = getCookie(deviceKey);
+        if (id) localStorage.setItem(deviceKey, id);
+    }
 
-                function updateUserOnMap(lat, lng) {
-                    initMapBase();
-                    if (!map) return;
+    if (!id) {
+        id = 'dev-' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+        localStorage.setItem(deviceKey, id);
+        setCookie(deviceKey, id, 365);
+    }
 
-                    if (!userMarker) {
-                        userMarker = L.marker([lat, lng]).addTo(map)
-                            .bindPopup('Lokasi Kamu');
-                    } else {
-                        userMarker.setLatLng([lat, lng]);
-                    }
+    return id;
+}
 
-                    const bounds = L.latLngBounds([
-                        [RSUD_LAT, RSUD_LNG],
-                        [lat, lng]
-                    ]);
-                    map.fitBounds(bounds, {padding:[20,20]});
-                }
+document.addEventListener("DOMContentLoaded", function() {
+    
+    setGreeting(); // Panggil fungsi greeting saat load
 
-                function setHiddenLocation(lat, lng, acc) {
-                    document.getElementById('geo-lat').value = lat;
-                    document.getElementById('geo-lng').value = lng;
-                    document.getElementById('geo-acc').value = Math.round(acc);
-                }
+    if (isInAppBrowser()) {
+        Swal.fire({
+            title: 'Buka di Browser Asli!',
+            text: 'Untuk menghindari error "Perangkat Salah", mohon klik ikon 3 titik di pojok kanan atas dan pilih "Buka di Chrome/Safari".',
+            icon: 'warning',
+            confirmButtonColor: '#8E1616', 
+            confirmButtonText: 'Mengerti'
+        });
+    }
+});
 
-                function handlePosition(position, forSubmit = false) {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    const acc = position.coords.accuracy;
+    const clientDeviceId = getDeviceId();
+    const serverDeviceStatus = "{{ $deviceStatus }}"; 
+    const dbDeviceId = "{{ $user->device_id ?? '' }}";
 
-                    const dist = haversine(lat, lng, RSUD_LAT, RSUD_LNG);
-                    const inRadius = dist <= RADIUS_ALLOWED;
+    // --- Init ---
+    document.addEventListener("DOMContentLoaded", function() {
+        const loader = document.getElementById('loader');
+        const regUI = document.getElementById('device-register-ui');
+        const mismatchUI = document.getElementById('device-mismatch-ui');
+        const attendanceUI = document.getElementById('attendance-ui');
+        const inputDeviceId = document.getElementById('input-device-id');
 
-                    updateUserOnMap(lat, lng);
-                    setHiddenLocation(lat, lng, acc);
-
-                    if (statusEl) {
-                        if (acc > MAX_ACC) {
-                            statusEl.innerHTML =
-                                'Lokasi terdeteksi namun kurang akurat. <span class="badge-warn">Perbaiki sinyal GPS dan internet, lalu coba lagi.</span>';
-                        } else if (inRadius) {
-                            statusEl.innerHTML =
-                                '<span class="badge-ok">Kamu berada di area RSUD Simpang Lima Gumul (radius 200 meter).</span>';
-                        } else {
-                            statusEl.innerHTML =
-                                '<span class="badge-no">Kamu berada di luar radius 200 meter RSUD Simpang Lima Gumul.</span>';
-                        }
-                    }
-
-                    if (forSubmit) {
-                        if (acc > MAX_ACC) {
-                            if (btn) { btn.disabled = false; btn.classList.remove('touch-active'); }
-                            Swal.fire({
-                                icon:'warning',
-                                title:'Lokasi Kurang Akurat',
-                                text:'Perbaiki sinyal GPS dan internet, lalu coba lagi di dekat area RSUD SLG.'
-                            });
-                            return;
-                        }
-
-                        if (!inRadius) {
-                            if (btn) { btn.disabled = false; btn.classList.remove('touch-active'); }
-                            Swal.fire({
-                                icon:'error',
-                                title:'Di Luar Area RSUD SLG',
-                                text:'Absen harus dilakukan di area RSUD Simpang Lima Gumul (radius 200 meter).'
-                            });
-                            return;
-                        }
-
-                        form.submit();
-                    }
-                }
-
-                function handleLocationError(error, context) {
-                    let msg = 'Lokasi tidak tersedia. Aktifkan GPS dan izinkan akses lokasi di browser.';
-                    if (error.code === error.PERMISSION_DENIED) {
-                        msg = 'Izin lokasi ditolak. Aktifkan GPS dan izinkan akses lokasi untuk dapat melakukan absensi.';
-                    } else if (error.code === error.POSITION_UNAVAILABLE) {
-                        msg = 'Informasi lokasi tidak tersedia. Coba pindah ke area yang lebih terbuka atau cek sinyal.';
-                    } else if (error.code === error.TIMEOUT) {
-                        msg = 'Pengambilan lokasi terlalu lama. Pastikan GPS dan internet aktif, lalu coba lagi.';
-                    }
-
-                    if (statusEl) {
-                        statusEl.innerHTML =
-                            '<span class="badge-warn">Lokasi tidak tersedia. Aktifkan GPS & izinkan akses lokasi di browser.</span>';
-                    }
-
-                    if (context === 'submit') {
-                        if (btn) { btn.disabled = false; btn.classList.remove('touch-active'); }
-                        Swal.fire({
-                            icon:'error',
-                            title:'Lokasi Tidak Tersedia',
-                            text:msg
-                        });
-                    }
-                }
-
-                // Map dasar selalu muncul di titik RSUD
-                initMapBase();
-
-                // Preview lokasi awal (auto minta GPS)
-                if ('geolocation' in navigator) {
-                    navigator.geolocation.getCurrentPosition(
-                        pos => handlePosition(pos, false),
-                        err => handleLocationError(err, 'preview'),
-                        {enableHighAccuracy:true,timeout:10000,maximumAge:0}
-                    );
+        setTimeout(() => {
+            loader.style.display = 'none';
+            
+            if (serverDeviceStatus === 'need_register') {
+                regUI.style.display = 'flex';
+            } else {
+                if (dbDeviceId === clientDeviceId) {
+                    attendanceUI.style.display = 'block';
+                    if(inputDeviceId) inputDeviceId.value = clientDeviceId;
+                    initMap();
                 } else {
-                    if (statusEl) {
-                        statusEl.innerHTML =
-                            '<span class="badge-warn">Perangkat tidak mendukung fitur lokasi. Absensi membutuhkan GPS aktif.</span>';
-                    }
+                    mismatchUI.style.display = 'flex';
                 }
+            }
+        }, 600);
+    });
 
-                // Submit absensi
-                if (form && btn) {
-                    form.addEventListener('submit', function (e) {
-                        e.preventDefault();
+    // --- Register ---
+    function registerCurrentDevice() {
+        Swal.fire({
+            title: 'Kunci Perangkat?',
+            text: "Akun ini akan terkunci di perangkat ini selamanya.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#F59E0B',
+            confirmButtonText: 'Ya, Kunci!',
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                // MODIFIKASI TERAPLIKASI DI SINI: Menyertakan param $mahasiswa->share_token ke url route
+                return fetch("{{ route('absensi.register_device', $mahasiswa->share_token) }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ device_id: clientDeviceId })
+                }).then(res => res.json()).catch(err => Swal.showValidationMessage(`Gagal: ${err}`));
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire('Berhasil', 'Perangkat berhasil didaftarkan.', 'success').then(() => location.reload());
+            }
+        });
+    }
 
-                        if (!('geolocation' in navigator)) {
-                            Swal.fire({
-                                icon:'error',
-                                title:'Lokasi Tidak Didukung',
-                                text:'Perangkat / browser tidak mendukung fitur lokasi. Absensi membutuhkan GPS aktif.'
-                            });
-                            return;
-                        }
+    // --- Helper: Hitung Jarak (Haversine Formula) ---
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3; 
+        const p1 = lat1 * Math.PI/180;
+        const p2 = lat2 * Math.PI/180;
+        const dp = (lat2-lat1) * Math.PI/180;
+        const dl = (lon2-lon1) * Math.PI/180;
 
-                        btn.disabled = true;
-                        btn.classList.add('touch-active');
+        const a = Math.sin(dp/2) * Math.sin(dp/2) +
+                  Math.cos(p1) * Math.cos(p2) *
+                  Math.sin(dl/2) * Math.sin(dl/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c; 
+    }
 
-                        navigator.geolocation.getCurrentPosition(
-                            pos => handlePosition(pos, true),
-                            err => handleLocationError(err, 'submit'),
-                            {enableHighAccuracy:true,timeout:10000,maximumAge:0}
-                        );
-                    });
-                }
+function initMap() {
+    if(!document.getElementById('location-map')) return;
 
-                // Pesan dari backend
-                @if(session('success'))
-                    Swal.fire({
-                        icon:'success',
-                        title:'Berhasil!',
-                        text:'{{ session('success') }}',
-                        showConfirmButton:false,
-                        timer:2500
-                    });
-                @endif
+    const RSUD_LAT = -7.82159559;
+    const RSUD_LNG = 112.05786417;
+    const MAX_RADIUS = 350; 
 
-                @if(session('error'))
-                    Swal.fire({
-                        icon:'warning',
-                        title:'Perhatian!',
-                        text:'{{ session('error') }}',
-                        showConfirmButton:true
-                    });
-                @endif
-            });
-        </script>
-    {{-- @endpush --}}
-@endsection
+    const map = L.map('location-map', { zoomControl: false, dragging: false }).setView([RSUD_LAT, RSUD_LNG], 16);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
+    L.circle([RSUD_LAT, RSUD_LNG], { radius: MAX_RADIUS, color: 'none', fillColor: '#10B981', fillOpacity: 0.15 }).addTo(map);
+    
+    const userMarker = L.marker([RSUD_LAT, RSUD_LNG]).addTo(map);
+    const btn = document.getElementById('btn-submit');
+    const statusTxt = document.getElementById('gps-status-text');
+
+    const geoOptions = {
+        enableHighAccuracy: true,
+        timeout: 20000,           
+        maximumAge: 3000          
+    };
+
+    function success(pos) {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const acc = Math.round(pos.coords.accuracy);
+        const distance = Math.round(calculateDistance(lat, lng, RSUD_LAT, RSUD_LNG));
+
+        document.getElementById('geo-lat').value = lat;
+        document.getElementById('geo-lng').value = lng;
+        document.getElementById('geo-acc').value = acc;
+
+        userMarker.setLatLng([lat, lng]);
+        map.setView([lat, lng], 17);
+
+        if (acc > 200) { 
+            statusTxt.innerHTML = `<span class="text-warning"><i class="bi bi-broadcast"></i> Mencari sinyal stabil (${acc}m)...</span>`;
+        } else if (distance <= MAX_RADIUS) {
+            statusTxt.innerHTML = `<span class="text-success"><i class="bi bi-geo-alt-fill"></i> Area Terdeteksi (${distance}m)</span>`;
+            btn.disabled = false;
+        } else {
+            statusTxt.innerHTML = `<span class="text-danger"><i class="bi bi-x-octagon-fill"></i> Di Luar Area (${distance}m)</span>`;
+            btn.disabled = true;
+        }
+    }
+
+    function error(err) {
+        console.warn(`ERROR(${err.code}): ${err.message}`);
+        let errMsg = "Klik 'Izinkan Lokasi' di browser";
+        
+        if(err.code === 1) errMsg = "Izin lokasi ditolak. Cek setelan browser.";
+        if(err.code === 2) errMsg = "Sinyal GPS hilang. Coba ke area terbuka.";
+        if(err.code === 3) errMsg = "Gagal mengunci lokasi (Timeout).";
+
+        statusTxt.innerHTML = `<span class="text-danger"><i class="bi bi-shield-x"></i> ${errMsg}</span>`;
+        btn.disabled = true;
+    }
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(success, error, geoOptions);
+        navigator.geolocation.watchPosition(success, error, geoOptions);
+    } else {
+        statusTxt.innerHTML = `<span class="text-danger">Browser tidak mendukung GPS</span>`;
+    }
+}
+
+@if(session('success')) 
+    Swal.fire({ icon: 'success', title: 'Berhasil', text: '{{ session('success') }}', timer: 2000, showConfirmButton: false }); 
+@endif
+
+@if(session('error'))
+    (function() {
+        const errMsg = "{{ session('error') }}";
+        const isLate = errMsg.includes('Terlambat'); // Deteksi pesan error terlambat
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal',
+            text: errMsg,
+            confirmButtonColor: '#8E1616',
+            confirmButtonText: 'OK',
+            // Jika terlambat, tampilkan tombol tambahan
+            showCancelButton: isLate, 
+            cancelButtonText: isLate ? 'Buat Dispen Terlambat' : '',
+            cancelButtonColor: '#F59E0B', // Warna kuning (disesuaikan dengan tema UI Anda)
+            reverseButtons: true
+        }).then((result) => {
+            // Jika tombol 'Buat Dispen Terlambat' diklik
+            if (result.dismiss === Swal.DismissReason.cancel) {
+                window.location.href = "{{ route('mahasiswa.dispensasi.create') }}";
+            }
+        });
+    })();
+@endif
+</script>
+
+</body>
+</html>

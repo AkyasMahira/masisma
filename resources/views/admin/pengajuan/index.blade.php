@@ -1,292 +1,339 @@
 @extends('layouts.app')
 
-@section('title', 'Approval Pengajuan')
-@section('page-title', 'Data Pengajuan')
-
 @section('content')
-    <style>
-        :root {
-            --custom-maroon: #7c1316;
-            --custom-maroon-light: #a3191d;
-            --custom-maroon-subtle: #fcf0f1;
-            --text-dark: #2c3e50;
-            --text-muted: #64748b;
-            --card-radius: 16px;
-            --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
-            --transition: 0.3s ease;
-        }
+<style>
+    .filter-card {
+        border: none;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+    }
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-right: none;
+        color: var(--custom-maroon);
+    }
+    .filter-card .form-control, .filter-card .form-select {
+        border-left: none;
+        background-color: #f8f9fa;
+    }
+    .filter-card .form-control:focus, .filter-card .form-select:focus {
+        background-color: #fff;
+        box-shadow: none;
+        border-color: #dee2e6;
+    }
+    .label-icon {
+        font-size: 0.85rem;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
 
-        /* --- Header --- */
-        .page-header-wrapper {
-            background: #fff;
-            border-radius: var(--card-radius);
-            padding: 1.5rem;
-            box-shadow: var(--shadow-soft);
-            margin-bottom: 2rem;
-            border-left: 5px solid var(--custom-maroon);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    :root {
+        --custom-maroon: #7c1316;
+        --card-radius: 16px;
+        --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
+        --transition: 0.3s ease;
+    }
 
-        /* --- Table Card --- */
-        .custom-table-card {
-            background: #fff;
-            border-radius: var(--card-radius);
-            box-shadow: var(--shadow-soft);
-            overflow: hidden;
-            border: none;
-        }
+    /* --- Filter Card --- */
+    .filter-card {
+        background: #fff;
+        border-radius: var(--card-radius);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-soft);
+        margin-bottom: 1.5rem;
+        border-top: 4px solid var(--custom-maroon);
+    }
 
-        .table thead th {
-            background-color: var(--custom-maroon);
-            color: white;
-            border: none;
-            padding: 1rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.5px;
-            vertical-align: middle;
-            white-space: nowrap;
-        }
+    /* --- Page Header --- */
+    .page-header-wrapper {
+        background: #fff;
+        border-radius: var(--card-radius);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-soft);
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-        .table tbody td {
-            padding: 1rem;
-            vertical-align: middle;
-            color: #475569;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 0.9rem;
-        }
+    /* --- Table Card --- */
+    .custom-table-card {
+        background: #fff;
+        border-radius: var(--card-radius);
+        box-shadow: var(--shadow-soft);
+        overflow: hidden;
+        border: none;
+    }
 
-        .table-hover tbody tr:hover {
-            background-color: #fff5f6;
-        }
+    /* --- Action Buttons --- */
+    .btn-action {
+        width: 32px; height: 32px;
+        border-radius: 8px;
+        display: inline-flex; align-items: center; justify-content: center;
+        transition: var(--transition); border: none; color: white;
+        text-decoration: none; font-size: 0.9rem;
+    }
+    .btn-approve { background-color: #10b981; }
+    .btn-reject { background-color: #ef4444; }
+    .btn-delete { background-color: #94a3b8; }
+    .btn-detail { background-color: #3b82f6; color: white; width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; }
+    
+    .btn-action:hover, .btn-detail:hover { 
+        transform: translateY(-2px); 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
+        color: white;
+    }
 
-        /* --- Status Badges (Main) --- */
-        .badge-status {
-            padding: 5px 10px;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 0.75rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
+    .badge-status { padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+    
+    /* Animation */
+    .animate-up { animation: fadeInUp 0.5s ease forwards; opacity: 0; transform: translateY(20px); }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+        .header-card {
+        background: white;
+        border-radius: 8px;
+        border-left: 5px solid #7c1316;
+        padding: 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+</style>
 
-        .status-pending { background-color: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
-        .status-approved { background-color: #f0fdf4; color: #15803d; border: 1px solid #dcfce7; }
-        .status-rejected { background-color: #fef2f2; color: #b91c1c; border: 1px solid #fee2e2; }
-
-        /* --- Secondary Badges (Surat & Bayar) --- */
-        .badge-pill-soft {
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-        .bg-soft-gray { background-color: #f1f5f9; color: #64748b; }
-        .bg-soft-purple { background-color: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; } /* Sudah Kirim */
-        .bg-soft-blue { background-color: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; } /* Uploaded */
-        .bg-soft-yellow { background-color: #fef9c3; color: #854d0e; border: 1px solid #fde047; } /* Menunggu */
-        .bg-soft-green { background-color: #dcfce7; color: #15803d; border: 1px solid #86efac; } /* Verified */
-
-        /* --- Action Buttons --- */
-        .btn-action {
-            width: 32px; height: 32px;
-            border-radius: 8px;
-            display: inline-flex; align-items: center; justify-content: center;
-            transition: var(--transition); border: none; color: white;
-            cursor: pointer;
-        }
-        .btn-approve { background-color: #10b981; }
-        .btn-approve:hover { background-color: #059669; transform: translateY(-2px); }
-        
-        .btn-reject { background-color: #ef4444; }
-        .btn-reject:hover { background-color: #dc2626; transform: translateY(-2px); }
-
-        /* --- PENAMBAHAN STYLE UNTUK TOMBOL DELETE --- */
-        .btn-delete { background-color: #94a3b8; } /* Warna abu-abu netral */
-        .btn-delete:hover { background-color: #dc2626; transform: translateY(-2px); } /* Merah saat di-hover */
-
-        .btn-detail {
-            background-color: white; border: 1px solid #e2e8f0; color: var(--text-dark);
-            padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 500;
-            text-decoration: none; transition: var(--transition); display: inline-flex; align-items: center; gap: 5px;
-        }
-        .btn-detail:hover { background-color: #f8f9fa; border-color: var(--custom-maroon); color: var(--custom-maroon); }
-
-        /* Animation */
-        .animate-up { animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
-        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
-    </style>
-
-    <div class="page-header-wrapper animate-up">
-        <div>
-            <h4 class="fw-bold mb-1" style="color: var(--custom-maroon);">Daftar Pengajuan</h4>
-            <small class="text-muted">Kelola persetujuan pengajuan penelitian & magang.</small>
-        </div>
+<div class="header-card d-flex justify-content-between align-items-center">
+    <div>
+        <h4 class="fw-bold mb-0 text-dark">Data Pengajuan</h4>
+        <small class="text-muted">Kelola layanan pengajuan magang dan penelitian.</small>
     </div>
+</div>
 
+<div class="filter-card animate-up" style="animation-delay: 0.05s;">
+    <form method="GET" action="{{ route('admin.pengajuan.index') }}">
+        <div class="row g-4">
+            {{-- SEKSI 1: IDENTITAS --}}
+            <div class="col-md-4">
+                <label class="label-icon fw-bold text-dark">
+                    <i class="bi bi-person-bounding-box text-primary"></i> Pencarian Pemohon
+                </label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Cari Nama atau Email..." value="{{ request('search') }}">
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="label-icon fw-bold text-dark">
+                    <i class="bi bi-building text-info"></i> Institusi / Universitas
+                </label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="bi bi-university"></i></span>
+                    <select name="university_id" class="form-select">
+                        <option value="">Semua Institusi</option>
+                        @foreach($universities as $univ)
+                            <option value="{{ $univ->id }}" {{ request('university_id') == $univ->id ? 'selected' : '' }}>
+                                {{ $univ->nama_instansi ?? $univ->nama_universitas }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="label-icon fw-bold text-dark">
+                    <i class="bi bi-layers text-success"></i> Kategori Data
+                </label>
+                <div class="d-flex gap-2">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                        <select name="jenis" class="form-select">
+                            <option value="">Semua Kategori</option>
+                            <!-- NOTE: Label diubah jadi Pendidikan & Penelitian, tapi value tetap -->
+                            <option value="magang" {{ request('jenis') == 'magang' ? 'selected' : '' }}>Pendidikan</option>
+                            <option value="pra_penelitian" {{ request('jenis') == 'pra_penelitian' ? 'selected' : '' }}>Penelitian</option>
+                        </select>
+                    </div>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                        <select name="id_card_status" class="form-select">
+                            <option value="">ID Card</option>
+                            <option value="1" {{ request('id_card_status') === '1' ? 'selected' : '' }}>Sudah ACC</option>
+                            <option value="0" {{ request('id_card_status') === '0' ? 'selected' : '' }}>Belum ACC</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            {{-- SEKSI 2: STATUS & TANGGAL --}}
+            <div class="col-md-3">
+                <label class="label-icon fw-bold text-dark">
+                    <i class="bi bi-check-circle text-warning"></i> Status Approval
+                </label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="bi bi-flag"></i></span>
+                    <select name="status" class="form-select">
+                        <option value="">Semua Status</option>
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>⌛ Pending</option>
+                        <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>✅ Approved</option>
+                        <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>❌ Rejected</option>
+                        <option value="canceled" {{ request('status') == 'canceled' ? 'selected' : '' }}>🚫 Canceled</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <label class="label-icon fw-bold text-dark">
+                    <i class="bi bi-calendar-range text-danger"></i> Rentang Tanggal Pengajuan
+                </label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Dari</span>
+                    <input type="date" name="start_date" class="form-control" value="{{ request('start_date') }}">
+                    <span class="input-group-text">Hingga</span>
+                    <input type="date" name="end_date" class="form-control" value="{{ request('end_date') }}">
+                </div>
+            </div>
+
+            {{-- TOMBOL AKSI --}}
+            <div class="col-md-4 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-sm w-100 fw-bold text-white shadow-sm" style="background-color: var(--custom-maroon); height: 38px; border-radius: 8px;">
+                    <i class="bi bi-filter-left"></i> Terapkan Filter
+                </button>
+                <a href="{{ route('admin.pengajuan.index') }}" class="btn btn-sm btn-light border w-25 d-flex align-items-center justify-content-center" style="height: 38px; border-radius: 8px;" title="Reset Filter">
+                    <i class="bi bi-arrow-counterclockwise text-secondary"></i>
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="alertContainer">
     @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show animate-up" role="alert" style="border-radius: 12px;">
+        <div class="alert alert-success border-0 shadow-sm animate-up" style="border-radius: 12px;">
             <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
-
     @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show animate-up" role="alert" style="border-radius: 12px;">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="alert alert-danger border-0 shadow-sm animate-up" style="border-radius: 12px;">
+            <i class="bi bi-exclamation-circle-fill me-2"></i> {{ session('error') }}
         </div>
     @endif
-
-    <div class="custom-table-card animate-up" style="animation-delay: 0.1s;">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th class="text-center" width="5%">No</th>
-                        <th>Pemohon</th>
-                        <th>Asal Universitas</th>
-                        <th>Jenis</th>
-                        <th>Tanggal</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-center">Surat Balasan</th>
-                        <th class="text-center">Pembayaran</th>
-                        <th class="text-center" width="15%">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($data as $p)
-                        <tr>
-                            <td class="text-center text-muted fw-bold">{{ $loop->iteration }}</td>
-                            <td>
-                                <div class="d-flex flex-column">
-                                    <span class="fw-bold text-dark">{{ $p->user->name ?? 'User Terhapus' }}</span>
-                                    <small class="text-muted">{{ $p->user->email ?? '-' }}</small>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="text-dark">{{ $p->user->mou ? ($p->user->mou->nama_instansi ?? $p->user->mou->nama_universitas) : '-' }}</span>
-                            </td>
-                            <td>
-                                <span class="badge bg-light text-dark border">
-                                    {{ ucwords(str_replace('_', ' ', $p->jenis)) }}
-                                </span>
-                            </td>
-                            <td>
-                                <small class="text-muted">
-                                    {{ $p->created_at->format('d M Y') }}
-                                </small>
-                            </td>
-                            <td class="text-center">
-                                @if ($p->status === 'pending')
-                                    <span class="badge-status status-pending">
-                                        <i class="bi bi-hourglass-split"></i> Pending
-                                    </span>
-                                @elseif ($p->status === 'approved')
-                                    <span class="badge-status status-approved">
-                                        <i class="bi bi-check-circle-fill"></i> Disetujui
-                                    </span>
-                                @elseif ($p->status === 'rejected')
-                                    <span class="badge-status status-rejected">
-                                        <i class="bi bi-x-circle-fill"></i> Ditolak
-                                    </span>
-                                @endif
-                            </td>
-
-                            {{-- Status Surat Balasan --}}
-<td class="text-center">
-
-    @if ($p->jenis === 'magang')
-        <span class="text-muted small">-</span>
-
-    @elseif ($p->status === 'approved')
-        @if ($p->status_galasan === 'pending')
-            <span class="badge-pill-soft bg-soft-gray">Belum Kirim</span>
-        @else
-            <span class="badge-pill-soft bg-soft-purple">
-                <i class="bi bi-send-fill me-1"></i> Terkirim
-            </span>
-        @endif
-
-    @else
-        <span class="text-muted small">-</span>
+    @if ($errors->any())
+        <div class="alert alert-danger border-0 shadow-sm animate-up">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
     @endif
+</div>
 
-</td>
+<form id="bulkActionForm" action="{{ route('admin.pengajuan.bulk_action') }}" method="POST" style="display: none;">
+    @csrf
+    <input type="hidden" name="action" id="bulkActionInput">
+    <div id="bulkIdsContainer"></div> 
+</form>
 
-                            {{-- Status Pembayaran --}}
-                            <td class="text-center">
-                                @if ($p->status === 'approved' && $p->status_galasan === 'sent')
-                                    @if ($p->status_pembayaran === 'pending')
-                                        <span class="badge-pill-soft bg-soft-yellow">Belum Upload</span>
-                                    @elseif ($p->status_pembayaran === 'uploaded')
-                                        <span class="badge-pill-soft bg-soft-blue">Perlu Verifikasi</span>
-                                    @elseif ($p->status_pembayaran === 'verified')
-                                        <span class="badge-pill-soft bg-soft-green">
-                                            <i class="bi bi-cash-stack me-1"></i> Lunas
-                                        </span>
-                                    @endif
-                                @else
-                                    <span class="text-muted small">-</span>
-                                @endif
-                            </td>
-
-                            <td class="text-center">
-                                {{-- PENYESUAIAN: Menggunakan d-flex agar semua tombol sejajar rapi --}}
-                                <div class="d-flex justify-content-center align-items-center gap-2">
-                                    @if ($p->status === 'pending')
-                                        {{-- Tombol Approve --}}
-                                        <form action="{{ route('admin.pengajuan.approve', $p->id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="btn-action btn-approve" title="Setujui" onclick="return confirm('Yakin ingin menyetujui pengajuan ini?')">
-                                                <i class="bi bi-check-lg fs-6"></i>
-                                            </button>
-                                        </form>
-
-                                        {{-- Tombol Reject --}}
-                                        <form action="{{ route('admin.pengajuan.reject', $p->id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="btn-action btn-reject" title="Tolak" onclick="return confirm('Yakin ingin menolak pengajuan ini?')">
-                                                <i class="bi bi-x-lg"></i>
-                                            </button>
-                                        </form>
-                                    @elseif ($p->status === 'approved')
-                                        <a href="{{ route('admin.pengajuan.show', $p->id) }}" class="btn-detail">
-                                            <i class="bi bi-eye"></i> Detail
-                                        </a>
-                                    @else
-                                        <span class="text-muted small fst-italic">Selesai</span>
-                                    @endif
-
-                                    {{-- delete button (Sekarang sudah ada stylenya dan sejajar) --}}
-                                    <form action="{{ route('admin.pengajuan.destroy', $p->id) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        {{-- Perbaikan sedikit pada onclick agar lebih aman --}}
-                                        <button type="submit" class="btn-action btn-delete" title="Hapus" onclick="return confirm('Yakin ingin menghapus pengajuan ini? Data yang dihapus tidak dapat dikembalikan.')">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="9" class="text-center py-5">
-                                <div class="d-flex flex-column align-items-center">
-                                    <i class="bi bi-inbox display-4 text-muted mb-3 opacity-50"></i>
-                                    <h5 class="text-muted fw-bold">Belum ada data pengajuan</h5>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+<div id="bulkToolbar" class="d-none bg-white p-3 rounded shadow-sm mb-3 border-start border-5 border-primary animate-up align-items-center justify-content-between">
+    <div class="d-flex align-items-center gap-3">
+        <div class="bg-primary bg-opacity-10 text-primary px-3 py-2 rounded fw-bold">
+            <i class="bi bi-check2-square me-2"></i>
+            <span id="selectedCount">0</span> Item Dipilih
         </div>
     </div>
+    
+    {{-- TAMBAHKAN TOMBOL-TOMBOL INI --}}
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-success btn-sm text-white fw-bold" onclick="submitBulk('approve')">
+            <i class="bi bi-check-lg"></i> Setujui
+        </button>
+        <button type="button" class="btn btn-danger btn-sm text-white fw-bold" onclick="submitBulk('reject')">
+            <i class="bi bi-x-lg"></i> Tolak
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm fw-bold" onclick="submitBulk('cancel')">
+            <i class="bi bi-slash-circle"></i> Batal
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm text-white fw-bold" onclick="submitBulk('delete')">
+            <i class="bi bi-trash"></i> Hapus
+        </button>
+    </div>
+</div>
+
+<div class="custom-table-card animate-up" style="animation-delay: 0.1s;">
+    <div class="table-responsive" id="tableContainer">
+        @include('admin.pengajuan._table', ['data' => $data])
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    updateBulkToolbar();
+});
+
+function updateBulkToolbar() {
+    const checkboxes = document.querySelectorAll('.select-item:checked');
+    const count = checkboxes.length;
+    const toolbar = document.getElementById('bulkToolbar');
+    const countSpan = document.getElementById('selectedCount');
+    
+    if(countSpan) countSpan.innerText = count;
+    
+    if (toolbar) {
+        if (count > 0) {
+            toolbar.classList.remove('d-none');
+            toolbar.classList.add('d-flex');
+        } else {
+            toolbar.classList.add('d-none');
+            toolbar.classList.remove('d-flex');
+        }
+    }
+}
+
+document.addEventListener('change', function(e) {
+    if (e.target.id === 'selectAll') {
+        const isChecked = e.target.checked;
+        document.querySelectorAll('.select-item').forEach(cb => {
+            cb.checked = isChecked;
+        });
+        updateBulkToolbar();
+    }
+    
+    if (e.target.classList.contains('select-item')) {
+        if (!e.target.checked) {
+            const selectAll = document.getElementById('selectAll');
+            if(selectAll) selectAll.checked = false;
+        }
+        updateBulkToolbar();
+    }
+});
+
+function submitBulk(actionType) {
+    let confirmMsg = '';
+    if (actionType === 'cancel') confirmMsg = 'Yakin ingin MEMBATALKAN pengajuan yang dipilih?';
+    else if (actionType === 'approve_id_card') confirmMsg = 'Yakin ingin menyetujui ID CARD untuk data yang dipilih?';
+    else if (actionType === 'approve') confirmMsg = 'Yakin ingin MENYETUJUI pengajuan yang dipilih?';
+    else if (actionType === 'reject') confirmMsg = 'Yakin ingin MENOLAK pengajuan yang dipilih?';
+    else if (actionType === 'delete') confirmMsg = 'Yakin ingin MENGHAPUS PERMANEN semua data yang dipilih?';
+
+    if (!confirm(confirmMsg)) return;
+
+    const form = document.getElementById('bulkActionForm');
+    const container = document.getElementById('bulkIdsContainer');
+    const actionInput = document.getElementById('bulkActionInput');
+    
+    actionInput.value = actionType;
+    
+    container.innerHTML = '';
+    document.querySelectorAll('.select-item:checked').forEach(cb => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'ids[]';
+        input.value = cb.value;
+        container.appendChild(input);
+    });
+
+    form.submit();
+}
+</script>
 @endsection

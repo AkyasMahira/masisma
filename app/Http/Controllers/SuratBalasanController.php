@@ -56,15 +56,15 @@ class SuratBalasanController extends Controller
             'prodi' => 'required|string',
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-            'data_dibutuhkan' => 'required|string',
+            'data_dibutuhkan' => 'required|array', // <--- ARRAY
         ]);
 
-        // Format rentang tanggal
+        // Format tanggal
         $request->merge([
             'lama_berlaku' => $request->tanggal_mulai . ' s/d ' . $request->tanggal_selesai,
+            'data_dibutuhkan' => json_encode($request->data_dibutuhkan), // <--- SIMPAN JSON
         ]);
 
-        // Create
         SuratBalasan::create($request->except(['tanggal_mulai', 'tanggal_selesai']));
 
         return redirect()->route('surat-balasan.index')
@@ -78,6 +78,9 @@ class SuratBalasanController extends Controller
     {
         $mous = Mou::all();
         $mahasiswa = MahasiswaPenelitian::all();
+
+        // Decode JSON agar bisa ditampilkan sebagai array
+        $suratBalasan->data_dibutuhkan = json_decode($suratBalasan->data_dibutuhkan, true);
 
         return view('surat_balasan.edit', compact('suratBalasan', 'mous', 'mahasiswa'));
     }
@@ -96,12 +99,12 @@ class SuratBalasanController extends Controller
             'prodi' => 'required|string',
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-            'data_dibutuhkan' => 'required|string',
+            'data_dibutuhkan' => 'required|array', // <--- ARRAY
         ]);
 
-        // Update rentang tanggal
         $request->merge([
             'lama_berlaku' => $request->tanggal_mulai . ' s/d ' . $request->tanggal_selesai,
+            'data_dibutuhkan' => json_encode($request->data_dibutuhkan), // <--- UPDATE JSON
         ]);
 
         $suratBalasan->update($request->except(['tanggal_mulai', 'tanggal_selesai']));

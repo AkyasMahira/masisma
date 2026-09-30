@@ -10,22 +10,19 @@ class CreateSuratBalasanTable extends Migration
     {
         Schema::create('surat_balasan', function (Blueprint $table) {
             $table->id();
+
             $table->foreignId('mou_id')
                 ->constrained('mous')
                 ->onDelete('cascade');
+
             $table->string('nama_mahasiswa');
             $table->string('nim');
             $table->string('wa_mahasiswa');
             $table->string('keperluan');
             $table->string('prodi');
             $table->string('lama_berlaku');
-           $table->enum('data_dibutuhkan', [
-                        'OBAT',
-                        'SOAP (RANAP)',
-                        'RADIOLOGI',
-                        'SOAP (RALAN)',
-                        'LAB'
-                ]);
+            $table->json('data_dibutuhkan');
+
             $table->timestamps();
         });
     }

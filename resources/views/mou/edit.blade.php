@@ -119,7 +119,7 @@
     </style>
 
     <div class="row justify-content-center animate-up">
-        <div class="col-md-9 col-lg-8">
+        <div class="col-12">
             <div class="form-card">
 
                 {{-- CARD HEADER --}}

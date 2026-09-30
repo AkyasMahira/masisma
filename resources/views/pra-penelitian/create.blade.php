@@ -1,10 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Pengajuan Pra Penelitian')
-@section('page-title', 'Tambah Pengajuan Pra Penelitian')
+@section('title', 'Tambah Pengajuan  Penelitian')
+@section('page-title', 'Tambah Pengajuan Penelitian')
 
 @section('content')
-    <style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+<style>
+  
+
         :root {
             --custom-maroon: #7c1316;
             --custom-maroon-light: #a3191d;
@@ -174,12 +177,58 @@
             }
         }
     </style>
+<style>
+    /* --- INTEGRASI CHOICES DENGAN BOOTSTRAP --- */
+    .choices {
+        flex: 1 1 auto;
+        width: 1% !important;
+        min-width: 0;
+        margin-bottom: 0;
+    }
 
+    .choices__inner {
+        background-color: #fff !important;
+        border: 1px solid #dee2e6 !important;
+        border-radius: 0 10px 10px 0 !important;
+        padding: 5px 15px !important;
+        min-height: 45px !important;
+        display: flex;
+        align-items: center;
+        transition: border-color 0.2s;
+    }
+
+    /* Memastikan Kotak Pencarian Muncul */
+    .choices__list--dropdown .choices__input {
+        background-color: #f8f9fa !important;
+        border: 1px solid #e9ecef !important;
+        border-radius: 8px !important;
+        font-size: 14px !important;
+        margin: 10px !important;
+        padding: 8px 12px !important;
+        width: calc(100% - 20px) !important;
+        display: block !important; /* Memaksa tampil */
+    }
+
+    /* Style Dropdown List */
+    .choices__list--dropdown {
+        z-index: 2000 !important;
+        border-radius: 15px !important;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15) !important;
+        border: 1px solid #e2e8f0 !important;
+        margin-top: 5px !important;
+    }
+
+    /* Highlight warna Maroon saat dipilih */
+    .choices__list--dropdown .choices__item--selectable.is-highlighted {
+        background-color: var(--custom-maroon) !important;
+        color: #fff !important;
+    }
+</style>
     <div class="row justify-content-center animate-up">
         <div class="col-lg-10">
             <div class="form-card">
                 <div class="card-header-custom">
-                    <h4 class="mb-0 fw-bold"><i class="bi bi-journal-plus me-2"></i> Tambah Pengajuan Pra Penelitian</h4>
+                    <h4 class="mb-0 fw-bold"><i class="bi bi-journal-plus me-2"></i> Tambah Pengajuan Penelitian</h4>
                     <p class="mb-0 small opacity-75">Isi formulir di bawah ini dengan data yang valid.</p>
                 </div>
 
@@ -219,28 +268,17 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label">Universitas <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-building"></i></span>
-                                    <select name="mou_id" class="form-select" required>
-                                        <option value="">-- Pilih Universitas --</option>
-                                        @foreach ($mous as $mou)
-                                            <option value="{{ $mou->id }}"
-                                                {{ old('mou_id') == $mou->id ? 'selected' : '' }}>
-                                                {{ $mou->nama_instansi ?? $mou->nama_universitas }} (Exp:
-                                                {{ $mou->tanggal_keluar->format('d M Y') }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
+                      
 
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <label class="form-label">Jenis Penelitian <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-grid"></i></span>
-                                    <select name="jenis_penelitian" class="form-select" required>
+                                    <select name="jenis_penelitian"
+        id="jenis-penelitian"
+        class="form-select"
+        required>
+
                                         <option value="Data Awal"
                                             {{ old('jenis_penelitian') == 'Data Awal' ? 'selected' : '' }}>Data Awal
                                         </option>
@@ -255,16 +293,107 @@
                             </div>
                         </div>
 
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label">Program Studi</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-book"></i></span>
-                                    <input type="text" name="prodi" class="form-control" value="{{ old('prodi') }}"
-                                        placeholder="Contoh: Psikologi" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
+                      <div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <label class="form-label">Universitas / Instansi <span class="text-danger">*</span></label>
+        <div class="input-group" style="overflow: visible;">
+            <span class="input-group-text"><i class="bi bi-building"></i></span>
+            <select name="mou_id" id="univ-select" required>
+                <option value="">Pilih atau Cari Universitas...</option>
+                @foreach ($mous as $mou)
+                    <option value="{{ $mou->id }}" {{ old('mou_id') == $mou->id ? 'selected' : '' }}>
+                        {{ strtoupper($mou->nama_instansi ?? $mou->nama_universitas) }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Program Studi <span class="text-danger">*</span></label>
+        <div class="input-group" style="overflow: visible;">
+            <span class="input-group-text"><i class="bi bi-mortarboard-fill"></i></span>
+          <select name="prodi" id="prodi-select" required>
+    <option value="">Pilih atau Cari Program Studi...</option>
+    <option value="S2 FISIKA">S2 FISIKA</option>
+    <option value="SMK REKAYASA PERANGKAT LUNAK">SMK REKAYASA PERANGKAT LUNAK</option>
+    <option value="SMK TEKNIK KOMPUTER JARINGAN">SMK TEKNIK KOMPUTER JARINGAN</option>
+    <option value="SMK MULTIMEDIA">SMK MULTIMEDIA</option>
+    <option value="S1 TEKNIK INFORMATIKA">S1 TEKNIK INFORMATIKA</option>
+    <option value="S1 SISTEM INFORMASI">S1 SISTEM INFORMASI</option>
+    <option value="S1 ILMU KOMPUTER">S1 ILMU KOMPUTER</option>
+    <option value="D3 TEKNIK ELEKTROMEDIK">D3 TEKNIK ELEKTROMEDIK</option>
+    <option value="D4 TEKNIK ELEKTROMEDIK">D4 TEKNIK ELEKTROMEDIK</option>
+    <option value="S1 TEKNIK ELEKTRO">S1 TEKNIK ELEKTRO</option>
+    <option value="S1 TEKNIK LINGKUNGAN">S1 TEKNIK LINGKUNGAN</option>
+          <option value="S1 ADMINISTRASI KESEHATAN">S1 ADMINISTRASI KESEHATAN</option>
+    <option value="S2 MAGISTER MANAJEMEN">S2 MAGISTER MANAJEMEN</option>
+    <option value="SMK ASISTEN KEPERAWATAN">SMK ASISTEN KEPERAWATAN</option>
+     <option value="S2 MAGISTER KESEHATAN">S2 MAGISTER KESEHATAN</option>
+        <option value="S3 FARMASI">S3 FARMASI</option>
+                                          <option value="S2 MAGISTER KESEHATAN MASYARAKAT">S2 MAGISTER KESEHATAN MASYARAKAT</option>
+    <option value="D3 KEPERAWATAN">D3 KEPERAWATAN</option>
+    <option value="D4 KEPERAWATAN">D4 KEPERAWATAN</option>
+    <option value="S1 KEPERAWATAN">S1 KEPERAWATAN</option>
+    <option value="PROFESI NERS">PROFESI NERS</option>
+    <option value="S2 KEPERAWATAN">S2 KEPERAWATAN</option>
+    <option value="D3 KEBIDANAN">D3 KEBIDANAN</option>
+    <option value="D4 KEBIDANAN">D4 KEBIDANAN</option>
+    <option value="S1 KEBIDANAN">S1 KEBIDANAN</option>
+    <option value="PROFESI BIDAN">PROFESI BIDAN</option>
+    <option value="S2 KEBIDANAN">S2 KEBIDANAN</option>
+  <option value="S1 FISIKA">S1 FISIKA</option>
+    <option value="SMK FARMASI">SMK FARMASI</option>
+    <option value="D3 FARMASI">D3 FARMASI</option>
+    <option value="S1 FARMASI">S1 FARMASI</option>
+    <option value="PROFESI APOTEKER">PROFESI APOTEKER</option>
+    <option value="S1 TEKNOLOGI LABORATORIUM MEDIK">S1 TEKNOLOGI LABORATORIUM MEDIK</option>
+    <option value="D4 TEKNOLOGI LABORATORIUM MEDIK">D4 TEKNOLOGI LABORATORIUM MEDIK</option>
+    <option value="D3 ANALIS KESEHATAN (TLM)">D3 ANALIS KESEHATAN (TLM)</option>
+    <option value="D4 ANALIS KESEHATAN (TLM)">D4 ANALIS KESEHATAN (TLM)</option>
+
+    <option value="S1 KEDOKTERAN UMUM">S1 KEDOKTERAN UMUM</option>
+    <option value="PROFESI DOKTER (KOAS)">PROFESI DOKTER (KOAS)</option>
+    <option value="S1 KEDOKTERAN GIGI">S1 KEDOKTERAN GIGI</option>
+    <option value="PROFESI DOKTER GIGI">PROFESI DOKTER GIGI</option>
+    <option value="PPDS (SPESIALIS)">PPDS (SPESIALIS)</option>
+
+    <option value="D3 RADIOLOGI">D3 RADIOLOGI</option>
+    <option value="D4 RADIOLOGI">D4 RADIOLOGI</option>
+    <option value="D3 FISIOTERAPI">D3 FISIOTERAPI</option>
+    <option value="S1 FISIOTERAPI">S1 FISIOTERAPI</option>
+    <option value="PROFESI FISIOTERAPI">PROFESI FISIOTERAPI</option>
+    <option value="D3 GIZI">D3 GIZI</option>
+    <option value="S1 GIZI">S1 GIZI</option>
+    <option value="PROFESI DIETISIEN">PROFESI DIETISIEN</option>
+    <option value="S1 KESELAMATAN DAN KESEHATAN KERJA (K3)">S1 KESELAMATAN DAN KESEHATAN KERJA (K3)</option>
+    <option value="D4 KESELAMATAN DAN KESEHATAN KERJA (K3)">D4 KESELAMATAN DAN KESEHATAN KERJA (K3)</option>
+
+    <option value="D3 REKAM MEDIK">D3 REKAM MEDIK</option>
+    <option value="D4 REKAM MEDIK">D4 REKAM MEDIK</option>
+    <option value="D3 REKAM MEDIS & INFORMASI KESEHATAN">D3 REKAM MEDIS & INFORMASI KESEHATAN</option>
+    <option value="D4 REKAM MEDIS & INFORMASI KESEHATAN">D4 REKAM MEDIS & INFORMASI KESEHATAN</option>
+    <option value="D3 KESEHATAN LINGKUNGAN (SANITASI)">D3 KESEHATAN LINGKUNGAN (SANITASI)</option>
+    <option value="S1 KESEHATAN MASYARAKAT">S1 KESEHATAN MASYARAKAT</option>
+    <option value="D4 PROMOSI KESEHATAN">D4 PROMOSI KESEHATAN</option>
+    <option value="S1 ADMINISTRASI RUMAH SAKIT">S1 ADMINISTRASI RUMAH SAKIT</option>
+
+    <option value="SMK OTOMATISASI TATA KELOLA PERKANTORAN (OTKP)">SMK OTKP</option>
+    <option value="SMK AKUNTANSI">SMK AKUNTANSI</option>
+    <option value="D3 AKUNTANSI">D3 AKUNTANSI</option>
+    <option value="S1 AKUNTANSI">S1 AKUNTANSI</option>
+    <option value="S1 MANAJEMEN">S1 MANAJEMEN</option>
+    <option value="S1 HUKUM">S1 HUKUM</option>
+    <option value="S1 PSIKOLOGI">S1 PSIKOLOGI</option>
+    <option value="S1 ADMINISTRASI PUBLIK">S1 ADMINISTRASI PUBLIK</option>
+</select>
+        </div>
+    </div>
+</div>
+{{-- 1. DATA PENELITIAN --}}
+<div class="row g-4 mb-4">
+
+    <div class="col-md-6">
                                 <label class="form-label">Tanggal Mulai Penelitian</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
@@ -272,39 +401,92 @@
                                         value="{{ old('tanggal_mulai') }}" required>
                                 </div>
                             </div>
-                        </div>
+<div class="col-md-6">
+        <label class="form-label">
+            Tgl. Rencana Skripsi <span class="text-danger">*</span>
+        </label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
+            <input type="date"
+                   name="tanggal_rencana_skripsi"
+                   class="form-control"
+                   value="{{ old('tanggal_rencana_skripsi') }}"
+                   required>
+        </div>
+    </div>
+</div>               
 
-                        {{-- 2. DATA TAMBAHAN (BERKAS) --}}
-                        <div class="row g-3 mb-5">
-                            <div class="col-md-4">
-                                <label class="form-label">Tgl. Rencana Skripsi</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
-                                    <input type="date" name="tanggal_rencana_skripsi" class="form-control"
-                                        value="{{ old('tanggal_rencana_skripsi') }}" required>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Upload Kerangka (PDF)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-file-earmark-pdf"></i></span>
-                                    <input type="file" name="kerangka_penelitian" class="form-control"
-                                        accept="application/pdf" required>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Surat Pengantar (PDF)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-envelope-paper"></i></span>
-                                    <input type="file" name="surat_pengantar" class="form-control"
-                                        accept="application/pdf" required>
-                                </div>
-                            </div>
-                        </div>
+                  
+
+{{-- 2. DATA TAMBAHAN (BERKAS) --}}
+<div class="row g-3 mb-5">
+    
+
+    <div class="col-md-4">
+        <label class="form-label">
+            Upload Kerangka Penelitian (PDF) <span class="text-danger">*</span>
+        </label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-diagram-3"></i></span>
+            <input type="file"
+                   name="kerangka_penelitian"
+                   class="form-control"
+                   accept="application/pdf"
+                   required>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <label class="form-label">
+            Upload Proposal Penelitian (PDF) <span class="text-danger">*</span>
+        </label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-file-text"></i></span>
+            <input type="file"
+                   name="proposal"
+                   class="form-control"
+                   accept="application/pdf"
+                   required>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <label class="form-label">
+            Surat Pengantar (PDF) <span class="text-danger">*</span>
+        </label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-envelope-paper"></i></span>
+            <input type="file"
+                   name="surat_pengantar"
+                   class="form-control"
+                   accept="application/pdf"
+                   required>
+        </div>
+    </div>
+
+    {{-- ETHICAL CLEARANCE (HANYA JIKA PENELITIAN) --}}
+    <div class="col-md-4 d-none" id="ethical-clearance-wrapper">
+        <label class="form-label">
+            Ethical Clearance (PDF)
+            <span class="text-danger">*</span>
+        </label>
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="bi bi-shield-check"></i>
+            </span>
+            <input type="file"
+                   name="ethical_clearance"
+                   id="ethical-clearance-input"
+                   class="form-control"
+                   accept="application/pdf">
+        </div>
+    </div>
+</div>
+
 
                         {{-- 3. SECTION DATA MAHASISWA --}}
                         <div class="dynamic-section">
-                            <span class="section-badge">Data Mahasiswa</span>
+                            <span class="section-badge">Data Peneliti</span>
 
                             <div class="d-flex justify-content-end mb-3">
                                 <button type="button" id="tambah-mahasiswa" class="btn-add-row">
@@ -314,7 +496,7 @@
 
                             {{-- Header Tabel (Desktop Only) --}}
                             <div class="row g-3 mb-2 d-none d-md-flex px-2 text-muted fw-bold small text-uppercase">
-                                <div class="col-md-4">Nama Mahasiswa</div>
+                                <div class="col-md-4">Nama Peneliti</div>
                                 <div class="col-md-4">No. WhatsApp</div>
                                 <div class="col-md-3">Jenjang (S1/D3)</div>
                                 <div class="col-md-1 text-center">Aksi</div>
@@ -451,7 +633,40 @@
             </div>
         </div>
     </template>
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Fungsi inisialisasi agar seragam
+        const initChoices = (id, placeholder) => {
+            const element = document.getElementById(id);
+            if (element) {
+                return new Choices(element, {
+                    searchEnabled: true,       // WAJIB TRUE
+                    searchChoices: true,       // WAJIB TRUE
+                    searchFloor: 0,            // Langsung munculkan search bar
+                    itemSelectText: '',        // Hapus teks "Press to select"
+                    shouldSort: false,
+                    placeholder: true,
+                    placeholderValue: placeholder,
+                    searchPlaceholderValue: 'Ketik untuk mencari...',
+                    classNames: {
+                        containerOuter: 'choices', // Jangan pakai form-control di sini
+                    },
+                });
+            }
+        };
+
+        // Jalankan Inisialisasi
+        const univChoices = initChoices('univ-select', 'Pilih Universitas');
+        const prodiChoices = initChoices('prodi-select', 'Pilih Program Studi');
+
+        // Fix untuk modal (jika form di dalam modal)
+        element.addEventListener('show.choices', function() {
+            univChoices.showDropdown();
+        }, false);
+    });
+</script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -514,4 +729,32 @@
             });
         });
     </script>
+   
+
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const jenisSelect = document.getElementById('jenis-penelitian');
+    const ethicalWrapper = document.getElementById('ethical-clearance-wrapper');
+    const ethicalInput = document.getElementById('ethical-clearance-input');
+
+    function toggleEthicalClearance() {
+        if (jenisSelect.value === 'Penelitian') {
+            ethicalWrapper.classList.remove('d-none');
+            ethicalInput.setAttribute('required', 'required');
+        } else {
+            ethicalWrapper.classList.add('d-none');
+            ethicalInput.removeAttribute('required');
+            ethicalInput.value = '';
+        }
+    }
+
+    // Trigger saat load (penting buat old value)
+    toggleEthicalClearance();
+
+    // Trigger saat berubah
+    jenisSelect.addEventListener('change', toggleEthicalClearance);
+});
+
+</script>
+
 @endsection

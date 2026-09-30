@@ -1,380 +1,442 @@
 @extends('layouts.public')
 
-@section('title', 'Perbarui Pelatihan')
+@section('title', 'Pembaruan Data Pelatihan - RSUD SLG')
 
 @section('content')
-    <style>
-        :root {
-            --custom-maroon: #7c1316;
-            --custom-maroon-light: #a3191d;
-            --custom-maroon-subtle: #fcf0f1;
-            --text-dark: #2c3e50;
-            --card-radius: 16px;
-            --transition: 0.3s ease;
-        }
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 
-        /* Card & Layout */
-        .form-card {
-            border: none;
-            border-radius: var(--card-radius);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            background: #fff;
-            overflow: hidden;
-            margin-top: 2rem;
-            margin-bottom: 2rem;
-        }
+<style>
+    :root {
+        --primary-maroon: #7c1316;
+        --accent-maroon: #a3191d;
+        --soft-maroon: #fdf2f2;
+        --glass: rgba(255, 255, 255, 0.95);
+        --text-main: #1e293b;
+        --text-light: #64748b;
+        --border-radius: 20px;
+        --shadow-sm: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
 
-        .card-header-custom {
-            background-color: var(--custom-maroon);
-            padding: 1.5rem;
-            color: white;
-            border-bottom: 4px solid var(--custom-maroon-light);
-        }
+    body {
+        background: radial-gradient(circle at top right, #fdf2f2, #f8fafc);
+        color: var(--text-main);
+        font-family: 'Inter', sans-serif;
+    }
 
-        .card-header-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    /* --- Hero Header --- */
+    .hero-bg {
+        background: white;
+        padding: 4rem 0 6rem 0;
+        text-align: center;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
 
-        .card-body-custom {
-            padding: 2rem;
-        }
+    .hero-logo { height: 90px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1)); margin-bottom: 1.5rem; }
+    
+    .hero-title {
+        font-weight: 800;
+        letter-spacing: -1px;
+        color: var(--primary-maroon);
+        margin-bottom: 0.5rem;
+    }
 
-        /* Info Box */
-        .info-box {
-            background: var(--custom-maroon-subtle);
-            border: 1px dashed var(--custom-maroon-light);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            font-size: 1rem;
-            color: var(--text-dark);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    /* --- Stats Dashboard --- */
+    .jpl-dashboard {
+        margin-top: -4rem;
+        background: var(--glass);
+        backdrop-filter: blur(10px);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        border: 1px solid white;
+        box-shadow: var(--shadow-lg);
+    }
 
-        .info-box strong {
-            color: var(--custom-maroon);
-        }
+    .jpl-progress-circle {
+        width: 80px;
+        height: 80px;
+        background: var(--soft-maroon);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 4px solid white;
+        box-shadow: var(--shadow-sm);
+    }
 
-        /* Form Controls */
-        .form-control {
-            border-radius: 8px;
-            padding: 0.7rem 1rem;
-            border: 1px solid #dee2e6;
-        }
+    .progress-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 700;
+        color: var(--text-light);
+    }
 
-        .form-control:focus {
-            border-color: var(--custom-maroon-light);
-            box-shadow: 0 0 0 0.2rem rgba(124, 19, 22, 0.1) !important;
-        }
+    /* --- Form Cards --- */
+    .section-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        box-shadow: var(--shadow-sm);
+    }
 
-        /* Pelatihan Section (Dashed Box) */
-        .pelatihan-section {
-            background: #f8f9fa;
-            border: 2px dashed #d1d1d1;
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            transition: var(--transition);
-        }
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 2rem;
+    }
 
-        .pelatihan-section:hover {
-            border-color: var(--custom-maroon-light);
-        }
+    .icon-box {
+        width: 45px;
+        height: 45px;
+        background: var(--primary-maroon);
+        color: white;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-        .pelatihan-title {
-            font-weight: 700;
-            color: var(--custom-maroon);
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+    .form-label {
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: var(--text-light);
+        margin-bottom: 8px;
+    }
 
-        /* Pelatihan Item Rows */
-        .pelatihan-item {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-            align-items: flex-start;
-            background: white;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #eee;
-        }
+    .form-control, .form-select {
+        border-radius: 12px;
+        border: 1.5px solid #f1f5f9;
+        background: #f8fafc;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        transition: 0.3s all;
+    }
 
-        .pelatihan-item input[type="text"] { flex: 2; }
-        .pelatihan-item input[type="number"] { width: 100px; }
-        .pelatihan-item .file-wrapper { flex: 1.5; display: flex; flex-direction: column; gap: 4px; }
-        .pelatihan-item input[type="file"] { font-size: 0.85rem; }
+    .form-control:focus {
+        background: white;
+        border-color: var(--primary-maroon);
+        box-shadow: 0 0 0 4px rgba(124, 19, 22, 0.08);
+    }
 
-        /* Existing File Badge */
-        .current-file {
-            font-size: 0.75rem;
-            background: #e9ecef;
-            padding: 4px 8px;
-            border-radius: 4px;
-            color: #555;
-        }
-        .current-file a { color: var(--custom-maroon); text-decoration: none; font-weight: bold; }
+    /* --- Training Item Rows --- */
+    .item-row {
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 25px;
+        margin-bottom: 1.5rem;
+        border: 1px solid #f1f5f9;
+        position: relative;
+        transition: 0.3s;
+    }
 
-        /* Buttons */
-        .btn-remove {
-            background: #fee2e2;
-            color: #dc2626;
-            border: none;
-            width: 38px;
-            height: 38px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-        }
-        .btn-remove:hover { background: #dc2626; color: white; }
+    .item-row:hover {
+        box-shadow: var(--shadow-sm);
+        border-color: var(--primary-maroon);
+    }
 
-        .btn-add-pelatihan {
-            background: var(--custom-maroon);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 0.6rem 1.2rem;
-            font-size: 0.9rem;
-            font-weight: 600;
-            transition: var(--transition);
-        }
-        .btn-add-pelatihan:hover { background: var(--custom-maroon-light); transform: translateY(-1px); }
+    .btn-delete {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: white;
+        color: #ef4444;
+        border: 1px solid #fee2e2;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+    }
 
-        .btn-maroon {
-            background-color: var(--custom-maroon);
-            color: white;
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: var(--transition);
-            box-shadow: 0 4px 15px rgba(124, 19, 22, 0.2);
-        }
-        .btn-maroon:hover { background-color: var(--custom-maroon-light); transform: translateY(-2px); color: white; }
+    .btn-delete:hover { background: #ef4444; color: white; }
 
-        .btn-secondary-custom {
-            background: #e9ecef;
-            color: var(--text-dark);
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 50px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: var(--transition);
-        }
-        .btn-secondary-custom:hover { background: #dee2e6; color: var(--text-dark); }
+    .btn-add {
+        width: 100%;
+        background: white;
+        color: var(--primary-maroon);
+        border: 2px dashed #e2e8f0;
+        padding: 15px;
+        border-radius: var(--border-radius);
+        font-weight: 700;
+        margin-top: 0.5rem;
+    }
 
-        .button-group { display: flex; gap: 1rem; margin-top: 2rem; }
+    .btn-add:hover { border-color: var(--primary-maroon); background: var(--soft-maroon); }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .pelatihan-item { flex-direction: column; }
-            .pelatihan-item input, .pelatihan-item .file-wrapper, .pelatihan-item button { width: 100%; }
-        }
-    </style>
+    /* --- Sticky Bar --- */
+    .action-bar {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(30, 41, 59, 0.9);
+        backdrop-filter: blur(10px);
+        padding: 12px 40px;
+        border-radius: 100px;
+        display: flex;
+        gap: 20px;
+        z-index: 1000;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
 
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-9">
+    .btn-save {
+        background: var(--primary-maroon);
+        color: white;
+        border: none;
+        padding: 10px 30px;
+        border-radius: 100px;
+        font-weight: 700;
+        transition: 0.3s;
+    }
 
-                <div class="form-card">
-                    <div class="card-header-custom">
-                        <h2 class="card-header-title">
-                            <i class="fas fa-edit"></i> Perbarui Data Pelatihan
-                        </h2>
+    .btn-save:hover { background: var(--accent-maroon); transform: scale(1.05); }
+
+    .file-link {
+        background: #f0fdf4;
+        color: #166534;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 10px;
+        font-weight: 600;
+    }
+</style>
+
+<div class="hero-bg">
+    <div class="container animate__animated animate__fadeIn">
+        <img src="/23.png" alt="Logo" class="hero-logo">
+        <h2 class="hero-title">PORTAL DATA MANDIRI</h2>
+        <p class="text-muted">Lengkapi profil dan riwayat kompetensi Anda</p>
+    </div>
+</div>
+
+<div class="container form-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-11">
+
+            {{-- 1. DASHBOARD RINGKASAN JPL --}}
+            @php
+                $currentYear = date('Y');
+                $totalJpl = $pelatihan->getTotalJplByYear($currentYear);
+                $percent = min(($totalJpl / 20) * 100, 100);
+            @endphp
+            <div class="jpl-dashboard animate__animated animate__slideInUp mb-5">
+                <div class="row align-items-center">
+                    <div class="col-md-auto text-center">
+                        <div class="jpl-progress-circle">
+                            <h3 class="mb-0 fw-bold" style="color: var(--primary-maroon)">{{ $totalJpl }}</h3>
+                        </div>
                     </div>
-
-                    <div class="card-body-custom">
-                        @if(session('success'))
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        @endif
-
-                        <div class="info-box">
-                            <i class="fas fa-user-circle fa-lg"></i>
+                    <div class="col">
+                        <div class="d-flex justify-content-between mb-2">
                             <div>
-                                Anda sedang memperbarui data pelatihan untuk: <strong>{{ $pelatihan->nama }}</strong>
+                                <h5 class="mb-0 fw-800">Capaian JPL Tahun {{ $currentYear }}</h5>
+                                <span class="text-muted small">Target Minimal: 20 Jam Pelajaran</span>
+                            </div>
+                            <span class="fw-bold">{{ $totalJpl }}/20 JPL</span>
+                        </div>
+                        <div class="progress" style="height: 12px; border-radius: 10px; background: #e2e8f0;">
+                            <div class="progress-bar" role="progressbar" 
+                                 style="width: {{ $percent }}%; background: var(--primary-maroon); border-radius: 10px;">
                             </div>
                         </div>
-
-                        <form action="{{ route('public.pelatihan.update', $pelatihan->id) }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            @method('PUT')
-
-                            <div class="pelatihan-section">
-                                <div class="pelatihan-title">
-                                    <i class="fas fa-graduation-cap"></i> Pelatihan Dasar
-                                </div>
-                                <div id="pelatihanDasarContainer">
-                                    @php $dasar = $pelatihan->pelatihan_dasar ?? []; @endphp
-                                    @if(is_array($dasar) && count($dasar) > 0)
-                                        @foreach($dasar as $i => $item)
-                                            <div class="pelatihan-item">
-                                                <input type="text" name="pelatihan_dasar[]" class="form-control" value="{{ $item['nama'] ?? '' }}" placeholder="Nama Pelatihan">
-                                                <input type="number" name="pelatihan_tahun_dasar[]" class="form-control" value="{{ $item['tahun'] ?? '' }}" placeholder="Thn">
-
-                                                <div class="file-wrapper">
-                                                    <input type="file" name="pelatihan_file_dasar[]" class="form-control">
-                                                    <input type="hidden" name="pelatihan_existing_file_dasar[]" value="{{ $item['file'] ?? '' }}">
-
-                                                    @if(!empty($item['file']))
-                                                        <div class="current-file">
-                                                            <i class="fas fa-file-pdf"></i> File ada.
-                                                            <a href="{{ Storage::url($item['file']) }}" target="_blank">Lihat</a>
-                                                        </div>
-                                                    @endif
-                                                </div>
-
-                                                <button type="button" class="btn-remove" onclick="removeRow(this)">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
-                                            </div>
-                                        @endforeach
-                                    @else
-                                        <div class="text-muted small fst-italic mb-2" id="emptyDasarMsg">Belum ada data pelatihan dasar.</div>
-                                    @endif
-                                </div>
-                                <div class="mt-3">
-                                    <button type="button" class="btn-add-pelatihan" onclick="addPelatihanDasar()">
-                                        <i class="fas fa-plus"></i> Tambah Dasar
-                                    </button>
-                                </div>
+                    </div>
+                    <div class="col-md-auto mt-3 mt-md-0">
+                        @if($totalJpl >= 20)
+                            <div class="px-4 py-2 rounded-pill bg-success text-white small fw-bold">
+                                <i class="fas fa-check-double me-2"></i>TARGET TERPENUHI
                             </div>
-
-                            <div class="pelatihan-section">
-                                <div class="pelatihan-title">
-                                    <i class="fas fa-chart-line"></i> Peningkatan Kompetensi
-                                </div>
-                                <div id="pelatihanKompetensiContainer">
-                                    @php $komp = $pelatihan->pelatihan_peningkatan_kompetensi ?? []; @endphp
-                                    @if(is_array($komp) && count($komp) > 0)
-                                        @foreach($komp as $i => $item)
-                                            <div class="pelatihan-item">
-                                                <input type="text" name="pelatihan_kompetensi[]" class="form-control" value="{{ $item['nama'] ?? '' }}" placeholder="Nama Pelatihan">
-                                                <input type="number" name="pelatihan_tahun_kompetensi[]" class="form-control" value="{{ $item['tahun'] ?? '' }}" placeholder="Thn">
-
-                                                <div class="file-wrapper">
-                                                    <input type="file" name="pelatihan_file_kompetensi[]" class="form-control">
-                                                    <input type="hidden" name="pelatihan_existing_file_kompetensi[]" value="{{ $item['file'] ?? '' }}">
-
-                                                    @if(!empty($item['file']))
-                                                        <div class="current-file">
-                                                            <i class="fas fa-file-pdf"></i> File ada.
-                                                            <a href="{{ Storage::url($item['file']) }}" target="_blank">Lihat</a>
-                                                        </div>
-                                                    @endif
-                                                </div>
-
-                                                <button type="button" class="btn-remove" onclick="removeRow(this)">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
-                                            </div>
-                                        @endforeach
-                                    @else
-                                        <div class="text-muted small fst-italic mb-2" id="emptyKompetensiMsg">Belum ada data kompetensi.</div>
-                                    @endif
-                                </div>
-                                <div class="mt-3">
-                                    <button type="button" class="btn-add-pelatihan" onclick="addPelatihanKompetensi()">
-                                        <i class="fas fa-plus"></i> Tambah Kompetensi
-                                    </button>
-                                </div>
+                        @else
+                            <div class="px-4 py-2 rounded-pill bg-warning text-dark small fw-bold">
+                                <i class="fas fa-clock me-2"></i>KURANG {{ 20 - $totalJpl }} JPL
                             </div>
-
-                            <div class="button-group">
-                                <button type="submit" class="btn-maroon">
-                                    <i class="fas fa-save"></i> Simpan Perubahan
-                                </button>
-                                <a href="{{ route('public.pelatihan.index') }}" class="btn-secondary-custom">
-                                    <i class="fas fa-arrow-left"></i> Kembali
-                                </a>
-                            </div>
-
-                        </form>
+                        @endif
                     </div>
                 </div>
             </div>
+
+            <form action="{{ route('public.pelatihan.update', $pelatihan->id) }}" method="POST" enctype="multipart/form-data" id="updateForm">
+                @csrf
+                @method('PUT')
+
+                {{-- SECTION PROFIL --}}
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="icon-box"><i class="fas fa-user-check"></i></div>
+                        <h4 class="mb-0 fw-bold">Data Identitas Pegawai</h4>
+                    </div>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Nama Lengkap & Gelar</label>
+                            <input type="text" name="nama" class="form-control" value="{{ $pelatihan->nama }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nomor Induk Kependudukan (NIK)</label>
+                            <input type="text" name="nik" class="form-control" value="{{ $pelatihan->nik }}" placeholder="16 Digit NIK">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Status</label>
+                            <input type="text" class="form-control" value="{{ $pelatihan->status_pegawai }}" disabled>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">NIP / NIRP</label>
+                            <input type="text" class="form-control" value="{{ $pelatihan->nip ?? $pelatihan->nirp }}" disabled>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Akun LMS (Kemenkes)</label>
+                            <select name="lms_status" id="lms_status" class="form-select" onchange="toggleLms(this.value)">
+                                <option value="Tidak" {{ $pelatihan->lms_status == 'Tidak' ? 'selected' : '' }}>Belum Ada</option>
+                                <option value="Ada" {{ $pelatihan->lms_status == 'Ada' ? 'selected' : '' }}>Sudah Ada</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12" id="lms_email_wrapper" style="display: {{ $pelatihan->lms_status == 'Ada' ? 'block' : 'none' }};">
+                            <label class="form-label">Email LMS (Pastikan aktif untuk sinkronisasi data)</label>
+                            <input type="email" name="lms_email" class="form-control" value="{{ $pelatihan->lms_email }}" placeholder="contoh@mail.com">
+                        </div>
+                    </div>
+                </div>
+
+                {{-- SECTION PELATIHAN --}}
+                @php
+                    $categories = [
+                        ['title' => 'Riwayat Pelatihan Dasar', 'id' => 'dasar', 'icon' => 'fa-certificate'],
+                        ['title' => 'Peningkatan Kompetensi', 'id' => 'komp', 'icon' => 'fa-medal']
+                    ];
+                @endphp
+
+                @foreach($categories as $cat)
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="icon-box"><i class="fas {{ $cat['icon'] }}"></i></div>
+                        <h4 class="mb-0 fw-bold">{{ $cat['title'] }}</h4>
+                    </div>
+                    
+                    <div id="wrapper-{{ $cat['id'] }}">
+                        @php $currentData = $cat['id'] == 'dasar' ? $pelatihan->pelatihan_dasar : $pelatihan->pelatihan_peningkatan_kompetensi; @endphp
+                        
+                        @foreach($currentData ?? [] as $val)
+                        <div class="item-row animate__animated animate__fadeIn">
+                            <button type="button" class="btn-delete" onclick="this.closest('.item-row').remove()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <div class="row g-3">
+                                <div class="col-lg-6">
+                                    <label class="form-label">Nama Pelatihan / Diklat</label>
+                                    <input type="text" name="pelatihan_{{ $cat['id'] }}[]" class="form-control" value="{{ $val['nama'] }}" required>
+                                </div>
+                                <div class="col-lg-2 col-6">
+                                    <label class="form-label">Tahun</label>
+                                    <input type="number" name="pelatihan_tahun_{{ $cat['id'] }}[]" class="form-control" value="{{ $val['tahun'] }}">
+                                </div>
+                                <div class="col-lg-1 col-6">
+                                    <label class="form-label">JPL</label>
+                                    <input type="number" name="pelatihan_jpl_{{ $cat['id'] }}[]" class="form-control" value="{{ $val['jpl'] ?? 0 }}">
+                                </div>
+                                <div class="col-lg-3">
+                                    <label class="form-label">Update Sertifikat (PDF)</label>
+                                    <input type="file" name="pelatihan_file_{{ $cat['id'] }}[]" class="form-control input-file" accept=".pdf">
+                                    <input type="hidden" name="pelatihan_existing_file_{{ $cat['id'] }}[]" value="{{ $val['file'] }}">
+                                    @if($val['file'])
+                                        <a href="{{ asset('storage/'.$val['file']) }}" target="_blank" class="file-link">
+                                            <i class="fas fa-check-circle"></i> File Tersimpan
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+
+                    <button type="button" class="btn-add" onclick="tambahRow('wrapper-{{ $cat['id'] }}', '{{ $cat['id'] }}')">
+                        <i class="fas fa-plus me-2"></i>Tambah Baris Pelatihan
+                    </button>
+                </div>
+                @endforeach
+
+                {{-- Action Footer --}}
+                <div class="mb-5 pb-5"></div>
+                <div class="action-bar">
+                    <a href="{{ route('public.pelatihan.index') }}" class="btn text-white text-decoration-none px-2 fw-bold small opacity-75">Batal</a>
+                    <button type="submit" class="btn-save shadow">
+                        <i class="fas fa-cloud-upload-alt me-2"></i>Simpan Perubahan
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <script>
-        // Helper untuk menghilangkan pesan "belum ada data" jika baris baru ditambahkan
-        function clearEmptyMsg(id) {
-            const msg = document.getElementById(id);
-            if(msg) msg.remove();
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function toggleLms(val) {
+        const wrapper = document.getElementById('lms_email_wrapper');
+        if(val === 'Ada') {
+            wrapper.style.display = 'block';
+            wrapper.classList.add('animate__animated', 'animate__fadeInDown');
+        } else {
+            wrapper.style.display = 'none';
         }
+    }
 
-        function addPelatihanDasar() {
-            clearEmptyMsg('emptyDasarMsg');
-            const container = document.getElementById('pelatihanDasarContainer');
-            const item = document.createElement('div');
-            item.className = 'pelatihan-item';
-            // Animasi masuk sederhana
-            item.style.animation = "fadeIn 0.3s";
-
-            item.innerHTML = `
-                <input type="text" name="pelatihan_dasar[]" class="form-control" placeholder="Nama Pelatihan" required>
-                <input type="number" name="pelatihan_tahun_dasar[]" class="form-control" placeholder="Thn">
-                <div class="file-wrapper">
-                    <input type="file" name="pelatihan_file_dasar[]" class="form-control">
-                    <input type="hidden" name="pelatihan_existing_file_dasar[]" value="">
-                </div>
-                <button type="button" class="btn-remove" onclick="removeRow(this)">
-                    <i class="fas fa-trash-alt"></i>
+    function tambahRow(containerId, type) {
+        const container = document.getElementById(containerId);
+        const html = `
+            <div class="item-row animate__animated animate__fadeInUp">
+                <button type="button" class="btn-delete" onclick="this.closest('.item-row').remove()">
+                    <i class="fas fa-times"></i>
                 </button>
-            `;
-            container.appendChild(item);
-        }
-
-        function addPelatihanKompetensi() {
-            clearEmptyMsg('emptyKompetensiMsg');
-            const container = document.getElementById('pelatihanKompetensiContainer');
-            const item = document.createElement('div');
-            item.className = 'pelatihan-item';
-            item.style.animation = "fadeIn 0.3s";
-
-            item.innerHTML = `
-                <input type="text" name="pelatihan_kompetensi[]" class="form-control" placeholder="Nama Pelatihan" required>
-                <input type="number" name="pelatihan_tahun_kompetensi[]" class="form-control" placeholder="Thn">
-                <div class="file-wrapper">
-                    <input type="file" name="pelatihan_file_kompetensi[]" class="form-control">
-                    <input type="hidden" name="pelatihan_existing_file_kompetensi[]" value="">
+                <div class="row g-3">
+                    <div class="col-lg-6">
+                        <label class="form-label">Nama Pelatihan / Diklat</label>
+                        <input type="text" name="pelatihan_${type}[]" class="form-control" placeholder="..." required>
+                    </div>
+                    <div class="col-lg-2 col-6">
+                        <label class="form-label">Tahun</label>
+                        <input type="number" name="pelatihan_tahun_${type}[]" class="form-control" value="${new Date().getFullYear()}">
+                    </div>
+                    <div class="col-lg-1 col-6">
+                        <label class="form-label">JPL</label>
+                        <input type="number" name="pelatihan_jpl_${type}[]" class="form-control" value="0">
+                    </div>
+                    <div class="col-lg-3">
+                        <label class="form-label">Sertifikat (PDF)</label>
+                        <input type="file" name="pelatihan_file_${type}[]" class="form-control input-file" accept=".pdf">
+                        <input type="hidden" name="pelatihan_existing_file_${type}[]" value="">
+                    </div>
                 </div>
-                <button type="button" class="btn-remove" onclick="removeRow(this)">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
-            `;
-            container.appendChild(item);
-        }
+            </div>`;
+        container.insertAdjacentHTML('beforeend', html);
+    }
 
-        function removeRow(btn) {
-            // Konfirmasi penghapusan opsional, di sini langsung hapus
-            btn.parentElement.remove();
-        }
-
-        // Tambahkan style animasi keyframes di head script
-        const styleSheet = document.createElement("style");
-        styleSheet.innerText = `
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(-10px); }
-                to { opacity: 1; transform: translateY(0); }
+    document.getElementById('updateForm').onsubmit = function(e) {
+        e.preventDefault();
+        Swal.fire({
+            title: 'Kirim Pembaruan?',
+            text: "Data akan diperbarui secara otomatis di database rumah sakit.",
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#7c1316',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, Update Data!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Memproses...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+                this.submit();
             }
-        `;
-        document.head.appendChild(styleSheet);
-    </script>
-
-    @endsection
+        });
+    };
+</script>
+@endsection

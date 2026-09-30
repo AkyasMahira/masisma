@@ -21,10 +21,19 @@ class Ruangan extends Model
      *
      * @var array
      */
-    protected $fillable = [
-        'nm_ruangan',
-        'kuota_ruangan',
-    ];
+   // App\Models\Ruangan.php
+
+protected $fillable = [
+    'nm_ruangan',
+    'kategori',
+    'kuota_ruangan',
+    'user_id', // <--- Tambahkan ini
+];
+
+public function user()
+{
+    return $this->belongsTo(\App\Models\User::class);
+}
 
     public function mahasiswa()
     {
@@ -42,6 +51,14 @@ class Ruangan extends Model
      * @param string|null $date YYYY-MM-DD
      * @return int
      */
+     // Tambahkan/Update method ini di dalam class Ruangan
+
+// Helper untuk menghitung mahasiswa aktif
+public function getMahasiswaCountAttribute()
+{
+    // Menggunakan collection filtering (agar tidak query ulang ke DB)
+    return $this->mahasiswa->where('status', 'aktif')->count();
+}
     public function getKuotaTersedia($date = null)
     {
         if ($date === null) {
@@ -55,6 +72,11 @@ class Ruangan extends Model
 
         // fallback to existing column if snapshot not present
         return isset($this->kuota_ruangan) ? (int) $this->kuota_ruangan : 0;
+    }
+    
+    public function roomShifts()
+    {
+        return $this->hasMany(\App\Models\RoomShift::class, 'ruangan_id');
     }
     /**
  * Sync kuota dengan jumlah mahasiswa aktual

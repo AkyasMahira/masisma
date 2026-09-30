@@ -17,6 +17,7 @@ class Absensi extends Model
         'durasi_menit',
         'latitude',
         'longitude',
+        'keterangan',
         'location_accuracy',
     ];
 

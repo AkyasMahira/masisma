@@ -162,17 +162,22 @@
     <div class="container py-4">
         
         {{-- Header --}}
-        <div class="page-header-wrapper animate-up">
-            <div>
-                <h4 class="fw-bold mb-1" style="color: var(--custom-maroon);">Konsultasi Penelitian</h4>
-                <small class="text-muted">Catat hasil bimbingan Anda dengan Pembimbing Lapangan.</small>
-            </div>
-            <div>
-                <a href="{{ route('pengajuan.index') }}" class="btn btn-outline-custom shadow-sm">
-                    <i class="bi bi-arrow-left me-1"></i> Kembali
-                </a>
-            </div>
+{{-- Ganti bagian Header di Blade Anda --}}
+<div class="page-header-wrapper animate-up">
+    <div>
+        <h4 class="fw-bold mb-1" style="color: var(--custom-maroon);">Konsultasi Penelitian</h4>
+        {{-- Tampilkan judul dari record pra_penelitian terbaru --}}
+        <div class="text-muted small">
+            <i class="bi bi-journal-text me-1"></i> 
+            Judul: <strong>{{ $praPenelitian->judul ?? 'Tidak ada judul' }}</strong>
         </div>
+    </div>
+    <div>
+        <a href="{{ route('pengajuan.index') }}" class="btn btn-outline-custom shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Kembali
+        </a>
+    </div>
+</div>
 
         {{-- Alerts (Fallback if SweetAlert fails) --}}
         @if (session('error'))
@@ -192,22 +197,37 @@
                                 <i class="bi bi-person-badge fs-3 text-secondary"></i>
                             </div>
                             <div>
-                                <div class="fw-bold text-dark">{{ $pengajuan->ci_nama }}</div>
-                                <small class="text-muted">{{ $pengajuan->ci_bidang }}</small>
+                                {{-- PERBAIKAN 1: Panggil relasi ->ci->nama --}}
+                                <div class="fw-bold text-dark">{{ $pengajuan->ci->nama ?? 'Nama CI Tidak Muncul' }}</div>
+                                {{-- Sesuaikan nama kolom bidang/jabatan di db corporate_instructors --}}
+                                <small class="text-muted">{{ $pengajuan->ci->bidang ?? $pengajuan->ci->jabatan ?? '-' }}</small>
                             </div>
                         </div>
                         
                         <div class="info-label">Kontak (WhatsApp)</div>
                         <div class="info-value">
-                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $pengajuan->ci_no_hp) }}" target="_blank" class="text-decoration-none text-success fw-bold">
-                                <i class="bi bi-whatsapp me-1"></i> {{ $pengajuan->ci_no_hp }}
-                            </a>
+                            {{-- PERBAIKAN 2: Panggil relasi ->ci->no_hp --}}
+                            @php 
+                                $no_hp = $pengajuan->ci->no_hp ?? '-';
+                                $wa_link = preg_replace('/[^0-9]/', '', $no_hp);
+                            @endphp
+                            @if($no_hp !== '-')
+                                <a href="https://wa.me/{{ $wa_link }}" target="_blank" class="text-decoration-none text-success fw-bold">
+                                    <i class="bi bi-whatsapp me-1"></i> {{ $no_hp }}
+                                </a>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
                         </div>
 
                         <div class="info-label">Lokasi Ruangan</div>
-                        <div class="info-value">
-                            <span class="badge bg-light text-dark border"><i class="bi bi-door-open me-1"></i> {{ $pengajuan->ruangan }}</span>
-                        </div>
+<div class="info-value">
+    <span class="badge bg-light text-dark border">
+        <i class="bi bi-door-open me-1"></i> 
+        {{-- Panggil dataRuangan (sesuai nama fungsi di model baru) --}}
+        {{ $pengajuan->dataRuangan->nm_ruangan ?? 'Belum ditentukan' }}
+    </span>
+</div>
 
                         <hr class="border-light my-3">
 

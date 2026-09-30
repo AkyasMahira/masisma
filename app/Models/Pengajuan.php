@@ -15,10 +15,9 @@ class Pengajuan extends Model
         'surat_balasan',
         'invoice',
         'bukti_pembayaran',
-        'ci_nama',
-        'ci_no_hp',
-        'ci_bidang',
-        'ruangan',
+        'ci_id',
+        'ci_id_2',
+        'ruangan_id',
         'status_galasan',
         'status_pembayaran',
     ];
@@ -27,6 +26,23 @@ class Pengajuan extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+// Relasi CI ke-1 (Sudah ada)
+public function ci()
+{
+    return $this->belongsTo(CorporateInstructor::class, 'ci_id');
+}
+
+// TAMBAHKAN: Relasi CI ke-2
+public function ci2()
+{
+    return $this->belongsTo(CorporateInstructor::class, 'ci_id_2');
+}
+    
+public function dataRuangan()
+{
+    return $this->belongsTo(Ruangan::class, 'ruangan_id', 'id');
+}
 
     public function presentasi()
     {

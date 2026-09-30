@@ -14,36 +14,38 @@ class MouController extends Controller
      * Halaman LIST (Halaman Kedua)
      * KITA TAMBAHKAN LOGIKA FILTER DI SINI
      */
-    public function index(Request $request) // Tambahkan Request $request
-    {
-        // Mulai query
-        $query = Mou::query();
+public function index(Request $request)
+{
+    $query = Mou::query();
 
-        // 1. Filter Nama Universitas
-        if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
-                $q->where('nama_instansi', 'like', '%' . $request->search . '%')
-                  ->orWhere('nama_universitas', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        // 2. Filter Dari Tanggal
-        if ($request->filled('tanggal_mulai')) {
-            $query->where('tanggal_masuk', '>=', $request->tanggal_mulai);
-        }
-
-        // 3. Filter Sampai Tanggal
-        if ($request->filled('tanggal_selesai')) {
-            $query->where('tanggal_keluar', '<=', $request->tanggal_selesai);
-        }
-
-        // Ambil data, urutkan, dan paginasi
-        // withQueryString() penting agar filter tetap aktif saat pindah halaman
-        $mous = $query->latest()->paginate(10)->withQueryString();
-
-        return view('mou.index', compact('mous'));
+    // 1. Filter Nama Universitas (Tetap sama)
+    if ($request->filled('search')) {
+        $query->where(function($q) use ($request) {
+            $q->where('nama_instansi', 'like', '%' . $request->search . '%')
+              ->orWhere('nama_universitas', 'like', '%' . $request->search . '%');
+        });
     }
 
+    // 2. Filter Berdasarkan Irisan Durasi (Overlap)
+    // Logika: Data muncul jika (Mulai_MOU <= Selesai_Filter) DAN (Selesai_MOU >= Mulai_Filter)
+    if ($request->filled('tanggal_mulai') && $request->filled('tanggal_selesai')) {
+        $query->where(function($q) use ($request) {
+            $q->where('tanggal_masuk', '<=', $request->tanggal_selesai)
+              ->where('tanggal_keluar', '>=', $request->tanggal_mulai);
+        });
+    } 
+    // Fallback jika user cuma isi salah satu (opsional)
+    elseif ($request->filled('tanggal_mulai')) {
+        $query->where('tanggal_keluar', '>=', $request->tanggal_mulai);
+    } 
+    elseif ($request->filled('tanggal_selesai')) {
+        $query->where('tanggal_masuk', '<=', $request->tanggal_selesai);
+    }
+
+    $mous = $query->latest()->paginate(10)->withQueryString();
+
+    return view('mou.index', compact('mous'));
+}
     /**
      * Halaman CREATE (Halaman Pertama)
      */
@@ -295,13 +297,47 @@ class MouController extends Controller
     public function publicIndex(Request $request)
     {
         $query = Mou::query();
+
+        // 1. Filter Pencarian Nama Instansi/Universitas
         if ($request->filled('search')) {
-            $query->where('nama_instansi', 'like', '%' . $request->search . '%')
-                  ->orWhere('nama_universitas', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_instansi', 'like', '%' . $search . '%')
+                  ->orWhere('nama_universitas', 'like', '%' . $search . '%');
+            });
         }
 
+        // 2. Filter Tanggal Mulai (tanggal_masuk >= tanggal_mulai)
+        if ($request->filled('tanggal_mulai')) {
+            try {
+                // Pastikan format tanggal aman, gunakan startOfDay
+                $startDate = Carbon::parse($request->tanggal_mulai)->startOfDay();
+                $query->where('tanggal_masuk', '>=', $startDate);
+            } catch (\Exception $e) {
+                // Opsional: Handle error parsing date
+                return back()->with('error', 'Format tanggal mulai tidak valid.');
+            }
+        }
+
+        // 3. Filter Tanggal Selesai (tanggal_keluar <= tanggal_selesai)
+        if ($request->filled('tanggal_selesai')) {
+            try {
+                // Pastikan format tanggal aman, gunakan endOfDay
+                $endDate = Carbon::parse($request->tanggal_selesai)->endOfDay();
+                $query->where('tanggal_keluar', '<=', $endDate);
+            } catch (\Exception $e) {
+                // Opsional: Handle error parsing date
+                return back()->with('error', 'Format tanggal selesai tidak valid.');
+            }
+        }
+
+        // Ambil data dengan pagination
         $mous = $query->orderBy('tanggal_masuk', 'desc')->paginate(10)->withQueryString();
-        $searchPerformed = $request->has('search');
+        
+        // Cek apakah ada filter yang aktif
+        $searchPerformed = $request->has('search') || $request->has('tanggal_mulai') || $request->has('tanggal_selesai');
+
+        // Pastikan Anda menggunakan nama view yang benar, sesuai yang Anda definisikan: 'public.mou.index'
         return view('mou.public_index', compact('mous', 'searchPerformed'));
     }
 

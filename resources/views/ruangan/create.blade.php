@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Ruangan')
-@section('page-title', 'Tambah Ruangan')
+
 
 @section('content')
     <style>
@@ -108,7 +107,7 @@
     </style>
 
     <div class="row justify-content-center animate-up">
-        <div class="col-md-8 col-lg-6">
+        <div class="col-12">
             <div class="form-card">
                 <div class="card-header-custom">
                     <h4 class="mb-0 fw-bold"><i class="bi bi-plus-circle-fill me-2"></i> Tambah Ruangan</h4>
@@ -146,7 +145,18 @@
                                 <div class="text-danger small mt-1">{{ $message }}</div>
                             @enderror
                         </div>
-
+<div class="mb-3">
+    <label class="form-label fw-bold">Kategori Jam Kerja</label>
+    <select name="kategori" class="form-select">
+        <option value="non_shift" {{ (old('kategori', $ruangan->kategori ?? '') == 'non_shift') ? 'selected' : '' }}>
+            Non-Shift (Senin-Kamis 07:15-15:30, Jumat 07:00-14:30)
+        </option>
+        <option value="shift" {{ (old('kategori', $ruangan->kategori ?? '') == 'shift') ? 'selected' : '' }}>
+            Shift (Pagi, Siang, Malam - 24 Jam)
+        </option>
+    </select>
+    <small class="text-muted">Pilih "Shift" untuk Rawat Inap/IGD. Pilih "Non-Shift" untuk Manajemen/Poli.</small>
+</div>
                         <div class="mb-4">
                             <label for="kuota_ruangan" class="form-label">Kuota Maksimal <span
                                     class="text-danger">*</span></label>

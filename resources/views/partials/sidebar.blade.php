@@ -1,11 +1,14 @@
-{{-- Sidebar --}}
-<div class="sidebar">
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="sidebar" id="sidebar">
     <div class="sidebar-inner">
         <div class="sidebar-header">
-            {{-- Pastikan file 'icon.png' ada di public folder --}}
             <img class="image-sidebar" src="{{ asset('icon.png') }}" alt="Logo">
-            <button class="sidebar-toggle" id="sidebarToggle">
+            <button class="sidebar-toggle d-none d-md-flex" id="sidebarToggle">
                 <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="sidebar-close-mobile d-md-none" id="sidebarCloseMobile">
+                <i class="bi bi-x-lg"></i>
             </button>
         </div>
 
@@ -18,786 +21,748 @@
 
         <nav class="nav flex-column sidebar-nav-container">
 
-            {{-- ========================================== --}}
-            {{-- MENU KHUSUS ADMIN                          --}}
-            {{-- ========================================== --}}
-            @if (auth()->check() && auth()->user()->role === 'admin')
-                
-                {{-- GRUP 1: UTAMA --}}
-                <div class="sidebar-heading">
+            {{-- ========== MENU ADMIN & KASIR ========== --}}
+            @if (auth()->check() && in_array(auth()->user()->role, ['admin', 'kasir']))
+                <div class="sidebar-heading animate-item">
                     <span class="sidebar-text">Menu Utama</span>
                 </div>
 
-                <a class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                <a class="nav-link animate-item {{ request()->is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                     <i class="bi bi-house-door"></i>
                     <span class="sidebar-text">Dashboard</span>
                 </a>
 
-                <a class="nav-link {{ request()->is('users*') ? 'active' : '' }}" href="{{ route('users.index') }}">
+                {{-- Menu Invoice Muncul untuk Admin & Kasir --}}
+                <a class="nav-link animate-item {{ Route::is('admin.invoices.*') ? 'active' : '' }}" href="{{ route('admin.invoices.index') }}">
+                    <i class="bi bi-receipt"></i>
+                    <span class="sidebar-text">Billing Invoice</span>
+                </a>
+            @endif
+
+            {{-- ========== MENU KHUSUS ADMIN SAJA ========== --}}
+            @if (auth()->check() && auth()->user()->role === 'admin')
+                <a class="nav-link animate-item {{ request()->is('users*') ? 'active' : '' }}" href="{{ route('users.index') }}">
                     <i class="bi bi-person-gear"></i>
-                    <span class="sidebar-text">Manajemen User</span>
+                    <span class="sidebar-text">Akun User</span>
                 </a>
 
-                <a class="nav-link {{ request()->is('admin/pengajuan*') ? 'active' : '' }}"
-                    href="{{ route('admin.pengajuan.index') }}">
+                <a class="nav-link animate-item {{ request()->is('admin/pengajuan*') ? 'active' : '' }}" href="{{ route('admin.pengajuan.index') }}">
                     <i class="bi bi-hourglass-split"></i>
-                    <span class="sidebar-text">Approval Pengajuan</span>
+                    <span class="sidebar-text">Pengajuan User</span>
                 </a>
 
-                                <a class="nav-link {{ request()->is('surat-balasan*') ? 'active' : '' }}"
-                    href="{{ route('surat-balasan.index') }}">
-                    <i class="bi bi-envelope-paper"></i>
-                    <span class="sidebar-text">Surat Balasan</span>
+                <a class="nav-link animate-item {{ request()->routeIs('admin.ci.*') ? 'active' : '' }}" href="{{ route('admin.ci.index') }}">
+                    <i class="bi bi-person-fill-add"></i>
+                    <span class="sidebar-text">Clinical Instructur</span>
                 </a>
-
-                {{-- GRUP 2: MOU --}}
-                @php $isMouActive = request()->is('mou*'); @endphp
-                <div class="nav-item-dropdown">
-                    <a class="nav-link {{ $isMouActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
-                        href="#menuMou" role="button" aria-expanded="{{ $isMouActive ? 'true' : 'false' }}">
+                
+                {{-- MoU --}}
+                <div class="nav-item-dropdown animate-item">
+                    <a class="nav-link {{ request()->is('mou') ? 'active' : '' }}" href="{{ route('mou.index') }}">
                         <i class="bi bi-file-earmark-text"></i>
-                        <span class="sidebar-text">MoU</span>
+                        <span class="sidebar-text">MOU</span>
+                    </a>
+                </div> 
+                
+
+ 
+                {{-- Orientasi --}}
+                @php $isMateriActive = request()->is('admin.materi*') || request()->is('admin/orientasi*'); @endphp
+                <div class="nav-item-dropdown animate-item">
+                    <a class="nav-link {{ $isMateriActive ? 'active-parent' : '' }}" data-bs-toggle="collapse" href="#menuMou" role="button">
+                        <i class="bi bi-clipboard"></i>
+                        <span class="sidebar-text">Orientasi</span>
                         <i class="bi bi-chevron-down sidebar-arrow"></i>
                     </a>
-                    <div class="collapse sub-menu {{ $isMouActive ? 'show' : '' }}" id="menuMou">
-                        <a class="nav-link {{ request()->is('mou') ? 'active' : '' }}"
-                            href="{{ route('mou.index') }}">
-                            <span class="sidebar-text">List MOU</span>
+                    <div class="collapse sub-menu {{ $isMateriActive ? 'show' : '' }}" id="menuMou">
+                        <a class="nav-link {{ request()->is('admin.materi*') ? 'active' : '' }}" href="{{ route('admin.materi.index') }}">
+                            <span class="sidebar-text">Materi</span>
+                        </a>
+                        <a class="nav-link {{ request()->is('admin/orientasi*') ? 'active' : '' }}" href="{{ route('admin.orientasi.index') }}">
+                            <span class="sidebar-text">Monitoring Nilai</span>
                         </a>
                     </div>
                 </div>
 
-                {{-- GRUP 3: PENDIDIKAN --}}
+                {{-- Pendidikan --}}
                 @php
-                    $isPendidikanActive = request()->is('mahasiswa*') || request()->is('ruangan*') || request()->is('absensi*');
+                    $isPendidikanActive = request()->is('mahasiswa*') || request()->is('ruangan*') || 
+                                          request()->is('room_sequences*') || request()->is('room_schedules*') || 
+                                          request()->is('absensi*') || request()->is('admin.dispensasi*');
                 @endphp
-                <div class="nav-item-dropdown">
-                    <a class="nav-link {{ $isPendidikanActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
-                        href="#menuPendidikan" role="button"
-                        aria-expanded="{{ $isPendidikanActive ? 'true' : 'false' }}">
+                <div class="nav-item-dropdown animate-item">
+                    <a class="nav-link {{ $isPendidikanActive ? 'active-parent' : '' }}" data-bs-toggle="collapse" href="#menuPendidikan" role="button">
                         <i class="bi bi-mortarboard"></i>
                         <span class="sidebar-text">Pendidikan</span>
                         <i class="bi bi-chevron-down sidebar-arrow"></i>
                     </a>
                     <div class="collapse sub-menu {{ $isPendidikanActive ? 'show' : '' }}" id="menuPendidikan">
-                        <a class="nav-link {{ request()->is('mahasiswa*') ? 'active' : '' }}"
-                            href="{{ route('mahasiswa.index') }}">
-                            <span class="sidebar-text">Mahasiswa</span>
-                        </a>
-                        <a class="nav-link {{ request()->is('ruangan*') ? 'active' : '' }}"
-                            href="{{ route('ruangan.index') }}">
-                            <span class="sidebar-text">Ruangan</span>
-                        </a>
-                        <a class="nav-link {{ request()->is('absensi*') ? 'active' : '' }}"
-                            href="{{ route('absensi.index') }}">
-                            <span class="sidebar-text">Riwayat Absensi</span>
-                        </a>
+                        <a class="nav-link {{ request()->is('mahasiswa*') ? 'active' : '' }}" href="{{ route('mahasiswa.index') }}"><span class="sidebar-text">Mahasiswa</span></a>
+                        <a class="nav-link {{ request()->is('ruangan*') ? 'active' : '' }}" href="{{ route('ruangan.index') }}"><span class="sidebar-text">Ruangan</span></a>
+                        <a class="nav-link {{ request()->is('admin.dispensasi*') ? 'active' : '' }}" href="{{ route('admin.dispensasi.index') }}"><span class="sidebar-text">Dispensasi</span></a>
+                        <a class="nav-link {{ request()->is('absensi*') ? 'active' : '' }}" href="{{ route('absensi.index') }}"><span class="sidebar-text">Riwayat Absensi</span></a>
+                          <a class="nav-link {{ request()->is('evaluasi_institusi*') ? 'active' : '' }}" href="{{ route('admin.evaluasi_institusi') }}"><span class="sidebar-text">Evaluasi</span></a>
+                          
                     </div>
                 </div>
 
-                {{-- GRUP 4: PELATIHAN --}}
-                @php $isPelatihanActive = request()->is('pelatihan*'); @endphp
-                <div class="nav-item-dropdown">
-                    <a class="nav-link {{ $isPelatihanActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
-                        href="#menuPelatihan" role="button"
-                        aria-expanded="{{ $isPelatihanActive ? 'true' : 'false' }}">
+            {{-- Pelatihan --}}
+                @php 
+                    // PERBAIKAN: Gunakan '/' bukan '.' untuk request()->is() karena ini membaca path URL
+                    $isPelatihanActive = request()->is('pelatihan*') || 
+                                         request()->is('diklat*') || 
+                                         request()->is('admin/master*') || 
+                                         request()->is('admin/kegiatan*') || // <-- Ini akan menjaga menu terbuka saat di dalam rute penilaian
+                                         request()->is('admin/forms*') || 
+                                         request()->is('admin/linktree*'); 
+                @endphp
+                <div class="nav-item-dropdown animate-item">
+                    <a class="nav-link {{ $isPelatihanActive ? 'active-parent' : '' }}" data-bs-toggle="collapse" href="#menuPelatihan">
                         <i class="bi bi-people"></i>
                         <span class="sidebar-text">Pelatihan</span>
                         <i class="bi bi-chevron-down sidebar-arrow"></i>
                     </a>
                     <div class="collapse sub-menu {{ $isPelatihanActive ? 'show' : '' }}" id="menuPelatihan">
-                        <a class="nav-link {{ request()->is('pelatihan') ? 'active' : '' }}"
-                            href="{{ route('pelatihan.index') }}">
-                            <span class="sidebar-text">List Pelatihan</span>
-                        </a>
-                        <a class="nav-link" href="{{ route('public.pelatihan.index') }}">
-                            <span class="sidebar-text">Search Pelatihan</span>
-                        </a>
+                        <a class="nav-link {{ request()->is('admin/master_instansi*') ? 'active' : '' }}" href="{{ route('admin.master_instansi.index') }}">Instansi</a>
+                        <a class="nav-link {{ request()->is('admin/master_ruangan*') ? 'active' : '' }}" href="{{ route('admin.master_ruangan.index') }}">Ruangan</a>
+                        <a class="nav-link {{ request()->is('admin/master_kompetensi*') ? 'active' : '' }}" href="{{ route('admin.master_kompetensi.index') }}">Kompetensi</a>
+                        
+                        {{-- Menu Kegiatan Utama --}}
+                        <a class="nav-link {{ request()->routeIs('admin.kegiatan.index', 'admin.kegiatan.create', 'admin.kegiatan.edit') ? 'active' : '' }}" href="{{ route('admin.kegiatan.index') }}">Pelatihan</a>
+
+                        {{-- ====== MENU DINAMIS ====== --}}
+                        {{-- Hanya muncul jika Admin sedang membuka Setting Penilaian suatu kegiatan --}}
+                        @if(request()->routeIs('admin.kegiatan.penilaian.*'))
+                            <a class="nav-link active" href="#" style="background: rgba(255,255,255,0.1); border-left: 2px solid #ffde59; padding-left: 15px;">
+                                <i class="bi bi-gear-fill me-2" style="font-size: 0.8rem; color: #ffde59;"></i> 
+                                <span class="sidebar-text" style="color: #ffde59;">Setting Penilaian</span>
+                            </a>
+                        @endif
+                        {{-- ============================== --}}
+
+                        <a class="nav-link {{ request()->is('pelatihan') ? 'active' : '' }}" href="{{ route('pelatihan.index') }}">Database SDM</a>
+                        <a class="nav-link {{ request()->is('diklat*') ? 'active' : '' }}" href="{{ route('diklat.index') }}">Pendaftaran</a>
+                        <a class="nav-link {{ request()->is('admin/forms*') ? 'active' : '' }}" href="{{ route('admin.forms.index') }}">Buat Formulir</a>
+                        <a class="nav-link {{ request()->is('admin/linktree*') ? 'active' : '' }}" href="{{ route('admin.linktree.index') }}">Paket Link</a>
                     </div>
                 </div>
-
-                {{-- GRUP 5: PENELITIAN --}}
-                @php $isPenelitianActive = request()->is('pra-penelitian*') || request()->is('admin/presentasi*'); @endphp
-                <div class="nav-item-dropdown">
-                    <a class="nav-link {{ $isPenelitianActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
-                        href="#menuPenelitian" role="button"
-                        aria-expanded="{{ $isPenelitianActive ? 'true' : 'false' }}">
+         {{-- Penelitian --}}
+                @php
+                    $isPenelitianActive = request()->is('pra-penelitian*') || request()->is('admin/presentasi*') || request()->is('surat-balasan*');
+                @endphp
+                <div class="nav-item-dropdown animate-item">
+                    <a class="nav-link {{ $isPenelitianActive ? 'active-parent' : '' }}" data-bs-toggle="collapse" href="#menuPenelitian">
                         <i class="bi bi-journal-richtext"></i>
                         <span class="sidebar-text">Penelitian</span>
                         <i class="bi bi-chevron-down sidebar-arrow"></i>
                     </a>
                     <div class="collapse sub-menu {{ $isPenelitianActive ? 'show' : '' }}" id="menuPenelitian">
-                        <a class="nav-link {{ request()->is('pra-penelitian*') ? 'active' : '' }}"
-                            href="{{ route('pra-penelitian.index') }}">
-                            <span class="sidebar-text">Pra-Penelitian</span>
-                        </a>
-                         <a class="nav-link {{ request()->is('admin/presentasi*') ? 'active' : '' }}"
-                            href="{{ route('admin.presentasi.index') }}">
-                            <span class="sidebar-text">Presentasi</span>
-                        </a>
+                        <a class="nav-link {{ request()->is('pra-penelitian*') ? 'active' : '' }}" href="{{ route('pra-penelitian.index') }}">Data Penelitian</a>
+                        <a class="nav-link {{ request()->is('surat-balasan*') ? 'active' : '' }}" href="{{ route('surat-balasan.index') }}">Surat Balasan</a>
+                        <a class="nav-link {{ request()->is('admin/presentasi*') ? 'active' : '' }}" href="{{ route('admin.presentasi.index') }}">Presentasi</a>
                     </div>
                 </div>
+                
+                  <div class="nav-item-dropdown animate-item">
+    {{-- Menentukan apakah parent harus aktif --}}
+    @php
+        $isOtomasiActive = request()->is('admin/master-pelatihan*', 'admin/rekomendasi-pelatihan*');
+    @endphp
 
-                {{-- Menu Tambahan (Jika perlu tetap ada) --}}
-                {{-- <div class="sidebar-heading mt-3">
-                    <span class="sidebar-text">Lainnya</span>
-                </div> --}}
+    <a class="nav-link {{ $isOtomasiActive ? 'active-parent' : '' }}" data-bs-toggle="collapse" href="#menuOtomasi" role="button" aria-expanded="{{ $isOtomasiActive ? 'true' : 'false' }}">
+        <i class="bi bi-robot"></i>
+        <span class="sidebar-text">Otomasi</span>
+        <i class="bi bi-chevron-down sidebar-arrow"></i>
+    </a>
+
+    <div class="collapse sub-menu {{ $isOtomasiActive ? 'show' : '' }}" id="menuOtomasi">
+    
+        <a class="nav-link {{ request()->is('admin/rekomendasi-pelatihan*') ? 'active' : '' }}" href="{{ route('admin.rekomendasi_pelatihan') }}">
+            <span class="sidebar-text">Rekomendasi TNA</span>
+        </a>
+    </div>
+</div>
+       
 
             @endif
 
-            {{-- ========================================== --}}
-            {{-- MENU KHUSUS USER                           --}}
-            {{-- ========================================== --}}
-            @if (auth()->check() && auth()->user()->role === 'user')
+            {{-- ========== MENU KEPALA RUANGAN ========== --}}
+            @if (auth()->check() && in_array(auth()->user()->role, ['ruangan', 'kepala_ruangan']))
+                <div class="sidebar-heading animate-item">
+                    <span class="sidebar-text">Menu Ruangan</span>
+                </div>
                 
-                {{-- Dashboard User juga butuh link Dashboard umum --}}
-                 <div class="sidebar-heading">
+                <a class="nav-link animate-item {{ request()->routeIs('kepala_ruangan.dashboard') ? 'active' : '' }}" href="{{ route('kepala_ruangan.dashboard') }}">
+                    <i class="bi bi-house-door"></i>
+                    <span class="sidebar-text">Dashboard Ruangan</span>
+                </a>
+            @endif
+
+       {{-- ========== MENU USER (MAHASISWA) ========== --}}
+            @if (auth()->check() && auth()->user()->role === 'user')
+                <div class="sidebar-heading animate-item">
                     <span class="sidebar-text">Menu Utama</span>
                 </div>
-                <a class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                <a class="nav-link animate-item {{ request()->is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                     <i class="bi bi-house-door"></i>
                     <span class="sidebar-text">Dashboard</span>
                 </a>
 
-                @php
+                <div class="sidebar-heading mt-2 animate-item"><span class="sidebar-text">Wajib</span></div>
+                <a class="nav-link animate-item {{ request()->is('orientasi*') ? 'active' : '' }}" href="{{ route('orientasi.index') }}">
+                    <i class="bi bi-journal-check"></i> <span class="sidebar-text">Orientasi Awal</span>
+                </a>
+@php
                     $userId = auth()->id();
-                    $pra = \App\Models\Pengajuan::where('user_id', $userId)->where('jenis', 'pra_penelitian')->latest()->first();
+                    
+                    // ==========================================
+                    // 1. DATA MAGANG
+                    // ==========================================
                     $magang = \App\Models\Pengajuan::where('user_id', $userId)->where('jenis', 'magang')->latest()->first();
-                    $hasPraAccess = $pra && $pra->status === 'approved';
-                    $hasMagangAccess = $magang && $magang->status === 'approved';
-                    $hasCIAccess = $hasPraAccess && $pra->ci_nama;
-                    $presentasi = $hasCIAccess ? \App\Models\Presentasi::where('user_id', $userId)->first() : null;
+                    $mahasiswaTerakhir = \App\Models\Mahasiswa::where('user_id', $userId)->latest()->first();
+                    
+                    $showMenuMagang = false;
+                    
+                    if ($mahasiswaTerakhir) {
+                        $showMenuMagang = true; // Default: Tampilkan agar bisa lihat riwayat/sertifikat lama
+                        
+                        // Sembunyikan menu JIKA pengajuan terbarunya sudah di-ACC TAPI biodata barunya belum diisi
+                        // (Terdeteksi jika data mahasiswa terakhir lebih jadul dari tanggal pengajuan terbaru)
+                        if ($magang && $magang->status === 'approved' && $mahasiswaTerakhir->created_at < $magang->created_at) {
+                            $showMenuMagang = false; 
+                        }
+                    }
+
+                    // ==========================================
+                    // 2. DATA PENELITIAN
+                    // ==========================================
+                    $pra = \App\Models\Pengajuan::where('user_id', $userId)->where('jenis', 'pra_penelitian')->latest()->first();
+                    $praTerakhir = \App\Models\PraPenelitian::where('user_id', $userId)->latest()->first();
+                    
+                    $showMenuPenelitian = false;
+                    
+                    if ($praTerakhir) {
+                        $showMenuPenelitian = true; // Default: Tampilkan agar bisa lihat laporan lama
+                        
+                        if ($pra && $pra->status === 'approved' && $praTerakhir->created_at < $pra->created_at) {
+                            $showMenuPenelitian = false;
+                        }
+                    }
                 @endphp
 
-                <div class="sidebar-heading mt-2">
-                    <span class="sidebar-text">Layanan</span>
-                </div>
-
-                {{-- 1. MENU STATUS & PENGAJUAN --}}
-                <a class="nav-link {{ request()->is('pengajuan') && !request()->is('pengajuan/detail*') ? 'active' : '' }}"
-                    href="{{ route('pengajuan.index') }}">
-                    <i class="bi bi-grid-1x2"></i>
-                    <span class="sidebar-text">Pengajuan & Status</span>
+                <div class="sidebar-heading mt-2 animate-item"><span class="sidebar-text">Layanan</span></div>
+                <a class="nav-link animate-item {{ request()->is('pengajuan') ? 'active' : '' }}" href="{{ route('pengajuan.index') }}">
+                    <i class="bi bi-grid-1x2"></i> <span class="sidebar-text">Pengajuan</span>
                 </a>
 
-                {{-- 2. MENU AKSES MAGANG --}}
-                @if ($hasMagangAccess)
-                    <div class="sidebar-heading mt-2">
-                        <span class="sidebar-text">Aktivitas Magang</span>
-                    </div>
-                    <a class="nav-link {{ request()->routeIs('mahasiswa.dashboard') ? 'active' : '' }}"
-                        href="{{ route('mahasiswa.dashboard') }}">
-                        <i class="bi bi-briefcase"></i>
-                        <span class="sidebar-text">Dashboard Magang</span>
+                {{-- Tampilkan Header "Aktivitas" jika salah satu menu aktif --}}
+                @if ($showMenuMagang || $showMenuPenelitian)
+                    <div class="sidebar-heading mt-2 animate-item"><span class="sidebar-text">Aktivitas Saya</span></div>
+                @endif
+
+                {{-- Menu Dashboard Magang --}}
+                @if ($showMenuMagang)
+                    <a class="nav-link animate-item {{ request()->routeIs('mahasiswa.dashboard') ? 'active' : '' }}" href="{{ route('mahasiswa.dashboard') }}">
+                        <i class="bi bi-briefcase"></i> <span class="sidebar-text">Dashboard Magang</span>
                     </a>
                 @endif
 
-                {{-- 3. MENU AKSES PRA-PENELITIAN --}}
-                @if ($hasPraAccess)
-                    <div class="sidebar-heading mt-2">
-                        <span class="sidebar-text">Aktivitas Penelitian</span>
-                    </div>
-
-                    <a class="nav-link {{ request()->is('pengajuan/detail/pra_penelitian') ? 'active' : '' }}"
-                        href="{{ route('pengajuan.detail', 'pra_penelitian') }}">
-                        <i class="bi bi-bar-chart-line"></i>
-                        <span class="sidebar-text">Detail Penelitian</span>
+                {{-- Menu Dashboard Penelitian (Tambahan Baru) --}}
+             {{-- Menu Dashboard Penelitian --}}
+                @if ($showMenuPenelitian)
+                    <a class="nav-link animate-item {{ request()->is('pengajuan/detail/pra_penelitian') ? 'active' : '' }}" href="{{ route('pengajuan.detail', ['jenis' => 'pra_penelitian']) }}">
+                        <i class="bi bi-journal-richtext"></i> <span class="sidebar-text">Dashboard Penelitian</span>
                     </a>
-
-                    @if ($hasCIAccess)
-                        <a class="nav-link {{ request()->is('konsultasi*') ? 'active' : '' }}"
-                            href="{{ route('konsultasi.index') }}">
-                            <i class="bi bi-chat-dots"></i>
-                            <span class="sidebar-text">Konsultasi</span>
-                        </a>
-                    @endif
-
-                    @if ($presentasi)
-                        <a class="nav-link {{ request()->is('presentasi*') ? 'active' : '' }}"
-                            href="{{ route('presentasi.show') }}">
-                            <i class="bi bi-easel"></i>
-                            <span class="sidebar-text">Presentasi</span>
-                        </a>
-                    @endif
                 @endif
             @endif
         </nav>
     </div>
 
-    {{-- User Profile di Bawah --}}
     <div class="sidebar-footer">
         <div class="p-3 sidebar-user-profile">
-            <a class="nav-link logout-link" href="#"
-                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+            <a class="nav-link logout-link" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                 <i class="bi bi-box-arrow-right"></i>
                 <span class="sidebar-text">Logout</span>
             </a>
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                @csrf
-            </form>
-
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">@csrf</form>
             <hr class="logout-divider">
-
-            <div class="d-flex align-items-center">
-                @if (auth()->check())
-                    @php
-                        $user = auth()->user();
-                        $mahasiswa = null;
-                        if ($user->role === 'user') {
-                            $mahasiswa = \App\Models\Mahasiswa::where('user_id', $user->id)->first();
-                        }
-                        $hasFoto = $mahasiswa && !empty($mahasiswa->foto_path) && file_exists(public_path($mahasiswa->foto_path));
-                    @endphp
-
-                    @if ($hasFoto)
-                        <img src="{{ asset($mahasiswa->foto_path) }}"
-                            class="rounded-circle me-2 object-fit-cover" 
-                            width="40" height="40" alt="User">
-                    @else
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=7c1316&color=fff"
-                            class="rounded-circle me-2" width="40" height="40" alt="User">
-                    @endif
-
-                    <div class="sidebar-text">
-                        <div class="fw-bold text-truncate" style="max-width: 140px;">{{ $user->name }}</div>
-                        <small>{{ ucfirst($user->role ?? 'user') }}</small>
-                    </div>
-                @else
-                    <img src="https://ui-avatars.com/api/?name=Guest&background=7c1316&color=fff"
-                        class="rounded-circle me-2" width="40" height="40" alt="Guest">
-                    <div class="sidebar-text">
-                        <div class="fw-bold">Guest</div>
-                        <small>Visitor</small>
-                    </div>
-                @endif
+            <div class="d-flex align-items-center user-info-box">
+                @php
+                    $user = auth()->user();
+                    $mahasiswa = ($user && $user->role === 'user') ? \App\Models\Mahasiswa::where('user_id', $user->id)->first() : null;
+                    $foto = ($mahasiswa && $mahasiswa->foto_path) ? asset($mahasiswa->foto_path) : "https://ui-avatars.com/api/?name=".urlencode($user->name ?? 'Guest')."&background=7c1316&color=fff";
+                @endphp
+                <img src="{{ $foto }}" class="rounded-circle me-2 object-fit-cover user-avatar" width="40" height="40" alt="User">
+                <div class="sidebar-text">
+                    <div class="fw-bold text-truncate" style="max-width: 130px;">{{ $user->name ?? 'Guest' }}</div>
+                    <small class="role-badge">{{ ucfirst($user->role ?? 'Visitor') }}</small>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // 1. Fitur Search Sidebar
-        const searchInput = document.querySelector('.sidebar-search .search-input');
-        if (searchInput) {
-            searchInput.addEventListener('input', function(e) {
-                filterSidebar(e.target.value);
-            });
-        }
-
-        // 2. Toggle Sidebar
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const sidebar = document.querySelector('.sidebar');
-
-        if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('collapsed');
-            });
-        }
-    });
-
-    function filterSidebar(filterText) {
-        const text = filterText.toLowerCase();
-        const navContainer = document.querySelector('.sidebar-nav-container');
-        const headings = navContainer.querySelectorAll('.sidebar-heading');
-        const items = navContainer.querySelectorAll(
-            '.sidebar-nav-container > .nav-link, .sidebar-nav-container > .nav-item-dropdown');
-        const allSubLinks = navContainer.querySelectorAll('.sub-menu .nav-link');
-
-        // RESET STATE
-        if (text === '') {
-            headings.forEach(h => h.style.display = 'block');
-            items.forEach(item => item.style.display = 'block');
-            allSubLinks.forEach(sub => sub.style.display = '');
-
-            navContainer.querySelectorAll('.sub-menu').forEach(sub => {
-                const parentLink = sub.closest('.nav-item-dropdown').querySelector(
-                    '[data-bs-toggle="collapse"]');
-                if (!parentLink.classList.contains('active-parent')) {
-                    sub.classList.remove('show');
-                    parentLink.setAttribute('aria-expanded', 'false');
-                }
-            });
-            return;
-        }
-
-        // FILTERING
-        headings.forEach(h => h.style.display = 'none');
-        allSubLinks.forEach(sub => sub.style.display = 'none');
-
-        items.forEach(item => {
-            let groupHasMatch = false;
-            const mainLink = item.matches('.nav-link') ? item : item.querySelector(
-                '[data-bs-toggle="collapse"]');
-            const mainText = mainLink.querySelector('.sidebar-text')?.textContent.toLowerCase() || '';
-
-            if (mainText.includes(text)) {
-                groupHasMatch = true;
-            }
-
-            if (item.matches('.nav-item-dropdown')) {
-                const subLinks = item.querySelectorAll('.sub-menu .nav-link');
-                subLinks.forEach(subLink => {
-                    const subText = subLink.textContent.toLowerCase();
-                    if (subText.includes(text)) {
-                        groupHasMatch = true;
-                        subLink.style.display = '';
-                    }
-                });
-            }
-
-            if (groupHasMatch) {
-                item.style.display = 'block';
-                if (item.matches('.nav-item-dropdown')) {
-                    item.querySelector('.sub-menu').classList.add('show');
-                    item.querySelector('[data-bs-toggle="collapse"]').setAttribute('aria-expanded', 'true');
-                }
-                // Show Heading
-                let heading = item.previousElementSibling;
-                while (heading) {
-                    if (heading.classList.contains('sidebar-heading')) {
-                        heading.style.display = 'block';
-                        break;
-                    }
-                    heading = heading.previousElementSibling;
-                }
-            } else {
-                item.style.display = 'none';
-            }
-        });
-    }
-</script>
+<button class="mobile-hamburger-btn d-md-none" id="mobileHamburger">
+    <i class="bi bi-list"></i>
+</button>
 
 <style>
-    /* ========================================= */
-    /* --- STYLING SIDEBAR (PILL UI/UX) --- */
-    /* ========================================= */
     :root {
         --maroon: #7c1316;
         --maroon-light: #a3191d;
         --sidebar-bg: var(--maroon);
         --sidebar-text-color: #e0e0e0;
         --sidebar-text-active: #ffffff;
-        --sidebar-pill-hover: rgba(255, 255, 255, 0.1);
-        --sidebar-pill-active: var(--maroon-light);
-        --sidebar-heading-color: rgba(255, 255, 255, 0.5);
-        --transition-speed: 0.25s;
-        text-decoration: none !important;
+        --sidebar-pill-hover: rgba(255, 255, 255, 0.15);
+        --sidebar-pill-active: linear-gradient(135deg, var(--maroon-light), #d12a30);
+        --sidebar-heading-color: rgba(255, 255, 255, 0.6);
+        --transition-speed: 0.4s;
     }
 
-    /* --- Sidebar Container (Flexbox + Scroll) --- */
+    /* Base Sidebar */
     .sidebar {
-        width: 250px;
+        width: 270px;
         height: 100vh;
         background: var(--sidebar-bg);
         color: var(--sidebar-text-color);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         position: fixed;
         top: 0;
         left: 0;
+        z-index: 1050;
         display: flex;
         flex-direction: column;
-        z-index: 1000;
-        transition: width var(--transition-speed) ease;
-        overflow: hidden;
+        transition: all var(--transition-speed) cubic-bezier(0.25, 1, 0.5, 1);
+        box-shadow: 6px 0 25px rgba(0,0,0,0.15);
     }
 
-    .sidebar.collapsed {
-        width: 80px;
+    .sidebar.collapsed { width: 85px; }
+
+    @media (max-width: 768px) {
+        .sidebar { transform: translateX(-100%); width: 280px; }
+        .sidebar.mobile-show { transform: translateX(0); }
+        .sidebar.collapsed { width: 280px; }
     }
 
-    /* --- Sidebar Inner (Scrollable Area) --- */
-    .sidebar-inner {
-        flex: 1;
-        overflow-y: auto;
-        overflow-x: hidden;
-        display: flex;
-        flex-direction: column;
-        scroll-behavior: smooth;
+    .sidebar-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+        display: none; z-index: 1040; opacity: 0; transition: opacity var(--transition-speed);
+    }
+    .sidebar-overlay.active { display: block; opacity: 1; }
+
+    /* ====== ANIMATED SCROLLBAR (BEAUTIFUL UX) ====== */
+    .sidebar-inner { 
+        flex: 1; 
+        overflow-y: auto; 
+        overflow-x: hidden; 
+        padding-bottom: 20px;
+    }
+    .sidebar-inner::-webkit-scrollbar { 
+        width: 6px; 
+    }
+    .sidebar-inner::-webkit-scrollbar-track { 
+        background: transparent; 
+    }
+    .sidebar-inner::-webkit-scrollbar-thumb { 
+        background: rgba(255,255,255,0.1); 
+        border-radius: 10px; 
+    }
+    .sidebar-inner:hover::-webkit-scrollbar-thumb { 
+        background: rgba(255,255,255,0.3); 
+    }
+    .sidebar-inner::-webkit-scrollbar-thumb:hover { 
+        background: rgba(255,255,255,0.5); 
     }
 
-    /* Custom Scrollbar */
-    .sidebar-inner::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .sidebar-inner::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 10px;
-    }
-
-    .sidebar-inner::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 10px;
-        transition: background 0.3s;
-    }
-
-    .sidebar-inner::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 255, 255, 0.5);
-    }
-
-    /* Firefox Scrollbar */
-    .sidebar-inner {
-        scrollbar-width: thin;
-        scrollbar-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0.2);
-    }
-
-    /* --- Header & Logo --- */
     .sidebar-header {
-        text-align: center;
-        padding: 1.5rem 1rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        position: relative;
-        height: 121px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
+        height: 100px; padding: 1rem; display: flex; align-items: center;
+        justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05);
     }
 
-    .image-sidebar {
-        width: 77%;
-        height: 90px;
-        object-fit: cover;
-        border-radius: 8px;
-        transition: opacity 0.1s;
+    .image-sidebar { 
+        height: 200px; padding: 30px; max-width: 200px; 
+        object-fit: contain; transition: opacity 0.3s; 
+        filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.3));
     }
+    .sidebar.collapsed .image-sidebar { opacity: 0; pointer-events: none; width: 0; padding: 0; }
 
-    .sidebar.collapsed .image-sidebar {
-        opacity: 0;
-        display: none;
+    .sidebar-toggle, .sidebar-close-mobile {
+        background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); 
+        color: white; width: 34px; height: 34px; border-radius: 50%; display: flex;
+        align-items: center; justify-content: center; cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     }
-
-    .sidebar-toggle {
-        position: absolute;
-        right: -15px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: #fff;
-        border: 1px solid #e0e0e0;
-        color: var(--maroon);
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all var(--transition-speed);
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        z-index: 1001;
-    }
-
-    .sidebar.collapsed .sidebar-toggle {
-        right: -15px;
-    }
-
     .sidebar-toggle:hover {
-        background: var(--maroon);
-        color: white;
-        border-color: var(--maroon);
-        transform: translateY(-50%) scale(1.1);
+        background: white; color: var(--maroon);
+        transform: scale(1.1); box-shadow: 0 0 15px rgba(255,255,255,0.4);
     }
+    .sidebar.collapsed .sidebar-toggle i { transform: rotate(180deg); }
 
-    .sidebar-toggle i {
-        transition: transform var(--transition-speed) ease;
-    }
-
-    .sidebar.collapsed .sidebar-toggle i {
-        transform: rotate(180deg);
-    }
-
-    /* --- Search Bar --- */
-    .sidebar-search {
-        padding: 1rem;
-        flex-shrink: 0;
-    }
-
-    .search-container {
-        position: relative;
-    }
-
-    .search-input {
-        width: 100%;
-        padding: 0.6rem 2.2rem 0.6rem 1rem;
-        border-radius: 8px;
-        border: none;
-        background: rgba(0, 0, 0, 0.15);
-        color: white;
-        transition: all var(--transition-speed);
-        font-size: 0.9rem;
-    }
-
-    .search-input::placeholder {
-        color: rgba(255, 255, 255, 0.6);
-    }
-
-    .search-input:focus {
-        outline: none;
-        background: rgba(0, 0, 0, 0.3);
-        box-shadow: 0 0 0 2px var(--maroon-light);
-    }
-
-    .search-icon {
-        position: absolute;
-        right: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: rgba(255, 255, 255, 0.6);
-    }
-
-    .sidebar.collapsed .sidebar-search {
-        display: none;
-    }
-
-    /* --- Navigasi Container (Scrollable) --- */
-    .sidebar-nav-container {
-        flex-grow: 1;
-        padding: 0 1rem 1rem 1rem;
-        overflow-y: visible;
-    }
-
-    /* Judul Grup */
-    .sidebar-heading {
-        font-size: 0.7rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: var(--sidebar-heading-color);
-        padding: 1.5rem 0.5rem 0.5rem;
-        white-space: nowrap;
-        overflow: hidden;
-        transition: opacity var(--transition-speed);
-    }
-
-    .sidebar.collapsed .sidebar-heading {
-        padding-top: 1rem;
-        padding-bottom: 0;
-    }
-
-    .sidebar.collapsed .sidebar-heading .sidebar-text {
-        display: none;
-    }
-
-    /* --- Link Navigasi (Pill Style) --- */
+    /* ====== NAVIGATION LINKS & ANIMATIONS ====== */
     .nav-link {
-        color: var(--sidebar-text-color);
-        padding: 0.7rem 0.8rem;
+        color: var(--sidebar-text-color) !important;
+        padding: 0.8rem 1.2rem;
         display: flex;
         align-items: center;
-        border-radius: 8px;
-        margin: 0.15rem 0;
-        transition: all var(--transition-speed) ease;
-        position: relative;
-        white-space: nowrap;
-        overflow: hidden;
+        border-radius: 10px;
+        margin: 4px 12px;
         text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        white-space: nowrap;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        position: relative;
+        overflow: hidden;
     }
-
-    .nav-link i {
-        margin-right: 12px;
-        font-size: 1.2rem;
-        min-width: 24px;
-        text-align: center;
-        transition: all var(--transition-speed) ease;
+    
+    .nav-link i { 
+        font-size: 1.3rem; 
+        min-width: 35px; 
+        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncing effect */
     }
 
     .nav-link:hover {
         background: var(--sidebar-pill-hover);
-        color: var(--sidebar-text-active);
-        text-decoration: none;
+        color: var(--sidebar-text-active) !important;
+        transform: translateX(6px);
+    }
+    
+    .nav-link:hover i {
+        transform: scale(1.2) rotate(5deg);
     }
 
     .nav-link.active {
         background: var(--sidebar-pill-active);
-        color: var(--sidebar-text-active);
-        font-weight: 500;
+        color: var(--sidebar-text-active) !important;
+        box-shadow: 0 4px 15px rgba(163, 25, 29, 0.4);
+        font-weight: 600;
+    }
+    
+    .nav-link.active i {
+        transform: scale(1.1);
+        animation: pulseIcon 2s infinite;
     }
 
-    .nav-link.active-parent {
-        color: var(--sidebar-text-active);
+    @keyframes pulseIcon {
+        0% { transform: scale(1.1); }
+        50% { transform: scale(1.25); }
+        100% { transform: scale(1.1); }
     }
 
-    /* --- Style Saat Collapsed --- */
-    .sidebar.collapsed .nav-link {
-        padding: 0.7rem 0;
-        justify-content: center;
-    }
+    .sidebar.collapsed .nav-link:hover { transform: scale(1.1); }
+    
+    .sidebar.collapsed .sidebar-text,
+    .sidebar.collapsed .sidebar-arrow,
+    .sidebar.collapsed .sidebar-heading { opacity: 0; display: none; }
 
-    .sidebar.collapsed .nav-link i {
-        margin-right: 0;
-        font-size: 1.3rem;
-    }
+    .sidebar.collapsed .nav-link { justify-content: center; margin: 6px; padding: 0.8rem 0; }
+    .sidebar.collapsed .nav-link i { min-width: unset; margin: 0; }
 
-    .sidebar.collapsed .sidebar-text {
-        display: none;
+    /* ====== SUBMENU ====== */
+    .sub-menu { 
+        padding-left: 1rem; 
+        background: rgba(0,0,0,0.15); 
+        border-radius: 0 0 10px 10px; 
+        margin: 0 12px; 
     }
-
-    .sidebar.collapsed .sidebar-arrow {
-        display: none;
-    }
-
-    .sidebar.collapsed .sub-menu {
-        display: none !important;
-    }
-
-    /* --- Dropdown Arrow --- */
-    .sidebar-arrow {
-        font-size: 0.8rem;
-        margin-left: auto;
-        transition: transform var(--transition-speed) ease;
-    }
-
-    .nav-link[aria-expanded="true"] .sidebar-arrow {
-        transform: rotate(180deg);
-    }
-
-    /* --- Sub-Menu (Line-and-Dot Style) --- */
-    .sub-menu {
-        position: relative;
-        padding-left: 2.1rem;
-        margin-left: 0.8rem;
-    }
-
-    .sub-menu::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 10px;
-        bottom: 10px;
-        width: 2px;
-        background: rgba(255, 255, 255, 0.15);
-        border-radius: 2px;
-    }
-
     .sub-menu .nav-link {
-        padding: 0.5rem 0.5rem;
         font-size: 0.9rem;
-        position: relative;
-        background: transparent !important;
+        padding: 0.6rem 1rem;
+        margin: 2px 5px;
     }
-
     .sub-menu .nav-link::before {
-        content: '';
-        position: absolute;
-        left: -1.3rem;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.4);
-        transition: all var(--transition-speed);
+        content: "•";
+        color: rgba(255,255,255,0.3);
+        margin-right: 8px;
+        transition: color 0.3s;
+    }
+    .sub-menu .nav-link:hover::before, .sub-menu .nav-link.active::before {
+        color: white;
     }
 
-    .sub-menu .nav-link:hover {
-        color: var(--sidebar-text-active);
+    .sidebar-heading {
+        padding: 1.5rem 1.5rem 0.5rem;
+        font-size: 0.75rem; text-transform: uppercase;
+        color: var(--sidebar-heading-color); letter-spacing: 1.5px;
+        font-weight: 700;
+    }
+/* =========================================
+   CUSTOM SCROLLBAR PREMIUM
+========================================= */
+
+/* Mengaktifkan animasi scroll yang halus (smooth scrolling) untuk seluruh halaman */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Mengatur lebar scrollbar vertikal dan tinggi scrollbar horizontal */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+/* Track (Jalur tempat scrollbar bergerak) */
+::-webkit-scrollbar-track {
+    background: #f8f9fa; /* Warna latar sangat terang agar bersih */
+    border-radius: 10px;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05); /* Sedikit bayangan di dalam */
+}
+
+/* Thumb (Pegangan scrollbar yang bisa ditarik) */
+::-webkit-scrollbar-thumb {
+    /* Gradasi warna maroon sesuai tema */
+    background: linear-gradient(180deg, #a3191d, #7c1316); 
+    border-radius: 10px;
+    /* Memberikan efek border transparan agar terlihat lebih ramping dari jalurnya */
+    border: 2px solid #f8f9fa; 
+    /* Transisi untuk animasi saat hover */
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+/* Animasi & Efek saat kursor (hover) diarahkan ke scrollbar */
+::-webkit-scrollbar-thumb:hover {
+    /* Warna gradasi berubah lebih terang / menyala saat di-hover */
+    background: linear-gradient(180deg, #d12a30, #a3191d);
+}
+
+/* Efek saat scrollbar sedang diklik / ditahan (active) */
+::-webkit-scrollbar-thumb:active {
+    background: #5a0e10; /* Warna menjadi lebih gelap saat ditarik */
+}
+/* Terapkan class ini ke wadah/div yang menampung konten panjang */
+.area-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* 1. Ukuran Lebar & Terlihat Jelas */
+.area-scroll::-webkit-scrollbar {
+    width: 16px; /* Lebih lebar dari standar, sangat mudah diklik */
+}
+
+/* 2. Jalur Scroll (Track) */
+.area-scroll::-webkit-scrollbar-track {
+    background: #f8f9fa;
+    border-left: 3px solid #1a1a1a; /* Garis outline hitam tegas */
+}
+
+/* 3. Bilah Gulir (Thumb) - Tampilan Solid & Berani */
+.area-scroll::-webkit-scrollbar-thumb {
+    background-color: #7c1316; 
+    border: 3px solid #1a1a1a; /* Outline hitam tebal memberikan struktur visual yang kuat */
+    border-radius: 6px;
+    /* Efek bayangan ke dalam (inset) untuk ilusi 3D retro */
+    box-shadow: inset -3px -3px 0px rgba(0, 0, 0, 0.3);
+}
+
+/* 4. Saat Kursor Diarahkan (Hover) - Menyala Terang */
+.area-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: #ff3338; /* Berubah jadi warna yang sangat cerah/mencolok */
+}
+
+/* 5. Saat Ditekan/Ditarik (Active) - Animasi Masuk/Dipencet */
+.area-scroll::-webkit-scrollbar-thumb:active {
+    background-color: #a3191d;
+    /* Arah bayangan dibalik untuk memberikan efek bilah sedang "tertekan" */
+    box-shadow: inset 3px 3px 0px rgba(0, 0, 0, 0.5); 
+}
+/* =========================================
+   SCROLLBAR "ZIPPER / SLIDER" - SANGAT JELAS
+========================================= */
+
+/* 1. Lebar rel diperbesar biar gampang ditangkap mouse */
+.sidebar-inner::-webkit-scrollbar {
+    width: 16px; 
+}
+
+/* 2. JALUR (Rel tempat resleting ditarik) */
+.sidebar-inner::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.15); /* Gelap transparan */
+    border-left: 2px solid rgba(0, 0, 0, 0.4); /* Garis tegas pembatas rel */
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.3); /* Rel kerasa masuk ke dalam */
+}
+
+/* 3. PEGANGAN (Kepala Resleting) */
+.sidebar-inner::-webkit-scrollbar-thumb {
+    background-color: #f8f9fa; /* Putih terang biar super kontras dengan background maroon */
+    border: 2px solid #000000; /* Border hitam tegas biar bentuknya nyata */
+    border-radius: 6px; 
+    
+    /* INI KUNCI EFEK ZIPPER: Tekstur garis-garis (grip) di tengah bilah */
+    background-image: repeating-linear-gradient(
+        180deg,
+        transparent,
+        transparent 4px,
+        #000000 4px,
+        #000000 6px
+    );
+    background-size: 8px 100%; /* Garis tekstur difokuskan di tengah aja */
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    /* Efek bayangan solid (ala retro/neo-brutalism) biar seolah ngambang dari rel */
+    box-shadow: -2px 3px 0px rgba(0, 0, 0, 0.4); 
+}
+
+/* 4. SAAT KURSOR MENDEKAT (Hover) */
+.sidebar-inner::-webkit-scrollbar-thumb:hover {
+    background-color: #ffde59; /* Berubah kuning menyala biar makin jelas posisinya! */
+}
+
+/* 5. SAAT DITARIK / DIKLIK (Active) */
+.sidebar-inner::-webkit-scrollbar-thumb:active {
+    background-color: #d12a30; /* Berubah merah pas ditarik */
+    /* Bayangan luar hilang, ganti bayangan dalam biar kerasa "ditekan" masuk */
+    box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.7); 
+}
+    /* ====== SEARCH BAR ====== */
+    .sidebar-search { padding: 1rem 12px; margin-bottom: 0.5rem; }
+    .search-container {
+        position: relative; background: rgba(0, 0, 0, 0.2);
+        border-radius: 12px; padding: 2px; transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .search-container:focus-within {
+        background: rgba(0, 0, 0, 0.4); border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+    .search-input {
+        width: 100%; background: transparent; border: none; color: white;
+        padding: 0.7rem 0.8rem 0.7rem 2.5rem; font-size: 0.85rem; outline: none;
+    }
+    .search-input::placeholder { color: rgba(255, 255, 255, 0.4); }
+    .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.6); transition: color 0.3s; pointer-events: none; }
+    .search-container:focus-within .search-icon { color: white; }
+    .sidebar.collapsed .sidebar-search { display: none; }
+
+    /* ====== DROPDOWN ARROW ====== */
+    .active-parent { background: rgba(0, 0, 0, 0.2); color: white !important; border-radius: 10px 10px 0 0; }
+    .sidebar-arrow { margin-left: auto; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); font-size: 0.8rem; }
+    [aria-expanded="true"] .sidebar-arrow { transform: rotate(180deg); color: white; }
+
+    /* ====== USER PROFILE ====== */
+    .sidebar-footer { border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.1); }
+    .sidebar-user-profile { 
+        background: rgba(255, 255, 255, 0.05); margin: 12px; 
+        border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+    }
+    .sidebar-user-profile:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    .user-avatar { border: 2px solid rgba(255,255,255,0.2); padding: 2px; transition: transform 0.3s ease; }
+    .sidebar-user-profile:hover .user-avatar { transform: scale(1.1); border-color: white; }
+    
+    .role-badge { 
+        background: rgba(0,0,0,0.3); padding: 2px 8px; 
+        border-radius: 20px; font-size: 0.7rem; color: rgba(255,255,255,0.8); 
     }
 
-    .sub-menu .nav-link:hover::before {
-        background: var(--sidebar-text-active);
+    .logout-link { 
+        color: #ffb3b3 !important; font-size: 0.85rem; margin: 0 0 10px 0; padding: 0.5rem; 
+        border-radius: 8px; transition: all 0.3s;
     }
-
-    .sub-menu .nav-link.active {
-        color: var(--sidebar-text-active);
-        font-weight: 500;
-        background: transparent !important;
+    .logout-link:hover { background: rgba(255, 0, 0, 0.2); color: white !important; }
+    .logout-divider { border-color: rgba(255,255,255,0.1); margin: 10px 0; }
+    
+    .mobile-hamburger-btn {
+        position: fixed; top: 15px; left: 15px; z-index: 1000;
+        background: var(--maroon); color: white; border: none;
+        padding: 8px 12px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        transition: transform 0.2s;
     }
+    .mobile-hamburger-btn:active { transform: scale(0.9); }
 
-    .sub-menu .nav-link.active::before {
-        background: var(--sidebar-text-active);
-        transform: translateY(-50%) scale(1.3);
+    /* ====== STAGGERED FADE-IN ANIMATION ON LOAD ====== */
+    .animate-item {
+        opacity: 0;
+        transform: translateY(15px);
+        animation: fadeInUp 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
     }
-
-    /* --- Sidebar Footer (Fixed at Bottom) --- */
-    .sidebar-footer {
-        flex-shrink: 0;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        background: var(--sidebar-bg);
+    @keyframes fadeInUp {
+        to { opacity: 1; transform: translateY(0); }
     }
-
-    .sidebar-user-profile {
-        padding: 1rem;
-    }
-
-    .sidebar.collapsed .sidebar-user-profile {
-        padding: 0.5rem;
-    }
-
-    .sidebar.collapsed .sidebar-user-profile .sidebar-text,
-    .sidebar.collapsed .sidebar-user-profile .logout-divider {
-        display: none;
-    }
-
-    .sidebar.collapsed .sidebar-user-profile .logout-link {
-        justify-content: center;
-    }
-
-    .sidebar.collapsed .sidebar-user-profile .logout-link .sidebar-text {
-        display: none;
-    }
-
-    .logout-link {
-        padding: 0.5rem;
-        color: var(--sidebar-text-color);
-        font-weight: 500;
-        margin-bottom: 0.5rem;
-        border-radius: 8px;
-        transition: all var(--transition-speed);
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-    }
-
-    .logout-link i {
-        margin-right: 12px;
-        font-size: 1.2rem;
-    }
-
-    .sidebar.collapsed .logout-link i {
-        margin-right: 0;
-    }
-
-    .logout-link:hover {
-        background: var(--sidebar-pill-hover);
-        color: var(--sidebar-text-active);
-        text-decoration: none;
-    }
-
-    .logout-divider {
-        border-color: rgba(255, 255, 255, 0.1);
-        margin: 0.5rem 0 1rem;
-    }
-
-    /* --- Responsive: Mobile --- */
-    @media (max-width: 768px) {
-        .sidebar {
-            width: 80px;
-        }
-
-        .sidebar.collapsed {
-            width: 0;
-            transform: translateX(-100%);
-        }
-
-        .sidebar-toggle {
-            display: none;
-        }
-    }
-
-    /* --- Animation --- */
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .nav-link {
-        animation: fadeIn 0.3s ease;
-    }
+    /* Add slight delays for each menu item to create a cascading effect */
+    .sidebar-nav-container > *:nth-child(1) { animation-delay: 0.1s; }
+    .sidebar-nav-container > *:nth-child(2) { animation-delay: 0.15s; }
+    .sidebar-nav-container > *:nth-child(3) { animation-delay: 0.2s; }
+    .sidebar-nav-container > *:nth-child(4) { animation-delay: 0.25s; }
+    .sidebar-nav-container > *:nth-child(5) { animation-delay: 0.3s; }
+    .sidebar-nav-container > *:nth-child(6) { animation-delay: 0.35s; }
+    .sidebar-nav-container > *:nth-child(7) { animation-delay: 0.4s; }
+    .sidebar-nav-container > *:nth-child(8) { animation-delay: 0.45s; }
+    .sidebar-nav-container > *:nth-child(9) { animation-delay: 0.5s; }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const mobileHamburger = document.getElementById('mobileHamburger');
+    const sidebarCloseMobile = document.getElementById('sidebarCloseMobile');
+    const overlay = document.getElementById('sidebarOverlay');
+    const searchInput = document.querySelector('.search-input');
+
+    function handleToggle() {
+        if (window.innerWidth <= 768) {
+            sidebar.classList.toggle('mobile-show');
+            overlay.classList.toggle('active');
+        } else {
+            sidebar.classList.toggle('collapsed');
+            localStorage.setItem('sidebarState', sidebar.classList.contains('collapsed') ? 'collapsed' : 'expanded');
+        }
+    }
+
+    if (sidebarToggle) sidebarToggle.addEventListener('click', handleToggle);
+    if (mobileHamburger) mobileHamburger.addEventListener('click', handleToggle);
+    if (sidebarCloseMobile) sidebarCloseMobile.addEventListener('click', handleToggle);
+    if (overlay) overlay.addEventListener('click', handleToggle);
+
+    const allLinks = document.querySelectorAll('.nav-link:not([data-bs-toggle="collapse"])');
+    allLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('mobile-show');
+                overlay.classList.remove('active');
+            }
+        });
+    });
+
+    if (window.innerWidth > 768) {
+        const savedState = localStorage.getItem('sidebarState');
+        if (savedState === 'collapsed') sidebar.classList.add('collapsed');
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const text = e.target.value.toLowerCase();
+            const items = document.querySelectorAll('.sidebar-nav-container > .nav-link, .sidebar-nav-container > .nav-item-dropdown');
+            const headings = document.querySelectorAll('.sidebar-heading');
+
+            if(text === "") {
+                items.forEach(i => i.style.display = 'block');
+                headings.forEach(h => h.style.display = 'block');
+                return;
+            }
+
+            items.forEach(item => {
+                const content = item.textContent.toLowerCase();
+                const isMatch = content.includes(text);
+                item.style.display = isMatch ? 'block' : 'none';
+                
+                if (item.classList.contains('nav-item-dropdown') && isMatch) {
+                    const collapseEl = item.querySelector('.collapse');
+                    if (collapseEl) {
+                        const bsCollapse = bootstrap.Collapse.getInstance(collapseEl) || new bootstrap.Collapse(collapseEl);
+                        bsCollapse.show();
+                    }
+                }
+            });
+
+            headings.forEach(h => h.style.display = 'none');
+        });
+    }
+});
+</script>

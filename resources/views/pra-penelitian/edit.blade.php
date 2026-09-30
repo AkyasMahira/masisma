@@ -230,7 +230,11 @@
                                 <label class="form-label">Jenis Penelitian <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-grid"></i></span>
-                                    <select name="jenis_penelitian" class="form-select" required>
+                                    <select name="jenis_penelitian"
+        id="jenis-penelitian"
+        class="form-select"
+        required>
+
                                         <option value="Data Awal" {{ old('jenis_penelitian', $praPenelitian->jenis_penelitian) == 'Data Awal' ? 'selected' : '' }}>Data Awal</option>
                                         <option value="Uji Validitas" {{ old('jenis_penelitian', $praPenelitian->jenis_penelitian) == 'Uji Validitas' ? 'selected' : '' }}>Uji Validitas</option>
                                         <option value="Penelitian" {{ old('jenis_penelitian', $praPenelitian->jenis_penelitian) == 'Penelitian' ? 'selected' : '' }}>Penelitian</option>
@@ -259,48 +263,90 @@
                         </div>
 
                         {{-- 2. DATA TAMBAHAN (BERKAS) --}}
-                        <div class="row g-3 mb-5">
-                            <div class="col-md-4">
-                                <label class="form-label">Tgl. Rencana Skripsi</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
-                                    <input type="date" name="tanggal_rencana_skripsi" class="form-control"
-                                           value="{{ old('tanggal_rencana_skripsi', $praPenelitian->tanggal_rencana_skripsi->format('Y-m-d')) }}" required>
-                                </div>
-                            </div>
+<div class="row g-3 mb-5">
+    <div class="col-md-4">
+        <label class="form-label">
+            Tgl. Rencana Skripsi <span class="text-danger">*</span>
+        </label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
+            <input type="date"
+                   name="tanggal_rencana_skripsi"
+                   class="form-control"
+                   value="{{ old('tanggal_rencana_skripsi', $praPenelitian->tanggal_rencana_skripsi->format('Y-m-d')) }}"
+                   required>
+        </div>
+    </div>
 
-                            {{-- File Kerangka --}}
-                            <div class="col-md-4">
-                                <label class="form-label">Update Kerangka (PDF)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-file-earmark-pdf"></i></span>
-                                    <input type="file" name="kerangka_penelitian" class="form-control" accept="application/pdf">
-                                </div>
-                                @if($praPenelitian->file_kerangka)
-                                    <a href="{{ asset($praPenelitian->file_kerangka) }}" target="_blank" class="current-file-badge">
-                                        <i class="bi bi-eye"></i> Lihat File Saat Ini
-                                    </a>
-                                @endif
-                            </div>
+    {{-- Kerangka --}}
+    <div class="col-md-4">
+        <label class="form-label">Update Kerangka Penelitian (PDF)</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-diagram-3"></i></span>
+            <input type="file" name="kerangka_penelitian" class="form-control" accept="application/pdf">
+        </div>
+        @if($praPenelitian->file_kerangka)
+            <a href="{{ asset($praPenelitian->file_kerangka) }}" target="_blank" class="current-file-badge">
+                <i class="bi bi-eye"></i> Lihat Kerangka Saat Ini
+            </a>
+        @endif
+    </div>
 
-                            {{-- File Surat --}}
-                            <div class="col-md-4">
-                                <label class="form-label">Update Surat Pengantar (PDF)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-envelope-paper"></i></span>
-                                    <input type="file" name="surat_pengantar" class="form-control" accept="application/pdf">
-                                </div>
-                                @if($praPenelitian->file_surat_pengantar)
-                                    <a href="{{ asset($praPenelitian->file_surat_pengantar) }}" target="_blank" class="current-file-badge">
-                                        <i class="bi bi-eye"></i> Lihat File Saat Ini
-                                    </a>
-                                @endif
-                            </div>
-                        </div>
+    {{-- Proposal --}}
+    <div class="col-md-4">
+        <label class="form-label">Update Proposal Penelitian (PDF)</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-file-text"></i></span>
+            <input type="file" name="proposal" class="form-control" accept="application/pdf">
+        </div>
+        @if($praPenelitian->file_proposal)
+            <a href="{{ asset($praPenelitian->file_proposal) }}" target="_blank" class="current-file-badge">
+                <i class="bi bi-eye"></i> Lihat Proposal Saat Ini
+            </a>
+        @endif
+    </div>
+
+    {{-- Surat --}}
+    <div class="col-md-4">
+        <label class="form-label">Update Surat Pengantar (PDF)</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-envelope-paper"></i></span>
+            <input type="file" name="surat_pengantar" class="form-control" accept="application/pdf">
+        </div>
+        @if($praPenelitian->file_surat_pengantar)
+            <a href="{{ asset($praPenelitian->file_surat_pengantar) }}" target="_blank" class="current-file-badge">
+                <i class="bi bi-eye"></i> Lihat Surat Saat Ini
+            </a>
+        @endif
+    </div>
+
+    {{-- ETHICAL CLEARANCE --}}
+    <div class="col-md-4 d-none" id="ethical-clearance-wrapper">
+        <label class="form-label">
+            Update Ethical Clearance (PDF)
+            <span class="text-danger">*</span>
+        </label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-shield-check"></i></span>
+            <input type="file"
+                   name="ethical_clearance"
+                   id="ethical-clearance-input"
+                   class="form-control"
+                   accept="application/pdf">
+        </div>
+
+        @if($praPenelitian->ethical_clearance)
+            <a href="{{ asset($praPenelitian->ethical_clearance) }}" target="_blank" class="current-file-badge">
+                <i class="bi bi-eye"></i> Lihat Ethical Clearance
+            </a>
+        @endif
+    </div>
+</div>
+
 
                         {{-- 3. SECTION DATA MAHASISWA (DINAMIS) --}}
                         <div class="dynamic-section">
-                            <span class="section-badge">Data Mahasiswa</span>
+                            <span class="section-badge">Data Peneliti</span>
 
                             <div class="d-flex justify-content-end mb-3">
                                 <button type="button" id="tambah-mahasiswa" class="btn-add-row">
@@ -309,7 +355,7 @@
                             </div>
 
                             <div class="row g-3 mb-2 d-none d-md-flex px-2 text-muted fw-bold small text-uppercase">
-                                <div class="col-md-4">Nama Mahasiswa</div>
+                                <div class="col-md-4">Nama Peneliti</div>
                                 <div class="col-md-4">No. WhatsApp</div>
                                 <div class="col-md-3">Jenjang (S1/D3)</div>
                                 <div class="col-md-1 text-center">Aksi</div>
@@ -529,4 +575,29 @@
             });
         });
     </script>
+    
+        <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const jenisSelect = document.getElementById('jenis-penelitian');
+    const ethicalWrapper = document.getElementById('ethical-clearance-wrapper');
+    const ethicalInput = document.getElementById('ethical-clearance-input');
+
+    function toggleEthicalClearance() {
+        if (jenisSelect.value === 'Penelitian') {
+            ethicalWrapper.classList.remove('d-none');
+            ethicalInput.setAttribute('required', 'required');
+        } else {
+            ethicalWrapper.classList.add('d-none');
+            ethicalInput.removeAttribute('required');
+            ethicalInput.value = '';
+        }
+    }
+
+    // Trigger saat load (penting buat old value)
+    toggleEthicalClearance();
+
+    // Trigger saat berubah
+    jenisSelect.addEventListener('change', toggleEthicalClearance);
+});
+</script>
 @endsection

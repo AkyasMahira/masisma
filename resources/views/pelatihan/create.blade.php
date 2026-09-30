@@ -13,7 +13,6 @@
             --custom-maroon-light: #a3191d;
             --custom-maroon-subtle: #fcf0f1;
             --text-dark: #2c3e50;
-            --text-muted: #95a5a6;
             --card-radius: 16px;
             --transition: 0.3s ease;
         }
@@ -40,9 +39,11 @@
         }
 
         .form-label {
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-dark);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             margin-bottom: 0.5rem;
         }
 
@@ -50,121 +51,29 @@
             background-color: #f8f9fa;
             border-right: none;
             color: var(--custom-maroon);
-            border-top-left-radius: 10px;
-            border-bottom-left-radius: 10px;
+            border-radius: 10px 0 0 10px;
         }
 
-        .form-control,
-        .form-select,
-        textarea.form-control {
-            border-left: none;
+        .form-control, .form-select {
             border-radius: 0 10px 10px 0;
             padding: 0.7rem 1rem;
             border-color: #dee2e6;
-            box-shadow: none !important;
-            transition: border-color 0.2s;
-            font-family: inherit;
         }
 
-        /* Khusus untuk input file di section pelatihan */
-        .pelatihan-item .form-control[type="file"] {
-            border-left: 1px solid #dee2e6;
-            border-radius: 6px;
-        }
-
-        /* Khusus untuk NIP/Gol/Pangkat/NIRP */
-        .conditional-fields .form-control {
-            border-left: 1px solid #dee2e6;
-            border-radius: 6px;
-        }
-
-        .form-control:focus,
-        .form-select:focus,
-        textarea.form-control:focus {
+        .form-control:focus, .form-select:focus {
             border-color: var(--custom-maroon-light);
             box-shadow: 0 0 0 0.2rem rgba(124, 19, 22, 0.1) !important;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .error-message {
-            color: #dc3545;
-            font-size: 0.85rem;
-            margin-top: 0.3rem;
         }
 
         .form-row-custom {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1.5rem;
+            margin-bottom: 1.5rem;
         }
 
         @media (max-width: 768px) {
-            .form-row-custom {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .btn-maroon {
-            background-color: var(--custom-maroon);
-            color: white;
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: var(--transition);
-            box-shadow: 0 4px 15px rgba(124, 19, 22, 0.2);
-        }
-
-        .btn-maroon:hover {
-            background-color: var(--custom-maroon-light);
-            transform: translateY(-2px);
-            color: white;
-        }
-
-        .btn-secondary-custom {
-            background: #e9ecef;
-            color: var(--text-dark);
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: var(--transition);
-            display: inline-block;
-            text-decoration: none;
-        }
-
-        .btn-secondary-custom:hover {
-            background: #dee2e6;
-            color: var(--text-dark);
-        }
-
-        .button-group {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-start;
-            margin-top: 2rem;
-        }
-
-        .card-body-custom {
-            padding: 2rem;
-        }
-
-        .info-box {
-            background: var(--custom-maroon-subtle);
-            border: 1px dashed var(--custom-maroon-light);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            font-size: 0.9rem;
-            color: var(--text-dark);
-        }
-
-        .info-box i {
-            margin-right: 0.5rem;
-            color: var(--custom-maroon);
+            .form-row-custom { grid-template-columns: 1fr; }
         }
 
         .pelatihan-section {
@@ -175,105 +84,59 @@
             margin-bottom: 1.5rem;
         }
 
-        .pelatihan-title {
-            font-weight: 700;
-            color: var(--custom-maroon);
-            margin-bottom: 1rem;
-            font-size: 1rem;
-        }
-
         .pelatihan-item {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 0.8rem;
-            align-items: flex-start;
+            display: grid;
+            grid-template-columns: 2fr 100px 80px 1.5fr auto;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: start;
         }
 
-        .pelatihan-item input[type="text"] {
-            flex: 2;
+        .btn-maroon {
+            background-color: var(--custom-maroon);
+            color: white;
+            border-radius: 50px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            border: none;
+            transition: var(--transition);
         }
 
-        .pelatihan-item input[type="number"] {
-            flex: 0 0 120px;
+        .btn-maroon:hover {
+            background-color: var(--custom-maroon-light);
+            transform: translateY(-2px);
         }
 
-        .pelatihan-item input[type="file"] {
-            flex: 1.5;
-            font-size: 0.85rem;
-            padding: 0.6rem;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-        }
-
-        .pelatihan-item .btn-remove {
-             margin-top: 5px;
-             background: #e74c3c;
-             color: white;
-             border: none;
-             border-radius: 5px;
-             width: 38px;
-             height: 38px;
-             line-height: 38px;
-             text-align: center;
-             padding: 0;
-        }
-        .pelatihan-item .btn-remove:hover {
-            background: #c0392b;
+        .btn-remove {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
         }
 
         .btn-add-pelatihan {
             background: var(--custom-maroon);
             color: white;
             border: none;
-            border-radius: 5px;
-            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            padding: 8px 15px;
             font-size: 0.9rem;
-            transition: var(--transition);
-        }
-        .btn-add-pelatihan:hover {
-            background: var(--custom-maroon-light);
-        }
-
-        /* Choices JS Override to match theme */
-        .choices__inner {
-            background-color: #fff;
-            border: 1px solid #dee2e6;
-            border-radius: 0 10px 10px 0;
-            min-height: 45px;
-            padding: 5px 10px;
-            font-size: 1rem;
-        }
-        .choices:focus-within .choices__inner {
-            border-color: var(--custom-maroon-light);
-            box-shadow: 0 0 0 0.2rem rgba(124, 19, 22, 0.1);
-        }
-        .choices__list--dropdown .choices__item--selectable.is-highlighted {
-            background-color: var(--custom-maroon);
-            color: #fff;
-        }
-        /* Fix border radius for input group */
-        .input-group > .choices {
-            flex: 1 1 auto;
-            width: 1%;
-            min-width: 0;
         }
     </style>
 
     <div class="row justify-content-center">
-        <div class="col-lg-8">
+        <div class="col-lg-10">
             <div class="form-card">
                 <div class="card-header-custom">
-                    <h2 class="card-header-title">
-                        <i class="fas fa-plus-circle"></i>
-                        Tambah Data Pegawai & Pelatihan
-                    </h2>
+                    <h2 class="card-header-title"><i class="fas fa-user-plus me-2"></i>Tambah Data Pegawai & Pelatihan</h2>
                 </div>
 
-                <div class="card-body-custom">
+                <div class="card-body p-4">
                     @if ($errors->any())
-                        <div class="alert alert-danger" role="alert">
-                            <strong>Terjadi kesalahan!</strong>
-                            <ul style="margin: 0.5rem 0 0 0;">
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
@@ -281,194 +144,128 @@
                         </div>
                     @endif
 
-                    <div class="info-box">
-                        <i class="fas fa-info-circle"></i>
-                        Isi data pegawai dan pelatihan dengan lengkap. Anda bisa mengupload file PDF (Maks 2MB) untuk setiap pelatihan.
-                    </div>
-
                     <form action="{{ route('pelatihan.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
                         <div class="form-row-custom">
                             <div class="form-group">
-                                <label for="nama" class="form-label">
-                                    <i class="fas fa-user"></i> Nama
-                                </label>
+                                <label class="form-label">Nama Lengkap & Gelar</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                    <input type="text" class="form-control @error('nama') is-invalid @enderror"
-                                        id="nama" name="nama" placeholder="Masukkan nama" value="{{ old('nama') }}" required>
+                                    <input type="text" name="nama" class="form-control" placeholder="Nama lengkap..." value="{{ old('nama') }}" required>
                                 </div>
-                                @error('nama') <div class="error-message">{{ $message }}</div> @enderror
                             </div>
-
                             <div class="form-group">
-                                <label for="jabatan" class="form-label">
-                                    <i class="fas fa-briefcase"></i> Jabatan
-                                </label>
+                                <label class="form-label">NIK (Nomor Induk Kependudukan)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                    <input type="text" name="nik" class="form-control" placeholder="16 Digit NIK" value="{{ old('nik') }}" maxlength="16">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row-custom">
+                            <div class="form-group">
+                                <label class="form-label">Jabatan</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-briefcase"></i></span>
-                                    <input type="text" class="form-control @error('jabatan') is-invalid @enderror"
-                                        id="jabatan" name="jabatan" placeholder="Masukkan jabatan" value="{{ old('jabatan') }}">
+                                    <input type="text" name="jabatan" class="form-control" placeholder="Contoh: Perawat Terampil" value="{{ old('jabatan') }}">
                                 </div>
-                                @error('jabatan') <div class="error-message">{{ $message }}</div> @enderror
                             </div>
-                        </div>
-
-                        <div class="form-row-custom">
                             <div class="form-group">
-                                <label for="unit" class="form-label">
-                                    <i class="fas fa-building"></i> Unit/Ruang
-                                </label>
+                                <label class="form-label">Unit/Ruang Kerja</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-building"></i></span>
-                                    <input type="text" class="form-control @error('unit') is-invalid @enderror"
-                                        id="unit" name="unit" placeholder="Masukkan unit" value="{{ old('unit') }}">
+                                    <input type="text" name="unit" class="form-control" placeholder="Contoh: IGD / Rawat Inap" value="{{ old('unit') }}">
                                 </div>
-                                @error('unit') <div class="error-message">{{ $message }}</div> @enderror
-                            </div>
-
-                            <div class="form-group">
-                                <label for="bidang" class="form-label">
-                                    <i class="fas fa-layer-group"></i> Bidang
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-layer-group"></i></span>
-                                    <select id="bidang" name="bidang" class="form-control @error('bidang') is-invalid @enderror" required>
-                                        <option value="" placeholder>-- Pilih Bidang --</option>
-                                        <option value="Keperawatan" {{ old('bidang') == 'Keperawatan' ? 'selected' : '' }}>Keperawatan</option>
-                                        <option value="Pelayanan Medik" {{ old('bidang') == 'Pelayanan Medik' ? 'selected' : '' }}>Pelayanan Medik</option>
-                                        <option value="Penunjang Klinik" {{ old('bidang') == 'Penunjang Klinik' ? 'selected' : '' }}>Penunjang Klinik</option>
-                                        <option value="Penunjang Non Klinik" {{ old('bidang') == 'Penunjang Non Klinik' ? 'selected' : '' }}>Penunjang Non Klinik</option>
-                                        <option value="Kepegawaian" {{ old('bidang') == 'Kepegawaian' ? 'selected' : '' }}>Kepegawaian</option>
-                                        <option value="Perencanaan" {{ old('bidang') == 'Perencanaan' ? 'selected' : '' }}>Perencanaan</option>
-                                        <option value="Keuangan" {{ old('bidang') == 'Keuangan' ? 'selected' : '' }}>Keuangan</option>
-                                    </select>
-                                </div>
-                                @error('bidang') <div class="error-message">{{ $message }}</div> @enderror
                             </div>
                         </div>
 
                         <div class="form-row-custom">
                             <div class="form-group">
-                                <label for="status_pegawai" class="form-label">
-                                    <i class="fas fa-id-card"></i> Status Pegawai
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-id-badge"></i></span>
-                                    <select id="status_pegawai" name="status_pegawai" class="form-select @error('status_pegawai') is-invalid @enderror" required>
-                                        <option value="">-- Pilih Status --</option>
-                                        <option value="PNS" {{ old('status_pegawai') == 'PNS' ? 'selected' : '' }}>PNS</option>
-                                        <option value="P3K" {{ old('status_pegawai') == 'P3K' ? 'selected' : '' }}>P3K</option>
-                                        <option value="Non-PNS" {{ old('status_pegawai') == 'Non-PNS' ? 'selected' : '' }}>Non-PNS</option>
-                                    </select>
-                                </div>
-                                @error('status_pegawai') <div class="error-message">{{ $message }}</div> @enderror
+                                <label class="form-label">Bidang</label>
+                                <select id="bidang" name="bidang" class="form-control" required>
+                                    <option value="">-- Pilih Bidang --</option>
+                                    @foreach(['Keperawatan', 'Pelayanan Medik', 'Penunjang Klinik', 'Penunjang Non Klinik', 'Kepegawaian', 'Perencanaan', 'Keuangan'] as $b)
+                                        <option value="{{ $b }}" {{ old('bidang') == $b ? 'selected' : '' }}>{{ $b }}</option>
+                                    @endforeach
+                                </select>
                             </div>
-
-                            <div class="form-group conditional-fields">
-
-                                <div id="pnsFields" style="display: none;">
-                                    <label class="form-label">
-                                        <i class="fas fa-key"></i> Detail Kepegawaian
-                                    </label>
-                                    <div style="display: flex; gap: 0.5rem;">
-                                        <input type="text" id="nip" name="nip" class="form-control" placeholder="NIP" value="{{ old('nip') }}">
-                                        <input type="text" id="golongan" name="golongan" class="form-control" placeholder="Golongan" value="{{ old('golongan') }}">
-
-                                        <div id="wrapper_pangkat" style="width: 100%;">
-                                            <input type="text" id="pangkat" name="pangkat" class="form-control" placeholder="Pangkat" value="{{ old('pangkat') }}">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div id="nonPnsFields" style="display: none;">
-                                    <label class="form-label">
-                                        <i class="fas fa-key"></i> NIRP
-                                    </label>
-                                    <div class="input-group">
-                                        <input type="text" id="nirp" name="nirp" class="form-control" placeholder="Masukkan NIRP" value="{{ old('nirp') }}">
-                                    </div>
-                                </div>
-
-                                @error('nip') <div class="error-message">NIP: {{ $message }}</div> @enderror
-                                @error('golongan') <div class="error-message">Golongan: {{ $message }}</div> @enderror
-                                @error('pangkat') <div class="error-message">Pangkat: {{ $message }}</div> @enderror
-                                @error('nirp') <div class="error-message">NIRP: {{ $message }}</div> @enderror
+                            <div class="form-group">
+                                <label class="form-label">Status Pegawai</label>
+                                <select id="status_pegawai" name="status_pegawai" class="form-select" required>
+                                    <option value="">-- Pilih Status --</option>
+                                    <option value="ASN" {{ old('status_pegawai') == 'ASN' ? 'selected' : '' }}>ASN</option>
+                                    <option value="KARYAWAN TETAP" {{ old('status_pegawai') == 'KARYAWAN TETAP' ? 'selected' : '' }}>KARYAWAN TETAP</option>
+                                    <option value="NON ASN" {{ old('status_pegawai') == 'NON ASN' ? 'selected' : '' }}>NON ASN</option>
+                                </select>
                             </div>
                         </div>
 
-                        <div class="pelatihan-section">
-                            <div class="pelatihan-title">
-                                <i class="fas fa-graduation-cap"></i> Pelatihan Dasar
+                        {{-- KONDISIONAL FIELDS NIP/NIRP --}}
+                        <div class="form-group mb-4" id="conditionalFields">
+                            <div id="pnsFields" style="display:none;" class="p-3 bg-light rounded border">
+                                <label class="form-label">Detail Kepegawaian</label>
+                                <div class="row g-2">
+                                    <div class="col-md-4"><input type="text" name="nip" id="nip" class="form-control" placeholder="NIP" value="{{ old('nip') }}"></div>
+                                    <div class="col-md-4"><input type="text" name="golongan" id="golongan" class="form-control" placeholder="Golongan" value="{{ old('golongan') }}"></div>
+                                    <div class="col-md-4" id="wrapper_pangkat"><input type="text" name="pangkat" id="pangkat" class="form-control" placeholder="Pangkat" value="{{ old('pangkat') }}"></div>
+                                </div>
                             </div>
+                            <div id="nonPnsFields" style="display:none;" class="p-3 bg-light rounded border">
+                                <label class="form-label">NIRP</label>
+                                <input type="text" name="nirp" id="nirp" class="form-control" placeholder="Nomor Induk Rumah Sakit" value="{{ old('nirp') }}">
+                            </div>
+                        </div>
+
+                        {{-- AKUN LMS --}}
+                        <div class="form-row-custom bg-light p-3 rounded mb-4 border">
+                            <div class="form-group mb-0">
+                                <label class="form-label">Akun LMS (Kemenkes/SatuSehat)</label>
+                                <select name="lms_status" id="lms_status" class="form-select">
+                                    <option value="Tidak" {{ old('lms_status') == 'Tidak' ? 'selected' : '' }}>Tidak Ada</option>
+                                    <option value="Ada" {{ old('lms_status') == 'Ada' ? 'selected' : '' }}>Ada</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0" id="lms_email_wrapper" style="display:none;">
+                                <label class="form-label">Email Akun LMS</label>
+                                <input type="email" name="lms_email" id="lms_email" class="form-control" placeholder="email@contoh.com" value="{{ old('lms_email') }}">
+                            </div>
+                        </div>
+
+                        {{-- PELATIHAN DASAR --}}
+                        <div class="pelatihan-section">
+                            <div class="pelatihan-title"><i class="fas fa-certificate me-2"></i>Riwayat Pelatihan Dasar</div>
                             <div id="pelatihanDasarContainer">
-                                @php
-                                    $dasarNama = old('pelatihan_dasar', ['']);
-                                    $dasarTahun = old('pelatihan_tahun_dasar', ['']);
-                                @endphp
-                                @foreach ($dasarNama as $index => $nama)
-                                    <div class="pelatihan-item">
-                                        <input type="text" class="form-control" name="pelatihan_dasar[]"
-                                            placeholder="Contoh: Pelatihan Prajabatan" value="{{ $nama }}">
-
-                                        <input type="number" class="form-control" name="pelatihan_tahun_dasar[]"
-                                            placeholder="Tahun" value="{{ $dasarTahun[$index] ?? '' }}" min="1990" max="2099">
-
-                                        <input type="file" class="form-control" name="pelatihan_file_dasar[]" accept=".pdf">
-
-                                        @if ($index > 0)
-                                            <button type="button" class="btn-remove" onclick="removeRow(this)">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        @endif
-                                    </div>
-                                @endforeach
+                                <div class="pelatihan-item">
+                                    <input type="text" name="pelatihan_dasar[]" class="form-control" placeholder="Nama Pelatihan">
+                                    <input type="number" name="pelatihan_tahun_dasar[]" class="form-control" placeholder="Tahun">
+                                    <input type="number" name="pelatihan_jpl_dasar[]" class="form-control" placeholder="JPL">
+                                    <input type="file" name="pelatihan_file_dasar[]" class="form-control" accept=".pdf">
+                                    <div></div> {{-- Spacer --}}
+                                </div>
                             </div>
-                            <button type="button" class="btn-add-pelatihan mt-2" onclick="addPelatihanDasar()">
-                                <i class="fas fa-plus"></i> Tambah Pelatihan Dasar
-                            </button>
+                            <button type="button" class="btn-add-pelatihan" onclick="addPelatihan('pelatihanDasarContainer', 'dasar')"><i class="fas fa-plus"></i> Tambah Pelatihan Dasar</button>
                         </div>
 
+                        {{-- PENINGKATAN KOMPETENSI --}}
                         <div class="pelatihan-section">
-                            <div class="pelatihan-title">
-                                <i class="fas fa-chart-line"></i> Pelatihan Peningkatan Kompetensi
-                            </div>
+                            <div class="pelatihan-title"><i class="fas fa-medal me-2"></i>Peningkatan Kompetensi</div>
                             <div id="pelatihanKompetensiContainer">
-                                @php
-                                    $kompNama = old('pelatihan_kompetensi', ['']);
-                                    $kompTahun = old('pelatihan_tahun_kompetensi', ['']);
-                                @endphp
-                                @foreach ($kompNama as $index => $nama)
-                                    <div class="pelatihan-item">
-                                        <input type="text" class="form-control" name="pelatihan_kompetensi[]"
-                                            placeholder="Contoh: Workshop Teknis" value="{{ $nama }}">
-
-                                        <input type="number" class="form-control" name="pelatihan_tahun_kompetensi[]"
-                                            placeholder="Tahun" value="{{ $kompTahun[$index] ?? '' }}" min="1990" max="2099">
-
-                                        <input type="file" class="form-control" name="pelatihan_file_kompetensi[]" accept=".pdf">
-
-                                        @if ($index > 0)
-                                            <button type="button" class="btn-remove" onclick="removeRow(this)">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        @endif
-                                    </div>
-                                @endforeach
+                                <div class="pelatihan-item">
+                                    <input type="text" name="pelatihan_kompetensi[]" class="form-control" placeholder="Nama Pelatihan">
+                                    <input type="number" name="pelatihan_tahun_kompetensi[]" class="form-control" placeholder="Tahun">
+                                    <input type="number" name="pelatihan_jpl_kompetensi[]" class="form-control" placeholder="JPL">
+                                    <input type="file" name="pelatihan_file_kompetensi[]" class="form-control" accept=".pdf">
+                                    <div></div> {{-- Spacer --}}
+                                </div>
                             </div>
-                            <button type="button" class="btn-add-pelatihan mt-2" onclick="addPelatihanKompetensi()">
-                                <i class="fas fa-plus"></i> Tambah Pelatihan Kompetensi
-                            </button>
+                            <button type="button" class="btn-add-pelatihan" onclick="addPelatihan('pelatihanKompetensiContainer', 'kompetensi')"><i class="fas fa-plus"></i> Tambah Pelatihan Kompetensi</button>
                         </div>
 
                         <div class="button-group">
-                            <button type="submit" class="btn-maroon">
-                                <i class="fas fa-save"></i> Simpan
-                            </button>
-                            <a href="{{ route('pelatihan.index') }}" class="btn-secondary-custom">
-                                <i class="fas fa-arrow-left"></i> Kembali
-                            </a>
+                            <button type="submit" class="btn-maroon"><i class="fas fa-save me-2"></i>Simpan Data</button>
+                            <a href="{{ route('pelatihan.index') }}" class="btn-secondary-custom">Kembali</a>
                         </div>
                     </form>
                 </div>
@@ -476,121 +273,50 @@
         </div>
     </div>
 
-    {{-- Load Choices.js Script --}}
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-
     <script>
-        // --- INIT CHOICES.JS ---
         document.addEventListener('DOMContentLoaded', function() {
-            const element = document.getElementById('bidang');
-            if(element) {
-                const choices = new Choices(element, {
-                    searchEnabled: true,
-                    itemSelectText: '',
-                    placeholder: true,
-                    placeholderValue: '-- Pilih Bidang --',
-                    shouldSort: false, // Agar urutan sesuai HTML
-                });
-            }
+            const bidang = document.getElementById('bidang');
+            if(bidang) new Choices(bidang, { searchEnabled: true, itemSelectText: '', placeholderValue: '-- Pilih Bidang --' });
+
+            const statusPegawai = document.getElementById('status_pegawai');
+            statusPegawai.addEventListener('change', toggleStatusFields);
+
+            const lmsStatus = document.getElementById('lms_status');
+            lmsStatus.addEventListener('change', toggleLmsField);
+
+            toggleStatusFields();
+            toggleLmsField();
         });
 
-        // --- FUNGSI TAMBAH BARIS PELATIHAN DASAR ---
-        function addPelatihanDasar() {
-            const container = document.getElementById('pelatihanDasarContainer');
-            const item = document.createElement('div');
-            item.className = 'pelatihan-item';
-            item.innerHTML = `
-                <input type="text" class="form-control" name="pelatihan_dasar[]" placeholder="Contoh: Pelatihan Prajabatan">
-                <input type="number" class="form-control" name="pelatihan_tahun_dasar[]" placeholder="Tahun" min="1990" max="2099">
-                <input type="file" class="form-control" name="pelatihan_file_dasar[]" accept=".pdf">
-                <button type="button" class="btn-remove" onclick="removeRow(this)">
-                    <i class="fas fa-trash"></i>
-                </button>
-            `;
-            container.appendChild(item);
-        }
-
-        // --- FUNGSI TAMBAH BARIS PELATIHAN KOMPETENSI (BARU) ---
-        function addPelatihanKompetensi() {
-            const container = document.getElementById('pelatihanKompetensiContainer');
-            const item = document.createElement('div');
-            item.className = 'pelatihan-item';
-            item.innerHTML = `
-                <input type="text" class="form-control" name="pelatihan_kompetensi[]" placeholder="Contoh: Workshop Teknis">
-                <input type="number" class="form-control" name="pelatihan_tahun_kompetensi[]" placeholder="Tahun" min="1990" max="2099">
-                <input type="file" class="form-control" name="pelatihan_file_kompetensi[]" accept=".pdf">
-                <button type="button" class="btn-remove" onclick="removeRow(this)">
-                    <i class="fas fa-trash"></i>
-                </button>
-            `;
-            container.appendChild(item);
-        }
-
-        // --- FUNGSI HAPUS BARIS ---
-        function removeRow(button) {
-            button.parentElement.remove();
-        }
-
-        // --- LOGIKA STATUS PEGAWAI (PNS/P3K/NON-PNS) ---
         function toggleStatusFields() {
-            const sel = document.getElementById('status_pegawai');
-            const pnsContainer = document.getElementById('pnsFields');
-            const nonPnsContainer = document.getElementById('nonPnsFields');
-            const wrapperPangkat = document.getElementById('wrapper_pangkat'); // Wrapper Pangkat
+            const val = document.getElementById('status_pegawai').value;
+            const pns = document.getElementById('pnsFields');
+            const nonPns = document.getElementById('nonPnsFields');
+            const wrapperPangkat = document.getElementById('wrapper_pangkat');
 
-            // Inputs
-            const nip = document.getElementById('nip');
-            const golongan = document.getElementById('golongan');
-            const pangkat = document.getElementById('pangkat');
-            const nirp = document.getElementById('nirp');
-
-            if (!sel) return;
-
-            const val = sel.value;
-
-            // 1. Reset display semua container
-            pnsContainer.style.display = 'none';
-            nonPnsContainer.style.display = 'none';
-            wrapperPangkat.style.display = 'none'; // Default sembunyikan pangkat
-
-            // 2. Reset required attribute
-            if(nip) nip.removeAttribute('required');
-            if(golongan) golongan.removeAttribute('required');
-            if(pangkat) pangkat.removeAttribute('required');
-            if(nirp) nirp.removeAttribute('required');
-
-            // 3. Logika Pilihan
-            if (val === 'PNS') {
-                // Jika PNS: Tampilkan NIP, Golongan, PANGKAT
-                pnsContainer.style.display = 'block';
-                wrapperPangkat.style.display = 'block'; // Tampilkan Pangkat
-
-                if(nip) nip.setAttribute('required', 'required');
-                if(golongan) golongan.setAttribute('required', 'required');
-                if(pangkat) pangkat.setAttribute('required', 'required');
-
-            } else if (val === 'P3K') {
-                // Jika P3K: Tampilkan NIP, Golongan SAJA
-                pnsContainer.style.display = 'block';
-                wrapperPangkat.style.display = 'none'; // Sembunyikan Pangkat
-
-                if(nip) nip.setAttribute('required', 'required');
-                if(golongan) golongan.setAttribute('required', 'required');
-                // Pangkat tidak required untuk P3K
-
-            } else if (val === 'Non-PNS') {
-                // Jika Non-PNS: Tampilkan NIRP
-                nonPnsContainer.style.display = 'block';
-                if(nirp) nirp.setAttribute('required', 'required');
-            }
+            pns.style.display = (val === 'ASN' || val === 'KARYAWAN TETAP') ? 'block' : 'none';
+            nonPns.style.display = (val === 'NON ASN') ? 'block' : 'none';
+            wrapperPangkat.style.display = (val === 'ASN') ? 'block' : 'none';
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const sel = document.getElementById('status_pegawai');
-            if (sel) {
-                sel.addEventListener('change', toggleStatusFields);
-                toggleStatusFields(); // Jalankan saat load untuk old input
-            }
-        });
+        function toggleLmsField() {
+            const status = document.getElementById('lms_status').value;
+            document.getElementById('lms_email_wrapper').style.display = (status === 'Ada') ? 'block' : 'none';
+        }
+
+        function addPelatihan(containerId, type) {
+            const container = document.getElementById(containerId);
+            const item = document.createElement('div');
+            item.className = 'pelatihan-item';
+            item.innerHTML = `
+                <input type="text" class="form-control" name="pelatihan_${type}[]" placeholder="Nama Pelatihan">
+                <input type="number" class="form-control" name="pelatihan_tahun_${type}[]" placeholder="Tahun">
+                <input type="number" class="form-control" name="pelatihan_jpl_${type}[]" placeholder="JPL">
+                <input type="file" class="form-control" name="pelatihan_file_${type}[]" accept=".pdf">
+                <button type="button" class="btn-remove" onclick="this.parentElement.remove()"><i class="fas fa-trash"></i></button>
+            `;
+            container.appendChild(item);
+        }
     </script>
 @endsection

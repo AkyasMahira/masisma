@@ -60,6 +60,7 @@ class Kernel extends HttpKernel
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'pra' => \App\Http\Middleware\CheckPraPenelitian::class,
         'magang' => \App\Http\Middleware\CheckMagang::class,
+        'admin.kasir' => \App\Http\Middleware\CheckAdminKasir::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,

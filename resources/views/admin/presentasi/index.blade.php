@@ -135,12 +135,20 @@
         </style>
 
         <!-- Header Section -->
-        <div class="page-header-wrapper animate-up">
-            <div>
-                <h4 class="fw-bold mb-1" style="color: var(--custom-maroon);">Daftar Presentasi</h4>
-                <small class="text-muted">Kelola jadwal, file, dan penilaian presentasi mahasiswa.</small>
-            </div>
-        </div>
+      <!-- Header Section -->
+<div class="page-header-wrapper animate-up">
+    <div>
+        <h4 class="fw-bold mb-1" style="color: var(--custom-maroon);">Daftar Presentasi</h4>
+        <small class="text-muted">Kelola jadwal, file, dan penilaian presentasi mahasiswa.</small>
+    </div>
+    <!-- Tambahkan Tombol Sinkronisasi Disini -->
+    <div class="d-flex gap-2">
+        <button type="button" onclick="syncToPerpustakaan()" id="btnSync" class="btn btn-maroon d-flex align-items-center gap-2">
+            <i class="bi bi-cloud-arrow-up-fill"></i>
+            <span>Sinkronisasi ke Perpustakaan</span>
+        </button>
+    </div>
+</div>
 
         <!-- Alert Messages -->
         @if (session('success'))
@@ -309,7 +317,7 @@
 
                                         {{-- Shortcut Download PPT --}}
                                         @if ($p->file_ppt)
-                                            <a href="{{ Storage::url($p->file_ppt) }}" target="_blank"
+                                            <a href="{{ asset('storage/' . $p->file_ppt) }}" target="_blank"
                                                 class="action-btn ppt" title="Lihat PPT">
                                                 <i class="bi bi-file-earmark-slides"></i>
                                             </a>
@@ -317,7 +325,7 @@
 
                                         {{-- Shortcut Download Laporan --}}
                                         @if ($p->file_laporan)
-                                            <a href="{{ Storage::url($p->file_laporan) }}" target="_blank"
+                                            <a href="{{ asset('storage/' . $p->file_laporan) }}" target="_blank"
                                                 class="action-btn doc" title="Lihat Laporan">
                                                 <i class="bi bi-file-earmark-text"></i>
                                             </a>
@@ -345,6 +353,73 @@
         <div class="d-flex justify-content-center mt-4 animate-up" style="animation-delay: 0.3s;">
             {{ $presentasi->withQueryString()->links('pagination.custom') }}
         </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function syncToPerpustakaan() {
+    const btn = document.getElementById('btnSync');
+    
+    Swal.fire({
+        title: 'Mulai Sinkronisasi?',
+        text: "Sistem akan mengirim laporan ke Perpustakaan",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#7c1316',
+        confirmButtonText: 'Ya, Jalankan'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Memproses...';
+
+            fetch("{{ route('admin.sync.perpustakaan') }}")
+                .then(response => response.json())
+                .then(data => {
+                    // Susun pesan laporan dalam bentuk tabel HTML
+                    let logHtml = `
+                        <div style="max-height: 300px; overflow-y: auto;">
+                            <table class="table table-sm small text-start">
+                                <thead>
+                                    <tr>
+                                        <th>Judul Laporan</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+
+                    data.detail.forEach(item => {
+                        let badgeClass = item.status === 'Berhasil' ? 'text-success' : 'text-danger';
+                        let infoText = item.info === 'Created' ? '<span class="badge bg-success">Baru</span>' : 
+                                      (item.info === 'Updated' ? '<span class="badge bg-info">Update</span>' : item.info);
+
+                        logHtml += `
+                            <tr>
+                                <td style="font-size: 11px;">${item.judul}</td>
+                                <td><b class="${badgeClass}">${infoText}</b></td>
+                            </tr>
+                        `;
+                    });
+
+                    logHtml += `</tbody></table></div>`;
+
+                    Swal.fire({
+                        title: 'Sinkronisasi Selesai',
+                        html: logHtml,
+                        icon: 'info',
+                        width: '600px',
+                        confirmButtonColor: '#7c1316'
+                    });
+                })
+                .catch(error => {
+                    Swal.fire('Error', 'Gagal terhubung ke server.', 'error');
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Sinkronisasi ke Perpustakaan';
+                });
+        }
+    });
+}
+</script>
 
     </div> {{-- Penutup Container Utama --}}
 @endsection

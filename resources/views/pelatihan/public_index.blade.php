@@ -1,244 +1,322 @@
-
-
 @extends('layouts.public')
 
-@section('title', 'Cek Data Pelatihan')
+@section('title', 'Cek Data Pelatihan - RSUD SLG')
 
 @section('content')
-    <style>
-        :root { --custom-maroon: #7c1316; --card-radius: 16px; }
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        /* Search Box Style */
-        .search-card {
-            background: #fff; border-radius: var(--card-radius);
-            border-top: 5px solid var(--custom-maroon);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 3rem 2rem;
-            text-align: center; margin-bottom: 2rem;
-        }
+<style>
+    :root {
+        --maroon: #7c1316;
+        --maroon-hover: #a3191d;
+        --bg-light: #f8f9fa;
+        --text-dark: #333333;
+    }
 
-        /* Buttons */
-        .btn-maroon {
-            background: var(--custom-maroon); color: white; border-radius: 50px;
-            padding: 0.7rem 2rem; font-weight: 600; border: none; transition: 0.3s;
-        }
-        .btn-maroon:hover { background: #a3191d; color: white; transform: translateY(-2px); }
-        .btn-outline-maroon {
-            border: 2px solid var(--custom-maroon); color: var(--custom-maroon);
-            border-radius: 50px; padding: 0.7rem 2rem; font-weight: 600; background: transparent;
-        }
-        .btn-outline-maroon:hover { background: var(--custom-maroon); color: white; }
+    body {
+        background-color: var(--bg-light);
+        color: var(--text-dark);
+        line-height: 1.6;
+    }
 
-        /* Table Styles */
-        .custom-table-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .table thead th { background: var(--custom-maroon); color: white; border: none; padding: 1rem; vertical-align: middle; }
-        .table tbody td { vertical-align: middle; padding: 1rem; }
+    /* --- Hero Section --- */
+    .hero-section {
+        background: white;
+        padding: 60px 0;
+        border-bottom: 1px solid #eee;
+        text-align: center;
+    }
 
-        /* List Item Style (Untuk File PDF) */
-        .pelatihan-list-item {
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 6px;
-            padding: 0.5rem;
-            font-size: 0.85rem;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            transition: 0.2s;
-        }
-        .pelatihan-list-item:hover {
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            border-color: #ddd;
-        }
-        .pelatihan-list-item .nama { flex-grow: 1; font-weight: 500; color: #333; padding-right: 10px; }
-        .pelatihan-list-item .tahun {
-            font-weight: 700; color: var(--custom-maroon);
-            background: white; padding: 2px 8px; border-radius: 4px;
-            font-size: 0.75rem; border: 1px solid #eee;
-        }
+    .hero-logo {
+        height: 100px;
+        width: auto;
+        margin-bottom: 20px;
+    }
 
-        /* Icon PDF */
-        .pdf-link {
-            color: #dc3545; /* Warna Merah PDF */
-            margin-right: 10px;
-            font-size: 1.3rem;
-            display: flex; align-items: center;
-        }
-        .pdf-link:hover { color: #a71d2a; transform: scale(1.1); }
-        .no-file-icon { color: #ccc; margin-right: 10px; font-size: 1.3rem; }
+    .hero-section h2 {
+        font-weight: 700;
+        color: var(--maroon);
+        margin-bottom: 10px;
+    }
 
-        .category-badge {
-            font-size: 0.7rem; font-weight: bold; text-transform: uppercase;
-            color: #999; margin-bottom: 4px; display: block; letter-spacing: 0.5px;
-        }
-    </style>
+    /* --- Search Area --- */
+    .search-wrapper {
+        margin-top: -35px;
+    }
 
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
+    .search-input-group {
+        background: white;
+        border-radius: 50px;
+        padding: 8px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        display: flex;
+        align-items: center;
+        border: 1px solid #ddd;
+    }
 
-                {{-- SEARCH BOX --}}
-                <div class="search-card">
-                    <h2 style="color: var(--custom-maroon); font-weight: 800; margin-bottom: 1rem;">
-                        <i class="fas fa-search"></i> Cek Data Pelatihan
-                    </h2>
-                    <p class="text-muted mb-4">Masukkan NIP atau NIRP untuk melihat riwayat pelatihan & file PDF Anda.</p>
+    .search-input-group input {
+        border: none;
+        padding: 10px 25px;
+        border-radius: 50px;
+        flex-grow: 1;
+        outline: none;
+        font-size: 1rem;
+    }
 
-                    <form action="{{ route('public.pelatihan.index') }}" method="GET">
-                        <div class="input-group mb-4 shadow-sm" style="max-width: 600px; margin: 0 auto;">
-                            <span class="input-group-text bg-white"><i class="fas fa-id-badge"></i></span>
-                            <input type="text" class="form-control border-start-0" name="keyword"
-                                placeholder="Masukkan NIP / NIRP..." value="{{ $keyword ?? '' }}" required>
-                            <button class="btn btn-maroon" type="submit">Cari Data</button>
-                        </div>
-                    </form>
+    .btn-search-main {
+        background: var(--maroon);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: 0.3s;
+    }
 
-                    <div class="mt-4 pt-3 border-top">
-                        <p class="mb-2 text-muted">Butuh memperbarui data pelatihan? Gunakan tombol Perbarui pada hasil pencarian.</p>
-                    </div>
+    .btn-search-main:hover {
+        background: var(--maroon-hover);
+        box-shadow: 0 4px 12px rgba(124, 19, 22, 0.2);
+    }
+
+    /* --- Result Cards --- */
+    .result-card {
+        background: white;
+        border: 1px solid #eaeaea;
+        border-radius: 16px;
+        padding: 24px;
+        height: 100%;
+        transition: 0.3s;
+    }
+
+    .result-card:hover {
+        border-color: var(--maroon);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+    }
+
+    .status-tag {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-radius: 6px;
+        text-transform: uppercase;
+    }
+
+    .info-row {
+        display: flex;
+        align-items: start;
+        gap: 12px;
+        margin-bottom: 12px;
+        font-size: 0.9rem;
+    }
+
+    .info-row i {
+        color: var(--maroon);
+        width: 16px;
+        margin-top: 4px;
+    }
+
+    .btn-outline-detail {
+        border: 1.5px solid var(--maroon);
+        color: var(--maroon);
+        background: transparent;
+        width: 100%;
+        padding: 10px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin-top: 15px;
+        transition: 0.2s;
+    }
+
+    .btn-outline-detail:hover {
+        background: var(--maroon);
+        color: white;
+    }
+
+    /* --- Modal Custom --- */
+    .modal-header {
+        border-bottom: none;
+        padding: 25px 30px 10px;
+    }
+
+    .modal-body {
+        padding: 10px 30px 30px;
+    }
+
+    .training-row {
+        background: #fcfcfc;
+        border: 1px solid #efefef;
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .pdf-button {
+        background: #f1f1f1;
+        color: #444;
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+    .pdf-button:hover {
+        background: var(--maroon);
+        color: white;
+    }
+</style>
+
+<div class="hero-section">
+    <div class="container">
+        <img src="/23.png" alt="Logo" class="hero-logo">
+        <h2 class="mb-0">Cari Data Pelatihan</h2>
+        <p class="text-muted">RSUD Simpang Lima Gumul Kediri</p>
+    </div>
+</div>
+
+<div class="container">
+    {{-- SEARCH BAR --}}
+    <div class="row justify-content-center search-wrapper">
+        <div class="col-md-8 px-4">
+            <form action="{{ route('public.pelatihan.index') }}" method="GET">
+                <div class="search-input-group">
+                    <input type="text" name="keyword" placeholder="Cari NIP, NIRP, atau Nama Anda..." value="{{ $keyword ?? '' }}" required>
+                    <button class="btn-search-main" type="submit">
+                        <i class="fas fa-search me-2"></i>Cari
+                    </button>
                 </div>
-
-                {{-- HASIL PENCARIAN --}}
-                @if ($searchPerformed)
-                    @if (session('success'))
-                        <div class="alert alert-success text-center mb-4">
-                            <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
-                        </div>
-                    @endif
-
-                    @if ($pelatihans->count() > 0)
-                        <div class="custom-table-card animate-up">
-                            <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
-                                <strong class="text-dark"><i class="fas fa-list"></i> Hasil Pencarian</strong>
-                                <span class="badge bg-success">{{ $pelatihans->count() }} Data Ditemukan</span>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table table-hover mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th width="25%">Info Pegawai</th>
-                                            <th width="15%">Unit & Jabatan</th>
-                                            <th width="60%">Riwayat Pelatihan & File</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($pelatihans as $pelatihan)
-                                            <tr>
-                                                {{-- KOLOM 1: INFO PEGAWAI --}}
-                                                <td class="align-top">
-                                                    <div class="fw-bold text-dark" style="font-size: 1.05rem;">{{ $pelatihan->nama }}</div>
-                                                    <div class="mt-2">
-                                                        @if ($pelatihan->status_pegawai === 'PNS')
-                                                            <span class="badge bg-primary">PNS</span>
-                                                            <div class="small text-muted mt-1">NIP: {{ $pelatihan->nip }}</div>
-                                                            <div class="small text-muted">{{ $pelatihan->golongan }} / {{ $pelatihan->pangkat }}</div>
-                                                        @elseif ($pelatihan->status_pegawai === 'P3K')
-                                                            <span class="badge bg-warning text-dark">P3K</span>
-                                                            <div class="small text-muted mt-1">NIP: {{ $pelatihan->nip }}</div>
-                                                            <div class="small text-muted">{{ $pelatihan->golongan }}</div>
-                                                        @else
-                                                            <span class="badge bg-secondary">Non-PNS</span>
-                                                            <div class="small text-muted mt-1">NIRP: {{ $pelatihan->nirp }}</div>
-                                                        @endif
-                                                    </div>
-                                                    <div class="mt-3">
-                                                        <a href="{{ route('public.pelatihan.edit', $pelatihan->id) }}" class="btn btn-outline-maroon btn-sm">
-                                                            <i class="fas fa-edit me-1"></i> Perbarui Pelatihan
-                                                        </a>
-                                                    </div>
-                                                </td>
-
-                                                {{-- KOLOM 2: UNIT & JABATAN --}}
-                                                <td class="align-top">
-                                                    <div class="mb-2">
-                                                        <small class="text-muted d-block">Unit/Ruang:</small>
-                                                        <span class="fw-bold text-dark">{{ $pelatihan->unit }}</span>
-                                                    </div>
-                                                    <div>
-                                                        <small class="text-muted d-block">Jabatan:</small>
-                                                        <span>{{ $pelatihan->jabatan }}</span>
-                                                    </div>
-                                                    <div class="mt-2">
-                                                        <small class="text-muted d-block">Bidang:</small>
-                                                        <span>{{ $pelatihan->bidang }}</span>
-                                                    </div>
-                                                </td>
-
-                                                {{-- KOLOM 3: RIWAYAT PELATIHAN (DENGAN PDF) --}}
-                                                <td class="align-top">
-                                                    {{-- Siapkan Data Array --}}
-                                                    @php
-                                                        $dasar = collect($pelatihan->pelatihan_dasar ?? [])->sortByDesc('tahun');
-                                                        $kompetensi = collect($pelatihan->pelatihan_peningkatan_kompetensi ?? [])->sortByDesc('tahun');
-                                                    @endphp
-
-                                                    {{-- Bagian Pelatihan Dasar --}}
-                                                    @if($dasar->count() > 0)
-                                                        <span class="category-badge">Pelatihan Dasar</span>
-                                                        @foreach ($dasar as $item)
-                                                            @if(isset($item['nama']))
-                                                                <div class="pelatihan-list-item">
-                                                                    {{-- LOGIKA TAMPILKAN PDF --}}
-                                                                    @if(!empty($item['file']))
-                                                                        <a href="{{ Storage::url($item['file']) }}" target="_blank" class="pdf-link" title="Klik untuk lihat PDF">
-                                                                            <i class="fas fa-file-pdf"></i>
-                                                                        </a>
-                                                                    @else
-                                                                        <i class="fas fa-file no-file-icon" title="Tidak ada file"></i>
-                                                                    @endif
-
-                                                                    <span class="nama">{{ $item['nama'] }}</span>
-                                                                    <span class="tahun">{{ $item['tahun'] ?? '-' }}</span>
-                                                                </div>
-                                                            @endif
-                                                        @endforeach
-                                                        <div class="mb-3"></div> {{-- Spacer --}}
-                                                    @endif
-
-                                                    {{-- Bagian Pelatihan Kompetensi --}}
-                                                    @if($kompetensi->count() > 0)
-                                                        <span class="category-badge">Peningkatan Kompetensi</span>
-                                                        @foreach ($kompetensi as $item)
-                                                            @if(isset($item['nama']))
-                                                                <div class="pelatihan-list-item">
-                                                                    {{-- LOGIKA TAMPILKAN PDF --}}
-                                                                    @if(!empty($item['file']))
-                                                                        <a href="{{ Storage::url($item['file']) }}" target="_blank" class="pdf-link" title="Klik untuk lihat PDF">
-                                                                            <i class="fas fa-file-pdf"></i>
-                                                                        </a>
-                                                                    @else
-                                                                        <i class="fas fa-file no-file-icon" title="Tidak ada file"></i>
-                                                                    @endif
-
-                                                                    <span class="nama">{{ $item['nama'] }}</span>
-                                                                    <span class="tahun">{{ $item['tahun'] ?? '-' }}</span>
-                                                                </div>
-                                                            @endif
-                                                        @endforeach
-                                                    @endif
-
-                                                    @if($dasar->count() == 0 && $kompetensi->count() == 0)
-                                                        <div class="text-center text-muted py-3">
-                                                            <i class="fas fa-folder-open mb-1"></i><br>
-                                                            <small>Belum ada data pelatihan.</small>
-                                                        </div>
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    @else
-                        <div class="alert alert-warning text-center">
-                            <i class="fas fa-exclamation-triangle fa-lg mb-2"></i><br>
-                            Data tidak ditemukan. Periksa kembali NIP / NIRP yang dimasukkan.
-                        </div>
-                    @endif
-                @endif
-
-            </div>
+            </form>
         </div>
     </div>
+
+    {{-- RESULTS --}}
+    @if ($searchPerformed)
+        <div class="mt-5 mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0">Hasil Pencarian</h5>
+                <hr class="flex-grow-1 mx-3 d-none d-md-block" style="opacity: 0.1;">
+                <span class="text-muted small">Ditemukan {{ $pelatihans->count() }} data</span>
+            </div>
+
+            @if ($pelatihans->count() > 0)
+                <div class="row g-4">
+                    @foreach ($pelatihans as $pelatihan)
+                        <div class="col-md-6 col-lg-4">
+                            <div class="result-card">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span class="status-tag {{ $pelatihan->status_pegawai == 'ASN' ? 'bg-primary text-white' : 'bg-warning text-dark' }}">
+                                        {{ $pelatihan->status_pegawai }}
+                                    </span>
+                                    <span class="text-muted small">ID: {{ $pelatihan->nip ?? $pelatihan->nirp }}</span>
+                                </div>
+                                
+                                <h5 class="fw-bold text-dark mb-4">{{ $pelatihan->nama }}</h5>
+<div class="info-row">
+    <i class="fas fa-fingerprint"></i>
+    <span>NIK: {{ $pelatihan->nik ?? '-' }}</span>
+</div>
+                                <div class="info-row">
+                                    <i class="fas fa-id-card"></i>
+                                    <span>{{ $pelatihan->jabatan }}</span>
+                                </div>
+                                <div class="info-row">
+                                    <i class="fas fa-layer-group"></i>
+                                    <span>{{ $pelatihan->unit }}</span>
+                                </div>
+
+                                <button class="btn-outline-detail" data-bs-toggle="modal" data-bs-target="#detail-{{ $pelatihan->id }}">
+                                    Lihat Riwayat Pelatihan <i class="fas fa-chevron-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- MODAL DETAIL --}}
+                        <div class="modal fade" id="detail-{{ $pelatihan->id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                                    <div class="modal-header">
+                                        <h5 class="fw-bold mb-0">Detail Riwayat</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-4 p-3 bg-light rounded-3">
+                                            <div class="small text-muted mb-1 text-uppercase fw-bold" style="letter-spacing: 1px;">Nama Pegawai</div>
+                                            <div class="h6 fw-bold mb-0">{{ $pelatihan->nama }}</div>
+                                        </div>
+{{-- Masukkan di dalam modal-body, di atas h6 "Daftar Pelatihan" --}}
+@php
+    $currentYear = date('Y');
+    $totalJpl = $pelatihan->getTotalJplByYear($currentYear);
+@endphp
+
+<div class="mb-4 p-3 border rounded-3 {{ $totalJpl >= 20 ? 'bg-success-subtle' : 'bg-danger-subtle' }}" style="border-style: dashed !important;">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <div class="small fw-bold">REKAP JPL TAHUN {{ $currentYear }}</div>
+            <h4 class="mb-0 fw-bold {{ $totalJpl >= 20 ? 'text-success' : 'text-danger' }}">{{ $totalJpl }} <small class="fs-6">JPL</small></h4>
+        </div>
+        @if($totalJpl >= 20)
+            <span class="badge bg-success text-white">Lengkap</span>
+        @else
+            <span class="badge bg-danger text-white">Kurang {{ 20 - $totalJpl }} JPL</span>
+        @endif
+    </div>
+</div>
+
+{{-- LMS INFO --}}
+<div class="mb-4 small">
+    <i class="fas fa-cloud-check text-primary me-1"></i> Akun LMS: 
+    <strong>{{ $pelatihan->lms_status == 'Ada' ? 'Terdaftar ('.$pelatihan->lms_email.')' : 'Belum Ada' }}</strong>
+</div>
+                                        <h6 class="fw-bold mb-3">Daftar Pelatihan:</h6>
+                                        @php
+                                            $allTrainings = collect($pelatihan->pelatihan_dasar ?? [])
+                                                            ->merge($pelatihan->pelatihan_peningkatan_kompetensi ?? [])
+                                                            ->sortByDesc('tahun');
+                                        @endphp
+
+                                       @forelse($allTrainings as $item)
+    <div class="training-row">
+        <div style="max-width: 75%;">
+            <div class="fw-bold small">{{ $item['nama'] }}</div>
+            <small class="text-muted">Tahun {{ $item['tahun'] }} | <span class="badge bg-light text-dark border">{{ $item['jpl'] ?? 0 }} JPL</span></small>
+        </div>
+        {{-- Tombol PDF Tetap Sama --}}
+        @if(!empty($item['file']))
+            <a href="{{ asset('storage/' . $item['file']) }}" target="_blank" class="pdf-button" title="Lihat PDF">
+                <i class="fas fa-file-pdf text-danger"></i>
+            </a>
+        @endif
+    </div>
+@empty
+                                            <div class="text-center py-4 text-muted">Belum ada riwayat pelatihan.</div>
+                                        @endforelse
+
+                                        <div class="mt-4 pt-3 border-top">
+                                            <a href="{{ route('public.pelatihan.edit', $pelatihan->id) }}" class="btn btn-light w-100 rounded-3 text-maroon fw-bold small">
+                                                <i class="fas fa-edit me-2"></i>Update Data Ini
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="text-center py-5">
+                    <img src="https://illustrations.popsy.co/gray/search.svg" height="150" alt="Not Found" class="mb-4">
+                    <h5 class="fw-bold">Data Tidak Ditemukan</h5>
+                    <p class="text-muted small">Coba cari dengan NIP atau Nama yang berbeda.</p>
+                </div>
+            @endif
+        </div>
+    @endif
+</div>
 @endsection

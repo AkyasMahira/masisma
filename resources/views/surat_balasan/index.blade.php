@@ -1,11 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Daftar Surat Balasan')
+@section('title', 'Data Surat Balasan')
 @section('page-title', 'Data Surat Balasan')
 
 @section('content')
     <style>
-        /* --- Style Seragam --- */
         :root {
             --custom-maroon: #7c1316;
             --custom-maroon-light: #a3191d;
@@ -25,7 +24,8 @@
             margin-bottom: 2rem;
             border-left: 5px solid var(--custom-maroon);
             position: relative;
-            z-index: 1050;
+            z-index: 99;
+            overflow: visible;
         }
 
         .filter-card {
@@ -34,6 +34,8 @@
             box-shadow: var(--shadow-soft);
             margin-bottom: 1.5rem;
             border: 1px solid #f0f0f0;
+            position: relative;
+            z-index: 50;
         }
 
         .filter-header {
@@ -69,6 +71,11 @@
             border: none;
         }
 
+        .table {
+            margin-bottom: 0;
+            border-collapse: collapse;
+        }
+
         .table thead th {
             background-color: var(--custom-maroon);
             color: white;
@@ -102,7 +109,6 @@
             transition: var(--transition);
             background: transparent;
             border: 1px solid transparent;
-            margin: 0 2px;
         }
 
         .action-btn:hover {
@@ -110,19 +116,19 @@
             color: var(--custom-maroon);
         }
 
-        .action-btn.edit:hover {
-            background: #e0f2fe;
-            color: #0284c7;
-        }
-
-        .action-btn.pdf:hover {
-            background: #fef3c7;
-            color: #d97706;
-        }
-
         .action-btn.delete:hover {
             background: #fee2e2;
             color: #dc2626;
+        }
+        
+        .action-btn.pdf:hover {
+            background: #ffecec;
+            color: #e74c3c;
+        }
+
+        .action-btn.edit:hover {
+            background: #fff8e1;
+            color: #f39c12;
         }
 
         .animate-up {
@@ -139,40 +145,39 @@
         }
     </style>
 
-    {{-- Header --}}
+    {{-- 1. Header Halaman --}}
     <div class="page-header-wrapper d-flex flex-wrap justify-content-between align-items-center gap-3 animate-up">
         <div>
             <h4 class="fw-bold mb-1" style="color: var(--custom-maroon);">Daftar Surat Balasan</h4>
-            <small class="text-muted">Kelola surat balasan untuk mahasiswa magang/penelitian.</small>
+            <small class="text-muted">Kelola data surat balasan mahasiswa.</small>
         </div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
             <a href="{{ route('surat-balasan.create') }}" class="btn btn-maroon shadow-sm d-flex align-items-center gap-2">
-                <i class="bi bi-plus-lg"></i> Tambah Surat
+                <i class="fas fa-plus"></i> Buat Surat Baru
             </a>
         </div>
     </div>
 
-    {{-- Filter --}}
+    {{-- 2. Filter Card --}}
     <div class="filter-card animate-up" style="animation-delay: 0.1s;">
         <div class="filter-header">
-            <i class="bi bi-funnel-fill mr-2"></i> Pencarian
+            <i class="fas fa-filter me-2"></i> Filter & Pencarian
         </div>
         <div class="card-body p-4">
-            <form method="GET" action="{{ route('surat-balasan.index') }}">
-                <div class="row">
+            <form action="{{ route('surat-balasan.index') }}" method="GET">
+                <div class="row align-items-end">
                     <div class="col-md-9 mb-3 mb-md-0">
+                        <label class="small text-muted font-weight-bold text-uppercase">Cari Nama / NIM / Prodi</label>
                         <div class="input-group shadow-sm">
-                            <span class="input-group-text bg-light border-right-0">
-                                <i class="bi bi-search"></i>
-                            </span>
-                            <input type="text" class="form-control bg-light border-left-0" name="search"
-                                placeholder="Cari Nama Mahasiswa / NIM..." value="{{ request('search') }}">
+                            <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
+                            <input type="text" name="search" class="form-control bg-light border-start-0" 
+                                placeholder="Ketikan kata kunci pencarian..." value="{{ request('search') }}">
                         </div>
                     </div>
                     <div class="col-md-3 d-flex gap-2">
-                        <button type="submit" class="btn btn-maroon shadow-sm w-100">Cari</button>
+                        <button class="btn btn-maroon shadow-sm w-100" type="submit">Cari Data</button>
                         <a href="{{ route('surat-balasan.index') }}" class="btn btn-light border shadow-sm" title="Reset">
-                            <i class="bi bi-arrow-counterclockwise"></i>
+                            <i class="fas fa-sync-alt"></i>
                         </a>
                     </div>
                 </div>
@@ -180,108 +185,133 @@
         </div>
     </div>
 
-    {{-- TABEL LENGKAP --}}
+    {{-- 3. Tabel Kustom --}}
     <div class="custom-table-card animate-up" style="animation-delay: 0.2s;">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
                 <thead>
                     <tr>
                         <th class="text-center" width="5%">No</th>
-                        <th>Info Mahasiswa</th>
-                        <th>Universitas</th>
-                        <th>Rentang Waktu</th>
+                        <th>Mahasiswa</th>
+                        <th>Instansi / MOU</th>
                         <th>Keperluan</th>
-                        <th>Data Dibutuhkan</th>
+                        {{-- Kolom Baru --}}
+                        <th width="15%">Data Dibutuhkan</th>
+                        <th>Lama Berlaku</th>
                         <th class="text-center" width="15%">Aksi</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                    @forelse($data as $row)
+                    @forelse($data as $item)
                         <tr>
-                            <td class="text-center fw-bold text-muted">
-                                {{ ($data->currentPage() - 1) * $data->perPage() + $loop->iteration }}
-                            </td>
-
+                            <td class="text-center text-muted font-weight-bold">{{ $loop->iteration + $data->firstItem() - 1 }}</td>
                             <td>
-                                <div class="fw-bold text-dark">{{ $row->nama_mahasiswa }}</div>
-                                <div class="small text-muted">NIM: {{ $row->nim }}</div>
-                                <div class="small text-success">
-                                    <i class="bi bi-whatsapp"></i> {{ $row->wa_mahasiswa }}
-                                </div>
-                                <div class="small text-muted">Prodi: {{ $row->prodi }}</div>
+                                <div class="fw-bold text-dark">{{ $item->nama_mahasiswa }}</div>
+                                <small class="text-muted" style="font-size: 0.8rem;">
+                                    {{ $item->nim }} <span class="mx-1">•</span> {{ $item->prodi }}
+                                </small>
+                            </td>
+                            <td>
+                                {{ $item->mou->nama_instansi ?? $item->mou->nama_universitas ?? '-' }}
+                            </td>
+                            <td>{{ $item->keperluan }}</td>
+                            
+                            {{-- LOGIKA KOLOM DATA DIBUTUHKAN --}}
+                            <td>
+                                @php
+                                    $listData = $item->data_dibutuhkan;
+                                    // Decode jika masih berupa string JSON
+                                    if (is_string($listData)) {
+                                        $listData = json_decode($listData, true);
+                                    }
+                                @endphp
+
+                                @if(!empty($listData) && is_array($listData))
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @foreach($listData as $req)
+                                            <span class="badge border" 
+                                                  style="background-color: var(--custom-maroon-subtle); color: var(--custom-maroon); font-weight: 500;">
+                                                {{ $req }}
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <span class="text-muted small">-</span>
+                                @endif
                             </td>
 
                             <td>
                                 <span class="badge bg-light text-dark border">
-                                    {{ $row->mou ? ($row->mou->nama_instansi ?? $row->mou->nama_universitas) : '-' }}
+                                    {{ $item->lama_berlaku }}
                                 </span>
                             </td>
-
-                            <td class="fw-semibold">{{ $row->lama_berlaku }}</td>
-
-                            <td>{{ Str::limit($row->keperluan, 40) }}</td>
-
-                            <td>{{ Str::limit($row->data_dibutuhkan, 40) }}</td>
-
                             <td class="text-center">
-                                <div class="d-flex justify-content-center gap-1">
-                                    <a href="{{ route('surat-balasan.pdf', $row->id) }}" target="_blank"
-                                        class="action-btn pdf" title="Download PDF">
-                                        <i class="bi bi-file-earmark-pdf-fill"></i>
-                                    </a>
-
-                                    <a href="{{ route('surat-balasan.edit', $row->id) }}"
-                                        class="action-btn edit" title="Edit">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
-
-                                    <form action="{{ route('surat-balasan.destroy', $row->id) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" class="action-btn delete btn-delete" title="Hapus">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
+                                {{-- Tombol PDF --}}
+                                <a href="{{ route('surat-balasan.pdf', $item->id) }}" class="action-btn pdf" title="Download PDF" target="_blank">
+                                    <i class="fas fa-file-pdf"></i>
+                                </a>
+                                {{-- Tombol Edit --}}
+                                <a href="{{ route('surat-balasan.edit', $item->id) }}" class="action-btn edit" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {{-- Tombol Hapus --}}
+                                <form action="{{ route('surat-balasan.destroy', $item->id) }}" method="POST" class="d-inline delete-form">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" class="action-btn delete btn-delete" title="Hapus">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     @empty
                         <tr>
+                            {{-- Colspan diubah jadi 7 karena ada kolom baru --}}
                             <td colspan="7" class="text-center py-5">
                                 <div class="d-flex flex-column align-items-center">
-                                    <i class="bi bi-inbox-fill display-4 text-muted mb-3" style="opacity: 0.5;"></i>
-                                    <h5 class="text-muted fw-bold">Tidak ada data surat</h5>
-                                    <p class="text-muted small">Silakan tambahkan surat balasan baru.</p>
+                                    <i class="fas fa-folder-open fa-3x text-muted mb-3" style="opacity: 0.5;"></i>
+                                    <h5 class="text-muted font-weight-bold">Data tidak ditemukan</h5>
+                                    <p class="text-muted small">Silakan tambahkan data surat balasan baru.</p>
                                 </div>
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
-
             </table>
         </div>
     </div>
 
-    {{-- PAGINASI --}}
+    {{-- 4. Pagination --}}
     <div class="d-flex justify-content-center mt-4 animate-up" style="animation-delay: 0.3s;">
         {{ $data->links() }}
     </div>
+
 @endsection
 
 @section('scripts')
+    {{-- SweetAlert Integration --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-
-            // Tooltip
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl)
+    {{-- Notifikasi Sukses/Error dari Session --}}
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
+                    showConfirmButton: false,
+                    timer: 1800,
+                    toast: true,
+                    position: 'top-end'
+                });
             });
+        </script>
+    @endif
 
-            // SweetAlert Delete
+    {{-- Script Konfirmasi Hapus --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
             const deleteButtons = document.querySelectorAll('.btn-delete');
             deleteButtons.forEach(btn => {
                 btn.addEventListener('click', function(e) {
@@ -289,13 +319,13 @@
                     const form = this.closest('form');
 
                     Swal.fire({
-                        title: 'Hapus Surat?',
-                        text: "Data surat ini akan dihapus permanen.",
+                        title: 'Yakin hapus data?',
+                        text: "Data surat balasan ini akan dihapus permanen.",
                         icon: 'warning',
                         showCancelButton: true,
-                        confirmButtonColor: '#dc2626',
+                        confirmButtonColor: '#7c1316',
                         cancelButtonColor: '#6c757d',
-                        confirmButtonText: 'Ya, Hapus!',
+                        confirmButtonText: 'Ya, hapus!',
                         cancelButtonText: 'Batal'
                     }).then((result) => {
                         if (result.isConfirmed) {
@@ -304,29 +334,6 @@
                     });
                 });
             });
-
-            // Flash Message
-            @if(session('success'))
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: "{{ session('success') }}",
-                    showConfirmButton: false,
-                    timer: 1500,
-                    toast: true,
-                    position: 'top-end'
-                });
-            @endif
-
-            @if(session('error'))
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal!',
-                    text: "{{ session('error') }}",
-                    toast: true,
-                    position: 'top-end'
-                });
-            @endif
         });
     </script>
 @endsection

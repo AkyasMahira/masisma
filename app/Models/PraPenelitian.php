@@ -8,22 +8,27 @@ class PraPenelitian extends Model
 {
     protected $table = 'pra_penelitians';
 
-    protected $fillable = [
-        'user_id', 
-        'judul',
-        'mou_id',
-        'jenis_penelitian',
-        'prodi',
-        'tanggal_mulai',
-        'tanggal_rencana_skripsi',
-        'file_kerangka',      
-        'file_surat_pengantar', 
-        'dosen1_nama',
-        'dosen1_hp',
-        'dosen2_nama',
-        'dosen2_hp',
-        'status',
-    ];
+protected $fillable = [
+    'user_id',
+    'judul',
+    'mou_id',
+    'jenis_penelitian',
+    'prodi',
+    'tanggal_mulai',
+    'tanggal_rencana_skripsi',
+    'file_kerangka',
+    'file_surat_pengantar',
+    'file_ethical_clearance',
+    'file_proposal', 
+    'dosen1_nama',
+    'dosen1_hp',
+    'dosen2_nama',
+    'dosen2_hp',
+    'status',
+    'jenis_mahasiswa',
+];
+
+
 
     protected $dates = [
         'tanggal_mulai',

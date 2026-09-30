@@ -56,4 +56,27 @@ class Presentasi extends Model
     {
         return $this->belongsTo(Pengajuan::class);
     }
+    
+    public function penilaianDetails() {
+    return $this->hasMany(PenilaianDetail::class);
+}
+
+// Helper untuk mendapatkan predikat dari angka
+// Helper untuk mendapatkan predikat dari angka
+public static function getPredikat($angka) {
+    if ($angka >= 80) return 'A'; // Predikat A: 80 - 100
+    if ($angka >= 70) return 'B'; // Predikat B: 70 - 79
+    if ($angka >= 60) return 'C'; // Predikat C: 60 - 69
+    return 'D';                   // Predikat D: < 60
+}
+
+public static function getKeterangan($predikat) {
+    $map = [
+        'A' => 'Baik Sekali',
+        'B' => 'Baik',
+        'C' => 'Cukup',
+        'D' => 'Kurang'
+    ];
+    return $map[$predikat] ?? '-';
+}
 }

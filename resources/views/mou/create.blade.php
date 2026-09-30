@@ -171,7 +171,7 @@
       =====================================================
     --}}
     <div class="row justify-content-center animate-up">
-        <div class="col-md-9 col-lg-8"> {{-- Sedikit lebih lebar dari form mhs --}}
+        <div class="col-12"> {{-- Sedikit lebih lebar dari form mhs --}}
             <div class="form-card">
 
                 {{-- CARD HEADER --}}
@@ -357,7 +357,7 @@
                             <div class="alert alert-info shadow-sm" role="alert">
                                 <h6 class="fw-bold mb-2">Contoh</h6>
                                 <div class="d-flex flex-column">
-                                    <a href="{{ asset('storage/pdfmou/draft_mou_smk.pdf') }}" target="_blank" class="file-download-box text-decoration-none mb-2">
+                                    <a href="{{ asset('storage/pdfmou/mousmk.pdf') }}" target="_blank" class="file-download-box text-decoration-none mb-2">
                                         <div class="d-flex align-items-center">
                                             <i class="bi bi-file-earmark-pdf-fill text-danger fs-3 me-3"></i>
                                             <div>
@@ -368,7 +368,7 @@
                                         <i class="bi bi-download text-secondary"></i>
                                     </a>
 
-                                    <a href="{{ asset('storage/pdfmou/Draft_Mou_Universitas.pdf') }}" target="_blank" class="file-download-box text-decoration-none mb-2">
+                                    <a href="{{ asset('storage/pdfmou/mouuniv.pdf') }}" target="_blank" class="file-download-box text-decoration-none mb-2">
                                         <div class="d-flex align-items-center">
                                             <i class="bi bi-file-earmark-pdf-fill text-danger fs-3 me-3"></i>
                                             <div>
@@ -379,12 +379,23 @@
                                         <i class="bi bi-download text-secondary"></i>
                                     </a>
 
-                                    <a href="{{ asset('storage/pdfmou/tata_tertib_magang.pdf') }}" target="_blank" class="file-download-box text-decoration-none">
+                                    <a href="{{ asset('storage/pdfmou/tatib.pdf') }}" target="_blank" class="file-download-box text-decoration-none">
                                         <div class="d-flex align-items-center">
                                             <i class="bi bi-file-earmark-pdf-fill text-danger fs-3 me-3"></i>
                                             <div>
                                                 <div class="fw-bold text-dark">Tata Tertib Pelaksanaan Magang/PKL/PKM/TPM</div>
                                                 <small class="text-muted">Aturan & panduan pelaksanaan kegiatan</small>
+                                            </div>
+                                        </div>
+                                        <i class="bi bi-download text-secondary"></i>
+                                    </a>
+                                    
+                                         <a href="{{ asset('storage/pdfmou/surat.pdf') }}" target="_blank" class="file-download-box text-decoration-none">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-file-earmark-pdf-fill text-danger fs-3 me-3"></i>
+                                            <div>
+                                                <div class="fw-bold text-dark">Surat Edaran Keterangan Penelitian</div>
+                                                <small class="text-muted">Bagi Kampus/Sekolah</small>
                                             </div>
                                         </div>
                                         <i class="bi bi-download text-secondary"></i>

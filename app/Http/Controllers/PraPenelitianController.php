@@ -2,168 +2,225 @@
 
 namespace App\Http\Controllers;
 
+/**
+ * Mendefinisikan model dan library yang dibutuhkan.
+ * Pastikan model Mou, PraPenelitian, dan PraPenelitianAnggota sudah ada.
+ */
 use App\Models\Mou;
 use App\Models\PraPenelitian;
-// Pastikan model ini ada (dari langkah sebelumnya)
 use App\Models\PraPenelitianAnggota;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PraPenelitianController extends Controller
 {
+    /**
+     * Constructor: Memastikan hanya user yang login yang bisa akses.
+     */
     public function __construct()
     {
         $this->middleware('auth');
     }
 
-    public function index()
-    {
-        $query = PraPenelitian::with(['mou'])
-            ->withCount('anggotas'); // ← ini yang absolut wajib ditambah
+public function index(Request $request)
+{
+    // Gunakan withCount supaya $item->anggotas_count bisa jalan di blade
+    $query = PraPenelitian::with(['mou', 'anggotas'])->withCount('anggotas');
 
-        if (auth()->user()->role !== 'admin') {
-            $query->where('user_id', auth()->id());
-        }
-
-        $penelitian = $query->latest()->paginate(10);
-
-        return view('pra-penelitian.index', compact('penelitian'));
+    if (auth()->user()->role !== 'admin') {
+        $query->where('user_id', auth()->id());
     }
 
+    // --- SEARCH FILTER (Judul, Univ, Nama Anggota) ---
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('judul', 'like', "%{$search}%")
+              ->orWhereHas('mou', function($subQ) use ($search) {
+                  $subQ->where('nama_instansi', 'like', "%{$search}%")
+                       ->orWhere('nama_universitas', 'like', "%{$search}%");
+              })
+              ->orWhereHas('anggotas', function($subQ) use ($search) {
+                  $subQ->where('nama', 'like', "%{$search}%");
+              });
+        });
+    }
+
+    // --- FILTER STATUS ---
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    // --- FILTER JENIS PENELITIAN ---
+    if ($request->filled('jenis_penelitian')) {
+        $query->where('jenis_penelitian', $request->jenis_penelitian);
+    }
+
+    // --- FILTER KATEGORI MAHASISWA (Pastikan nama kolom sesuai DB) ---
+    if ($request->filled('jenis_mahasiswa')) {
+        $query->where('jenis_mahasiswa', $request->jenis_mahasiswa);
+    }
+
+    $penelitian = $query->latest()->paginate(10);
+    
+    return view('pra-penelitian.index', compact('penelitian'));
+}
+    /**
+     * SHOW: Menampilkan detail satu data penelitian.
+     */
+    public function show($id)
+    {
+        $praPenelitian = PraPenelitian::with(['anggotas', 'mou'])->findOrFail($id);
+
+        // Security: Mencegah user mengintip data orang lain via URL ID
+        if (auth()->user()->role !== 'admin' && $praPenelitian->user_id !== auth()->id()) {
+            abort(403, 'Waduh! Kamu nggak punya izin buat liat data ini.');
+        }
+
+        return view('pra-penelitian.show', compact('praPenelitian'));
+    }
+
+    /**
+     * CREATE: Menampilkan form tambah data.
+     */
     public function create()
     {
-        // Ambil MOU yang masih berlaku
+        // Hanya mengambil MoU yang belum kadaluarsa
         $mous = Mou::where('tanggal_keluar', '>=', now()->toDateString())
-            ->orderBy('nama_instansi', 'asc')
+            ->orderBy('nama_instansi')
             ->get();
 
         return view('pra-penelitian.create', compact('mous'));
     }
 
+    /**
+     * STORE: Proses penyimpanan data baru ke database.
+     */
     public function store(Request $request)
     {
-        // Business rule: if user has a previous PraPenelitian with status 'Selesai',
-        // they must wait 1 x 24 jam before creating another.
-        $recentFinished = PraPenelitian::where('user_id', auth()->id())
-            ->where('status', 'Selesai')
-            ->where('updated_at', '>=', now()->subDay())
-            ->first();
+        // Cek apakah user baru saja menyelesaikan pengajuan (Jeda 24 Jam)
+        // $recentFinished = PraPenelitian::where('user_id', auth()->id())
+        //     ->where('status', 'Selesai')
+        //     ->where('updated_at', '>=', now()->subDay())
+        //     ->first();
 
-        if ($recentFinished) {
-            return back()->withInput()->with('error', 'Anda harus menunggu 1 x 24 jam setelah pengajuan Pra-Penelitian sebelumnya selesai sebelum mengajukan kembali.');
-        }
+        // if ($recentFinished) {
+        //     return back()->withInput()->with('error', 'Selesaikan dulu masa tunggu 1x24 jam sebelum mengajukan kembali ya.');
+        // }
 
-        $request->validate([
-            // Data Utama
+        /**
+         * VALIDASI DATA & FALLBACK MANUSIAWI
+         * Bagian ini yang bakal kasih tahu error spesifik ke user.
+         */
+        $rules = [
             'judul' => 'required|string|max:255',
             'mou_id' => 'required|exists:mous,id',
             'jenis_penelitian' => 'required|in:Data Awal,Uji Validitas,Penelitian',
-            'prodi' => 'required|string|max:255',
+            'prodi' => 'required|string', // SINKRONKAN: Di Blade harus name="prodi"
             'tanggal_mulai' => 'required|date',
             'tanggal_rencana_skripsi' => 'required|date',
-
-            // File Upload
             'kerangka_penelitian' => 'required|mimes:pdf|max:2048',
             'surat_pengantar' => 'required|mimes:pdf|max:2048',
-
-            // Dosen
+            'proposal' => 'required|mimes:pdf|max:2048',
+            'ethical_clearance' => $request->jenis_penelitian === 'Penelitian' ? 'required|mimes:pdf|max:2048' : 'nullable',
             'dosen1_nama' => 'required|string',
             'dosen1_hp' => 'required|string',
             'dosen2_nama' => 'required|string',
             'dosen2_hp' => 'required|string',
-
-            // Data Mahasiswa
             'mahasiswas' => 'required|array|min:1',
             'mahasiswas.*.nama' => 'required|string',
             'mahasiswas.*.no_telpon' => 'required|string',
             'mahasiswas.*.jenjang' => 'required|string',
-        ]);
+        ];
+
+        $messages = [
+            'required' => 'Waduh! Kolom :attribute ini wajib diisi, jangan kosong ya.',
+            'mimes'    => 'File :attribute mustahil dibaca kalau bukan PDF.',
+            'max'      => 'File :attribute kegedean! Maksimal cuma boleh 2MB.',
+            'prodi.required' => 'Kamu belum milih Program Studi lho.',
+            'ethical_clearance.required' => 'Karena ini jenis Penelitian, Ethical Clearance hukumnya wajib diupload.',
+        ];
+
+        $request->validate($rules, $messages);
+
+        // Mulai Transaksi Database (Biar kalau ada yang gagal, data nggak berantakan)
+        DB::beginTransaction();
 
         try {
-            DB::beginTransaction();
-
-            // 1. Upload File
+            // Proses Upload File Menggunakan Helper di bawah
             $pathKerangka = $this->uploadFile($request, 'kerangka_penelitian', 'uploads/pra_penelitian/kerangka');
-            $pathSurat = $this->uploadFile($request, 'surat_pengantar', 'uploads/pra_penelitian/surat');
+            $pathSurat    = $this->uploadFile($request, 'surat_pengantar', 'uploads/pra_penelitian/surat');
+            $pathProposal = $this->uploadFile($request, 'proposal', 'uploads/pra_penelitian/proposal');
+            $pathEthical  = $this->uploadFile($request, 'ethical_clearance', 'uploads/pra_penelitian/ethical');
 
-            // 2. Simpan Data Utama (Parent)
+            // Simpan Data Utama
             $penelitian = PraPenelitian::create([
-                'user_id' => Auth::id(), // ID User yang login
+                'user_id' => Auth::id(),
                 'judul' => $request->judul,
                 'mou_id' => $request->mou_id,
                 'jenis_penelitian' => $request->jenis_penelitian,
                 'prodi' => $request->prodi,
                 'tanggal_mulai' => $request->tanggal_mulai,
                 'tanggal_rencana_skripsi' => $request->tanggal_rencana_skripsi,
-
-                // Path File
                 'file_kerangka' => $pathKerangka,
                 'file_surat_pengantar' => $pathSurat,
-
-                // Dosen
+                'file_proposal' => $pathProposal,
+                'file_ethical_clearance' => $pathEthical,
                 'dosen1_nama' => $request->dosen1_nama,
                 'dosen1_hp' => $request->dosen1_hp,
                 'dosen2_nama' => $request->dosen2_nama,
                 'dosen2_hp' => $request->dosen2_hp,
-
                 'status' => 'Pending',
             ]);
 
-            // 3. Simpan Data Anggota (Children)
+            // Simpan Data Anggota Mahasiswa (Relasi HasMany)
             foreach ($request->mahasiswas as $mhs) {
-                // Menggunakan relation 'anggotas' yang didefinisikan di Model PraPenelitian
-                $penelitian->anggotas()->create([
-                    'nama' => $mhs['nama'],
-                    'no_telpon' => $mhs['no_telpon'],
-                    'jenjang' => $mhs['jenjang'],
-                ]);
+                $penelitian->anggotas()->create($mhs);
             }
 
             DB::commit();
 
-            // Redirect sesuai role
-            if (auth()->user()->role === 'admin') {
-                return redirect()->route('pra-penelitian.index')->with('success', 'Pengajuan berhasil dibuat.');
-            } else {
-                return redirect()->route('dashboard')->with('success', 'Pengajuan berhasil dikirim. Mohon tunggu konfirmasi.');
-            }
+            return redirect()
+                ->route(auth()->user()->role === 'admin' ? 'pra-penelitian.index' : 'dashboard')
+                ->with('success', 'Mantap! Pengajuan penelitian kamu berhasil dikirim.');
+
         } catch (\Exception $e) {
             DB::rollBack();
-            // Hapus file jika database gagal (cleanup)
-            if (isset($pathKerangka)) File::delete(public_path($pathKerangka));
-            if (isset($pathSurat)) File::delete(public_path($pathSurat));
+            Log::error('Error Simpan PraPenelitian: ' . $e->getMessage());
 
-            return back()->withInput()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            // Cleanup: Hapus file yang terlanjur diupload kalau DB gagal simpan
+            foreach ([$pathKerangka, $pathSurat, $pathProposal, $pathEthical] as $file) {
+                if ($file) $this->deleteFile($file);
+            }
+
+            return back()->withInput()->with('error', 'Ada gangguan teknis: ' . $e->getMessage());
         }
     }
 
-    public function show($id)
-    {
-        $praPenelitian = PraPenelitian::with(['mou', 'anggotas', 'user'])->findOrFail($id);
-
-        // Proteksi: User biasa hanya boleh lihat punya sendiri
-        if (auth()->user()->role !== 'admin' && $praPenelitian->user_id !== auth()->id()) {
-            abort(403, 'Unauthorized');
-        }
-
-        return view('pra-penelitian.show', compact('praPenelitian'));
-    }
-
+    /**
+     * EDIT: Menampilkan form edit data.
+     */
     public function edit($id)
     {
-        $praPenelitian = PraPenelitian::with('anggotas')->findOrFail($id);
+        $praPenelitian = PraPenelitian::with(['anggotas', 'mou'])->findOrFail($id);
 
         if (auth()->user()->role !== 'admin' && $praPenelitian->user_id !== auth()->id()) {
             abort(403);
         }
 
-        $mous = Mou::where('tanggal_keluar', '>=', now()->toDateString())->get();
+        $mous = Mou::where('tanggal_keluar', '>=', now()->toDateString())
+            ->orderBy('nama_instansi')
+            ->get();
 
         return view('pra-penelitian.edit', compact('praPenelitian', 'mous'));
     }
 
+    /**
+     * UPDATE: Memperbarui data yang sudah ada.
+     */
     public function update(Request $request, $id)
     {
         $penelitian = PraPenelitian::findOrFail($id);
@@ -177,117 +234,124 @@ class PraPenelitianController extends Controller
             'mou_id' => 'required|exists:mous,id',
             'jenis_penelitian' => 'required',
             'tanggal_mulai' => 'required|date',
-            // File bersifat nullable saat update
             'kerangka_penelitian' => 'nullable|mimes:pdf|max:2048',
             'surat_pengantar' => 'nullable|mimes:pdf|max:2048',
+            'proposal' => 'nullable|mimes:pdf|max:2048',
+            'ethical_clearance' => 'nullable|mimes:pdf|max:2048',
             'mahasiswas' => 'required|array|min:1',
-        ]);
+        ], ['required' => 'Kolom :attribute jangan sampai terlewat ya.']);
+
+        DB::beginTransaction();
 
         try {
-            DB::beginTransaction();
+            $data = $request->except([
+                'mahasiswas', 'kerangka_penelitian', 'surat_pengantar', 'proposal', 'ethical_clearance',
+            ]);
 
-            // 1. Update Data Utama
-            $dataToUpdate = $request->except(['mahasiswas', 'kerangka_penelitian', 'surat_pengantar']);
+            // Handle Update File (Hapus file lama kalau ganti file baru)
+            $fileFields = [
+                'kerangka_penelitian' => 'file_kerangka',
+                'surat_pengantar'     => 'file_surat_pengantar',
+                'proposal'            => 'file_proposal',
+                'ethical_clearance'   => 'file_ethical_clearance',
+            ];
 
-            // Handle File Upload (Hanya jika ada file baru)
-            if ($request->hasFile('kerangka_penelitian')) {
-                $this->deleteFile($penelitian->file_kerangka);
-                $dataToUpdate['file_kerangka'] = $this->uploadFile($request, 'kerangka_penelitian', 'uploads/pra_penelitian/kerangka');
+            foreach ($fileFields as $input => $column) {
+                if ($request->hasFile($input)) {
+                    $this->deleteFile($penelitian->$column); // Hapus yang lama
+                    $data[$column] = $this->uploadFile($request, $input, 'uploads/pra_penelitian/' . str_replace('file_', '', $column));
+                }
             }
-            if ($request->hasFile('surat_pengantar')) {
-                $this->deleteFile($penelitian->file_surat_pengantar);
-                $dataToUpdate['file_surat_pengantar'] = $this->uploadFile($request, 'surat_pengantar', 'uploads/pra_penelitian/surat');
-            }
 
-            $penelitian->update($dataToUpdate);
+            $penelitian->update($data);
 
-            // 2. Sync Anggota (Hapus lama, buat baru - cara termudah untuk nested form)
+            // Sync Anggota: Hapus semua lama, masukkan yang baru
             $penelitian->anggotas()->delete();
-
             foreach ($request->mahasiswas as $mhs) {
-                $penelitian->anggotas()->create([
-                    'nama' => $mhs['nama'],
-                    'no_telpon' => $mhs['no_telpon'],
-                    'jenjang' => $mhs['jenjang'],
-                ]);
+                $penelitian->anggotas()->create($mhs);
             }
 
             DB::commit();
-            return redirect()->route('pra-penelitian.index')->with('success', 'Data berhasil diperbarui.');
+            return redirect()->route('pra-penelitian.index')->with('success', 'Data kamu sudah berhasil diperbarui.');
+
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', 'Gagal update: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Gagal update data: ' . $e->getMessage());
         }
     }
 
+    /**
+     * DESTROY: Menghapus data beserta file fisiknya.
+     */
     public function destroy($id)
     {
         $penelitian = PraPenelitian::findOrFail($id);
 
-        if (auth()->user()->role !== 'admin' && $penelitian->user_id !== auth()->id()) {
-            abort(403);
+        // Hapus file dari storage biar nggak nyampah
+        $files = ['file_kerangka', 'file_surat_pengantar', 'file_proposal', 'file_ethical_clearance'];
+        foreach ($files as $file) {
+            $this->deleteFile($penelitian->$file);
         }
 
-        try {
-            // Hapus File Fisik
-            $this->deleteFile($penelitian->file_kerangka);
-            $this->deleteFile($penelitian->file_surat_pengantar);
-
-            // Hapus Record (Anggota akan terhapus otomatis karena onCascade di migration)
-            $penelitian->delete();
-
-            return redirect()->route('pra-penelitian.index')->with('success', 'Data berhasil dihapus.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Gagal menghapus data.');
-        }
-    }
-
-    public function batal($id)
-    {
-        $penelitian = PraPenelitian::findOrFail($id);
-        // Hanya admin atau pemilik yang bisa membatalkan
-        if (auth()->user()->role !== 'admin' && $penelitian->user_id !== auth()->id()) {
-            abort(403);
-        }
-
-        $penelitian->update(['status' => 'Rejected']); // Atau status khusus 'Batal'
-        return back()->with('success', 'Status pengajuan diubah menjadi Batal/Ditolak.');
+        $penelitian->delete();
+        return back()->with('success', 'Data pengajuan sudah berhasil dihapus selamanya.');
     }
 
     /**
-     * Helper: Upload File
+     * APPROVE: Mengubah status menjadi Approved (Khusus Admin).
+     */
+    public function approveForm($id)
+    {
+        $penelitian = PraPenelitian::findOrFail($id);
+        $penelitian->update(['status' => 'Approved']);
+        
+        return back()->with('success', 'Formulir Pra Penelitian berhasil disetujui.');
+    }
+
+    /**
+     * UPDATE JENIS MAHASISWA: Khusus admin untuk melabeli Internal/Eksternal.
+     */
+    public function updateJenisMahasiswa(Request $request, $id)
+    {
+        if (auth()->user()->role !== 'admin') {
+            abort(403, 'Akses ilegal! Cuma Admin yang boleh ganti jenis mahasiswa.');
+        }
+
+        $request->validate([
+            'jenis_mahasiswa' => 'required|in:Internal,Eksternal',
+        ], ['in' => 'Pilihannya cuma Internal atau Eksternal ya.']);
+
+        $penelitian = PraPenelitian::findOrFail($id);
+        $penelitian->update([
+            'jenis_mahasiswa' => $request->jenis_mahasiswa
+        ]);
+
+        return back()->with('success', 'Status Mahasiswa sekarang menjadi: ' . $request->jenis_mahasiswa);
+    }
+
+    /**
+     * PRIVATE HELPER: Menangani upload file dan pembuatan folder otomatis.
      */
     private function uploadFile($request, $inputName, $targetDir)
     {
         if ($request->hasFile($inputName)) {
             $file = $request->file($inputName);
             $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path($targetDir), $filename);
+            
+            // Cek folder, buat otomatis jika belum ada di public path
+            $fullPath = public_path($targetDir);
+            if (!File::isDirectory($fullPath)) {
+                File::makeDirectory($fullPath, 0755, true, true);
+            }
+
+            $file->move($fullPath, $filename);
             return $targetDir . '/' . $filename;
         }
         return null;
     }
 
     /**
-     * Approve form pra penelitian (approve surat pengantar)
-     */
-    public function approveForm(PraPenelitian $praPenelitian)
-    {
-        $praPenelitian->update(['status' => 'Approved']);
-        return back()->with('success', 'Form pra penelitian berhasil di-approve.');
-    }
-
-    /**
-     * Reject form pra penelitian
-     */
-    public function rejectForm(PraPenelitian $praPenelitian)
-    {
-        $praPenelitian->update(['status' => 'Rejected']);
-        return back()->with('success', 'Form pra penelitian ditolak.');
-    }
-
-    /**
-     * Helper: Delete File
+     * PRIVATE HELPER: Menangani penghapusan file fisik.
      */
     private function deleteFile($path)
     {

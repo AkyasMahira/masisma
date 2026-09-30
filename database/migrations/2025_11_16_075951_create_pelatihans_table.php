@@ -22,7 +22,7 @@ class CreatePelatihansTable extends Migration
             ])->nullable();
             $table->string('jabatan')->nullable();
             $table->string('unit')->nullable();
-            $table->enum('status_pegawai', ['PNS', 'P3K', 'Non-PNS']);
+            $table->enum('status_pegawai', ['ASN', 'KARYAWAN TETAP', 'NON ASN']);
             $table->string('nip')->nullable();
             $table->string('pangkat')->nullable();
             $table->string('golongan')->nullable();

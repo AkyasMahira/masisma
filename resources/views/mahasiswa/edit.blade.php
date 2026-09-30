@@ -1,505 +1,499 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Mahasiswa')
-@section('page-title', 'Edit Mahasiswa')
+@section('title', 'Edit Data Mahasiswa')
 
 @section('content')
+    {{-- 
+       =========================================================
+       1. SETUP DATA (PHP SIDE)
+       =========================================================
+    --}}
+    @php
+        $listProdi = [
+            'TEKNIK & INFORMATIKA' => [
+                'SMK REKAYASA PERANGKAT LUNAK', 'SMK TEKNIK KOMPUTER JARINGAN', 'SMK MULTIMEDIA',
+                'S1 TEKNIK INFORMATIKA', 'S1 SISTEM INFORMASI', 'S1 ILMU KOMPUTER',
+                'D3 TEKNIK ELEKTROMEDIK', 'D4 TEKNIK ELEKTROMEDIK', 'S1 TEKNIK ELEKTRO', 'S1 TEKNIK LINGKUNGAN',   'S1 TEKNOLOGI LABORATORIUM MEDIS',
+                  'D4 TEKNOLOGI LABORATORIUM MEDIS'
+            ],
+            'KEPERAWATAN' => [
+                'SMK ASISTEN KEPERAWATAN', 'D3 KEPERAWATAN', 'D4 KEPERAWATAN', 'S1 KEPERAWATAN',
+                'PROFESI NERS', 'S2 KEPERAWATAN', 'SMK KEPERAWATAN',
+            ],
+            'KEBIDANAN' => [
+                'D3 KEBIDANAN', 'D4 KEBIDANAN', 'S1 KEBIDANAN', 'PROFESI BIDAN',
+            ],
+            'KEDOKTERAN & FARMASI' => [
+                'S1 KEDOKTERAN UMUM', 'PROFESI DOKTER (KOAS)', 'S1 KEDOKTERAN GIGI', 'PROFESI DOKTER GIGI',
+                'PPDS (SPESIALIS)', 'SMK FARMASI', 'D3 FARMASI', 'S1 FARMASI', 'PROFESI APOTEKER',
+            ],
+            'PENUNJANG MEDIS & KESEHATAN' => [
+                'S1 TEKNIK BIOMEDIS',
+                'D4 REKAM MEDIK', 'D3 REKAM MEDIK', 'D3 REKAM MEDIS & INFORMASI KESEHATAN',
+                'D4 REKAM MEDIS & INFORMASI KESEHATAN', 'S1 TEKNOLOGI LABORATORIUM MEDIK',
+                'D4 TEKNOLOGI LABORATORIUM MEDIK', 'D3 ANALIS KESEHATAN (TLM)', 'D4 ANALIS KESEHATAN (TLM)',
+                'D3 RADIOLOGI', 'D4 RADIOLOGI', 'D3 FISIOTERAPI', 'S1 FISIOTERAPI', 'PROFESI FISIOTERAPI',
+                'D3 GIZI', 'S1 GIZI', 'PROFESI DIETISIEN', 'D3 KESEHATAN LINGKUNGAN (SANITASI)',
+                'S1 KESEHATAN MASYARAKAT', 'D4 PROMOSI KESEHATAN', 'S1 KESELAMATAN DAN KESEHATAN KERJA (K3)',
+                'D4 KESELAMATAN DAN KESEHATAN KERJA (K3)',
+            ],
+            'MANAJEMEN & SOSIAL' => [
+                'SMK OTOMATISASI TATA KELOLA PERKANTORAN (OTKP)', 'SMK AKUNTANSI', 'D3 AKUNTANSI',
+                'S1 AKUNTANSI', 'S1 MANAJEMEN', 'S1 HUKUM', 'S1 PSIKOLOGI', 'S1 ADMINISTRASI PUBLIK',
+                'S1 ADMINISTRASI RUMAH SAKIT','SMK FARMASI','SMK LABORATORIUM',
+            ]
+        ];
+    @endphp
+
+    {{-- Load CSS Libraries --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+
     <style>
+        /* --- CUSTOM THEME --- */
         :root {
-            --custom-maroon: #7c1316;
-            --custom-maroon-light: #a3191d;
-            --custom-maroon-subtle: #fcf0f1;
-            --text-dark: #2c3e50;
-            --text-muted: #95a5a6;
-            --card-radius: 16px;
-            --transition: 0.3s ease;
+            --primary-maroon: #7c1316;
+            --primary-maroon-hover: #9c1c20;
+            --bg-soft: #f8f9fc;
+            --input-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
         }
 
-        /* --- Card Styling --- */
-        .form-card {
-            border: none;
-            border-radius: var(--card-radius);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        /* --- THEME HELPER CLASSES (Agar senada) --- */
+        .text-maroon { color: var(--primary-maroon) !important; }
+        .bg-maroon { background-color: var(--primary-maroon) !important; color: white !important; }
+        .btn-maroon {
+            background-color: var(--primary-maroon); color: white; border: none;
+        }
+        .btn-maroon:hover {
+            background-color: var(--primary-maroon-hover); color: white; transform: scale(1.05);
+        }
+        .btn-outline-maroon {
+            color: var(--primary-maroon); border: 1px solid var(--primary-maroon); background: transparent;
+        }
+        .btn-outline-maroon:hover {
+            background-color: var(--primary-maroon); color: white;
+        }
+        .btn-soft-danger {
+            background-color: #fee2e2; color: #ef4444; border: none; transition: 0.3s;
+        }
+        .btn-soft-danger:hover {
+            background-color: #fca5a5; color: #b91c1c;
+        }
+
+        /* --- CARD STYLE & RESPONSIVE --- */
+        .custom-card {
             background: #fff;
+            border-radius: 16px;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            width: 100%;
             overflow: hidden;
         }
 
-        .card-header-custom {
-            background-color: var(--custom-maroon);
-            padding: 1.5rem;
-            color: white;
-            border-bottom: 4px solid var(--custom-maroon-light);
-        }
-
-        /* --- Form Styling --- */
-        .form-label {
-            font-weight: 600;
-            color: var(--text-dark);
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .input-group-text {
-            background-color: #f8f9fa;
-            border-right: none;
-            color: var(--custom-maroon);
-            border-top-left-radius: 10px;
-            border-bottom-left-radius: 10px;
-        }
-
-        .form-control,
-        .form-select {
-            border-left: none;
-            border-radius: 0 10px 10px 0;
-            padding: 0.7rem 1rem;
-            border-color: #dee2e6;
-            box-shadow: none !important;
-            transition: border-color 0.2s;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            border-color: var(--custom-maroon-light);
-        }
-
-        /* --- Room Info Box --- */
-        .room-info-box {
-            background-color: var(--custom-maroon-subtle);
-            border: 1px dashed var(--custom-maroon-light);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-top: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .room-info-box.full {
-            background-color: #fee2e2;
-            border-color: #ef4444;
-        }
-
-        /* --- Buttons --- */
-        .btn-maroon {
-            background-color: var(--custom-maroon);
-            color: white;
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: var(--transition);
-            box-shadow: 0 4px 15px rgba(124, 19, 22, 0.2);
-        }
-
-        .btn-maroon:hover {
-            background-color: var(--custom-maroon-light);
-            transform: translateY(-2px);
+        .card-header-hero {
+            background: linear-gradient(135deg, var(--primary-maroon) 0%, #4a0d0f 100%);
+            padding: 1.5rem; /* Default mobile */
             color: white;
         }
 
-        .btn-maroon:disabled {
-            background-color: #ccc;
-            transform: none;
-            box-shadow: none;
+        /* Mobile Adjustments */
+        @media (min-width: 768px) {
+            .card-header-hero { padding: 2rem 2.5rem; }
+            .card-body-custom { padding: 3rem !important; }
         }
 
-        .btn-light-custom {
-            background: #fff;
-            border: 1px solid #dee2e6;
-            color: var(--text-dark);
-            border-radius: 50px;
-            padding: 0.8rem 1.5rem;
-            font-weight: 600;
+        /* --- FORM ELEMENTS --- */
+        .section-header {
+            display: flex; align-items: center; margin: 2rem 0 1.2rem 0;
+        }
+        .section-header i {
+            font-size: 1.2rem; color: var(--primary-maroon); margin-right: 0.8rem;
+            background: #fff4f4; padding: 8px; border-radius: 8px;
+        }
+        .section-header h5 {
+            margin: 0; font-weight: 700; color: var(--text-main);
+            text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.95rem;
+        }
+        .section-line { flex: 1; height: 1px; background: var(--border-color); margin-left: 1rem; }
+
+        .form-label { font-weight: 600; color: var(--text-main); font-size: 0.9rem; margin-bottom: 0.4rem; }
+
+        .input-group-custom {
+            display: flex; align-items: center; background: var(--input-bg);
+            border: 1px solid var(--border-color); border-radius: 10px;
+            padding: 0.4rem 0.8rem; transition: all 0.3s; width: 100%;
+        }
+        .input-group-custom:focus-within {
+            border-color: var(--primary-maroon);
+            box-shadow: 0 0 0 3px rgba(124, 19, 22, 0.1);
+        }
+        .input-icon { color: var(--text-sub); font-size: 1.1rem; margin-right: 0.8rem; }
+        .form-control-custom, .form-select-custom {
+            border: none; width: 100%; padding: 0.4rem; font-size: 0.95rem;
+            background: transparent; outline: none; color: var(--text-main);
         }
 
-        .btn-light-custom:hover {
-            background: #f8f9fa;
-            color: var(--custom-maroon);
-        }
+        /* Choices JS Fixes */
+        .choices__inner { border: none !important; background: transparent !important; min-height: auto !important; padding: 0 !important; }
+        .choices__list--dropdown { border-radius: 10px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1050; }
 
-        /* Animation */
-        .animate-up {
-            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-            opacity: 0;
-            transform: translateY(20px);
+        /* Buttons */
+        .btn-save {
+            background: var(--primary-maroon); color: white; border: none;
+            padding: 12px 40px; border-radius: 50px; font-weight: 600;
+            transition: 0.3s; box-shadow: 0 4px 15px rgba(124, 19, 22, 0.2);
         }
-
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+        .btn-save:hover { background: var(--primary-maroon-hover); transform: translateY(-2px); color: white; }
     </style>
 
-<div class="row justify-content-center animate-up">
-    <div class="col-md-8 col-lg-7">
-        <div class="form-card">
-            <div class="card-header-custom">
-                <h4 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i> Perbarui Data Magang</h4>
-                <p class="mb-0 small opacity-75">Perbarui nomor kontak atau foto profil Anda.</p>
+    <div class="col-12 px-2 px-md-0">
+        
+        {{-- Alert Success --}}
+        @if (session('success'))
+            <div class="alert alert-success border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center">
+                <i class="bi bi-check-circle-fill fs-5 me-3 text-success"></i>
+                <div>{{ session('success') }}</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
             </div>
+        @endif
 
-            <div class="card-body p-4 p-md-5">
-                {{-- Alert Success --}}
-                @if (session('success'))
-                    <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
-                        <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        {{-- Alert Error --}}
+        @if ($errors->any())
+            <div class="alert alert-danger border-0 shadow-sm rounded-3 mb-4">
+                <ul class="mb-0 ps-3 small">
+                    @foreach ($errors->all() as $error) <li>{{ $error }}</li> @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form action="{{ route('mahasiswa.update', $mahasiswa->id) }}" method="POST" enctype="multipart/form-data" id="form-mahasiswa">
+            @csrf
+            @method('PUT')
+
+            <div class="custom-card mb-5">
+                {{-- HEADER --}}
+                <div class="card-header-hero">
+                    <h3 class="fw-bold mb-1"><i class="bi bi-pencil-square me-2"></i>Edit Data Magang</h3>
+                    <p class="mb-0 opacity-75 small">Perbarui data diri, kontak, atau informasi akademik Anda.</p>
+                </div>
+
+                <div class="card-body p-3 card-body-custom">
+                    
+                    {{-- 1. DATA PRIBADI --}}
+                    <div class="section-header mt-0">
+                        <i class="bi bi-person-lines-fill"></i><h5>Data Pribadi & Akun</h5><div class="section-line"></div>
                     </div>
-                @endif
 
-                {{-- Alert Error --}}
-                @if ($errors->any())
-                    <div class="alert alert-danger rounded-3 shadow-sm mb-4">
-                        <ul class="mb-0 small">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+                    <div class="row g-4 mb-5">
+                        {{-- KOLOM KIRI: FOTO --}}
+                        <div class="col-md-3 text-center">
+                            <label class="form-label d-block mb-3">Pas Foto</label>
+                            
+                            <div class="position-relative d-inline-block" style="cursor: pointer;">
+                                {{-- Foto Utama --}}
+                                <img id="img-profile-avatar" 
+                                     src="{{ $mahasiswa->foto_path ? asset($mahasiswa->foto_path) : asset('assets/img/default-avatar.png') }}" 
+                                     onclick="openZoomModal()"
+                                     style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 4px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: 0.3s;">
+                                
+                                {{-- Tombol Ganti Foto (Diubah pakai btn-maroon) --}}
+                                <button type="button" 
+                                        onclick="document.getElementById('foto-input').click()"
+                                        class="btn btn-sm btn-maroon position-absolute shadow" 
+                                        style="bottom: 5px; right: 5px; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 2px solid white; z-index: 2; transition: 0.2s;">
+                                    <i class="bi bi-camera-fill"></i>
+                                </button>
 
-                <form action="{{ route('mahasiswa.update', $mahasiswa->id) }}" method="POST" id="form-mahasiswa"
-                    enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
+                                {{-- Input File Hidden --}}
+                                <input type="file" name="foto" id="foto-input" accept="image/*" hidden>
+                            </div>
 
-{{-- Helper variable biar kodingan lebih bersih --}}
-                    @php
-                        $isAdmin = auth()->user()->role === 'admin';
-                    @endphp
+                            <div class="mt-3">
+                                <span class="badge bg-soft-secondary text-dark border" style="font-size: 0.75rem;">
+                                    ID User: {{ $mahasiswa->user_id }}
+                                </span>
+                                <div id="file-name-display" class="small text-maroon mt-2 fw-bold" style="min-height: 15px;"></div>
+                            </div>
+                        </div>
 
-                    {{-- ======================================================== --}}
-                    {{-- 1. INFORMASI MAHASISWA (Admin: Edit, User: Readonly) --}}
-                    {{-- ======================================================== --}}
-                    <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">
-                        Informasi Dasar
-                    </h6>
+                        {{-- KOLOM KANAN: INPUT FIELD --}}
+                        <div class="col-md-9">
+                            <div class="row g-4">
+                                <div class="col-12">
+                                    <label class="form-label">Nama Lengkap</label>
+                                    <div class="input-group-custom">
+                                        <i class="bi bi-person input-icon"></i>
+                                        <input type="text" name="nm_mahasiswa" class="form-control-custom"
+                                            value="{{ old('nm_mahasiswa', $mahasiswa->nm_mahasiswa) }}" required
+                                            oninput="this.value = this.value.toUpperCase()">
+                                    </div>
+                                </div>
 
-                    {{-- NAMA LENGKAP --}}
-                    <div class="mb-3">
-                        <label class="form-label">Nama Lengkap</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-person-lock"></i></span>
-                            {{-- Jika Admin: Tidak ada readonly. Jika User: Readonly --}}
-                            <input type="text" name="nm_mahasiswa" class="form-control"
-                                value="{{ old('nm_mahasiswa', $mahasiswa->nm_mahasiswa) }}"
-                                {{ $isAdmin ? '' : 'readonly' }}>
+                                <div class="col-md-6">
+                                    <label class="form-label">Alamat Email <span class="text-danger">*</span></label>
+                                    <div class="input-group-custom">
+                                        <i class="bi bi-envelope input-icon"></i>
+                                        <input type="email" name="email" class="form-control-custom"
+                                            value="{{ old('email', $mahasiswa->user->email ?? '') }}" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">No. WhatsApp <span class="text-danger">*</span></label>
+                                    <div class="input-group-custom">
+                                        <i class="bi bi-whatsapp input-icon"></i>
+                                        <input type="number" name="no_hp" class="form-control-custom"
+                                            value="{{ old('no_hp', $mahasiswa->no_hp) }}" required>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    {{-- UNIVERSITAS & PRODI --}}
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Asal Universitas</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-building-lock"></i></span>
+                    {{-- 2. DATA AKADEMIK --}}
+                    <div class="section-header">
+                        <i class="bi bi-mortarboard-fill"></i><h5>Data Akademik</h5><div class="section-line"></div>
+                    </div>
 
-                                @if($isAdmin)
-                                    {{-- JIKA ADMIN: TAMPILKAN DROPDOWN SELECT --}}
-                                    <select name="mou_id" class="form-select">
-                                        <option value="">-- Pilih Universitas --</option>
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Asal Instansi</label>
+                            <div class="input-group-custom ps-2">
+                                <i class="bi bi-building input-icon"></i>
+                                <div style="flex: 1; width: 100%;">
+                                    <select name="mou_id" id="univ-select" class="form-select-custom">
+                                        <option value="">Pilih Instansi...</option>
                                         @foreach ($mous as $mou)
-                                            <option value="{{ $mou->id }}"
+                                            <option value="{{ $mou->id }}" 
                                                 {{ old('mou_id', $mahasiswa->mou_id) == $mou->id ? 'selected' : '' }}>
-                                                {{ $mou->nama_instansi ?? $mou->nama_universitas }}
+                                                {{ strtoupper($mou->nama_instansi ?? $mou->nama_universitas) }}
                                             </option>
                                         @endforeach
                                     </select>
-                                @else
-                                    {{-- JIKA USER: TAMPILKAN INPUT READONLY + HIDDEN ID --}}
-                                    <input type="text" class="form-control"
-                                        value="{{ $mahasiswa->mou ? ($mahasiswa->mou->nama_instansi ?? $mahasiswa->mou->nama_universitas) : 'Tidak Ada Data' }}" readonly>
-                                    <input type="hidden" name="mou_id" value="{{ $mahasiswa->mou_id }}">
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Program Studi</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-book"></i></span>
-                                {{-- Jika Admin: Tidak ada readonly. Jika User: Readonly --}}
-                                <input type="text" name="prodi" class="form-control"
-                                    value="{{ old('prodi', $mahasiswa->prodi) }}"
-                                    {{ $isAdmin ? '' : 'readonly' }}>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- ======================================================== --}}
-                    {{-- 2. INFORMASI EDITABLE (BISA DIEDIT USER) --}}
-                    {{-- ======================================================== --}}
-
-                    {{-- NOMOR HP --}}
-                    <div class="mb-3">
-                        <label class="form-label">Nomor WhatsApp / HP <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-whatsapp"></i></span>
-                            <input type="number" name="no_hp" class="form-control" placeholder="Contoh: 081234567890"
-                                value="{{ old('no_hp', $mahasiswa->no_hp) }}" required>
-                        </div>
-                        @error('no_hp')
-                            <div class="text-danger small mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <hr class="my-4 border-light">
-
-                    <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">
-                        Update Berkas
-                    </h6>
-
-                    {{-- FOTO --}}
-                    <div class="mb-4">
-                        <label class="form-label">Pas Foto 3x4</label>
-
-                        {{-- Tampilkan Foto Lama (Jika Ada) --}}
-                        @if ($mahasiswa->foto_path)
-                            <div class="mb-2 d-flex align-items-center">
-                                <div class="p-1 border rounded bg-light me-3">
-                                    <img src="{{ asset($mahasiswa->foto_path) }}" alt="Foto Lama"
-                                        style="height: 80px; width: 60px; object-fit: cover; border-radius: 4px;">
                                 </div>
-                                <span class="badge bg-secondary opacity-75">Foto Saat Ini</span>
                             </div>
-                        @endif
-
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-camera"></i></span>
-                            {{-- Hapus 'required' agar user tidak wajib upload ulang jika tidak mau ganti foto --}}
-                            <input type="file" name="foto" id="foto-input" class="form-control"
-                                accept="image/jpeg,image/png,image/jpg">
-                        </div>
-                        <small class="form-text text-muted">Biarkan kosong jika tidak ingin mengubah foto. (Max: 2MB)</small>
-
-                        {{-- Preview Foto Baru (Javascript) --}}
-                        <div class="mt-3" id="preview-container" style="display: none;">
-                            <div class="d-inline-block p-1 border rounded bg-light">
-                                <img id="img-preview" src="#" alt="Preview Foto Baru"
-                                    style="max-width: 150px; max-height: 200px; object-fit: cover; border-radius: 4px; display: block;">
-                            </div>
-                            <div class="small text-muted mt-1 fst-italic">Preview Foto Baru</div>
                         </div>
 
-                        @error('foto')
-                            <div class="text-danger small">{{ $message }}</div>
-                        @enderror
-                    </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Program Studi</label>
+                            <div class="input-group-custom ps-2">
+                                <i class="bi bi-book input-icon"></i>
+                                <div style="flex: 1; width: 100%;">
+                                    <select name="prodi" id="prodi-select" class="form-select-custom">
+                                        <option value="">Pilih Program Studi...</option>
+                                        @foreach($listProdi as $group => $items)
+                                            <optgroup label="{{ $group }}">
+                                                @foreach($items as $itemProdi)
+                                                    <option value="{{ $itemProdi }}" 
+                                                        {{ old('prodi', $mahasiswa->prodi) == $itemProdi ? 'selected' : '' }}>
+                                                        {{ $itemProdi }}
+                                                    </option>
+                                                @endforeach
+                                            </optgroup>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- ... (di dalam <div class="row g-4 mb-4"> Data Akademik) ... -->
 
-{{-- ======================================================== --}}
-{{-- 3. BAGIAN PENEMPATAN & DURASI (LOGIKA CABANG) --}}
-{{-- ======================================================== --}}
-
-@if(auth()->user()->role === 'admin')
-
-    {{-- === TAMPILAN KHUSUS ADMIN (BISA EDIT) === --}}
-    <hr class="my-4 border-light">
-    <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">
-        Penempatan & Durasi (Admin Control)
-    </h6>
-
-    {{-- Pilih Ruangan --}}
-    <div class="mb-3">
-        <label class="form-label">Pilih Ruangan</label>
-        <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-door-open"></i></span>
-            <select id="ruangan_id" name="ruangan_id" class="form-select">
-                <option value="">-- Pilih Ruangan (Opsional) --</option>
-                @foreach ($ruangans as $r)
-                    <option value="{{ $r->id }}"
-                        {{ old('ruangan_id', $mahasiswa->ruangan_id) == $r->id ? 'selected' : '' }}>
-                        {{ $r->nm_ruangan }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        {{-- Info Box Room JS (Pastikan script JS included di bawah) --}}
-        <div id="ruangan-info" class="room-info-box" style="display: none;">
-            </div>
-    </div>
-
-    {{-- Tanggal Mulai & Akhir --}}
-    <div class="row">
-        <div class="col-md-6 mb-3">
-            <label class="form-label">Tanggal Mulai <span class="text-danger">*</span></label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-calendar-plus"></i></span>
-                <input type="date" name="tanggal_mulai" class="form-control"
-                    value="{{ old('tanggal_mulai', $mahasiswa->tanggal_mulai ? $mahasiswa->tanggal_mulai->format('Y-m-d') : '') }}"
-                    required>
-            </div>
-        </div>
-        <div class="col-md-6 mb-3">
-            <label class="form-label">Tanggal Berakhir <span class="text-danger">*</span></label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
-                <input type="date" name="tanggal_berakhir" class="form-control"
-                    value="{{ old('tanggal_berakhir', $mahasiswa->tanggal_berakhir ? $mahasiswa->tanggal_berakhir->format('Y-m-d') : '') }}"
-                    required>
-            </div>
-        </div>
-    </div>
-
-    {{-- Status Keaktifan --}}
-    <div class="mb-4">
-        <label class="form-label">Status Keaktifan</label>
-        <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-toggle-on"></i></span>
-            <select name="status" class="form-select">
-                <option value="aktif" {{ old('status', $mahasiswa->status) === 'aktif' ? 'selected' : '' }}>
-                    🟢 Aktif
-                </option>
-                <option value="nonaktif" {{ old('status', $mahasiswa->status) === 'nonaktif' ? 'selected' : '' }}>
-                    🔴 Nonaktif
-                </option>
-            </select>
-        </div>
-    </div>
-
-    {{-- Weekend Switch --}}
-    <div class="form-group mb-4" style="padding-top: 10px;">
-        <div class="form-check form-switch" style="padding-left: 2.5em;">
-            <input class="form-check-input" type="checkbox" role="switch" name="weekend_aktif"
-                value="1" id="weekend_aktif"
-                {{ old('weekend_aktif', $mahasiswa->weekend_aktif) ? 'checked' : '' }}
-                style="height: 1.25em; width: 2.25em; cursor: pointer;">
-            <label class="form-check-label" for="weekend_aktif"
-                style="padding-top: 0.2em; font-weight: 600; color: var(--text-dark); cursor: pointer;">
-                Aktifkan Absensi Weekend
-            </label>
-        </div>
-        <small class="form-text text-muted" style="padding-left: 2.5em;">
-            Jika dicentang, Sabtu & Minggu akan dihitung sebagai hari magang.
-        </small>
-    </div>
-
-@else
-
-    {{-- === LOGIKA KHUSUS USER BIASA (HIDDEN FIELDS) === --}}
-    {{-- User biasa tidak melihat form di atas, tapi data lama tetap dikirim agar validasi Controller lolos --}}
-
-    <input type="hidden" name="ruangan_id" value="{{ $mahasiswa->ruangan_id }}">
-    <input type="hidden" name="nm_ruangan" value="{{ $mahasiswa->nm_ruangan }}">
-    <input type="hidden" name="tanggal_mulai" value="{{ $mahasiswa->tanggal_mulai ? $mahasiswa->tanggal_mulai->format('Y-m-d') : '' }}">
-    <input type="hidden" name="tanggal_berakhir" value="{{ $mahasiswa->tanggal_berakhir ? $mahasiswa->tanggal_berakhir->format('Y-m-d') : '' }}">
-    <input type="hidden" name="status" value="{{ $mahasiswa->status }}">
-    @if($mahasiswa->weekend_aktif)
-        <input type="hidden" name="weekend_aktif" value="1">
-    @endif
-
-@endif
-
-                    {{-- TOMBOL AKSI --}}
-                    <div class="d-flex justify-content-between align-items-center pt-3">
-                        <a href="{{ auth()->user()->role === 'admin' ? route('mahasiswa.index') : route('dashboard') }}"
-                           class="btn btn-light-custom shadow-sm">
-                            <i class="bi bi-arrow-left me-2"></i> Kembali
-                        </a>
-                        <button type="submit" class="btn btn-maroon" id="submit-btn">
-                            Simpan Perubahan <i class="bi bi-check-lg ms-2"></i>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+{{-- TIPE MAHASISWA --}}
+<div class="col-md-6">
+    <label class="form-label">Tipe (Magang / PKL) <span class="text-danger">*</span></label>
+    <div class="input-group-custom bg-white">
+        <i class="bi bi-person-badge input-icon text-maroon"></i>
+        <select name="tipe_mahasiswa" class="form-select-custom" required>
+            <option value="">Pilih Tipe...</option>
+            <option value="magang" {{ old('tipe_mahasiswa', $mahasiswa->tipe_mahasiswa) == 'magang' ? 'selected' : '' }}>Magang</option>
+            <option value="pkl" {{ old('tipe_mahasiswa', $mahasiswa->tipe_mahasiswa) == 'pkl' ? 'selected' : '' }}>PKL</option>
+        </select>
     </div>
 </div>
+                    </div>
 
+                    {{-- 3. DATA KOMPETENSI --}}
+                    <div class="section-header">
+                        <i class="bi bi-list-check"></i><h5>Data Kompetensi</h5><div class="section-line"></div>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-12">
+                            <label class="form-label text-muted small">Tambahkan kompetensi/keahlian yang Anda kuasai (Opsional)</label>
+                            
+                            <div id="kompetensi-container">
+                                @php
+                                    $kompetensiList = old('kompetensi', $mahasiswa->kompetensi_json ?? []);
+                                @endphp
+
+                                @if(is_array($kompetensiList) && count($kompetensiList) > 0)
+                                    @foreach($kompetensiList as $kompetensi)
+                                        <div class="d-flex flex-column flex-md-row align-items-md-center mb-2 kompetensi-row gap-2">
+                                            <div class="input-group-custom w-100">
+                                                <i class="bi bi-award input-icon text-maroon"></i>
+                                                <input type="text" name="kompetensi[]" class="form-control-custom" value="{{ $kompetensi }}" placeholder="Contoh: Menguasai Framework Laravel">
+                                            </div>
+                                            <button type="button" class="btn btn-soft-danger rounded-3" onclick="this.parentElement.remove()" title="Hapus">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                @else
+                                    <div class="d-flex flex-column flex-md-row align-items-md-center mb-2 kompetensi-row gap-2">
+                                        <div class="input-group-custom w-100">
+                                            <i class="bi bi-award input-icon text-maroon"></i>
+                                            <input type="text" name="kompetensi[]" class="form-control-custom" placeholder="Contoh: Menguasai Framework Laravel">
+                                        </div>
+                                        <button type="button" class="btn btn-soft-danger rounded-3" onclick="this.parentElement.remove()" title="Hapus">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <button type="button" class="btn btn-sm btn-outline-maroon mt-2 rounded-pill px-3 fw-bold" onclick="addKompetensi()">
+                                <i class="bi bi-plus-circle me-1"></i> Tambah Kompetensi Lainnya
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- 4. PERIODE MAGANG & PENEMPATAN --}}
+                    <div class="section-header">
+                        <i class="bi bi-calendar-range-fill"></i><h5>Periode</h5><div class="section-line"></div>
+                    </div>
+
+                    <div class="p-3 p-md-4 rounded-4" style="background: #fffcfc; border: 1px dashed var(--primary-maroon);">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Tanggal Mulai <span class="text-danger">*</span></label>
+                                <div class="input-group-custom bg-white">
+                                    <i class="bi bi-calendar-plus input-icon text-maroon"></i>
+                                    <input type="date" name="tanggal_mulai" class="form-control-custom" 
+                                        value="{{ old('tanggal_mulai', $mahasiswa->tanggal_mulai ? $mahasiswa->tanggal_mulai->format('Y-m-d') : '') }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tanggal Berakhir <span class="text-danger">*</span></label>
+                                <div class="input-group-custom bg-white">
+                                    <i class="bi bi-calendar-check input-icon text-maroon"></i>
+                                    <input type="date" name="tanggal_berakhir" class="form-control-custom" 
+                                        value="{{ old('tanggal_berakhir', $mahasiswa->tanggal_berakhir ? $mahasiswa->tanggal_berakhir->format('Y-m-d') : '') }}" required>
+                                </div>
+                            </div>
+                            
+                            {{-- Status & Weekend --}}
+                            <div class="col-md-6">
+                                <label class="form-label">Status Keaktifan</label>
+                                <div class="input-group-custom bg-white">
+                                    <i class="bi bi-toggle-on input-icon"></i>
+                                    <select name="status" class="form-select-custom">
+                                        <option value="aktif" {{ old('status', $mahasiswa->status) === 'aktif' ? 'selected' : '' }}>🟢 Aktif</option>
+                                        <option value="nonaktif" {{ old('status', $mahasiswa->status) === 'nonaktif' ? 'selected' : '' }}>🔴 Nonaktif</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 pt-md-4">
+                                <div class="form-check form-switch d-flex align-items-center ps-0 mt-2">
+                                    <input class="form-check-input ms-0 me-3" type="checkbox" name="weekend_aktif" value="1" id="weekend_aktif" 
+                                        {{ old('weekend_aktif', $mahasiswa->weekend_aktif) ? 'checked' : '' }} 
+                                        style="width: 3em; height: 1.5em; cursor: pointer;">
+                                    <div>
+                                        <label class="fw-bold mb-0 text-dark" for="weekend_aktif" style="cursor: pointer;">Aktifkan Absensi Weekend</label>
+                                        <div class="small text-muted">Hitung Sabtu & Minggu sebagai hari magang.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                {{-- FOOTER --}}
+                <div class="card-footer bg-white border-0 p-3 p-md-4 pt-0 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                    <a href="{{ auth()->user()->role === 'admin' ? route('mahasiswa.index') : route('dashboard') }}" 
+                       class="btn btn-light shadow-sm px-4 rounded-pill fw-bold w-100 w-md-auto text-center">
+                        <i class="bi bi-arrow-left me-2"></i> Kembali
+                    </a>
+                    <button type="submit" class="btn btn-save w-100 w-md-auto text-center" id="submit-btn">
+                        Simpan Perubahan <i class="bi bi-check-lg ms-2"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {{-- MODAL ZOOM --}}
+    <div class="modal fade" id="zoomModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 bg-transparent">
+                <div class="modal-body text-center p-0">
+                    <img id="img-zoom-preview" src="{{ $mahasiswa->foto_path ? asset($mahasiswa->foto_path) : '' }}" 
+                         style="max-width: 100%; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Script JS --}}
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script>
+        // --- LOGIKA DINAMIS KOMPETENSI ---
+        function addKompetensi() {
+            const container = document.getElementById('kompetensi-container');
+            const row = document.createElement('div');
+            // Menambahkan flex-column flex-md-row dan class button danger yang baru
+            row.className = 'd-flex flex-column flex-md-row align-items-md-center mb-2 kompetensi-row gap-2';
+            
+            row.innerHTML = `
+                <div class="input-group-custom w-100">
+                    <i class="bi bi-award input-icon text-maroon"></i>
+                    <input type="text" name="kompetensi[]" class="form-control-custom" placeholder="Ketik kompetensi di sini..." required>
+                </div>
+                <button type="button" class="btn btn-soft-danger rounded-3" onclick="this.parentElement.remove()" title="Hapus">
+                    <i class="bi bi-trash"></i>
+                </button>
+            `;
+            
+            container.appendChild(row);
+            row.querySelector('input').focus(); 
+        }
+
+        function openZoomModal() {
+            const zoomModal = new bootstrap.Modal(document.getElementById('zoomModal'));
+            zoomModal.show();
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            const ruanganSelect = document.getElementById('ruangan_id');
-            const ruanganInfo = document.getElementById('ruangan-info');
-            const submitBtn = document.getElementById('submit-btn');
+            // 1. CONFIG CHOICES.JS
+            const config = {
+                searchEnabled: true,
+                itemSelectText: '',
+                shouldSort: false,
+                classNames: { containerOuter: 'choices', containerInner: 'choices__inner', input: 'choices__input' }
+            };
+            new Choices('#univ-select', { ...config, placeholderValue: 'Cari Instansi...' });
+            new Choices('#prodi-select', { ...config, placeholderValue: 'Cari Program Studi...' });
 
-            // Menyimpan ID ruangan awal untuk pengecekan "pindah ruangan"
-            const originalRuanganId = "{{ old('ruangan_id', $mahasiswa->ruangan_id) }}";
-            let selectedRuanganFull = false;
+            // 2. LOGIC UPLOAD FOTO (ID DIPERBAIKI)
+            const fotoInput = document.getElementById('foto-input');
+            const imgProfileAvatar = document.getElementById('img-profile-avatar'); // Diperbaiki: menargetkan elemen avatar profil
+            const imgZoomPreview = document.getElementById('img-zoom-preview'); // Agar gambar modal zoom juga ikut terganti
+            const nameDisplay = document.getElementById('file-name-display');
 
-            function loadRuanganInfo(ruanganId) {
-                if (!ruanganId) {
-                    ruanganInfo.style.display = 'none';
-                    selectedRuanganFull = false;
-                    submitBtn.disabled = false;
-                    return;
-                }
-
-                fetch(`/api/ruangan-info/${ruanganId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        document.getElementById('info-nama').textContent = data.nm_ruangan;
-                        document.getElementById('info-kuota-total').textContent = data.kuota_total;
-                        document.getElementById('info-tersedia').textContent = data.tersedia;
-                        document.getElementById('info-terisi').textContent = data.terisi;
-
-                        const badgeStatus = document.getElementById('badge-status');
-                        const infoBox = document.getElementById('ruangan-info');
-
-                        // Logic: Jika ruangan penuh DAN bukan ruangan asli (sedang mencoba pindah)
-                        if (data.tersedia <= 0 && ruanganId != originalRuanganId) {
-                            badgeStatus.className = 'badge rounded-pill bg-danger';
-                            badgeStatus.innerHTML = '<i class="bi bi-x-circle me-1"></i> Penuh';
-                            infoBox.classList.add('full');
-
-                            selectedRuanganFull = true;
-                            submitBtn.disabled = true;
-                            submitBtn.innerHTML = '<i class="bi bi-lock-fill me-2"></i> Ruangan Penuh';
-                        } else {
-                            // Jika ruangan tersedia ATAU ini adalah ruangan dia sendiri (aman)
-                            badgeStatus.className = 'badge rounded-pill bg-success';
-                            badgeStatus.innerHTML = '<i class="bi bi-check-circle me-1"></i> Tersedia';
-
-                            // Tambahan teks jika ini ruangan lama
-                            if (ruanganId == originalRuanganId) {
-                                badgeStatus.className = 'badge rounded-pill bg-info text-dark';
-                                badgeStatus.innerHTML =
-                                    '<i class="bi bi-house-door me-1"></i> Ruangan Saat Ini';
-                            }
-
-                            infoBox.classList.remove('full');
-                            selectedRuanganFull = false;
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = 'Simpan Perubahan <i class="bi bi-check-lg ms-2"></i>';
-                        }
-
-                        ruanganInfo.style.display = 'block';
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        ruanganInfo.style.display = 'none';
-                    });
-            }
-
-            // Load info saat halaman pertama kali dibuka jika ada ruangan terpilih
-            if (ruanganSelect.value) {
-                loadRuanganInfo(ruanganSelect.value);
-            }
-
-            ruanganSelect.addEventListener('change', function() {
-                loadRuanganInfo(this.value);
-            });
-
-            document.getElementById('form-mahasiswa').addEventListener('submit', function(e) {
-                if (selectedRuanganFull) {
-                    e.preventDefault();
-                    alert('Ruangan tujuan sudah penuh. Silakan pilih ruangan lain.');
+            fotoInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imgProfileAvatar.src = e.target.result; // Update avatar langsung
+                        imgZoomPreview.src = e.target.result;   // Update foto zoom modal juga
+                        nameDisplay.textContent = 'File Dipilih: ' + file.name;
+                    }
+                    reader.readAsDataURL(file);
                 }
             });
         });
-        document.getElementById('foto-input').addEventListener('change', function(event) {
-        const file = event.target.files[0];
-        const previewContainer = document.getElementById('preview-container');
-        const imgPreview = document.getElementById('img-preview');
-
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                imgPreview.src = e.target.result;
-                previewContainer.style.display = 'block';
-            }
-            reader.readAsDataURL(file);
-        } else {
-            previewContainer.style.display = 'none';
-        }
-    });
     </script>
 @endsection

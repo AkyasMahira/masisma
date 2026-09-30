@@ -1,15 +1,22 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\Pelatihan;
+
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\IOFactory;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Log;
+use App\Models\Kegiatan; // Memanggil model Kegiatan untuk saran pelatihan
 
 class PelatihanController extends Controller
 {
+    private $baseUrl = 'http://192.168.244.104/masdayat/api/v1';
+    private $headers = [
+        'X-API-KEY' => 'MASDAYAT749',
+        'Accept'    => 'application/json'
+    ];
+
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
@@ -17,713 +24,352 @@ class PelatihanController extends Controller
                 abort(403, 'Akses ditolak.');
             }
             return $next($request);
-        })->except(['publicIndex', 'publicEdit', 'publicUpdate']);
-        // Pastikan 'publicIndex' juga masuk except jika itu nama methodnya sekarang
+        });
     }
 
-    /**
-     * Display a listing of pelatihan
-     */
     public function index(Request $request)
     {
-        $query = Pelatihan::query();
-
-        if ($request->filled('search')) {
-            $query->where('nama', 'like', '%' . $request->search . '%');
-        }
-        if ($request->filled('jabatan')) {
-            $query->where('jabatan', 'like', '%' . $request->jabatan . '%');
-        }
-        if ($request->filled('unit')) {
-            $query->where('unit', 'like', '%' . $request->unit . '%');
-        }
-        if ($request->filled('bidang')) {
-            $query->where('bidang', 'like', '%' . $request->bidang . '%');
-        }
-
-        $pelatihans = $query->orderBy('nama', 'asc')->paginate(10);
-        return view('pelatihan.index', compact('pelatihans'));
-    }
-
-    /**
-     * Show the form for creating a new pelatihan
-     */
-    public function create()
-    {
-        return view('pelatihan.create');
-    }
-
-    /**
-     * Store a newly created pelatihan in storage
-     */
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'nama' => 'required|string|max:255|unique:pelatihans,nama',
-            'bidang' => 'required|string|max:255',
-            'jabatan' => 'nullable|string|max:255',
-            'unit' => 'nullable|string|max:255',
-
-            'status_pegawai' => 'required|in:PNS,P3K,Non-PNS',
-
-            // Validasi Kondisional PNS / P3K
-            'nip' => 'nullable|required_if:status_pegawai,PNS,P3K|string|max:50',
-            'golongan' => 'nullable|required_if:status_pegawai,PNS,P3K|string|max:100',
-
-            // --- PERUBAHAN DISINI: Pangkat hanya required jika PNS, P3K tidak required ---
-            'pangkat' => 'nullable|required_if:status_pegawai,PNS|string|max:100',
-
-            // Validasi Kondisional Non-PNS
-            'nirp' => 'nullable|required_if:status_pegawai,Non-PNS|string|max:50',
-
-            // --- PELATIHAN DASAR ---
-            'pelatihan_dasar' => 'nullable|array',
-            'pelatihan_dasar.*' => 'nullable|string',
-            'pelatihan_tahun_dasar' => 'nullable|array',
-            'pelatihan_tahun_dasar.*' => 'nullable|string',
-            'pelatihan_file_dasar' => 'nullable|array',
-            'pelatihan_file_dasar.*' => 'nullable|file|mimes:pdf|max:2048',
-
-            // --- PELATIHAN PENINGKATAN KOMPETENSI ---
-            'pelatihan_kompetensi' => 'nullable|array',
-            'pelatihan_kompetensi.*' => 'nullable|string',
-            'pelatihan_tahun_kompetensi' => 'nullable|array',
-            'pelatihan_tahun_kompetensi.*' => 'nullable|string',
-            'pelatihan_file_kompetensi' => 'nullable|array',
-            'pelatihan_file_kompetensi.*' => 'nullable|file|mimes:pdf|max:2048',
-        ]);
-
-        // 1. PROSES PELATIHAN DASAR
-        $daftarPelatihanDasar = [];
-        if ($request->has('pelatihan_dasar')) {
-            $namaPelatihan = $request->input('pelatihan_dasar');
-            $tahunPelatihan = $request->input('pelatihan_tahun_dasar');
-            $filePelatihan = $request->file('pelatihan_file_dasar');
-
-            foreach ($namaPelatihan as $index => $nama) {
-                if (!empty($nama)) {
-                    $filePath = null;
-                    if (isset($filePelatihan[$index]) && $filePelatihan[$index]->isValid()) {
-                        $file = $filePelatihan[$index];
-                        $fileName = time() . '_dasar_' . $index . '_' . $file->getClientOriginalName();
-                        $filePath = $file->storeAs('pelatihan_pdf', $fileName, 'public');
-                    }
-
-                    $daftarPelatihanDasar[] = [
-                        'nama'  => $nama,
-                        'tahun' => $tahunPelatihan[$index] ?? null,
-                        'file'  => $filePath,
-                    ];
-                }
+        try {
+            $response = Http::withHeaders($this->headers)->get("{$this->baseUrl}/pegawai");
+            
+            if ($response->failed()) {
+                Log::error('API Error: ' . $response->body());
+                return view('pelatihan.index', ['pelatihans' => new LengthAwarePaginator([], 0, 10)])
+                    ->with('error', 'Koneksi ke API gagal atau API Key salah.');
             }
-        }
 
-        // 2. PROSES PELATIHAN PENINGKATAN KOMPETENSI
-        $daftarPelatihanKompetensi = [];
-        if ($request->has('pelatihan_kompetensi')) {
-            $namaKompetensi = $request->input('pelatihan_kompetensi');
-            $tahunKompetensi = $request->input('pelatihan_tahun_kompetensi');
-            $fileKompetensi = $request->file('pelatihan_file_kompetensi');
-
-            foreach ($namaKompetensi as $index => $nama) {
-                if (!empty($nama)) {
-                    $filePath = null;
-                    if (isset($fileKompetensi[$index]) && $fileKompetensi[$index]->isValid()) {
-                        $file = $fileKompetensi[$index];
-                        $fileName = time() . '_komp_' . $index . '_' . $file->getClientOriginalName();
-                        $filePath = $file->storeAs('pelatihan_pdf', $fileName, 'public');
-                    }
-
-                    $daftarPelatihanKompetensi[] = [
-                        'nama'  => $nama,
-                        'tahun' => $tahunKompetensi[$index] ?? null,
-                        'file'  => $filePath,
-                    ];
-                }
+            $body = $response->json();
+            $apiData = $body['data'] ?? []; 
+            
+            if (!is_array($apiData)) {
+                $apiData = [];
             }
+
+            $collection = collect($apiData);
+
+            // Filter Pencarian Lokal
+            if ($request->filled('search')) {
+                $collection = $collection->filter(function($item) use ($request) {
+                    return isset($item['nama']) && stripos($item['nama'], $request->search) !== false;
+                });
+            }
+            if ($request->filled('unit')) {
+                $collection = $collection->filter(function($item) use ($request) {
+                    return isset($item['unit_sekarang']) && stripos($item['unit_sekarang'], $request->unit) !== false;
+                });
+            }
+
+            $currentYear = date('Y');
+
+            // Ambil saran pelatihan (3 kegiatan terbaru dari database lokal)
+            // Bisa disesuaikan kondisinya (misal hanya yang aktif)
+            $saranPelatihan = Kegiatan::select('id', 'nama_kegiatan', 'jpl')
+                                ->orderBy('id', 'desc')
+                                ->take(3)
+                                ->get();
+
+            // Mapping Data & Hitung JPL
+            $mappedData = $collection->map(function($item) use ($currentYear) {
+                $pelatihanList = [];
+                $jplTahunIni = 0;
+                
+                if (isset($item['pelatihan']) && is_array($item['pelatihan'])) {
+                    foreach ($item['pelatihan'] as $tahunGrup => $pelatihans) {
+                        if (is_array($pelatihans)) {
+                            foreach ($pelatihans as $p) {
+                                if (is_array($p)) {
+                                    $jpl = (isset($p['jpl']) && is_numeric($p['jpl'])) ? (int) $p['jpl'] : 0;
+                                    
+                                    $pelatihanList[] = [
+                                        'no_index' => $p['no'] ?? 0,
+                                        'nama'     => $p['nama_pelatihan'] ?? $p['pelatihan'] ?? '-',
+                                        'jpl'      => $jpl,
+                                        'tahun'    => $tahunGrup,
+                                        'file'     => null 
+                                    ];
+
+                                    // Akumulasi JPL khusus tahun berjalan
+                                    if ((string)$tahunGrup === (string)$currentYear) {
+                                        $jplTahunIni += $jpl;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Grouping riwayat per tahun agar rapi saat dikirim ke modal accordion
+                $riwayatGrouped = collect($pelatihanList)->groupBy('tahun')->sortKeysDesc()->toArray();
+
+                return (object) [
+                    'id'               => $item['id'] ?? null,
+                    'nama'             => $item['nama'] ?? '-',
+                    'email'            => $item['email'] ?? '-',
+                    'nip'              => (!empty($item['nip']) && $item['nip'] !== '-') ? $item['nip'] : ($item['nik'] ?? '-'),
+                    'status_pegawai'   => $item['status_kepegawaian'] ?? '-',
+                    'unit'             => $item['unit_sekarang'] ?? '-',
+                    'pelatihan_dasar'  => $pelatihanList, // Dipertahankan untuk method show/kompatibilitas
+                    'riwayat_grouped'  => $riwayatGrouped, // Untuk tampilan accordion
+                    'jpl_tahun_ini'    => $jplTahunIni,
+                    'target_terpenuhi' => $jplTahunIni >= 20,
+                ];
+            })->values();
+
+            $perPage = 10;
+            $currentPage = Paginator::resolveCurrentPage();
+            $currentItems = $mappedData->slice(($currentPage - 1) * $perPage, $perPage)->values()->all();
+            
+            $pelatihans = new LengthAwarePaginator(
+                $currentItems, 
+                $mappedData->count(), 
+                $perPage, 
+                $currentPage, 
+                ['path' => Paginator::resolveCurrentPath(), 'query' => $request->query()]
+            );
+
+            return view('pelatihan.index', compact('pelatihans', 'currentYear', 'saranPelatihan'));
+
+        } catch (\Exception $e) {
+            Log::error('PelatihanController Index Error: ' . $e->getMessage());
+            return view('pelatihan.index', ['pelatihans' => new LengthAwarePaginator([], 0, 10)])
+                ->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
         }
-
-        // Simpan ke array data utama
-        $data['pelatihan_dasar'] = $daftarPelatihanDasar;
-        $data['pelatihan_peningkatan_kompetensi'] = $daftarPelatihanKompetensi;
-
-        // Hapus key temporary
-        unset($data['pelatihan_tahun_dasar']);
-        unset($data['pelatihan_file_dasar']);
-        unset($data['pelatihan_kompetensi']);
-        unset($data['pelatihan_tahun_kompetensi']);
-        unset($data['pelatihan_file_kompetensi']);
-
-        Pelatihan::create($data);
-        return redirect()->route('pelatihan.index')->with('success', 'Data berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified pelatihan
-     */
+    public function showPelatihanAPI($id, $index)
+    {
+        try {
+            $response = Http::withHeaders($this->headers)
+                ->get("{$this->baseUrl}/pegawai/{$id}/pelatihan/{$index}");
+                
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+            
+            return response()->json([
+                'status' => 'error', 
+                'message' => 'Gagal mengambil data pelatihan dari API.'
+            ], $response->status());
+
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
     public function show($id)
     {
-        $pelatihan = Pelatihan::findOrFail($id);
-        return view('pelatihan.show', compact('pelatihan'));
-    }
+        try {
+            $response = Http::withHeaders($this->headers)->get("{$this->baseUrl}/pegawai");
 
-    /**
-     * Show the form for editing the specified pelatihan
-     */
-    public function edit($id)
-    {
-        $pelatihan = Pelatihan::findOrFail($id);
-        return view('pelatihan.edit', compact('pelatihan'));
-    }
+            if ($response->failed()) {
+                Log::error('API Error (show): ' . $response->body());
+                return redirect()->route('pelatihan.index')->with('error', 'Koneksi ke API gagal atau API Key salah.');
+            }
 
-    /**
-     * Update the specified pelatihan in storage
-     */
-    public function update(Request $request, $id)
-    {
-        $pelatihan = Pelatihan::findOrFail($id);
+            $body = $response->json();
+            $apiData = $body['data'] ?? [];
+            if (!is_array($apiData)) {
+                $apiData = [];
+            }
 
-        $data = $request->validate([
-            'nama' => 'required|string|max:255|unique:pelatihans,nama,' . $id,
-            'bidang' => 'required|string|max:255',
-            'jabatan' => 'nullable|string|max:255',
-            'unit' => 'nullable|string|max:255',
+            // Cari item yang id-nya cocok
+            $item = collect($apiData)->first(function ($row) use ($id) {
+                return isset($row['id']) && (string) $row['id'] === (string) $id;
+            });
 
-            'status_pegawai' => 'required|in:PNS,P3K,Non-PNS',
+            if (!$item) {
+                return redirect()->route('pelatihan.index')->with('error', 'Data pegawai dengan ID tersebut tidak ditemukan.');
+            }
 
-            'nip' => 'nullable|required_if:status_pegawai,PNS,P3K|string|max:50',
-            'golongan' => 'nullable|required_if:status_pegawai,PNS,P3K|string|max:100',
-
-            // --- PERUBAHAN DISINI: Pangkat hanya required jika PNS ---
-            'pangkat' => 'nullable|required_if:status_pegawai,PNS|string|max:100',
-
-            'nirp' => 'nullable|required_if:status_pegawai,Non-PNS|string|max:50',
-
-            // --- DASAR ---
-            'pelatihan_dasar' => 'nullable|array',
-            'pelatihan_dasar.*' => 'nullable|string',
-            'pelatihan_tahun_dasar' => 'nullable|array',
-            'pelatihan_tahun_dasar.*' => 'nullable|string',
-            'pelatihan_file_dasar' => 'nullable|array',
-            'pelatihan_file_dasar.*' => 'nullable|file|mimes:pdf|max:2048',
-            'pelatihan_existing_file_dasar' => 'nullable|array',
-
-            // --- KOMPETENSI ---
-            'pelatihan_kompetensi' => 'nullable|array',
-            'pelatihan_kompetensi.*' => 'nullable|string',
-            'pelatihan_tahun_kompetensi' => 'nullable|array',
-            'pelatihan_tahun_kompetensi.*' => 'nullable|string',
-            'pelatihan_file_kompetensi' => 'nullable|array',
-            'pelatihan_file_kompetensi.*' => 'nullable|file|mimes:pdf|max:2048',
-            'pelatihan_existing_file_kompetensi' => 'nullable|array',
-        ]);
-
-        // (Logic update file dipertahankan sama seperti sebelumnya)
-        // --- 1. UPDATE LOGIC PELATIHAN DASAR ---
-        $daftarPelatihanDasar = [];
-        if ($request->has('pelatihan_dasar')) {
-            $namaPelatihan = $request->input('pelatihan_dasar');
-            $tahunPelatihan = $request->input('pelatihan_tahun_dasar');
-            $filePelatihanBaru = $request->file('pelatihan_file_dasar');
-            $fileLama = $request->input('pelatihan_existing_file_dasar');
-
-            foreach ($namaPelatihan as $index => $nama) {
-                if (!empty($nama)) {
-                    $filePath = $fileLama[$index] ?? null;
-                    if (isset($filePelatihanBaru[$index]) && $filePelatihanBaru[$index]->isValid()) {
-                        $file = $filePelatihanBaru[$index];
-                        if ($filePath && Storage::disk('public')->exists($filePath)) {
-                            Storage::disk('public')->delete($filePath);
+            $dasar = [];
+            if (isset($item['pelatihan']) && is_array($item['pelatihan'])) {
+                foreach ($item['pelatihan'] as $tahunGrup => $pelatihans) {
+                    if (is_array($pelatihans)) {
+                        foreach ($pelatihans as $p) {
+                            if (is_array($p)) {
+                                $dasar[] = [
+                                    'nama'  => $p['nama_pelatihan'] ?? $p['pelatihan'] ?? '-',
+                                    'jpl'   => is_numeric($p['jpl'] ?? null) ? (int) $p['jpl'] : 0,
+                                    'tahun' => $tahunGrup,
+                                    'file'  => $p['file'] ?? null,
+                                ];
+                            }
                         }
-                        $fileName = time() . '_dasar_' . $index . '_' . $file->getClientOriginalName();
-                        $filePath = $file->storeAs('pelatihan_pdf', $fileName, 'public');
                     }
-                    $daftarPelatihanDasar[] = [
-                        'nama'  => $nama,
-                        'tahun' => $tahunPelatihan[$index] ?? null,
-                        'file'  => $filePath,
-                    ];
                 }
             }
 
-            $submittedPaths = collect($daftarPelatihanDasar)->pluck('file')->filter();
-            $originalPaths = collect($pelatihan->pelatihan_dasar)->pluck('file')->filter();
-            $filesToDelete = $originalPaths->diff($submittedPaths);
-            foreach ($filesToDelete as $file) {
-                if ($file && Storage::disk('public')->exists($file)) {
-                    Storage::disk('public')->delete($file);
-                }
-            }
+            $currentYear = date('Y');
+            $totalJpl = collect($dasar)
+                ->filter(function ($p) use ($currentYear) {
+                    return (string) $p['tahun'] === (string) $currentYear;
+                })
+                ->sum('jpl');
+
+            $pelatihan = (object) [
+                'id'                               => $item['id'] ?? $id,
+                'nama'                             => $item['nama'] ?? '-',
+                'nik'                              => $item['nik'] ?? null,
+                'jabatan'                          => $item['jabatan'] ?? null,
+                'bidang'                           => $item['bidang'] ?? '-',
+                'unit'                             => $item['unit_sekarang'] ?? '-',
+                'status_pegawai'                   => $item['status_kepegawaian'] ?? '-',
+                'nip'                              => (!empty($item['nip']) && $item['nip'] !== '-') ? $item['nip'] : ($item['nik'] ?? '-'),
+                'nirp'                             => $item['nirp'] ?? null,
+                'lms_status'                       => $item['lms_status'] ?? 'Tidak',
+                'lms_email'                        => $item['lms_email'] ?? null,
+                'pelatihan_dasar'                  => $dasar,
+                'pelatihan_peningkatan_kompetensi' => [],
+            ];
+
+            return view('pelatihan.show', compact('pelatihan', 'totalJpl', 'currentYear'));
+
+        } catch (\Exception $e) {
+            Log::error('PelatihanController Show Error: ' . $e->getMessage());
+            return redirect()->route('pelatihan.index')->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
         }
-
-        // --- 2. UPDATE LOGIC PELATIHAN KOMPETENSI ---
-        $daftarPelatihanKompetensi = [];
-        if ($request->has('pelatihan_kompetensi')) {
-            $namaKompetensi = $request->input('pelatihan_kompetensi');
-            $tahunKompetensi = $request->input('pelatihan_tahun_kompetensi');
-            $fileKompetensiBaru = $request->file('pelatihan_file_kompetensi');
-            $fileLamaKompetensi = $request->input('pelatihan_existing_file_kompetensi');
-
-            foreach ($namaKompetensi as $index => $nama) {
-                if (!empty($nama)) {
-                    $filePath = $fileLamaKompetensi[$index] ?? null;
-                    if (isset($fileKompetensiBaru[$index]) && $fileKompetensiBaru[$index]->isValid()) {
-                        $file = $fileKompetensiBaru[$index];
-                        if ($filePath && Storage::disk('public')->exists($filePath)) {
-                            Storage::disk('public')->delete($filePath);
-                        }
-                        $fileName = time() . '_komp_' . $index . '_' . $file->getClientOriginalName();
-                        $filePath = $file->storeAs('pelatihan_pdf', $fileName, 'public');
-                    }
-                    $daftarPelatihanKompetensi[] = [
-                        'nama'  => $nama,
-                        'tahun' => $tahunKompetensi[$index] ?? null,
-                        'file'  => $filePath,
-                    ];
-                }
-            }
-
-            $submittedPaths = collect($daftarPelatihanKompetensi)->pluck('file')->filter();
-            $originalPaths = collect($pelatihan->pelatihan_peningkatan_kompetensi)->pluck('file')->filter();
-            $filesToDelete = $originalPaths->diff($submittedPaths);
-            foreach ($filesToDelete as $file) {
-                if ($file && Storage::disk('public')->exists($file)) {
-                    Storage::disk('public')->delete($file);
-                }
-            }
-        }
-
-        $data['pelatihan_dasar'] = $daftarPelatihanDasar;
-        $data['pelatihan_peningkatan_kompetensi'] = $daftarPelatihanKompetensi;
-
-        // Bersihkan Data Temporary
-        unset($data['pelatihan_tahun_dasar']);
-        unset($data['pelatihan_file_dasar']);
-        unset($data['pelatihan_existing_file_dasar']);
-        unset($data['pelatihan_kompetensi']);
-        unset($data['pelatihan_tahun_kompetensi']);
-        unset($data['pelatihan_file_kompetensi']);
-        unset($data['pelatihan_existing_file_kompetensi']);
-
-        $pelatihan->update($data);
-        return redirect()->route('pelatihan.index')->with('success', 'Data berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified pelatihan from storage
-     */
-    public function destroy($id)
-    {
-        $pelatihan = Pelatihan::findOrFail($id);
-
-        // Hapus file fisik jika ada
-        if (is_array($pelatihan->pelatihan_dasar)) {
-            foreach ($pelatihan->pelatihan_dasar as $item) {
-                if (!empty($item['file']) && Storage::disk('public')->exists($item['file'])) {
-                    Storage::disk('public')->delete($item['file']);
-                }
-            }
-        }
-        if (is_array($pelatihan->pelatihan_peningkatan_kompetensi)) {
-            foreach ($pelatihan->pelatihan_peningkatan_kompetensi as $item) {
-                if (!empty($item['file']) && Storage::disk('public')->exists($item['file'])) {
-                    Storage::disk('public')->delete($item['file']);
-                }
-            }
-        }
-
-        $pelatihan->delete();
-        return redirect()->route('pelatihan.index')->with('success', 'Data berhasil dihapus.');
-    }
-
-    /**
-     * Export pelatihan to Excel
-     */
-    public function export()
+    public function exportData()
     {
         try {
-            $pelatihans = Pelatihan::all();
-            $spreadsheet = new Spreadsheet();
-            $sheet = $spreadsheet->getActiveSheet();
+            $response = Http::withHeaders($this->headers)->get("{$this->baseUrl}/pegawai");
 
-            // Header Update
-            $headers = [
-                'NAMA', 'BIDANG', 'JABATAN', 'UNIT', 'STATUS', 'NIP / NIRP', 'GOLONGAN', 'PANGKAT',
-                'PELATIHAN DASAR (TAHUN)', 'PELATIHAN KOMPETENSI (TAHUN)', 'FILE PDF (GABUNGAN)'
-            ];
-            $sheet->fromArray([$headers], null, 'A1');
-
-            $headerStyle = [
-                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-                'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '7c1316']],
-                'alignment' => ['horizontal' => 'center', 'vertical' => 'center'],
-            ];
-            $sheet->getStyle('A1:K1')->applyFromArray($headerStyle);
-
-            $row = 2;
-            foreach ($pelatihans as $p) {
-                $dasarStr = '';
-                $files = [];
-                if (is_array($p->pelatihan_dasar)) {
-                    $items = [];
-                    foreach ($p->pelatihan_dasar as $item) {
-                        $nama = $item['nama'] ?? 'N/A';
-                        $tahun = $item['tahun'] ?? '?';
-                        $items[] = "{$nama} ({$tahun})";
-                        if (!empty($item['file'])) {
-                            $files[] = Storage::url($item['file']);
-                        }
-                    }
-                    $dasarStr = implode('; ', $items);
-                }
-
-                $kompStr = '';
-                if (is_array($p->pelatihan_peningkatan_kompetensi)) {
-                    $items = [];
-                    foreach ($p->pelatihan_peningkatan_kompetensi as $item) {
-                        $nama = $item['nama'] ?? 'N/A';
-                        $tahun = $item['tahun'] ?? '?';
-                        $items[] = "{$nama} ({$tahun})";
-                        if (!empty($item['file'])) {
-                            $files[] = Storage::url($item['file']);
-                        }
-                    }
-                    $kompStr = implode('; ', $items);
-                }
-
-                $daftarFileStr = implode('; ', $files);
-
-                $identitas = ($p->status_pegawai == 'PNS' || $p->status_pegawai == 'P3K') ? $p->nip : $p->nirp;
-
-                $rowData = [
-                    $p->nama, $p->bidang, $p->jabatan, $p->unit, $p->status_pegawai,
-                    $identitas, $p->golongan, $p->pangkat, $dasarStr, $kompStr, $daftarFileStr
-                ];
-
-                $sheet->fromArray([$rowData], null, 'A' . $row);
-                $row++;
+            if ($response->failed()) {
+                Log::error('Export API Error: ' . $response->body());
+                return response()->json(['status' => 'error', 'message' => 'Gagal mengambil data dari API.'], 500);
             }
 
-            foreach (range('A', 'K') as $col) {
-                $sheet->getColumnDimension($col)->setAutoSize(true);
+            $body = $response->json();
+            $apiData = $body['data'] ?? [];
+            if (!is_array($apiData)) {
+                $apiData = [];
             }
 
-            $writer = new Xlsx($spreadsheet);
-            $fileName = 'Data_Pegawai_' . date('Y-m-d_His') . '.xlsx';
+            $rows = [];
 
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment;filename="' . $fileName . '"');
-            header('Cache-Control: max-age=0');
+            foreach ($apiData as $item) {
+                $nama   = $item['nama'] ?? '-';
+                $email  = $item['email'] ?? '-';
+                $nip    = (!empty($item['nip']) && $item['nip'] !== '-') ? $item['nip'] : ($item['nik'] ?? '-');
+                $status = $item['status_kepegawaian'] ?? '-';
+                $unit   = $item['unit_sekarang'] ?? '-';
 
-            $writer->save('php://output');
-            exit;
+                $adaPelatihan = false;
+
+                if (isset($item['pelatihan']) && is_array($item['pelatihan'])) {
+                    foreach ($item['pelatihan'] as $tahunGrup => $pelatihans) {
+                        if (is_array($pelatihans)) {
+                            foreach ($pelatihans as $p) {
+                                if (is_array($p)) {
+                                    $adaPelatihan = true;
+                                    $rows[] = [
+                                        'nama'      => $nama,
+                                        'email'     => $email,
+                                        'nip'       => $nip,
+                                        'status'    => $status,
+                                        'unit'      => $unit,
+                                        'tahun'     => $tahunGrup,
+                                        'pelatihan' => $p['nama_pelatihan'] ?? $p['pelatihan'] ?? '-',
+                                        'jpl'       => is_numeric($p['jpl'] ?? null) ? (int) $p['jpl'] : 0,
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (!$adaPelatihan) {
+                    $rows[] = [
+                        'nama'      => $nama,
+                        'email'     => $email,
+                        'nip'       => $nip,
+                        'status'    => $status,
+                        'unit'      => $unit,
+                        'tahun'     => '-',
+                        'pelatihan' => '-',
+                        'jpl'       => 0,
+                    ];
+                }
+            }
+
+            return response()->json(['status' => 'success', 'data' => $rows]);
+
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal mengekspor data: ' . $e->getMessage());
+            Log::error('PelatihanController ExportData Error: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
 
-    // =========================
-    // BAGIAN PUBLIC METHODS
-    // =========================
-
-    public function publicIndex(Request $request)
+    public function storePelatihan(Request $request, $id)
     {
-        $keyword = $request->input('keyword');
-        $searchPerformed = false;
-        $pelatihans = collect();
-        if ($request->filled('keyword')) {
-            $searchPerformed = true;
-            $pelatihans = \App\Models\Pelatihan::where('nip', $keyword)
-                            ->orWhere('nirp', $keyword)
-                            ->get();
-        }
-        return view('pelatihan.public_index', compact('keyword', 'searchPerformed', 'pelatihans'));
-    }
-
-    public function publicEdit($id)
-    {
-        $pelatihan = Pelatihan::findOrFail($id);
-        return view('pelatihan.public_edit', compact('pelatihan'));
-    }
-
-    public function publicStore(Request $request)
-    {
-        // Validasi sama seperti store biasa
-        $data = $request->validate([
-            'nama' => 'required|string|max:255|unique:pelatihans,nama',
-            'bidang' => 'required|string|max:255',
-            'jabatan' => 'nullable|string|max:255',
-            'unit' => 'nullable|string|max:255',
-            'status_pegawai' => 'required|in:PNS,P3K,Non-PNS',
-
-            'nip' => 'nullable|required_if:status_pegawai,PNS,P3K|string|max:50',
-            'golongan' => 'nullable|required_if:status_pegawai,PNS,P3K|string|max:100',
-
-            // --- PERUBAHAN DISINI: Pangkat hanya required jika PNS ---
-            'pangkat' => 'nullable|required_if:status_pegawai,PNS|string|max:100',
-
-            'nirp' => 'nullable|required_if:status_pegawai,Non-PNS|string|max:50',
-
-            // Validasi Array Pelatihan
-            'pelatihan_dasar' => 'nullable|array',
-            'pelatihan_file_dasar.*' => 'nullable|file|mimes:pdf|max:2048',
-            'pelatihan_kompetensi' => 'nullable|array',
-            'pelatihan_file_kompetensi.*' => 'nullable|file|mimes:pdf|max:2048',
+        $request->validate([
+            'pelatihan'       => 'required|string',
+            'jpl'             => 'required|numeric',
+            'tanggal_mulai'   => 'required|date',
+            'tanggal_selesai' => 'nullable|date'
         ]);
 
-        // --- LOGIKA PENYIMPANAN (Copy dari method store) ---
-        // 1. Proses Pelatihan Dasar
-        $daftarPelatihanDasar = [];
-        if ($request->has('pelatihan_dasar')) {
-            $namaPelatihan = $request->input('pelatihan_dasar');
-            $tahunPelatihan = $request->input('pelatihan_tahun_dasar');
-            $filePelatihan = $request->file('pelatihan_file_dasar');
+        try {
+            $response = Http::withHeaders($this->headers)
+                ->post("{$this->baseUrl}/pegawai/{$id}/pelatihan", [
+                    'pelatihan'       => $request->pelatihan,
+                    'jpl'             => $request->jpl,
+                    'tanggal_mulai'   => $request->tanggal_mulai,
+                    'tanggal_selesai' => $request->tanggal_selesai
+                ]);
 
-            foreach ($namaPelatihan as $index => $nama) {
-                if (!empty($nama)) {
-                    $filePath = null;
-                    if (isset($filePelatihan[$index]) && $filePelatihan[$index]->isValid()) {
-                        $file = $filePelatihan[$index];
-                        $fileName = time() . '_dasar_' . $index . '_' . $file->getClientOriginalName();
-                        $filePath = $file->storeAs('pelatihan_pdf', $fileName, 'public');
-                    }
-                    $daftarPelatihanDasar[] = [
-                        'nama'  => $nama,
-                        'tahun' => $tahunPelatihan[$index] ?? null,
-                        'file'  => $filePath,
-                    ];
-                }
+            if ($response->successful()) {
+                return redirect()->back()->with('success', 'Pelatihan berhasil ditambahkan via API.');
             }
+
+            return redirect()->back()->with('error', 'Gagal menambahkan pelatihan: ' . $response->json('message', 'Unknown Error'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-
-        // 2. Proses Pelatihan Kompetensi
-        $daftarPelatihanKompetensi = [];
-        if ($request->has('pelatihan_kompetensi')) {
-            $namaKompetensi = $request->input('pelatihan_kompetensi');
-            $tahunKompetensi = $request->input('pelatihan_tahun_kompetensi');
-            $fileKompetensi = $request->file('pelatihan_file_kompetensi');
-
-            foreach ($namaKompetensi as $index => $nama) {
-                if (!empty($nama)) {
-                    $filePath = null;
-                    if (isset($fileKompetensi[$index]) && $fileKompetensi[$index]->isValid()) {
-                        $file = $fileKompetensi[$index];
-                        $fileName = time() . '_komp_' . $index . '_' . $file->getClientOriginalName();
-                        $filePath = $file->storeAs('pelatihan_pdf', $fileName, 'public');
-                    }
-                    $daftarPelatihanKompetensi[] = [
-                        'nama'  => $nama,
-                        'tahun' => $tahunKompetensi[$index] ?? null,
-                        'file'  => $filePath,
-                    ];
-                }
-            }
-        }
-
-        $data['pelatihan_dasar'] = $daftarPelatihanDasar;
-        $data['pelatihan_peningkatan_kompetensi'] = $daftarPelatihanKompetensi;
-
-        // Bersihkan data temporary
-        unset($data['pelatihan_tahun_dasar'], $data['pelatihan_file_dasar']);
-        unset($data['pelatihan_tahun_kompetensi'], $data['pelatihan_file_kompetensi']);
-
-        Pelatihan::create($data);
-
-        // Redirect ke public index dengan keyword agar user bisa langsung lihat datanya
-        return redirect()->route('public.pelatihan.index', ['keyword' => $request->nip ?? $request->nirp])
-            ->with('success', 'Data berhasil disimpan! Silakan cek data Anda di bawah.');
     }
 
-    public function publicUpdate(Request $request, $id)
+    public function updatePelatihan(Request $request, $id, $index)
     {
-        $pelatihan = Pelatihan::findOrFail($id);
-
-        $data = $request->validate([
-            'pelatihan_dasar' => 'nullable|array',
-            'pelatihan_dasar.*' => 'nullable|string',
-            'pelatihan_tahun_dasar' => 'nullable|array',
-            'pelatihan_tahun_dasar.*' => 'nullable|string',
-            'pelatihan_file_dasar' => 'nullable|array',
-            'pelatihan_file_dasar.*' => 'nullable|file|mimes:pdf|max:2048',
-            'pelatihan_existing_file_dasar' => 'nullable|array',
-
-            'pelatihan_kompetensi' => 'nullable|array',
-            'pelatihan_kompetensi.*' => 'nullable|string',
-            'pelatihan_tahun_kompetensi' => 'nullable|array',
-            'pelatihan_tahun_kompetensi.*' => 'nullable|string',
-            'pelatihan_file_kompetensi' => 'nullable|array',
-            'pelatihan_file_kompetensi.*' => 'nullable|file|mimes:pdf|max:2048',
-            'pelatihan_existing_file_kompetensi' => 'nullable|array',
+        $request->validate([
+            'pelatihan'       => 'required|string',
+            'jpl'             => 'required|numeric',
+            'tanggal_mulai'   => 'required|date',
+            'tanggal_selesai' => 'nullable|date'
         ]);
 
-        // --- PROSES PELATIHAN DASAR ---
-        $daftarPelatihanDasar = [];
-        if ($request->has('pelatihan_dasar')) {
-            $namaPelatihan = $request->input('pelatihan_dasar');
-            $tahunPelatihan = $request->input('pelatihan_tahun_dasar');
-            $filePelatihanBaru = $request->file('pelatihan_file_dasar');
-            $fileLama = $request->input('pelatihan_existing_file_dasar', []);
+        try {
+            $response = Http::withHeaders($this->headers)
+                ->put("{$this->baseUrl}/pegawai/{$id}/pelatihan/{$index}", [
+                    'pelatihan'       => $request->pelatihan,
+                    'jpl'             => $request->jpl,
+                    'tanggal_mulai'   => $request->tanggal_mulai,
+                    'tanggal_selesai' => $request->tanggal_selesai
+                ]);
 
-            foreach ($namaPelatihan as $index => $nama) {
-                if (!empty($nama)) {
-                    $filePath = $fileLama[$index] ?? null;
-                    if (isset($filePelatihanBaru[$index]) && $filePelatihanBaru[$index]->isValid()) {
-                        $file = $filePelatihanBaru[$index];
-                        if ($filePath && Storage::disk('public')->exists($filePath)) {
-                            Storage::disk('public')->delete($filePath);
-                        }
-                        $fileName = time() . '_dasar_' . $index . '_' . $file->getClientOriginalName();
-                        $filePath = $file->storeAs('pelatihan_pdf', $fileName, 'public');
-                    }
-
-                    $daftarPelatihanDasar[] = [
-                        'nama' => $nama,
-                        'tahun' => $tahunPelatihan[$index] ?? null,
-                        'file' => $filePath,
-                    ];
-                }
+            if ($response->successful()) {
+                return redirect()->back()->with('success', 'Pelatihan berhasil diperbarui via API.');
             }
 
-            $submittedPaths = collect($daftarPelatihanDasar)->pluck('file')->filter();
-            $originalPaths = collect($pelatihan->pelatihan_dasar)->pluck('file')->filter();
-            $filesToDelete = $originalPaths->diff($submittedPaths);
-            foreach ($filesToDelete as $file) {
-                if ($file && Storage::disk('public')->exists($file)) {
-                    Storage::disk('public')->delete($file);
-                }
-            }
-        } else {
-            $daftarPelatihanDasar = $pelatihan->pelatihan_dasar ?? [];
+            return redirect()->back()->with('error', 'Gagal memperbarui pelatihan: ' . $response->json('message', 'Unknown Error'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-
-        // --- PROSES PELATIHAN KOMPETENSI ---
-        $daftarPelatihanKompetensi = [];
-        if ($request->has('pelatihan_kompetensi')) {
-            $namaKompetensi = $request->input('pelatihan_kompetensi');
-            $tahunKompetensi = $request->input('pelatihan_tahun_kompetensi');
-            $fileKompetensiBaru = $request->file('pelatihan_file_kompetensi');
-            $fileLamaKompetensi = $request->input('pelatihan_existing_file_kompetensi', []);
-
-            foreach ($namaKompetensi as $index => $nama) {
-                if (!empty($nama)) {
-                    $filePath = $fileLamaKompetensi[$index] ?? null;
-                    if (isset($fileKompetensiBaru[$index]) && $fileKompetensiBaru[$index]->isValid()) {
-                        $file = $fileKompetensiBaru[$index];
-                        if ($filePath && Storage::disk('public')->exists($filePath)) {
-                            Storage::disk('public')->delete($filePath);
-                        }
-                        $fileName = time() . '_komp_' . $index . '_' . $file->getClientOriginalName();
-                        $filePath = $file->storeAs('pelatihan_pdf', $fileName, 'public');
-                    }
-
-                    $daftarPelatihanKompetensi[] = [
-                        'nama' => $nama,
-                        'tahun' => $tahunKompetensi[$index] ?? null,
-                        'file' => $filePath,
-                    ];
-                }
-            }
-
-            $submittedPaths = collect($daftarPelatihanKompetensi)->pluck('file')->filter();
-            $originalPaths = collect($pelatihan->pelatihan_peningkatan_kompetensi)->pluck('file')->filter();
-            $filesToDelete = $originalPaths->diff($submittedPaths);
-            foreach ($filesToDelete as $file) {
-                if ($file && Storage::disk('public')->exists($file)) {
-                    Storage::disk('public')->delete($file);
-                }
-            }
-        } else {
-            $daftarPelatihanKompetensi = $pelatihan->pelatihan_peningkatan_kompetensi ?? [];
-        }
-
-        $pelatihan->pelatihan_dasar = $daftarPelatihanDasar;
-        $pelatihan->pelatihan_peningkatan_kompetensi = $daftarPelatihanKompetensi;
-        $pelatihan->save();
-
-        return redirect()->route('public.pelatihan.index', ['keyword' => $pelatihan->nip ?? $pelatihan->nirp])
-            ->with('success', 'Data pelatihan berhasil diperbarui.');
     }
 
-    public function import_excel(Request $request)
+    public function destroyPelatihan($id, $index)
     {
         try {
-            $request->validate(['data' => 'required|string']);
-            $rows = json_decode($request->input('data'), true);
+            $response = Http::withHeaders($this->headers)
+                ->delete("{$this->baseUrl}/pegawai/{$id}/pelatihan/{$index}");
 
-            if (empty($rows)) {
-                return response()->json(['success' => false, 'message' => 'Tidak ada data untuk diimpor.'], 422);
+            if ($response->successful()) {
+                return redirect()->back()->with('success', 'Pelatihan berhasil dihapus via API.');
             }
 
-            $imported = 0;
-            $errors = [];
-
-            foreach ($rows as $index => $row) {
-                $rowIndex = $index + 2;
-                try {
-                    $statusRaw = $row['Status'] ?? 'Non-PNS';
-                    $data = [
-                        'nama' => $row['Nama'] ?? null,
-                        'bidang' => $row['Bidang'] ?? null,
-                        'jabatan' => $row['Jabatan'] ?? null,
-                        'unit' => $row['Unit'] ?? null,
-                        'status_pegawai' => $statusRaw,
-                        'nip' => ($statusRaw == 'PNS' || $statusRaw == 'P3K') ? ($row['NIP'] ?? null) : null,
-                        'nirp' => ($statusRaw == 'Non-PNS') ? ($row['NIRP'] ?? null) : null,
-                        'golongan' => $row['Golongan'] ?? null,
-                        'pangkat' => $row['Pangkat'] ?? null,
-                    ];
-
-                    if (empty($data['nama'])) {
-                        $errors[] = "Baris " . $rowIndex . ": Nama tidak boleh kosong";
-                        continue;
-                    }
-
-                    // Helper lokal untuk parse pelatihan
-                    $daftarPelatihanDasar = [];
-                    if (!empty($row['Pelatihan_Dasar'])) {
-                        $items = explode(';', $row['Pelatihan_Dasar']);
-                        foreach($items as $it) {
-                            $daftarPelatihanDasar[] = ['nama' => trim($it), 'tahun' => null, 'file' => null];
-                        }
-                    }
-
-                    $daftarPelatihanKompetensi = [];
-                    if (!empty($row['Pelatihan_Kompetensi'])) {
-                        $items = explode(';', $row['Pelatihan_Kompetensi']);
-                        foreach($items as $it) {
-                            $daftarPelatihanKompetensi[] = ['nama' => trim($it), 'tahun' => null, 'file' => null];
-                        }
-                    }
-
-                    $data['pelatihan_dasar'] = $daftarPelatihanDasar;
-                    $data['pelatihan_peningkatan_kompetensi'] = $daftarPelatihanKompetensi;
-
-                    Pelatihan::updateOrCreate(
-                        ['nama' => $data['nama']],
-                        $data
-                    );
-
-                    $imported++;
-                } catch (\Exception $e) {
-                    $errors[] = "Baris " . $rowIndex . ": " . $e->getMessage();
-                }
-            }
-
-            $message = "Berhasil impor/update {$imported} data.";
-            if (count($errors) > 0) {
-                 $message .= " Ditemukan " . count($errors) . " error.";
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => $message,
-                'errors' => $errors,
-            ]);
+            return redirect()->back()->with('error', 'Gagal menghapus pelatihan: ' . $response->json('message', 'Unknown Error'));
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Import gagal: ' . $e->getMessage(),
-            ], 422);
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 }

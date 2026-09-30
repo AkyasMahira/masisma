@@ -192,8 +192,103 @@
                     </div>
                 </div>
             </div>
+{{-- Daftar Nilai Masuk dari CI --}}
+<div class="custom-card animate-up">
+    <div class="card-header-main">
+        <i class="bi bi-person-check-fill fs-5 text-success"></i> Status Penilaian Kolektif
+    </div>
+    <div class="card-body-custom">
+        @if($presentasi->penilaianDetails->count() > 0)
+            @php 
+                $avgSkor = $presentasi->penilaianDetails->avg('skor_angka');
+                $suggestedGrade = \App\Models\Presentasi::getPredikat($avgSkor);
+            @endphp
 
-            {{-- Link Penilaian CI --}}
+            {{-- Form Finalisasi Admin --}}
+   @if($presentasi->status_penilaian == 'pending')
+    <form action="{{ route('admin.presentasi.finalisasi', $presentasi->id) }}" method="POST" id="finalisasiForm">
+        @csrf
+        <div class="bg-light p-3 rounded border mb-3">
+            {{-- REFERENSI NILAI KOLEKTIF (ANGKA & PREDIKAT) --}}
+            <div class="mb-3 pb-2 border-bottom">
+                <small class="text-muted d-block fw-bold text-uppercase" style="font-size: 0.65rem;">Rerata Kolektif Pembimbing (CI)</small>
+                @php
+                    $avgKolektif = $presentasi->penilaianDetails->count() > 0 ? $presentasi->penilaianDetails->avg('skor_angka') : 0;
+                    $hurufKolektif = \App\Models\Presentasi::getPredikat($avgKolektif);
+                    $ketKolektif = \App\Models\Presentasi::getKeterangan($hurufKolektif);
+                @endphp
+                <div class="fw-bold text-primary">
+                    {{ round($avgKolektif, 2) }} | {{ $hurufKolektif }} ({{ $ketKolektif }})
+                </div>
+            </div>
+
+            {{-- INPUT NILAI AKHIR (HANYA HURUF & PREDIKAT DI SERTIFIKAT) --}}
+            <label class="info-label text-maroon fw-bold">Skor Akhir (Revisi Admin)</label>
+            <input readonly="" type="number" name="skor_final" class="form-control mb-2 fw-bold border-maroon" 
+                   value="{{ round($avgKolektif, 2) }}" step="0.01">
+            
+           <label class="info-label text-maroon fw-bold">Predikat Akhir (A/B/C/D)</label>
+            <select name="nilai_final" class="form-select fw-bold border-maroon">
+                <option value="A" {{ $hurufKolektif == 'A' ? 'selected' : '' }}>A (Baik Sekali)</option>
+                <option value="B" {{ $hurufKolektif == 'B' ? 'selected' : '' }}>B (Baik)</option>
+                <option value="C" {{ $hurufKolektif == 'C' ? 'selected' : '' }}>C (Cukup)</option>
+                <option value="D" {{ $hurufKolektif == 'D' ? 'selected' : '' }}>D (Kurang)</option>
+            </select>
+            <small class="text-muted italic">*Nilai Akhir pada sertifikat hanya akan menampilkan Huruf dan Predikat.</small>
+        </div>
+
+        <button type="submit" class="btn btn-success w-100 fw-bold">
+            <i class="bi bi-check-all me-1"></i> Finalisasi & Kunci Nilai
+        </button>
+    </form>
+@else
+    {{-- TAMPILAN JIKA SUDAH DIKUNCI --}}
+    <div class="alert alert-success text-center border-0 shadow-sm p-3">
+        <div class="small fw-bold text-uppercase ls-1 text-muted mb-1">Hasil Penilaian Final</div>
+        
+        {{-- Nilai Akhir: Huruf dan Predikat --}}
+        <div class="display-6 fw-bold text-maroon mb-0">{{ $presentasi->nilai }}</div>
+        <div class="fw-bold text-dark mb-3">({{ \App\Models\Presentasi::getKeterangan($presentasi->nilai) }})</div>
+        
+        <div class="row g-0 border-top pt-2 mt-2">
+            <div class="col-12">
+                <small class="text-muted d-block" style="font-size: 0.65rem;">REFERENSI KOLEKTIF CI (ANGKA & PREDIKAT)</small>
+                @php
+                    $avgK = $presentasi->penilaianDetails->avg('skor_angka') ?? 0;
+                    $hurufK = \App\Models\Presentasi::getPredikat($avgK);
+                @endphp
+                <div class="small fw-bold">
+                    {{ round($avgK, 2) }} | {{ $hurufK }} ({{ \App\Models\Presentasi::getKeterangan($hurufK) }})
+                </div>
+            </div>
+        </div>
+    </div>
+@endif
+
+            <div class="table-responsive mt-3">
+                <table class="table table-sm small table-bordered">
+                    <thead class="bg-light">
+                        <tr><th>Pemberi Nilai</th><th class="text-center">Skor</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach($presentasi->penilaianDetails as $detail)
+                        <tr>
+                            <td>{{ $detail->nama_ci }}</td>
+                            <td class="text-center">{{ $detail->skor_angka }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <div class="text-center py-3 text-muted small">Belum ada nilai CI masuk.</div>
+        @endif
+    </div>
+</div>
+        </div>
+
+        {{-- KOLOM KANAN: File & Proses --}}
+        <div class="col-lg-8 animate-up" style="animation-delay: 0.2s;">
             <div class="custom-card">
                 <div class="card-header-main">
                     <i class="bi bi-link-45deg fs-5 text-primary"></i> Link Penilaian CI
@@ -208,22 +303,17 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        {{-- KOLOM KANAN: File & Proses --}}
-        <div class="col-lg-8 animate-up" style="animation-delay: 0.2s;">
-            
             {{-- 1. File Presentasi (PPT) --}}
             <div class="custom-card">
                 <div class="card-header-main">
-                    <i class="bi bi-file-earmark-slides-fill text-warning fs-5"></i> File Presentasi
+                    <i class="bi bi-file-earmark-slides-fill text-warning fs-5"></i> File Laporan Awal
                 </div>
                 <div class="card-body-custom">
                     @if ($presentasi->file_ppt)
-                        <a href="{{ Storage::url($presentasi->file_ppt) }}" target="_blank" class="file-download-card">
-                            <div class="file-icon"><i class="bi bi-file-earmark-ppt-fill"></i></div>
+                        <a href="{{ asset('storage/' . $presentasi->file_ppt) }}" target="_blank" class="file-download-card">
+                            <div class="file-icon"><i class="bi bi-file-earmark-word-fill"></i></div>
                             <div class="flex-grow-1">
-                                <div class="fw-bold text-dark">Materi Presentasi</div>
+                                <div class="fw-bold text-dark">Laporan Awal</div>
                                 <div class="small text-muted">Diupload: {{ $presentasi->uploaded_at->format('d M Y H:i') }}</div>
                             </div>
                             <div class="d-flex align-items-center gap-2 text-primary small fw-bold">
@@ -243,39 +333,93 @@
             </div>
 
             {{-- 2. Hasil Penilaian --}}
-            @if ($presentasi->nilai)
-                <div class="custom-card">
-                    <div class="card-header-main">
-                        <i class="bi bi-award-fill text-success fs-5"></i> Hasil Penilaian
-                    </div>
-                    <div class="card-body-custom">
-                        <div class="row align-items-center g-4">
-                            <div class="col-md-4">
-                                <div class="score-box">
-                                    <div class="score-val text-grade-{{ $presentasi->nilai }}">{{ $presentasi->nilai }}</div>
-                                    <div class="score-lbl">Predikat Akhir</div>
-                                </div>
-                            </div>
-                            <div class="col-md-8">
-                                @if ($presentasi->hasil_penilaian)
-                                    <h6 class="fw-bold mb-3 text-dark border-bottom pb-2">Rincian Penilaian</h6>
-                                    <div class="list-group list-group-flush">
-                                        @foreach ($presentasi->hasil_penilaian as $index => $item)
-                                            <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center bg-transparent border-bottom-0">
-                                                <span class="text-secondary small">{{ $loop->iteration }}. {{ $item['judul'] }}</span>
-                                                <span class="fw-bold text-dark badge bg-light text-dark border">{{ $item['nilai'] ?? '-' }}</span>
-                                            </div>
-                                        @endforeach
+      @if ($presentasi->nilai)
+    <div class="custom-card">
+        
+        <div class="card-header-main">
+            <i class="bi bi-award-fill text-success fs-5"></i> Hasil Penilaian Akhir
+        </div>
+        <div class="card-body-custom">
+            <div class="row align-items-center g-4">
+<div class="col-md-4">
+    <div class="score-box shadow-sm border-0">
+        {{-- BAGIAN 1: NILAI AKHIR (ADMIN) --}}
+        <div class="mb-3">
+            <small class="text-muted d-block fw-bold text-uppercase mb-1" style="font-size: 0.7rem;">Nilai Akhir (Disahkan)</small>
+            <div class="score-val text-grade-{{ $presentasi->nilai }} mb-0" style="line-height: 1;">
+                {{ $presentasi->nilai ?? '-' }}
+            </div>
+            
+      @php
+                $statusNilai = [
+                    'A' => ['bg' => 'success', 'txt' => 'Baik Sekali'],
+                    'B' => ['bg' => 'success', 'txt' => 'Baik'],
+                    'C' => ['bg' => 'warning', 'txt' => 'Cukup'],
+                    'D' => ['bg' => 'danger', 'txt' => 'Kurang']
+                ][$presentasi->nilai] ?? ['bg' => 'secondary', 'txt' => 'Belum Dinilai'];
+            @endphp
+            <span class="badge bg-{{ $statusNilai['bg'] }} mt-1">{{ $statusNilai['txt'] }}</span>
+        </div>
+
+        <hr class="my-3">
+
+        {{-- BAGIAN 2: NILAI KOLEKTIF (RATA-RATA SEMUA CI) --}}
+        <div class="bg-light rounded p-2 text-center">
+            <small class="text-muted d-block fw-bold text-uppercase mb-1" style="font-size: 0.65rem;">Rerata Kolektif Pembimbing</small>
+            
+            @php
+                $avgKolektif = $presentasi->penilaianDetails->count() > 0 ? $presentasi->penilaianDetails->avg('skor_angka') : 0;
+                $hurufKolektif = \App\Models\Presentasi::getPredikat($avgKolektif);
+                $ketKolektif = \App\Models\Presentasi::getKeterangan($hurufKolektif);
+            @endphp
+
+            <div class="fw-bold text-dark fs-4 mb-0">
+                {{ round($avgKolektif, 2) }}
+            </div>
+            <div class="small fw-bold text-secondary">
+                {{ $hurufKolektif }} — {{ $ketKolektif }}
+            </div>
+        </div>
+
+        <div class="score-lbl mt-3">Predikat & Skor Keseluruhan</div>
+    </div>
+</div>
+
+                {{-- Detail Catatan Kolektif --}}
+                <div class="col-md-8">
+                    @if ($presentasi->hasil_penilaian)
+                        <h6 class="fw-bold mb-3 text-dark border-bottom pb-2">Catatan Evaluasi CI</h6>
+                        <div class="list-group list-group-flush" style="max-height: 250px; overflow-y: auto;">
+                            @foreach ($presentasi->hasil_penilaian as $index => $item)
+                                <div class="list-group-item px-0 py-2 bg-transparent border-bottom">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <span class="text-dark small fw-bold">{{ $loop->iteration }}. {{ $item['judul'] }}</span>
                                     </div>
-                                @endif
-                            </div>
+                                    <p class="mb-0 text-muted extra-small fst-italic">{{ $item['keterangan'] }}</p>
+                                </div>
+                            @endforeach
                         </div>
-                        <div class="text-end mt-3 border-top pt-2">
-                            <small class="text-muted fst-italic">Dinilai pada: {{ $presentasi->dinilai_at->format('d M Y H:i') }}</small>
+                    @endif
+                    
+                    {{-- Info Range Nilai (Penjelasan kenapa dapat C, dll) --}}
+                   {{-- Info Range Nilai (Penjelasan kenapa dapat C, dll) --}}
+                    <div class="mt-3 p-2 bg-light rounded border">
+                        <div class="extra-small text-muted fw-bold text-uppercase mb-1" style="font-size: 0.65rem;">Referensi Rentang Nilai:</div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <span class="extra-small {{ $presentasi->nilai == 'A' ? 'fw-bold text-success' : '' }}" style="font-size: 0.7rem;">A: 80-100</span>
+                            <span class="extra-small {{ $presentasi->nilai == 'B' ? 'fw-bold text-success' : '' }}" style="font-size: 0.7rem;">B: 70-79</span>
+                            <span class="extra-small {{ $presentasi->nilai == 'C' ? 'fw-bold text-warning' : '' }}" style="font-size: 0.7rem;">C: 60-69</span>
+                            <span class="extra-small {{ $presentasi->nilai == 'D' ? 'fw-bold text-danger' : '' }}" style="font-size: 0.7rem;">D: < 60</span>
                         </div>
                     </div>
                 </div>
-            @endif
+            </div>
+            <div class="text-end mt-3 border-top pt-2">
+                <small class="text-muted fst-italic">Data difinalisasi pada: {{ $presentasi->dinilai_at->format('d M Y H:i') }}</small>
+            </div>
+        </div>
+    </div>
+@endif
 
             {{-- 3. Laporan Akhir & Review --}}
             @if (in_array($presentasi->nilai, ['A', 'B']))
@@ -290,7 +434,7 @@
                                     <div class="fw-bold text-dark">File Laporan Akhir</div>
                                     <small class="text-muted">Uploaded: {{ $presentasi->laporan_uploaded_at->format('d M Y') }}</small>
                                 </div>
-                                <a href="{{ Storage::url($presentasi->file_laporan) }}" target="_blank" class="btn btn-outline-primary btn-sm shadow-sm bg-white">
+                                <a href="{{ asset('storage/' . $presentasi->file_laporan) }}" target="_blank" class="btn btn-outline-primary btn-sm shadow-sm bg-white">
                                     <i class="bi bi-download me-1"></i> Download
                                 </a>
                             </div>
@@ -354,16 +498,21 @@
                             <p class="text-muted small mb-0">Seluruh tahapan penelitian telah diselesaikan dengan baik.</p>
                         </div>
                         <div class="d-flex gap-2">
-                            @if ($presentasi->surat_selesai)
-                                <a href="{{ Storage::url($presentasi->surat_selesai) }}" target="_blank" class="btn btn-outline-secondary btn-sm fw-bold">
-                                    <i class="bi bi-file-pdf me-1"></i> Surat Selesai
-                                </a>
-                            @endif
-                            @if ($presentasi->sertifikat)
-                                <a href="{{ Storage::url($presentasi->sertifikat) }}" target="_blank" class="btn btn-success btn-sm text-white fw-bold shadow-sm">
-                                    <i class="bi bi-award-fill me-1"></i> Sertifikat
-                                </a>
-                            @endif
+                         @if ($presentasi->status_final == 'selesai')
+    {{-- Tombol Surat Selesai Generate Otomatis --}}
+    <a href="{{ route('presentasi.download-surat-selesai', [$presentasi->id, urlencode($presentasi->user->name)]) }}" 
+       target="_blank" 
+       class="btn btn-outline-secondary btn-sm fw-bold">
+        <i class="bi bi-file-pdf me-1"></i> Surat Selesai
+    </a>
+
+    {{-- Tombol Sertifikat Generate Otomatis --}}
+    <a href="{{ route('presentasi.download-sertifikat', [$presentasi->id, urlencode($presentasi->user->name)]) }}" 
+       target="_blank" 
+       class="btn btn-success btn-sm text-white fw-bold shadow-sm">
+        <i class="bi bi-award-fill me-1"></i> Sertifikat
+    </a>
+@endif
                         </div>
                     </div>
                 </div>
@@ -416,6 +565,28 @@
 
     {{-- Script JavaScript untuk Copy Link & SweetAlert --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    const finalisasiForm = document.getElementById('finalisasiForm');
+    if(finalisasiForm){
+        finalisasiForm.addEventListener('submit', function(e){
+            e.preventDefault();
+            Swal.fire({
+                title: 'Finalisasi Nilai?',
+                text: "Nilai akan dikalkulasi dan form input CI akan dikunci selamanya.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Finalisasi!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.submit();
+                }
+            });
+        });
+    }
+</script>
     <script>
         // SweetAlert untuk Session Flash
         @if(session('success'))

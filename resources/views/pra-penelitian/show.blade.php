@@ -284,8 +284,8 @@
                     <table class="table table-hover mb-0 align-middle">
                         <thead class="bg-light">
                             <tr>
-                                <th class="ps-4">Nama Mahasiswa</th>
-                                <th>Jenjang</th>
+                                <th class="ps-4">Nama Peneliti</th>
+                                <th class="text-center">Jenjang</th>
                                 <th>Kontak (WA)</th>
                             </tr>
                         </thead>
@@ -293,7 +293,7 @@
                             @foreach($praPenelitian->anggotas as $mhs)
                             <tr>
                                 <td class="ps-4 fw-bold text-dark">{{ $mhs->nama }}</td>
-                                <td><span class="badge bg-light text-dark border">{{ $mhs->jenjang }}</span></td>
+                                <td class="text-center"><span class="badge bg-light text-dark border">{{ $mhs->jenjang }}</span></td>
                                 <td>
                                     <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $mhs->no_telpon) }}" target="_blank" class="text-decoration-none text-success fw-medium">
                                         <i class="bi bi-whatsapp me-1"></i> {{ $mhs->no_telpon }}
@@ -345,7 +345,8 @@
                     <h5>Berkas Lampiran</h5>
                 </div>
                 <div class="detail-body">
-                    {{-- File Kerangka --}}
+                    
+                    {{-- 1. File Kerangka --}}
                     @if($praPenelitian->file_kerangka)
                     <a href="{{ asset($praPenelitian->file_kerangka) }}" target="_blank" class="file-card">
                         <div class="file-icon">
@@ -358,10 +359,44 @@
                         <i class="bi bi-box-arrow-up-right text-muted"></i>
                     </a>
                     @else
-                        <div class="text-muted small mb-3 fst-italic">Tidak ada kerangka penelitian.</div>
+                        <div class="text-muted small mb-3 fst-italic">Kerangka penelitian tidak ada.</div>
                     @endif
 
-                    {{-- File Surat --}}
+                    {{-- 2. File Proposal (BARU DITAMBAHKAN) --}}
+                    @if($praPenelitian->file_proposal)
+                    <a href="{{ asset($praPenelitian->file_proposal) }}" target="_blank" class="file-card">
+                        <div class="file-icon">
+                            <i class="bi bi-book-half"></i>
+                        </div>
+                        <div class="file-info">
+                            <div class="file-name">Proposal Lengkap</div>
+                            <div class="file-action">Klik untuk melihat</div>
+                        </div>
+                        <i class="bi bi-box-arrow-up-right text-muted"></i>
+                    </a>
+                    @else
+                        <div class="text-muted small mb-3 fst-italic">Proposal belum diupload.</div>
+                    @endif
+
+                    {{-- 3. File Ethical Clearance (BARU DITAMBAHKAN) --}}
+                    @if($praPenelitian->file_ethical_clearance)
+                    <a href="{{ asset($praPenelitian->file_ethical_clearance) }}" target="_blank" class="file-card">
+                        <div class="file-icon">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div class="file-info">
+                            <div class="file-name">Ethical Clearance</div>
+                            <div class="file-action">Klik untuk melihat</div>
+                        </div>
+                        <i class="bi bi-box-arrow-up-right text-muted"></i>
+                    </a>
+                    @else
+                        <div class="text-muted small mb-3 fst-italic">
+                            {{ $praPenelitian->jenis_penelitian == 'Penelitian' ? 'Ethical clearance belum ada.' : 'Ethical clearance tidak diperlukan.' }}
+                        </div>
+                    @endif
+
+                    {{-- 4. File Surat Pengantar --}}
                     @if($praPenelitian->file_surat_pengantar)
                     <a href="{{ asset($praPenelitian->file_surat_pengantar) }}" target="_blank" class="file-card mb-0">
                         <div class="file-icon">
@@ -374,21 +409,19 @@
                         <i class="bi bi-box-arrow-up-right text-muted"></i>
                     </a>
                     @else
-                        <div class="text-muted small fst-italic">Tidak ada surat pengantar.</div>
+                        <div class="text-muted small fst-italic">Surat pengantar tidak ada.</div>
                     @endif
+
                 </div>
             </div>
 
             {{-- Tombol Aksi Tambahan (Admin Only - Optional) --}}
             @if(auth()->user()->role === 'admin' && $praPenelitian->status === 'Pending')
             <div class="d-grid gap-2">
-                {{-- Jika Anda punya route untuk approve/reject di controller khusus --}}
-                {{--
-                <form action="{{ route('pengajuan.approve', $praPenelitian->id) }}" method="POST">
+                 <form action="{{ route('pra-penelitian.approve', $praPenelitian->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin?');">
                     @csrf
                     <button class="btn btn-success w-100 fw-bold py-2">Setujui Pengajuan</button>
                 </form>
-                --}}
             </div>
             @endif
 
