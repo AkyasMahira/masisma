@@ -53,6 +53,9 @@
     .histori-list { border: 1px solid #eef2f7; border-radius: 12px; overflow: hidden; }
     .histori-list li { border-bottom: 1px solid #f1f5f9; }
     .histori-list li:last-child { border-bottom: none; }
+
+    /* --- Kartu dispensasi menunggu persetujuan --- */
+    .dispen-card { background: #fff; border: 1px solid #fde8c4; border-left: 4px solid #f59e0b; border-radius: 14px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,.04); }
     
     /* --- Badges & Avatars --- */
     .avatar-initial { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.25rem; background: linear-gradient(135deg, #7c1316, #a3191d); color: #fff; flex-shrink: 0; box-shadow: 0 4px 10px rgba(124,19,22,.25); }
@@ -144,8 +147,58 @@
         </div>
     </div>
 
+    {{-- ============ DISPENSASI MENUNGGU PERSETUJUAN (langsung di dashboard, bukan modal) ============ --}}
+    @if(isset($pendingDispensasi) && $pendingDispensasi->isNotEmpty())
     <div class="dashboard-card">
-        
+        <div class="card-header-clean">
+            <span class="fw-bold text-dark"><i class="bi bi-envelope-paper-heart text-warning me-2"></i> Dispensasi Menunggu Persetujuan</span>
+            <span class="badge bg-warning text-dark rounded-pill px-3">{{ $pendingDispensasi->count() }} pengajuan</span>
+        </div>
+        <div class="p-3" style="background:#fffdf7;">
+            <div class="row g-3">
+                @foreach($pendingDispensasi as $dispen)
+                    <div class="col-md-6 col-xl-4">
+                        <div class="dispen-card h-100">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <div class="avatar-initial" style="width:38px;height:38px;font-size:1rem;">{{ substr(optional($dispen->mahasiswa)->nm_mahasiswa ?? '?', 0, 1) }}</div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-dark" style="font-size:.85rem;">{{ optional($dispen->mahasiswa)->nm_mahasiswa ?? '-' }}</div>
+                                    <span class="badge bg-light text-dark border" style="font-size:.65rem;"><i class="bi bi-tag-fill me-1"></i>{{ ucfirst($dispen->kategori) }}</span>
+                                </div>
+                            </div>
+                            <div class="small text-muted mb-1">
+                                <i class="bi bi-calendar-range me-1"></i>{{ \Carbon\Carbon::parse($dispen->tanggal_mulai)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($dispen->tanggal_selesai)->format('d/m/Y') }}
+                            </div>
+                            <p class="mb-2 text-dark" style="font-size:.82rem; line-height:1.4;"><strong>Ket:</strong> {{ $dispen->keterangan }}</p>
+                            @if($dispen->file_path)
+                                <a href="{{ asset('storage/'.$dispen->file_path) }}" target="_blank" class="small text-decoration-none d-inline-block mb-2"><i class="bi bi-paperclip me-1"></i>Lihat berkas</a>
+                            @endif
+                            <div class="d-flex gap-2">
+                                <form action="{{ route('kepala_ruangan.dispensasi.approve', $dispen->id) }}" method="POST" class="flex-fill" onsubmit="return confirm('Setujui dispensasi ini? Absensi akan terisi otomatis.');">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success btn-sm w-100"><i class="bi bi-check-lg me-1"></i>Setujui</button>
+                                </form>
+                                <button type="button" class="btn btn-outline-danger btn-sm flex-fill" data-bs-toggle="collapse" data-bs-target="#tolakDisp-{{ $dispen->id }}">
+                                    <i class="bi bi-x-lg me-1"></i>Tolak
+                                </button>
+                            </div>
+                            <div class="collapse mt-2" id="tolakDisp-{{ $dispen->id }}">
+                                <form action="{{ route('kepala_ruangan.dispensasi.reject', $dispen->id) }}" method="POST">
+                                    @csrf
+                                    <textarea name="catatan_admin" class="form-control form-control-sm mb-2" rows="2" placeholder="Alasan penolakan (wajib)..." required></textarea>
+                                    <button type="submit" class="btn btn-danger btn-sm w-100"><i class="bi bi-send me-1"></i>Kirim Penolakan</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <div class="dashboard-card">
+
         <div class="bg-white p-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-3">
             <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-list-check text-danger me-2"></i> Pantauan & Penilaian Mahasiswa</h5>
             
@@ -569,24 +622,8 @@
                                 @if($dispen->catatan_admin && $st !== 'pending')
                                     <div class="mt-2 small text-muted"><i class="bi bi-chat-left-text me-1"></i>{{ $dispen->catatan_admin }}</div>
                                 @endif
-
                                 @if($st === 'pending')
-                                    <div class="d-flex gap-2 mt-3">
-                                        <form action="{{ route('kepala_ruangan.dispensasi.approve', $dispen->id) }}" method="POST" onsubmit="return confirm('Setujui dispensasi ini? Absensi akan terisi otomatis.');">
-                                            @csrf
-                                            <button type="submit" class="btn btn-success btn-sm"><i class="bi bi-check-lg me-1"></i>Setujui</button>
-                                        </form>
-                                        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="collapse" data-bs-target="#tolak-{{ $dispen->id }}">
-                                            <i class="bi bi-x-lg me-1"></i>Tolak
-                                        </button>
-                                    </div>
-                                    <div class="collapse mt-2" id="tolak-{{ $dispen->id }}">
-                                        <form action="{{ route('kepala_ruangan.dispensasi.reject', $dispen->id) }}" method="POST">
-                                            @csrf
-                                            <textarea name="catatan_admin" class="form-control form-control-sm mb-2" rows="2" placeholder="Alasan penolakan (wajib diisi)..." required></textarea>
-                                            <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-send me-1"></i>Kirim Penolakan</button>
-                                        </form>
-                                    </div>
+                                    <div class="mt-2 small text-warning fw-semibold"><i class="bi bi-info-circle me-1"></i>Persetujuan ada di panel "Dispensasi Menunggu Persetujuan" pada dashboard.</div>
                                 @endif
                             </div>
                         @empty

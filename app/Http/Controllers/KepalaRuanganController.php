@@ -299,11 +299,29 @@ class KepalaRuanganController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
+        // Dispensasi menunggu persetujuan untuk mahasiswa di ruangan ini (semua, tanpa pagination)
+        $mahasiswaIdsRuangan = Mahasiswa::where(function ($q) use ($ruangan) {
+                $q->where('ruangan_id', $ruangan->id)
+                  ->orWhereHas('roomSequences', function ($sq) use ($ruangan) {
+                      $sq->where('ruangan_id', $ruangan->id);
+                  })
+                  ->orWhereHas('shiftSchedules', function ($sq) use ($ruangan) {
+                      $sq->where('ruangan_id', $ruangan->id);
+                  });
+            })->pluck('id');
+
+        $pendingDispensasi = \App\Models\Dispensasi::with('mahasiswa')
+            ->whereIn('mahasiswa_id', $mahasiswaIdsRuangan)
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return view('ruangan_dashboard.index', [
             'ruangan' => $ruangan,
             'mahasiswas' => $paginatedMahasiswas,
+            'pendingDispensasi' => $pendingDispensasi,
             'startDate' => $startDate,
-            'endDate' => $endDate,  
+            'endDate' => $endDate,
             'filter' => $filter,
             'totalMahasiswa' => $total,
             'hadirCountGlobal' => $globalHadir,
