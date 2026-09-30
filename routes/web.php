@@ -251,6 +251,15 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::delete('/{id}', [\App\Http\Controllers\EvaluasiController::class, 'destroy'])->name('destroy');
     });
 
+    Route::prefix('admin/master-prodi')->name('admin.master_prodi.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\MasterProdiController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\MasterProdiController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\MasterProdiController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [\App\Http\Controllers\MasterProdiController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [\App\Http\Controllers\MasterProdiController::class, 'update'])->name('update');
+        Route::delete('/{id}', [\App\Http\Controllers\MasterProdiController::class, 'destroy'])->name('destroy');
+    });
+
     Route::prefix('admin/master-evaluasi')->name('admin.master_evaluasi.')->group(function () {
         Route::get('/', [\App\Http\Controllers\MasterEvaluasiController::class, 'index'])->name('index');
         Route::get('/create', [\App\Http\Controllers\MasterEvaluasiController::class, 'create'])->name('create');

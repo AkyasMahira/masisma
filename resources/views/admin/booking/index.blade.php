@@ -58,7 +58,11 @@
                     @forelse($bookings as $b)
                     <tr>
                         <td class="fw-semibold">{{ optional($b->mou)->nama_instansi ?? optional($b->mou)->nama_universitas ?? '-' }}</td>
-                        <td>{{ optional($b->ruangan)->nm_ruangan ?? '-' }}</td>
+                        <td>{{ optional($b->ruangan)->nm_ruangan ?? '-' }}
+                            @if($b->prodi || $b->jenjang || $b->semester)
+                                <div class="text-muted" style="font-size:.68rem;">{{ trim(($b->jenjang ? $b->jenjang.' ' : '').($b->prodi ?? '')) ?: '-' }}{{ $b->semester ? ' · smt '.$b->semester : '' }}</div>
+                            @endif
+                        </td>
                         <td class="text-center fw-bold">{{ $b->jumlah_peserta }}</td>
                         <td class="text-center">
                             @if($b->pesertas->count())

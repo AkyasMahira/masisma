@@ -9,8 +9,8 @@ class BookingRuangan extends Model
     protected $table = 'booking_ruangans';
 
     protected $fillable = [
-        'mou_id', 'ruangan_id', 'user_id', 'jumlah_peserta',
-        'tanggal_mulai', 'tanggal_selesai', 'keterangan',
+        'mou_id', 'ruangan_id', 'user_id', 'jenjang', 'prodi', 'semester',
+        'jumlah_peserta', 'tanggal_mulai', 'tanggal_selesai', 'keterangan',
         'status', 'catatan_admin', 'batas_pengisian',
     ];
 

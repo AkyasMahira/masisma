@@ -38,6 +38,35 @@
                 <div class="room-hint text-muted mt-1"><i class="bi bi-info-circle me-1"></i>Sisa kuota indikatif per hari ini. Kuota final dicek saat admin menyetujui.</div>
             </div>
 
+            <div class="row g-3 mb-1">
+                <div class="col-md-4">
+                    <label class="form-label">Jenjang</label>
+                    <select name="jenjang" class="form-select">
+                        <option value="">-- Semua/umum --</option>
+                        @foreach($jenjangList as $j)
+                            <option value="{{ $j }}" {{ old('jenjang')===$j ? 'selected':'' }}>{{ $j }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">Program Studi</label>
+                    <select name="prodi" class="form-select">
+                        <option value="">-- Pilih prodi --</option>
+                        @foreach($listProdi as $grup => $items)
+                            <optgroup label="{{ $grup }}">
+                                @foreach($items as $p)
+                                    <option value="{{ $p }}" {{ old('prodi')===$p ? 'selected':'' }}>{{ $p }}</option>
+                                @endforeach
+                            </optgroup>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Semester</label>
+                    <input type="text" name="semester" class="form-control" value="{{ old('semester') }}" placeholder="mis. 5">
+                </div>
+            </div>
+
             <div class="row g-3">
                 <div class="col-md-4">
                     <label class="form-label">Jumlah Peserta <span class="text-danger">*</span></label>

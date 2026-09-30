@@ -135,6 +135,7 @@
                         <a class="nav-link {{ request()->is('admin/master_instansi*') ? 'active' : '' }}" href="{{ route('admin.master_instansi.index') }}">Instansi</a>
                         <a class="nav-link {{ request()->is('admin/master_ruangan*') ? 'active' : '' }}" href="{{ route('admin.master_ruangan.index') }}">Ruangan</a>
                         <a class="nav-link {{ request()->is('admin/master_kompetensi*') ? 'active' : '' }}" href="{{ route('admin.master_kompetensi.index') }}">Kompetensi</a>
+                        <a class="nav-link {{ request()->is('admin/master-prodi*') ? 'active' : '' }}" href="{{ route('admin.master_prodi.index') }}">Program Studi</a>
                         
                         {{-- Menu Kegiatan Utama --}}
                         <a class="nav-link {{ request()->routeIs('admin.kegiatan.index', 'admin.kegiatan.create', 'admin.kegiatan.edit') ? 'active' : '' }}" href="{{ route('admin.kegiatan.index') }}">Pelatihan</a>

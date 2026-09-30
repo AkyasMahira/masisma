@@ -56,7 +56,12 @@ class InstansiController extends Controller
             return $r;
         });
 
-        return view('instansi.booking_create', ['mou' => $user->mou, 'ruangans' => $ruangans]);
+        return view('instansi.booking_create', [
+            'mou'         => $user->mou,
+            'ruangans'    => $ruangans,
+            'listProdi'   => \App\Models\MasterProdi::grouped(),
+            'jenjangList' => \App\Models\MasterProdi::jenjangList(),
+        ]);
     }
 
     public function bookingStore(Request $request)
@@ -65,6 +70,9 @@ class InstansiController extends Controller
 
         $data = $request->validate([
             'ruangan_id'     => 'required|exists:ruangans,id',
+            'jenjang'        => 'nullable|string|max:20',
+            'prodi'          => 'nullable|string|max:255',
+            'semester'       => 'nullable|string|max:20',
             'jumlah_peserta' => 'required|integer|min:1',
             'tanggal_mulai'  => 'required|date',
             'tanggal_selesai'=> 'required|date|after_or_equal:tanggal_mulai',
@@ -88,6 +96,9 @@ class InstansiController extends Controller
             'mou_id'          => $user->mou->id,
             'user_id'         => $user->id,
             'ruangan_id'      => $ruangan->id,
+            'jenjang'         => $data['jenjang'] ?? null,
+            'prodi'           => $data['prodi'] ?? null,
+            'semester'        => $data['semester'] ?? null,
             'jumlah_peserta'  => $data['jumlah_peserta'],
             'tanggal_mulai'   => $data['tanggal_mulai'],
             'tanggal_selesai' => $data['tanggal_selesai'],
