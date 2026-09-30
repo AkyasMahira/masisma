@@ -9,9 +9,15 @@ class BookingPeserta extends Model
     protected $table = 'booking_pesertas';
 
     protected $fillable = [
-        'booking_ruangan_id', 'nama', 'nim', 'prodi',
-        'jenis_kelamin', 'no_hp', 'keterangan',
+        'booking_ruangan_id', 'nama', 'nim', 'email', 'prodi',
+        'tipe_mahasiswa', 'weekend_aktif', 'jenis_kelamin', 'no_hp',
+        'foto_path', 'kompetensi_json', 'keterangan',
         'status', 'catatan_admin', 'user_id', 'mahasiswa_id',
+    ];
+
+    protected $casts = [
+        'weekend_aktif'   => 'boolean',
+        'kompetensi_json' => 'array',
     ];
 
     public function booking()

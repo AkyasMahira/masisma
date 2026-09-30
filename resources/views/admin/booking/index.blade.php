@@ -74,6 +74,13 @@
                             @if($b->status!=='pending' && $b->catatan_admin)<div class="text-muted mt-1" style="font-size:.68rem;">{{ $b->catatan_admin }}</div>@endif
                         </td>
                         <td class="text-center">
+                            <div class="mb-2 d-flex justify-content-center gap-1">
+                                <a href="{{ route('admin.booking.edit', $b->id) }}" class="btn btn-sm btn-outline-dark" title="Edit booking"><i class="bi bi-pencil"></i></a>
+                                <form action="{{ route('admin.booking.destroy', $b->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus booking ini beserta daftar pesertanya?');">
+                                    @csrf @method('DELETE')
+                                    <button class="btn btn-sm btn-outline-danger" title="Hapus booking"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
                             @if($b->status === 'pending')
                                 <button class="btn btn-sm btn-success" data-bs-toggle="collapse" data-bs-target="#acc-{{ $b->id }}"><i class="bi bi-check-lg"></i> ACC</button>
                                 <button class="btn btn-sm btn-outline-danger" data-bs-toggle="collapse" data-bs-target="#rej-{{ $b->id }}"><i class="bi bi-x-lg"></i></button>

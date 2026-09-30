@@ -53,7 +53,7 @@
                 @elseif($booking->pesertas->count() >= $booking->jumlah_peserta)
                     <div class="alert alert-warning small mb-0">Kuota peserta booking ini sudah penuh ({{ $booking->jumlah_peserta }} orang).</div>
                 @else
-                <form action="{{ route('instansi.booking.peserta.store', $booking->id) }}" method="POST">
+                <form action="{{ route('instansi.booking.peserta.store', $booking->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="mb-2"><label class="form-label small fw-semibold">Nama <span class="text-danger">*</span></label><input type="text" name="nama" class="form-control form-control-sm" value="{{ old('nama') }}" required></div>
                     <div class="row g-2">
@@ -66,11 +66,43 @@
                             </select>
                         </div>
                     </div>
+                    <div class="mb-2"><label class="form-label small fw-semibold">Email <span class="text-muted">(untuk akun login)</span></label><input type="email" name="email" class="form-control form-control-sm" value="{{ old('email') }}" placeholder="opsional"></div>
                     <div class="mb-2"><label class="form-label small fw-semibold">Program Studi</label><input type="text" name="prodi" class="form-control form-control-sm" value="{{ old('prodi') }}"></div>
-                    <div class="mb-2"><label class="form-label small fw-semibold">No. HP</label><input type="text" name="no_hp" class="form-control form-control-sm" value="{{ old('no_hp') }}"></div>
+                    <div class="row g-2">
+                        <div class="col-6 mb-2"><label class="form-label small fw-semibold">Tipe <span class="text-danger">*</span></label>
+                            <select name="tipe_mahasiswa" class="form-select form-select-sm" required>
+                                <option value="magang" {{ old('tipe_mahasiswa','magang')==='magang'?'selected':'' }}>Magang</option>
+                                <option value="pkl" {{ old('tipe_mahasiswa')==='pkl'?'selected':'' }}>PKL</option>
+                            </select>
+                        </div>
+                        <div class="col-6 mb-2"><label class="form-label small fw-semibold">No. HP</label><input type="text" name="no_hp" class="form-control form-control-sm" value="{{ old('no_hp') }}"></div>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                        <input type="hidden" name="weekend_aktif" value="0">
+                        <input class="form-check-input" type="checkbox" name="weekend_aktif" value="1" id="wk" {{ old('weekend_aktif') ? 'checked' : '' }}>
+                        <label class="form-check-label small" for="wk">Aktif di akhir pekan (Sabtu/Minggu)</label>
+                    </div>
+                    <div class="mb-2"><label class="form-label small fw-semibold">Pas Foto <span class="text-muted">(untuk ID card)</span></label><input type="file" name="foto" class="form-control form-control-sm" accept="image/*"></div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold">Kompetensi</label>
+                        <div id="kompetensiWrap">
+                            <input type="text" name="kompetensi[]" class="form-control form-control-sm mb-1" placeholder="mis. Pemasangan infus">
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary w-100" onclick="tambahKompetensi()"><i class="bi bi-plus"></i> Tambah kompetensi</button>
+                    </div>
                     <div class="mb-3"><label class="form-label small fw-semibold">Keterangan</label><textarea name="keterangan" class="form-control form-control-sm" rows="2">{{ old('keterangan') }}</textarea></div>
                     <button type="submit" class="btn-maroon btn-sm w-100"><i class="bi bi-plus-lg me-1"></i> Tambah</button>
                 </form>
+                <script>
+                    function tambahKompetensi() {
+                        var w = document.getElementById('kompetensiWrap');
+                        var i = document.createElement('input');
+                        i.type = 'text'; i.name = 'kompetensi[]';
+                        i.className = 'form-control form-control-sm mb-1';
+                        i.placeholder = 'Kompetensi lain';
+                        w.appendChild(i);
+                    }
+                </script>
                 @endif
             </div>
         </div>

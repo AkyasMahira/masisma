@@ -126,9 +126,15 @@ class InstansiController extends Controller
         $data = $request->validate([
             'nama'          => 'required|string|max:255',
             'nim'           => 'nullable|string|max:100',
+            'email'         => 'nullable|email|max:255',
             'prodi'         => 'nullable|string|max:255',
+            'tipe_mahasiswa'=> 'required|in:magang,pkl',
+            'weekend_aktif' => 'nullable|boolean',
             'jenis_kelamin' => 'nullable|in:L,P',
             'no_hp'         => 'nullable|string|max:30',
+            'foto'          => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'kompetensi'    => 'nullable|array',
+            'kompetensi.*'  => 'nullable|string|max:255',
             'keterangan'    => 'nullable|string',
         ], [
             'nama.required' => 'Nama peserta wajib diisi.',
@@ -139,6 +145,20 @@ class InstansiController extends Controller
             return back()->with('error', "Jumlah peserta sudah mencapai batas booking ({$booking->jumlah_peserta} orang). Ajukan booking tambahan bila perlu.");
         }
 
+        // Foto pas (untuk ID card mahasiswa nanti)
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $namaFile = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
+            $file->move(public_path('uploads/pas_foto'), $namaFile);
+            $data['foto_path'] = 'uploads/pas_foto/' . $namaFile;
+        }
+        unset($data['foto']);
+
+        // Kompetensi (array of string, dibersihkan)
+        $data['kompetensi_json'] = $request->filled('kompetensi') ? array_values(array_filter($request->kompetensi)) : [];
+        unset($data['kompetensi']);
+
+        $data['weekend_aktif'] = $request->boolean('weekend_aktif');
         $data['booking_ruangan_id'] = $booking->id;
         BookingPeserta::create($data);
 
@@ -193,6 +213,50 @@ class InstansiController extends Controller
             'batas_pengisian' => $request->batas_pengisian ?: null,
         ]);
         return back()->with('success', 'Booking disetujui.');
+    }
+
+    public function adminEditBooking($id)
+    {
+        $booking = BookingRuangan::with('mou')->findOrFail($id);
+        $ruangans = Ruangan::orderBy('nm_ruangan')->get();
+        return view('admin.booking.edit', compact('booking', 'ruangans'));
+    }
+
+    public function adminUpdateBooking(Request $request, $id)
+    {
+        $booking = BookingRuangan::findOrFail($id);
+
+        $data = $request->validate([
+            'ruangan_id'      => 'required|exists:ruangans,id',
+            'jumlah_peserta'  => 'required|integer|min:1',
+            'tanggal_mulai'   => 'required|date',
+            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
+            'status'          => 'required|in:pending,approved,rejected',
+            'batas_pengisian' => 'nullable|date',
+            'keterangan'      => 'nullable|string',
+            'catatan_admin'   => 'nullable|string',
+        ]);
+
+        // Cegah overbooking bila status disetujui
+        if ($data['status'] === 'approved') {
+            $ruangan = Ruangan::find($data['ruangan_id']);
+            $sisa = $this->sisaKuota($ruangan, $data['tanggal_mulai'], $data['tanggal_selesai'], $booking->id);
+            if ($data['jumlah_peserta'] > $sisa) {
+                return back()->withInput()->with('error', "Sisa kuota {$ruangan->nm_ruangan} hanya {$sisa} orang untuk periode itu.");
+            }
+        }
+
+        $data['batas_pengisian'] = $data['batas_pengisian'] ?? null;
+        $booking->update($data);
+
+        return redirect()->route('admin.booking.index')->with('success', 'Booking berhasil diperbarui.');
+    }
+
+    public function adminDestroyBooking($id)
+    {
+        $booking = BookingRuangan::findOrFail($id);
+        $booking->delete(); // cascade: peserta ikut terhapus
+        return redirect()->route('admin.booking.index')->with('success', 'Booking dihapus.');
     }
 
     /**
@@ -280,14 +344,19 @@ class InstansiController extends Controller
         }
 
         $result = DB::transaction(function () use ($peserta, $booking) {
-            // 1. Buat akun login untuk anak magang
-            $base = $peserta->nim ?: Str::slug($peserta->nama);
-            if ($base === '') $base = 'magang';
-            $email = $base . '@magang.rsudslg.id';
-            $i = 1;
-            while (User::where('email', $email)->exists()) {
-                $email = $base . $i . '@magang.rsudslg.id';
-                $i++;
+            // 1. Buat akun login untuk anak magang.
+            //    Pakai email dari instansi bila ada & unik; jika tidak, generate.
+            if ($peserta->email && !User::where('email', $peserta->email)->exists()) {
+                $email = $peserta->email;
+            } else {
+                $base = $peserta->nim ?: Str::slug($peserta->nama);
+                if ($base === '') $base = 'magang';
+                $email = $base . '@magang.rsudslg.id';
+                $i = 1;
+                while (User::where('email', $email)->exists()) {
+                    $email = $base . $i . '@magang.rsudslg.id';
+                    $i++;
+                }
             }
             $password = Str::random(8);
 
@@ -300,7 +369,7 @@ class InstansiController extends Controller
                 'is_approved' => true,
             ]);
 
-            // 2. Buat record Mahasiswa (biodata dari peserta + ruangan/periode dari booking)
+            // 2. Buat record Mahasiswa (biodata lengkap dari peserta + ruangan/periode dari booking)
             do {
                 $token = (string) Str::uuid();
             } while (Mahasiswa::where('share_token', $token)->exists());
@@ -316,7 +385,10 @@ class InstansiController extends Controller
                 'share_token'      => $token,
                 'tanggal_mulai'    => $booking->tanggal_mulai,
                 'tanggal_berakhir' => $booking->tanggal_selesai,
-                'tipe_mahasiswa'   => 'Eksternal',
+                'tipe_mahasiswa'   => in_array($peserta->tipe_mahasiswa, ['magang', 'pkl']) ? $peserta->tipe_mahasiswa : 'magang',
+                'weekend_aktif'    => (bool) $peserta->weekend_aktif,
+                'foto_path'        => $peserta->foto_path,
+                'kompetensi_json'  => $peserta->kompetensi_json ?: [],
             ]);
 
             // 3. Auto-create RoomSequence dari booking (ruangan + periode) agar absensi langsung aktif.
