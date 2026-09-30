@@ -1228,6 +1228,7 @@
             <a href="#peraturan-penelitian">Peraturan Penelitian</a>
              <a  href="#peraturan-magang">Peraturan Magang/PKL</a>
               <a  href="#pelatihan-tersedia">Pelatihan Tersedia</a>
+              <a href="{{ route('evaluasi.public.form') }}">Evaluasi</a>
         </nav>
         <div class="d-flex gap-2">
             <!--<a class="btn btn-ghost" href="#fitur">Fitur</a>-->
@@ -1252,6 +1253,7 @@
                     <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
                         <a class="btn btn-primary-soft" href="{{ route('login') }}">Masuk ke aplikasi</a>
                         <a class="btn btn-ghost" href="#alur">Lihat alur kerja</a>
+                        <a class="btn btn-ghost" href="{{ route('evaluasi.public.form') }}"><i class="bi bi-clipboard2-check me-1"></i> Isi Evaluasi Diklat</a>
                     </div>
                     <div class="hero-pills">
                         <div class="pill">

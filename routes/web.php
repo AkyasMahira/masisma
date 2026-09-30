@@ -64,6 +64,11 @@ Route::get('/forms/{slug}', [CustomFormController::class, 'showPublic'])->name('
 Route::post('/forms/{slug}', [CustomFormController::class, 'submitPublic'])->name('forms.public.submit');
 Route::get('/', [PublicController::class, 'landing'])->name('landing');
 Route::post('/chatbot', [PublicController::class, 'chatbot'])->name('chatbot.ask');
+
+// Evaluasi Publik (kritik, saran & IKM diklat) - dari landing
+Route::get('/evaluasi', [\App\Http\Controllers\EvaluasiController::class, 'publicForm'])->name('evaluasi.public.form');
+Route::get('/evaluasi/terima-kasih', [\App\Http\Controllers\EvaluasiController::class, 'terimaKasih'])->name('evaluasi.public.terimakasih');
+Route::post('/evaluasi', [\App\Http\Controllers\EvaluasiController::class, 'publicStore'])->name('evaluasi.public.store');
 Route::get('/forgot-password', [AuthController::class, 'showLinkRequestForm'])->name('password.request');
 Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
@@ -233,6 +238,26 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::put('/{id}', [\App\Http\Controllers\MasterKompetensiController::class, 'update'])->name('update');
         Route::delete('/{id}', [\App\Http\Controllers\MasterKompetensiController::class, 'destroy'])->name('destroy');
         Route::post('/import', [\App\Http\Controllers\MasterKompetensiController::class, 'import'])->name('import');
+    });
+
+    // ---------------------------------------------------------------------
+    // EVALUASI DIKLAT + IKM
+    // ---------------------------------------------------------------------
+    Route::prefix('admin/evaluasi')->name('admin.evaluasi.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\EvaluasiController::class, 'index'])->name('index');
+        Route::get('/export/csv', [\App\Http\Controllers\EvaluasiController::class, 'exportCsv'])->name('export.csv');
+        Route::get('/export/pdf', [\App\Http\Controllers\EvaluasiController::class, 'exportPdf'])->name('export.pdf');
+        Route::get('/{id}', [\App\Http\Controllers\EvaluasiController::class, 'show'])->name('show');
+        Route::delete('/{id}', [\App\Http\Controllers\EvaluasiController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('admin/master-evaluasi')->name('admin.master_evaluasi.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\MasterEvaluasiController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\MasterEvaluasiController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\MasterEvaluasiController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [\App\Http\Controllers\MasterEvaluasiController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [\App\Http\Controllers\MasterEvaluasiController::class, 'update'])->name('update');
+        Route::delete('/{id}', [\App\Http\Controllers\MasterEvaluasiController::class, 'destroy'])->name('destroy');
     });
 
     // ---------------------------------------------------------------------

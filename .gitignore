@@ -17,3 +17,6 @@ yarn-error.log
 # arsip besar, jangan di-commit
 /public/storage.zip
 *.zip
+
+# script deploy lokal (berisi detail server, jangan di-commit)
+deploy.sh
