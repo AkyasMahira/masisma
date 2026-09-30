@@ -56,6 +56,39 @@ class MouController extends Controller
             'password' => $password,
         ])->with('success', 'Akun instansi berhasil dibuat. Catat kredensial di bawah — password hanya ditampilkan sekali.');
     }
+
+    /**
+     * Reset password akun instansi (password baru digenerate & ditampilkan sekali).
+     */
+    public function resetAkun(Mou $mou)
+    {
+        $akun = User::where('mou_id', $mou->id)->where('role', 'instansi')->first();
+        if (!$akun) {
+            return back()->with('error', 'MOU ini belum punya akun instansi.');
+        }
+
+        $password = Str::random(10);
+        $akun->update(['password' => Hash::make($password)]);
+
+        return back()->with('akun_instansi', [
+            'nama'     => $mou->nama_instansi ?: $mou->nama_universitas,
+            'username' => $akun->email,
+            'password' => $password,
+        ])->with('success', 'Password akun instansi berhasil direset. Catat kredensial baru di bawah.');
+    }
+
+    /**
+     * Hapus akun instansi (bisa dibuat ulang lewat "Buat Akun").
+     */
+    public function hapusAkun(Mou $mou)
+    {
+        $akun = User::where('mou_id', $mou->id)->where('role', 'instansi')->first();
+        if (!$akun) {
+            return back()->with('error', 'MOU ini belum punya akun instansi.');
+        }
+        $akun->delete();
+        return back()->with('success', 'Akun instansi dihapus. Anda dapat membuat akun baru bila diperlukan.');
+    }
     /**
      * Halaman LIST (Halaman Kedua)
      * KITA TAMBAHKAN LOGIKA FILTER DI SINI

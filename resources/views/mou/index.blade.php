@@ -423,7 +423,15 @@
 </td>
                             <td class="text-center">
                                 @if($mou->akun)
-                                    <span class="action-btn" style="color:#15803d;" title="Akun instansi sudah dibuat: {{ $mou->akun->email }}"><i class="bi bi-person-check-fill"></i></span>
+                                    <span class="action-btn" style="color:#15803d;" title="Akun aktif: {{ $mou->akun->email }}"><i class="bi bi-person-check-fill"></i></span>
+                                    <form action="{{ route('mou.reset_akun', $mou->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Reset password akun instansi {{ $mou->akun->email }}? Password lama tidak berlaku lagi.');">
+                                        @csrf
+                                        <button type="submit" class="action-btn" style="color:#b45309;" title="Reset Password Akun"><i class="bi bi-key-fill"></i></button>
+                                    </form>
+                                    <form action="{{ route('mou.hapus_akun', $mou->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus akun instansi ini? Instansi tidak bisa login lagi.');">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="action-btn" style="color:#be123c;" title="Hapus Akun Instansi"><i class="bi bi-person-dash-fill"></i></button>
+                                    </form>
                                 @else
                                     <form action="{{ route('mou.buat_akun', $mou->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Buatkan akun portal untuk instansi ini?');">
                                         @csrf

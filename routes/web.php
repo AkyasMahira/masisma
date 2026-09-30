@@ -447,6 +447,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::put('/{mou}', [MouController::class, 'update'])->name('update');
         Route::delete('/{mou}', [MouController::class, 'destroy'])->name('destroy');
         Route::post('/{mou}/buat-akun', [MouController::class, 'buatAkun'])->name('buat_akun');
+        Route::post('/{mou}/reset-akun', [MouController::class, 'resetAkun'])->name('reset_akun');
+        Route::delete('/{mou}/hapus-akun', [MouController::class, 'hapusAkun'])->name('hapus_akun');
     });
 
     // Manajemen booking ruangan dari instansi mitra (sisi admin)
