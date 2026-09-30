@@ -13,3 +13,7 @@ yarn-error.log
 
 # runtime user uploads (per-environment, not versioned)
 /public/uploads
+
+# arsip besar, jangan di-commit
+/public/storage.zip
+*.zip
