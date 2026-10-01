@@ -62,6 +62,7 @@ Route::get('/formst/{slug}/download-bukti/{response_id}', [CustomFormController:
 Route::get('/forms/{slug}/sukses', [CustomFormController::class, 'showSuccess'])->name('forms.public.success');
 Route::get('/forms/{slug}', [CustomFormController::class, 'showPublic'])->name('forms.public.show');
 Route::post('/forms/{slug}', [CustomFormController::class, 'submitPublic'])->name('forms.public.submit');
+Route::view('/sosmed', 'public.sosmed')->name('sosmed');
 Route::get('/', [PublicController::class, 'landing'])->name('landing');
 Route::post('/chatbot', [PublicController::class, 'chatbot'])->name('chatbot.ask');
 

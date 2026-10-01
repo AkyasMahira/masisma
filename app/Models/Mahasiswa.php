@@ -258,6 +258,93 @@ public function dispensasis()
     /**
      * Menghitung Persentase Kehadiran
      */
+    /**
+     * SATU SUMBER kalender (jadwal shift/ruangan + realisasi absensi + dispensasi).
+     * Dipakai dashboard mahasiswa & halaman detail admin agar kalendernya identik.
+     */
+    public function kalenderEvents()
+    {
+        $events = [];
+        $today = now()->format('Y-m-d');
+        $manualShifts = $this->shiftSchedules->keyBy('tanggal');
+        $liburDates = [];
+
+        // A/B. JADWAL (ruangan non-shift & shift)
+        foreach ($this->roomSequences as $seq) {
+            if (!$seq->ruangan) continue;
+            $kategoriRuangan = $seq->ruangan->kategori ?? 'non_shift';
+            $ruangName = $seq->ruangan->nm_ruangan;
+            $customShifts = $seq->ruangan->roomShifts->keyBy('nama_shift');
+
+            foreach (\Carbon\CarbonPeriod::create($seq->start_date, $seq->end_date) as $dt) {
+                $dStr = $dt->format('Y-m-d');
+                $dayOfWeek = $dt->dayOfWeekIso;
+
+                if ($kategoriRuangan === 'non_shift') {
+                    if ($dt->isWeekend() && !$this->weekend_aktif) {
+                        $liburDates[$dStr] = true;
+                        $events[] = ['title' => 'LIBUR', 'start' => $dStr, 'color' => '#6c757d', 'extendedProps' => ['jam' => 'Sabtu/Minggu', 'ruang' => $ruangName, 'type' => 'jadwal']];
+                        continue;
+                    }
+                    $shiftName = ($dayOfWeek == 5) ? 'Jumat' : 'Reguler';
+                    $jam = ($dayOfWeek == 5) ? '07:00 - 14:30' : '07:15 - 15:30';
+                    if (isset($customShifts[$shiftName])) {
+                        $jam = \Carbon\Carbon::parse($customShifts[$shiftName]->jam_masuk)->format('H:i') . ' - ' .
+                               \Carbon\Carbon::parse($customShifts[$shiftName]->jam_keluar)->format('H:i');
+                    }
+                    $events[] = ['title' => $shiftName, 'start' => $dStr, 'color' => '#6610f2', 'extendedProps' => ['jam' => $jam, 'ruang' => $ruangName, 'type' => 'jadwal']];
+                } else {
+                    if (isset($manualShifts[$dStr])) {
+                        $type = $manualShifts[$dStr]->shift_type;
+                        if ($type === 'Libur') {
+                            $liburDates[$dStr] = true;
+                            $jamShift = 'Istirahat'; $color = '#6c757d';
+                        } else {
+                            $color = '#0d6efd'; $jamShift = 'Jam Default';
+                            if (isset($customShifts[$type])) {
+                                $jamShift = \Carbon\Carbon::parse($customShifts[$type]->jam_masuk)->format('H:i') . ' - ' .
+                                            \Carbon\Carbon::parse($customShifts[$type]->jam_keluar)->format('H:i');
+                            } elseif ($type == 'Pagi') $jamShift = '07:00 - 14:00';
+                            elseif ($type == 'Siang') $jamShift = '14:00 - 21:00';
+                            elseif ($type == 'Malam') $jamShift = '21:00 - 07:00';
+                        }
+                        $events[] = ['title' => ucfirst($type), 'start' => $dStr, 'color' => $color, 'extendedProps' => ['jam' => $jamShift, 'ruang' => $ruangName, 'type' => 'jadwal']];
+                    }
+                }
+            }
+        }
+
+        // C. REALISASI ABSENSI
+        $absensiGrouped = $this->absensis->groupBy(function ($item) {
+            return \Carbon\Carbon::parse($item->created_at)->format('Y-m-d');
+        });
+        foreach ($absensiGrouped as $date => $logs) {
+            $masuk = $logs->where('type', 'masuk')->first();
+            $hasKeluar = $logs->where('type', 'keluar')->first();
+            if (isset($liburDates[$date]) && !$masuk) continue;
+            if ($masuk && $hasKeluar) {
+                $jamM = \Carbon\Carbon::parse($masuk->jam_masuk)->format('H:i');
+                $jamK = \Carbon\Carbon::parse($hasKeluar->jam_keluar)->format('H:i');
+                $events[] = ['title' => 'HADIR', 'start' => $date, 'color' => '#198754', 'extendedProps' => ['jam' => "$jamM - $jamK", 'ruang' => 'Absen', 'type' => 'absen']];
+            } elseif ($masuk) {
+                $isToday = $date == $today;
+                $events[] = ['title' => $isToday ? 'KERJA' : 'LUPA', 'start' => $date, 'color' => $isToday ? '#ffc107' : '#dc3545', 'extendedProps' => ['jam' => \Carbon\Carbon::parse($masuk->jam_masuk)->format('H:i') . ' - ?', 'ruang' => 'Incomplete', 'type' => 'absen']];
+            }
+        }
+
+        // D. DISPENSASI
+        foreach ($this->dispensasis()->where('status', 'approved')->get() as $dispen) {
+            $events[] = [
+                'title' => 'IZIN', 'start' => $dispen->tanggal_mulai,
+                'end'   => \Carbon\Carbon::parse($dispen->tanggal_selesai)->addDay()->format('Y-m-d'),
+                'color' => '#fd7e14',
+                'extendedProps' => ['jam' => $dispen->kategori, 'ruang' => 'Dispensasi', 'type' => 'izin'],
+            ];
+        }
+
+        return $events;
+    }
+
     public function getAbsensiPercentageAttribute()
     {
         $stat = $this->statistik; 
