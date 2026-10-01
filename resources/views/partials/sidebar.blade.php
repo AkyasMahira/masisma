@@ -86,8 +86,11 @@
                         <a class="nav-link {{ request()->is('admin.materi*') ? 'active' : '' }}" href="{{ route('admin.materi.index') }}">
                             <span class="sidebar-text">Materi</span>
                         </a>
-                        <a class="nav-link {{ request()->is('admin/orientasi*') ? 'active' : '' }}" href="{{ route('admin.orientasi.index') }}">
+                        <a class="nav-link {{ request()->is('admin/orientasi') ? 'active' : '' }}" href="{{ route('admin.orientasi.index') }}">
                             <span class="sidebar-text">Monitoring Nilai</span>
+                        </a>
+                        <a class="nav-link {{ request()->is('admin/orientasi-pegawai*') ? 'active' : '' }}" href="{{ route('admin.orientasi_pegawai.index') }}">
+                            <span class="sidebar-text">Orientasi Pegawai</span>
                         </a>
                     </div>
                 </div>

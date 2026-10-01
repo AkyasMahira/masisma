@@ -374,6 +374,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('admin/orientasi/api-data', [AdminOrientasiController::class, 'apiData'])->name('admin.orientasi.api');
     Route::delete('/admin/orientasi/{id}', [AdminOrientasiController::class, 'destroy'])->name('admin.orientasi.destroy');
 
+    // Orientasi Pegawai (data dari API SDM)
+    Route::prefix('admin/orientasi-pegawai')->name('admin.orientasi_pegawai.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\OrientasiPegawaiController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\OrientasiPegawaiController::class, 'store'])->name('store');
+        Route::delete('/{nip}', [\App\Http\Controllers\OrientasiPegawaiController::class, 'destroy'])->name('destroy');
+    });
+
     Route::prefix('admin/pengajuan')->name('admin.pengajuan.')->group(function () {
         Route::get('/', [PengajuanController::class, 'adminIndex'])->name('index');
         Route::post('/{pengajuan}/approve', [PengajuanController::class, 'approve'])->name('approve');

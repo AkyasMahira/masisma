@@ -174,6 +174,16 @@
                     <div>
                         <span class="kepanjangan-sindikat"></span>
                         <h1>Dashboard Orientasi</h1>
+                        @isset($orientasiKe)
+                        <div class="mb-2">
+                            <span class="badge" style="background:rgba(255,255,255,.22);color:#fff;font-weight:700;border-radius:20px;padding:6px 14px;">
+                                <i class="fas fa-redo me-1"></i> Orientasi ke-{{ $orientasiKe }}
+                            </span>
+                            <span class="badge" style="background:rgba(255,255,255,.22);color:#fff;font-weight:700;border-radius:20px;padding:6px 14px;">
+                                <i class="fas fa-calendar-alt me-1"></i> Tahun {{ $tahunOrientasi }}
+                            </span>
+                        </div>
+                        @endisset
                         <p class="mb-0 opacity-75 fw-bold">Selamat datang, {{ auth()->user()->name }}.<br>Selesaikan seluruh materi untuk membuka akses ujian.</p>
                     </div>
                     <div class="d-flex align-items-center gap-3">

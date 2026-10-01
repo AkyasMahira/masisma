@@ -116,25 +116,49 @@ class InstansiController extends Controller
 
     /* ======================= REKAP & LAPORAN ======================= */
 
-    public function rekap()
+    public function rekap(Request $request)
     {
         $user = $this->instansi();
         $mou = $user->mou;
         $today = now()->startOfDay();
 
+        $view = in_array($request->get('view'), ['prodi', 'ruangan', 'periode']) ? $request->get('view') : 'semua';
+
         $mahasiswas = Mahasiswa::where('mou_id', $mou->id)
-            ->with(['roomSequences.ruangan'])
+            ->with(['roomSequences.ruangan', 'ruangan'])
             ->orderBy('nm_mahasiswa')
             ->get()
             ->map(function ($m) use ($today) {
-                $selesai = ($m->status === 'nonaktif')
+                $m->is_selesai = ($m->status === 'nonaktif')
                     || ($m->tanggal_berakhir && Carbon::parse($m->tanggal_berakhir)->startOfDay()->lt($today));
-                $m->is_selesai = $selesai;
                 $m->orientasi = OrientasiResult::where('mahasiswa_id', $m->id)->first();
+                $m->nilai_akhir = (float) ($m->nilai_karu_final ?? 0);
                 return $m;
             });
 
-        return view('instansi.rekap', compact('mou', 'mahasiswas'));
+        // Statistik dashboard
+        $nilaiValid = $mahasiswas->where('nilai_akhir', '>', 0);
+        $stat = [
+            'total'    => $mahasiswas->count(),
+            'selesai'  => $mahasiswas->where('is_selesai', true)->count(),
+            'berjalan' => $mahasiswas->where('is_selesai', false)->count(),
+            'lulus_orientasi' => $mahasiswas->filter(fn($m) => $m->orientasi && $m->orientasi->status === 'lulus_orientasi')->count(),
+            'rata_nilai' => $nilaiValid->count() ? round($nilaiValid->avg('nilai_akhir'), 1) : 0,
+        ];
+
+        // Grouping sesuai mode
+        $grouped = null;
+        if ($view === 'prodi') {
+            $grouped = $mahasiswas->groupBy(fn($m) => $m->prodi ?: 'Tanpa Prodi')->sortKeys();
+        } elseif ($view === 'ruangan') {
+            $grouped = $mahasiswas->groupBy(fn($m) => optional($m->ruangan)->nm_ruangan ?: 'Tanpa Ruangan')->sortKeys();
+        } elseif ($view === 'periode') {
+            $grouped = $mahasiswas->groupBy(function ($m) {
+                return (optional($m->tanggal_mulai)->format('d/m/Y') ?? '?') . ' - ' . (optional($m->tanggal_berakhir)->format('d/m/Y') ?? '?');
+            })->sortKeys();
+        }
+
+        return view('instansi.rekap', compact('mou', 'mahasiswas', 'stat', 'view', 'grouped'));
     }
 
     public function sertifikatOrientasi($mahasiswaId)

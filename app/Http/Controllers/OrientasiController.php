@@ -362,8 +362,21 @@ class OrientasiController extends Controller
         $done = count($userProgress);
         $persen = $total > 0 ? ($done / $total) * 100 : 0;
         $allCompleted = ($total > 0 && $done >= $total);
-        
-        return view('orientasi.index', compact('materials', 'userProgress', 'persen', 'allCompleted', 'result'));
+
+        // Orientasi ke-berapa (urutan periode magang user ini) + tahun periode
+        $orientasiKe = 1;
+        $tahunOrientasi = now()->year;
+        if ($mahasiswaAktif) {
+            $orientasiKe = Mahasiswa::where('user_id', auth()->id())
+                ->where('created_at', '<=', $mahasiswaAktif->created_at)
+                ->count();
+            if ($orientasiKe < 1) $orientasiKe = 1;
+            $tahunOrientasi = $mahasiswaAktif->tanggal_mulai
+                ? \Carbon\Carbon::parse($mahasiswaAktif->tanggal_mulai)->year
+                : now()->year;
+        }
+
+        return view('orientasi.index', compact('materials', 'userProgress', 'persen', 'allCompleted', 'result', 'orientasiKe', 'tahunOrientasi'));
     }
 
     public function showMaterial($id)
