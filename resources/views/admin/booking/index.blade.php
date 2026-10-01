@@ -4,25 +4,40 @@
 
 @section('content')
 <style>
-    :root { --maroon:#7c1316; --maroon-light:#a3191d; --maroon-subtle:#fcf0f1; --radius:12px; --shadow:0 4px 20px rgba(0,0,0,.05); }
-    .header-card { background:#fff; border-radius:var(--radius); border-left:5px solid var(--maroon); padding:20px; margin-bottom:20px; box-shadow:0 2px 4px rgba(0,0,0,.05); }
+    :root { --maroon:#7c1316; --maroon-light:#a3191d; --maroon-subtle:#fcf0f1; --radius:14px; --shadow:0 4px 20px rgba(0,0,0,.05); }
+    .hero { background:linear-gradient(135deg,#7c1316,#5f0f12); color:#fff; border-radius:20px; padding:24px 28px; margin-bottom:1.25rem; box-shadow:0 14px 34px rgba(124,19,22,.28); position:relative; overflow:hidden; }
+    .hero::after { content:''; position:absolute; right:-40px; top:-40px; width:180px; height:180px; background:rgba(255,255,255,.07); border-radius:50%; }
+    .hero h4 { font-weight:800; margin:0 0 4px; }
+    .hero p { opacity:.9; margin:0; font-size:.88rem; }
+    .hero .btn-light-h { background:rgba(255,255,255,.95); color:var(--maroon); border:none; border-radius:50px; font-weight:700; padding:8px 18px; }
+    .hero .btn-light-h:hover { background:#fff; transform:translateY(-1px); }
+    .hero .wait-pill { background:rgba(255,255,255,.18); color:#fff; border-radius:50px; padding:8px 16px; font-weight:700; font-size:.82rem; }
     .table-card { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
-    .table thead th { background:var(--maroon-subtle); color:var(--maroon); font-size:.78rem; text-transform:uppercase; }
-    .pill { padding:3px 10px; border-radius:20px; font-size:.72rem; font-weight:700; }
+    .table { margin-bottom:0; }
+    .table thead th { background:var(--maroon-subtle); color:var(--maroon); font-size:.72rem; text-transform:uppercase; letter-spacing:.4px; border:none; padding:14px 16px; }
+    .table tbody td { padding:16px; border-top:1px solid #f1f5f9; vertical-align:middle; }
+    .table tbody tr:hover { background:#fcfbfb; }
+    .pill { padding:4px 12px; border-radius:20px; font-size:.72rem; font-weight:700; display:inline-flex; align-items:center; }
     .b-pending { background:#fef3c7; color:#b45309; } .b-approved { background:#dcfce7; color:#15803d; } .b-rejected { background:#fee2e2; color:#b91c1c; }
     .btn-maroon { background:var(--maroon); color:#fff; border:none; border-radius:8px; font-weight:600; }
     .btn-maroon:hover { background:var(--maroon-light); color:#fff; }
+    .filter-sel { border-radius:10px; border:1px solid #e2e8f0; font-weight:600; color:#475569; }
+    .act-ic { width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid #e2e8f0; background:#fff; color:#64748b; transition:.15s; }
+    .act-ic:hover { background:#f8fafc; }
+    .act-edit:hover { color:#b45309; border-color:#fcd34d; }
+    .act-del:hover { color:#b91c1c; border-color:#fca5a5; }
+    .inst-name { font-weight:700; color:#1f2937; }
 </style>
 
 <div class="container-fluid py-3">
-    <div class="header-card d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <div class="hero d-flex flex-wrap justify-content-between align-items-center gap-3">
         <div>
-            <h4 class="mb-1 fw-bold" style="color:var(--maroon);"><i class="bi bi-calendar-check me-2"></i>Booking Ruangan Instansi</h4>
-            <p class="mb-0 text-muted small">Permintaan booking kuota ruangan dari instansi mitra untuk anak magang.</p>
+            <h4><i class="bi bi-calendar-check me-2"></i>Booking Ruangan Instansi</h4>
+            <p>Permintaan booking kuota ruangan dari instansi mitra untuk anak magang.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <a href="{{ route('admin.booking.kalender') }}" class="btn btn-maroon btn-sm"><i class="bi bi-calendar3-week me-1"></i> Kalender</a>
-            <span class="pill b-pending"><i class="bi bi-hourglass-split me-1"></i>{{ $jmlPending }} menunggu</span>
+            <span class="wait-pill"><i class="bi bi-hourglass-split me-1"></i>{{ $jmlPending }} menunggu</span>
+            <a href="{{ route('admin.booking.kalender') }}" class="btn-light-h"><i class="bi bi-calendar3-week me-1"></i> Kalender</a>
         </div>
     </div>
 
@@ -42,8 +57,9 @@
 
     <div class="table-card">
         <div class="p-3 border-bottom">
-            <form method="GET" class="d-flex gap-2" style="max-width:280px;">
-                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+            <form method="GET" class="d-flex gap-2 align-items-center" style="max-width:300px;">
+                <span class="small fw-semibold text-muted"><i class="bi bi-funnel me-1"></i>Filter:</span>
+                <select name="status" class="form-select form-select-sm filter-sel" onchange="this.form.submit()">
                     <option value="">Semua status</option>
                     <option value="pending" {{ request('status')==='pending'?'selected':'' }}>Menunggu</option>
                     <option value="approved" {{ request('status')==='approved'?'selected':'' }}>Disetujui</option>
@@ -79,10 +95,10 @@
                         </td>
                         <td class="text-center">
                             <div class="mb-2 d-flex justify-content-center gap-1">
-                                <a href="{{ route('admin.booking.edit', $b->id) }}" class="btn btn-sm btn-outline-dark" title="Edit booking"><i class="bi bi-pencil"></i></a>
+                                <a href="{{ route('admin.booking.edit', $b->id) }}" class="act-ic act-edit" title="Edit booking"><i class="bi bi-pencil"></i></a>
                                 <form action="{{ route('admin.booking.destroy', $b->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus booking ini beserta daftar pesertanya?');">
                                     @csrf @method('DELETE')
-                                    <button class="btn btn-sm btn-outline-danger" title="Hapus booking"><i class="bi bi-trash"></i></button>
+                                    <button class="act-ic act-del" title="Hapus booking"><i class="bi bi-trash"></i></button>
                                 </form>
                             </div>
                             @if($b->status === 'pending')
