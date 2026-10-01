@@ -803,45 +803,50 @@ a.fc-event, a.fc-event:hover {
                 <div class="content-header">
                     <h5 class="content-title"><i class="bi bi-signpost-split me-2"></i> Rencana Rotasi Ruangan</h5>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="ps-4">Ruangan</th>
-                                <th>Kategori</th>
-                                <th>Periode</th>
-                                <th class="text-center">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($mahasiswa->roomSequences->sortBy('start_date') as $seq)
-                                @php
-                                    $today = now()->format('Y-m-d');
-                                    if ($today >= $seq->start_date && $today <= $seq->end_date) {
-                                        $st = '<span class="badge bg-success">Aktif</span>';
-                                    } elseif ($today > $seq->end_date) {
-                                        $st = '<span class="badge bg-secondary">Selesai</span>';
-                                    } else {
-                                        $st = '<span class="badge bg-warning text-dark">Akan Datang</span>';
-                                    }
-                                    $kat = $seq->ruangan->kategori ?? 'non_shift';
-                                @endphp
-                                <tr>
-                                    <td class="ps-4 fw-bold text-dark">{{ $seq->ruangan->nm_ruangan }}</td>
-                                    <td>
-                                        <span class="badge {{ $kat=='shift'?'bg-info text-dark':'bg-light text-dark border' }}">
-                                            {{ strtoupper($kat) }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        {{ \Carbon\Carbon::parse($seq->start_date)->format('d M') }} - 
-                                        {{ \Carbon\Carbon::parse($seq->end_date)->format('d M Y') }}
-                                    </td>
-                                    <td class="text-center">{!! $st !!}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                <style>
+                    .rotasi-timeline { position:relative; padding: 6px 10px 6px 34px; }
+                    .rotasi-timeline::before { content:''; position:absolute; left:14px; top:10px; bottom:10px; width:2px; background:#e9edf2; }
+                    .rotasi-item { position:relative; margin-bottom:14px; }
+                    .rotasi-item:last-child { margin-bottom:0; }
+                    .rotasi-item .r-dot { position:absolute; left:-27px; top:14px; width:16px; height:16px; border-radius:50%; border:3px solid #fff; }
+                    .rotasi-card { background:#fff; border:1px solid #eef2f7; border-left:4px solid #cbd5e1; border-radius:12px; padding:12px 16px; box-shadow:0 2px 10px rgba(0,0,0,.04); transition:.2s; }
+                    .rotasi-card:hover { box-shadow:0 8px 20px rgba(0,0,0,.08); transform:translateX(2px); }
+                    .rotasi-aktif { border-left-color:#16a34a; background:linear-gradient(90deg,#f0fdf4,#fff); }
+                    .rotasi-aktif .r-dot { background:#16a34a; box-shadow:0 0 0 4px rgba(22,163,74,.18); }
+                    .rotasi-selesai { border-left-color:#94a3b8; opacity:.85; }
+                    .rotasi-selesai .r-dot { background:#94a3b8; }
+                    .rotasi-datang { border-left-color:#f59e0b; }
+                    .rotasi-datang .r-dot { background:#f59e0b; }
+                    .r-room { font-weight:700; color:#1f2937; font-size:.98rem; }
+                    .r-pill { font-size:.68rem; font-weight:700; padding:2px 9px; border-radius:20px; }
+                </style>
+                <div class="p-2">
+                    <div class="rotasi-timeline">
+                        @foreach($mahasiswa->roomSequences->sortBy('start_date') as $seq)
+                            @php
+                                $today = now()->format('Y-m-d');
+                                if ($today >= $seq->start_date && $today <= $seq->end_date) { $cls='rotasi-aktif'; $lbl='Aktif'; $pill='bg-success text-white'; }
+                                elseif ($today > $seq->end_date) { $cls='rotasi-selesai'; $lbl='Selesai'; $pill='bg-secondary text-white'; }
+                                else { $cls='rotasi-datang'; $lbl='Akan Datang'; $pill='bg-warning text-dark'; }
+                                $kat = $seq->ruangan->kategori ?? 'non_shift';
+                            @endphp
+                            <div class="rotasi-item">
+                                <span class="r-dot"></span>
+                                <div class="rotasi-card {{ $cls }}">
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                        <div>
+                                            <div class="r-room"><i class="bi bi-door-open me-1 text-muted"></i>{{ $seq->ruangan->nm_ruangan }}</div>
+                                            <div class="small text-muted mt-1">
+                                                <i class="bi bi-calendar3 me-1"></i>{{ \Carbon\Carbon::parse($seq->start_date)->format('d M') }} – {{ \Carbon\Carbon::parse($seq->end_date)->format('d M Y') }}
+                                                <span class="r-pill {{ $kat=='shift'?'bg-info text-dark':'bg-light text-dark border' }} ms-2">{{ strtoupper($kat) }}</span>
+                                            </div>
+                                        </div>
+                                        <span class="r-pill {{ $pill }}">{{ $lbl }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
             @endif
