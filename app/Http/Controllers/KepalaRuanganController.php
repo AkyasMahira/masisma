@@ -191,11 +191,22 @@ class KepalaRuanganController extends Controller
                 ];
             }
 
-            // Simpan statistik yang sudah akurat per-ruangan
-            $mhs->stat_hadir = $countHadir;
-            $mhs->stat_alfa = $countAlfa;
-            $mhs->stat_dispen = $countDispen;
-            $mhs->stat_target = $countTarget; 
+            // Statistik SATU SUMBER dari model (scoped ke ruangan ini) agar
+            // angka & bobot (terlambat 90%, hari ini belum=bukan alpha) konsisten
+            // dengan dashboard mahasiswa & sertifikat.
+            $scopeDates = array_keys($assignedDates);
+            if ($filter != 'semua') {
+                $scopeDates = array_values(array_filter($scopeDates, function ($d) use ($startDate, $endDate) {
+                    return $d >= $startDate && $d <= $endDate;
+                }));
+            }
+            $resModel = $mhs->hitungKehadiran($scopeDates);
+            $sm = $resModel['stat'];
+            $mhs->stat_hadir  = $sm['hadir_fisik'];
+            $mhs->stat_alfa   = $sm['alpha'];
+            $mhs->stat_dispen = $sm['dispensasi_biasa'] + $sm['dispensasi_terlambat'];
+            $mhs->stat_target = $sm['target_sekarang'];
+            $mhs->stat_persen = $sm['target_sekarang'] > 0 ? round(min($sm['hadir'] / $sm['target_sekarang'] * 100, 100), 1) : 0;
             
             $mhs->timeline_logs = collect($logs)->filter(function($l) {
                 return in_array($l['status'], ['HADIR', 'ALFA', 'DISPEN']);

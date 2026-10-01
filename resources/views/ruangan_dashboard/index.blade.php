@@ -275,11 +275,8 @@
 
                    <td>
                             @php
-                                $total = $mhs->stat_target > 0 ? $mhs->stat_target : 1;
-                                // Dispen dihitung sebagai kehadiran yang sah secara persentase
-                                $persen = round((($mhs->stat_hadir + $mhs->stat_dispen) / $total) * 100);
-                                $persen = $persen > 100 ? 100 : $persen; // Kunci max 100%
-                                
+                                // Persentase dari model (satu sumber): sudah berbobot (terlambat 90%) & hari ini tak dihitung alpha
+                                $persen = round($mhs->stat_persen ?? 0);
                                 $color = $persen >= 100 ? 'success' : ($persen >= 75 ? 'primary' : ($persen >= 50 ? 'warning' : 'danger'));
                             @endphp
                             

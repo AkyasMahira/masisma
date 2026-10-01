@@ -1465,6 +1465,20 @@ public function dashboard()
         if ($today < $startStr && $totalHadirChart > 0) $persentase = 100;
         if ($persentase > 100) $persentase = 100;
 
+        // ==========================================================
+        // SATU SUMBER: timpa statistik dengan hasil model agar identik
+        // di semua dashboard/sertifikat (bobot terlambat 90%, hari ini bukan alpha)
+        // ==========================================================
+        $stM = $mahasiswa->statistik;
+        $targetTotal     = $stM->target_total;
+        $targetBerjalan  = $stM->target_sekarang;
+        $totalHadirFisik = $stM->hadir_fisik;
+        $totalIzinValid  = $stM->dispensasi_biasa + $stM->dispensasi_terlambat;
+        $totalHadirChart = $totalHadirFisik + $totalIzinValid;
+        $alpha           = $stM->alpha;
+        $chartSisa       = $stM->sisa_kerja;
+        $persentase      = round($mahasiswa->absensi_percentage);
+
         // 6. DATA RIWAYAT
         $absensi = \App\Models\Absensi::where('mahasiswa_id', $mahasiswa->id)
             ->orderBy('created_at', 'desc')->limit(5)->get();

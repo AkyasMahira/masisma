@@ -126,13 +126,39 @@ public function dispensasis()
      */
     public function getStatistikAttribute()
     {
+        return (object) $this->hitungKehadiran()['stat'];
+    }
+
+    /**
+     * Kalender kehadiran harian (SATU SUMBER untuk semua dashboard).
+     * [ 'YYYY-MM-DD' => ['status' => hadir|terlambat|izin|alpha|belum|libur, 'label' => ...] ]
+     */
+    public function getKalenderKehadiranAttribute()
+    {
+        return $this->hitungKehadiran()['kalender'];
+    }
+
+    /**
+     * SATU-SATUNYA logika perhitungan kehadiran (statistik + kalender).
+     * Dipakai oleh getStatistikAttribute, getKalenderKehadiranAttribute,
+     * getAbsensiPercentageAttribute, dan semua dashboard/sertifikat.
+     *
+     * Bobot: hadir normal / dispensasi biasa = 1 (100%), dispensasi terlambat = 0.9 (90%).
+     * Hari ini TIDAK dihitung alpha sampai hari berakhir (status 'belum').
+     */
+    public function hitungKehadiran($scopeDates = null)
+    {
+        // $scopeDates: null = seluruh periode magang (overall); array 'Y-m-d' = batasi ke tanggal itu
+        // (dipakai dashboard kepala ruangan untuk performa per-ruangan, formula tetap sama).
+        $scope = is_array($scopeDates) ? array_flip($scopeDates) : null;
+
         $default = [
-            'hadir' => 0, 'hadir_fisik' => 0, 'dispensasi_biasa' => 0, 'dispensasi_terlambat' => 0, 
-            'alpha' => 0, 'target_sekarang' => 0, 'target_total' => 0, 'sisa_kerja' => 0
+            'hadir' => 0, 'hadir_fisik' => 0, 'dispensasi_biasa' => 0, 'dispensasi_terlambat' => 0,
+            'alpha' => 0, 'target_sekarang' => 0, 'target_total' => 0, 'sisa_kerja' => 0,
         ];
 
         if (!$this->tanggal_mulai || !$this->tanggal_berakhir) {
-            return (object) $default;
+            return ['stat' => $default, 'kalender' => []];
         }
 
         try {
@@ -140,113 +166,89 @@ public function dispensasis()
             $endStr   = optional($this->tanggal_berakhir)->format('Y-m-d');
             $todayStr = now()->format('Y-m-d');
 
-            // 1. Ambil Peta Shift (Tanggal => Tipe)
             $shiftMap = $this->shiftSchedules()->pluck('shift_type', 'tanggal')->toArray();
 
-            // 2. Kumpulkan Hari Wajib Kerja Total
-            $targetTotal = 0;
-            $periodTotal = \Carbon\CarbonPeriod::create($startStr, $endStr);
-            foreach ($periodTotal as $dt) {
-                $dateStr = $dt->format('Y-m-d');
-                $shiftType = $shiftMap[$dateStr] ?? null;
-                
-                if ($shiftType === 'Libur') continue;
-                if (!$shiftType && !$this->weekend_aktif && $dt->isWeekend()) continue;
-                
-                $targetTotal++;
-            }
-
-            // 3. Kumpulkan Peta Hari Wajib Kerja Sampai Hari Ini
-            $calcEndStr = ($todayStr < $endStr) ? $todayStr : $endStr;
-            $targetSekarang = 0;
-            $workingDays = []; // Array untuk menyimpan tanggal wajib masuk
-            
-            if ($todayStr >= $startStr) {
-                $periodRunning = \Carbon\CarbonPeriod::create($startStr, $calcEndStr);
-                foreach ($periodRunning as $dt) {
-                    $dateStr = $dt->format('Y-m-d');
-                    $shiftType = $shiftMap[$dateStr] ?? null;
-                    
-                    if ($shiftType === 'Libur') continue;
-                    if (!$shiftType && !$this->weekend_aktif && $dt->isWeekend()) continue;
-
-                    $targetSekarang++;
-                    $workingDays[] = $dateStr;
+            // Peta dispensasi approved (biasa / terlambat) per tanggal
+            $dispBiasa = [];
+            $dispTerlambat = [];
+            foreach ($this->dispensasis()->where('status', 'approved')->get() as $disp) {
+                foreach (\Carbon\CarbonPeriod::create(\Carbon\Carbon::parse($disp->tanggal_mulai), \Carbon\Carbon::parse($disp->tanggal_selesai)) as $dt) {
+                    $tgl = $dt->format('Y-m-d');
+                    if (strtolower($disp->kategori) === 'terlambat') $dispTerlambat[$tgl] = true;
+                    else $dispBiasa[$tgl] = true;
                 }
             }
 
-            // 4. Cek Kehadiran Fisik Aktual (dari mesin absen)
-            $tappedInDates = [];
+            // Tanggal tap masuk aktual
+            $tappedIn = [];
             foreach ($this->absensis as $absen) {
                 if ($absen->type !== 'masuk' || !$absen->created_at) continue;
-                $tgl = $absen->created_at->format('Y-m-d');
-                
-                // Pastikan yang dihitung hanya hari wajib masuk
-                if (in_array($tgl, $workingDays) && !in_array($tgl, $tappedInDates)) {
-                    $tappedInDates[] = $tgl;
-                }
+                $tappedIn[$absen->created_at->format('Y-m-d')] = true;
             }
 
-            // 5. Cek Peta Dispensasi yang Approved
-            $dispensasiBiasaDates = [];
-            $dispensasiTerlambatDates = [];
-            
-            $approvedDispensasis = $this->dispensasis()->where('status', 'approved')->get();
-            foreach ($approvedDispensasis as $disp) {
-                $mulai = \Carbon\Carbon::parse($disp->tanggal_mulai);
-                $selesai = \Carbon\Carbon::parse($disp->tanggal_selesai);
-                $periodDisp = \Carbon\CarbonPeriod::create($mulai, $selesai);
+            $targetTotal = 0; $targetSekarang = 0;
+            $poinHadir = 0; $hadirFisik = 0; $totalBiasa = 0; $totalTerlambat = 0; $alpha = 0;
+            $kalender = [];
 
-                foreach ($periodDisp as $dt) {
-                    $tgl = $dt->format('Y-m-d');
-                    // Hanya memproses dispensasi jika hari tersebut memang hari wajib kerja (bukan pas hari libur)
-                    if (in_array($tgl, $workingDays)) {
-                        if (strtolower($disp->kategori) === 'terlambat') {
-                            $dispensasiTerlambatDates[] = $tgl;
-                        } else {
-                            $dispensasiBiasaDates[] = $tgl;
-                        }
-                    }
+            foreach (\Carbon\CarbonPeriod::create($startStr, $endStr) as $dt) {
+                $tgl = $dt->format('Y-m-d');
+
+                // Scope per-ruangan: lewati tanggal di luar penugasan ruangan tsb
+                if ($scope !== null && !isset($scope[$tgl])) continue;
+
+                $shiftType = $shiftMap[$tgl] ?? null;
+
+                // Hari libur / akhir pekan (tidak wajib)
+                $isLibur = ($shiftType === 'Libur') || (!$shiftType && !$this->weekend_aktif && $dt->isWeekend());
+                if ($isLibur) {
+                    $kalender[$tgl] = ['status' => 'libur', 'label' => 'Libur'];
+                    continue;
                 }
-            }
 
-            // 6. Hitung Poin Kehadiran (Logika Utama)
-            $poinHadir = 0;
-            $hadirFisik = 0;
-            $totalBiasa = 0;
-            $totalTerlambat = 0;
-            $alpha = 0;
+                $targetTotal++;
 
-            foreach ($workingDays as $tgl) {
-                // Cek hierarki kehadiran hari ini. 
-                // Jika dia telat, walaupun dia absen di mesin, tetap dihitung telat (0.8)
-                if (in_array($tgl, $dispensasiBiasaDates)) {
-                    $poinHadir += 1;
-                    $totalBiasa++;
-                } elseif (in_array($tgl, $dispensasiTerlambatDates)) {
-                    $poinHadir += 0.9;
-                    $totalTerlambat++;
-                } elseif (in_array($tgl, $tappedInDates)) {
-                    $poinHadir += 1;
-                    $hadirFisik++;
+                // Masa depan (belum sampai hari ini)
+                if ($tgl > $todayStr) {
+                    $kalender[$tgl] = ['status' => 'future', 'label' => '-'];
+                    continue;
+                }
+
+                $targetSekarang++;
+
+                if (isset($dispBiasa[$tgl])) {
+                    $poinHadir += 1; $totalBiasa++;
+                    $kalender[$tgl] = ['status' => 'izin', 'label' => 'Izin/Dispensasi'];
+                } elseif (isset($dispTerlambat[$tgl])) {
+                    $poinHadir += 0.9; $totalTerlambat++;
+                    $kalender[$tgl] = ['status' => 'terlambat', 'label' => 'Dispensasi Terlambat (90%)'];
+                } elseif (isset($tappedIn[$tgl])) {
+                    $poinHadir += 1; $hadirFisik++;
+                    $kalender[$tgl] = ['status' => 'hadir', 'label' => 'Hadir'];
+                } elseif ($tgl === $todayStr) {
+                    // Hari ini belum berakhir -> jangan hitung alpha
+                    $targetSekarang--;
+                    $kalender[$tgl] = ['status' => 'belum', 'label' => 'Belum absen (hari ini)'];
                 } else {
                     $alpha++;
+                    $kalender[$tgl] = ['status' => 'alpha', 'label' => 'Alpha'];
                 }
             }
 
-            return (object) [
-                'hadir' => $poinHadir, // Poin akhir ini yang menentukan kelulusan
-                'hadir_fisik' => $hadirFisik,
-                'dispensasi_biasa' => $totalBiasa,
-                'dispensasi_terlambat' => $totalTerlambat,
-                'alpha' => $alpha,
-                'target_sekarang' => $targetSekarang,
-                'target_total' => $targetTotal,
-                'sisa_kerja' => max(0, $targetTotal - $targetSekarang)
+            return [
+                'stat' => [
+                    'hadir' => $poinHadir,
+                    'hadir_fisik' => $hadirFisik,
+                    'dispensasi_biasa' => $totalBiasa,
+                    'dispensasi_terlambat' => $totalTerlambat,
+                    'alpha' => $alpha,
+                    'target_sekarang' => $targetSekarang,
+                    'target_total' => $targetTotal,
+                    'sisa_kerja' => max(0, $targetTotal - $targetSekarang),
+                ],
+                'kalender' => $kalender,
             ];
-
         } catch (\Exception $e) {
-            return (object) $default;
+            return ['stat' => $default, 'kalender' => []];
         }
     }
 
