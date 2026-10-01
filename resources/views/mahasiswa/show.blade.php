@@ -70,11 +70,22 @@
             }
         }
 
-        // 5. Hitung Final
-        $alphaCount = count($listAlpha);
-        $sisaPeriode = max(0, $targetTotal - $targetBerjalan);
-        $persentase = ($targetBerjalan > 0) ? round(($totalHadirReal / $targetBerjalan) * 100) : 0;
-        if($persentase > 100) $persentase = 100;
+        // 5. Hitung Final — SATU SUMBER dari model (konsisten dgn dashboard & sertifikat)
+        $stM = $mahasiswa->statistik;
+        $targetTotal    = $stM->target_total;
+        $targetBerjalan = $stM->target_sekarang;
+        $totalHadirReal = $stM->hadir_fisik + $stM->dispensasi_biasa + $stM->dispensasi_terlambat;
+        $alphaCount     = $stM->alpha;
+        $sisaPeriode    = $stM->sisa_kerja;
+        $persentase     = round($mahasiswa->absensi_percentage);
+
+        // Daftar tanggal alpha untuk modal, dari kalender model
+        $listAlpha = [];
+        foreach(($mahasiswa->kalender_kehadiran ?? []) as $tgl => $info) {
+            if(($info['status'] ?? '') === 'alpha') {
+                $listAlpha[] = \Carbon\Carbon::parse($tgl)->isoFormat('dddd, D MMMM Y');
+            }
+        }
     @endphp
 
     <style>

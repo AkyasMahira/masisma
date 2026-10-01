@@ -13,15 +13,21 @@
 
     body { background-color: var(--bg-light); }
 
-    /* Header Section - Konsisten dengan Modul SINDIKAT */
+    /* Header hero gradient maroon */
     .header-card {
-        background: white;
-        border-radius: 8px;
-        border-left: 5px solid var(--maroon-slg);
-        padding: 20px;
+        background: linear-gradient(135deg, #7c1316 0%, #5f0f12 100%);
+        border-radius: 20px;
+        padding: 24px 28px;
         margin-bottom: 25px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        box-shadow: 0 14px 34px rgba(124,19,22,.28);
+        position: relative;
+        overflow: hidden;
     }
+    .header-card::after { content:''; position:absolute; right:-40px; top:-40px; width:170px; height:170px; background:rgba(255,255,255,.07); border-radius:50%; }
+    .header-card h4 { color:#fff !important; font-weight:800; }
+    .header-card small { color:rgba(255,255,255,.85) !important; }
+    .header-card .btn-outline-secondary-custom { background:rgba(255,255,255,.9); color:var(--maroon-slg); border:none; border-radius:50px; font-weight:700; }
+    .header-card .btn-outline-secondary-custom:hover { background:#fff; }
 
     /* Filter Section - Matching pattern "Daftar Surat Balasan" */
     .filter-section {

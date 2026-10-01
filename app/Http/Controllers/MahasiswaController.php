@@ -1156,8 +1156,8 @@ private function storeSingleMahasiswa(Request $request)
             'user'
         ])->findOrFail($id);
 
-        // 2. Data Orientasi
-        $orientasi = \App\Models\OrientasiResult::where('user_id', $mahasiswa->user_id)->first();
+        // 2. Data Orientasi (per periode/mahasiswa_id, bukan user_id -> orientasi reset tiap pengajuan)
+        $orientasi = \App\Models\OrientasiResult::where('mahasiswa_id', $mahasiswa->id)->first();
 
         // 3. Setup Variabel Statistik Global
         $totalExpectedDays = 0; // Total Hari Kerja Keseluruhan
@@ -1235,11 +1235,8 @@ private function storeSingleMahasiswa(Request $request)
 // ... (Kode sebelumnya) ...
         $instansiName = $mahasiswa->mou ? ($mahasiswa->mou->nama_instansi ?? $mahasiswa->mou->nama_universitas) : 'Umum';
         
-        // 4. Kalkulasi Persentase yang Aman
-        $targetBerjalan = $totalActualDays + $totalIzin + $totalAlpaDays; 
-        $targetBerjalan = $targetBerjalan > 0 ? $targetBerjalan : 1; 
-        
-        $participationRate = round((($totalActualDays + $totalIzin) / $targetBerjalan) * 100);
+        // 4. Persentase — SATU SUMBER dari model (bobot terlambat 90%, hari ini bukan alpha)
+        $participationRate = round($mahasiswa->absensi_percentage);
         $participationRate = $participationRate > 100 ? 100 : $participationRate;
 
         // 5. Siapkan Data Nilai Ruangan
