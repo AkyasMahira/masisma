@@ -124,41 +124,66 @@ class InstansiController extends Controller
 
         $view = in_array($request->get('view'), ['prodi', 'ruangan', 'periode']) ? $request->get('view') : 'semua';
 
-        $mahasiswas = Mahasiswa::where('mou_id', $mou->id)
-            ->with(['roomSequences.ruangan', 'ruangan'])
-            ->orderBy('nm_mahasiswa')
-            ->get()
-            ->map(function ($m) use ($today) {
-                $m->is_selesai = ($m->status === 'nonaktif')
-                    || ($m->tanggal_berakhir && Carbon::parse($m->tanggal_berakhir)->startOfDay()->lt($today));
-                $m->orientasi = OrientasiResult::where('mahasiswa_id', $m->id)->first();
-                $m->nilai_akhir = (float) ($m->nilai_karu_final ?? 0);
-                return $m;
-            });
+        $selesaiFn = function ($status, $tglBerakhir) use ($today) {
+            return ($status === 'nonaktif')
+                || ($tglBerakhir && Carbon::parse($tglBerakhir)->startOfDay()->lt($today));
+        };
 
-        // Statistik dashboard
-        $nilaiValid = $mahasiswas->where('nilai_akhir', '>', 0);
+        // ---- STATISTIK (ringan: tanpa relasi, satu query) ----
+        $light = Mahasiswa::where('mou_id', $mou->id)->get(['id', 'status', 'tanggal_berakhir', 'nilai_ruangan_json']);
+        $allIds = $light->pluck('id');
+        $nilaiRata = $light->map(function ($m) {
+            $nr = is_array($m->nilai_ruangan_json) ? $m->nilai_ruangan_json : [];
+            $nr = array_filter($nr, 'is_numeric');
+            return count($nr) ? array_sum($nr) / count($nr) : null;
+        })->filter();
+        $lulusOrientasi = $allIds->count()
+            ? OrientasiResult::whereIn('mahasiswa_id', $allIds)->where('status', 'lulus_orientasi')->count() : 0;
         $stat = [
-            'total'    => $mahasiswas->count(),
-            'selesai'  => $mahasiswas->where('is_selesai', true)->count(),
-            'berjalan' => $mahasiswas->where('is_selesai', false)->count(),
-            'lulus_orientasi' => $mahasiswas->filter(fn($m) => $m->orientasi && $m->orientasi->status === 'lulus_orientasi')->count(),
-            'rata_nilai' => $nilaiValid->count() ? round($nilaiValid->avg('nilai_akhir'), 1) : 0,
+            'total'    => $light->count(),
+            'selesai'  => $light->filter(fn($m) => $selesaiFn($m->status, $m->tanggal_berakhir))->count(),
+            'berjalan' => $light->filter(fn($m) => !$selesaiFn($m->status, $m->tanggal_berakhir))->count(),
+            'lulus_orientasi' => $lulusOrientasi,
+            'rata_nilai' => $nilaiRata->count() ? round($nilaiRata->avg(), 1) : 0,
         ];
 
-        // Grouping sesuai mode
+        // ---- DAFTAR (pagination + eager load + batch orientasi) ----
+        $query = Mahasiswa::where('mou_id', $mou->id)
+            ->with(['roomSequences.ruangan', 'ruangan'])
+            ->orderBy('nm_mahasiswa');
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $query->where(function ($w) use ($q) {
+                $w->where('nm_mahasiswa', 'like', "%$q%")->orWhere('prodi', 'like', "%$q%");
+            });
+        }
+        // Mode grup butuh seluruh data agar grup utuh; mode "semua" dipaginate
+        $perPage = ($view === 'semua') ? 20 : 1000;
+        $pg = $query->paginate($perPage)->withQueryString();
+
+        $pageIds = collect($pg->items())->pluck('id');
+        $oriMap = $pageIds->count()
+            ? OrientasiResult::whereIn('mahasiswa_id', $pageIds)->get()->keyBy('mahasiswa_id') : collect();
+
+        $pg->getCollection()->transform(function ($m) use ($selesaiFn, $oriMap) {
+            $m->is_selesai = $selesaiFn($m->status, $m->tanggal_berakhir);
+            $m->orientasi = $oriMap->get($m->id);
+            $m->nilai_akhir = (float) ($m->nilai_karu_final ?? 0);
+            return $m;
+        });
+
         $grouped = null;
         if ($view === 'prodi') {
-            $grouped = $mahasiswas->groupBy(fn($m) => $m->prodi ?: 'Tanpa Prodi')->sortKeys();
+            $grouped = $pg->getCollection()->groupBy(fn($m) => $m->prodi ?: 'Tanpa Prodi')->sortKeys();
         } elseif ($view === 'ruangan') {
-            $grouped = $mahasiswas->groupBy(fn($m) => optional($m->ruangan)->nm_ruangan ?: 'Tanpa Ruangan')->sortKeys();
+            $grouped = $pg->getCollection()->groupBy(fn($m) => optional($m->ruangan)->nm_ruangan ?: 'Tanpa Ruangan')->sortKeys();
         } elseif ($view === 'periode') {
-            $grouped = $mahasiswas->groupBy(function ($m) {
+            $grouped = $pg->getCollection()->groupBy(function ($m) {
                 return (optional($m->tanggal_mulai)->format('d/m/Y') ?? '?') . ' - ' . (optional($m->tanggal_berakhir)->format('d/m/Y') ?? '?');
             })->sortKeys();
         }
 
-        return view('instansi.rekap', compact('mou', 'mahasiswas', 'stat', 'view', 'grouped'));
+        return view('instansi.rekap', compact('mou', 'pg', 'stat', 'view', 'grouped'));
     }
 
     public function sertifikatOrientasi($mahasiswaId)

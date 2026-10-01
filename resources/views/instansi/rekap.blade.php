@@ -49,20 +49,26 @@
     <div class="card-soft mb-3">
         <div class="p-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
             <div class="view-tabs d-flex flex-wrap gap-2">
-                <a href="{{ route('instansi.rekap') }}" class="vt {{ $view==='semua'?'active':'' }}"><i class="bi bi-list-ul me-1"></i>Semua</a>
-                <a href="{{ route('instansi.rekap', ['view'=>'prodi']) }}" class="vt {{ $view==='prodi'?'active':'' }}"><i class="bi bi-mortarboard me-1"></i>Per Prodi</a>
-                <a href="{{ route('instansi.rekap', ['view'=>'ruangan']) }}" class="vt {{ $view==='ruangan'?'active':'' }}"><i class="bi bi-door-open me-1"></i>Per Ruangan</a>
-                <a href="{{ route('instansi.rekap', ['view'=>'periode']) }}" class="vt {{ $view==='periode'?'active':'' }}"><i class="bi bi-calendar-range me-1"></i>Per Periode</a>
+                <a href="{{ route('instansi.rekap', ['q'=>request('q')]) }}" class="vt {{ $view==='semua'?'active':'' }}"><i class="bi bi-list-ul me-1"></i>Semua</a>
+                <a href="{{ route('instansi.rekap', ['view'=>'prodi','q'=>request('q')]) }}" class="vt {{ $view==='prodi'?'active':'' }}"><i class="bi bi-mortarboard me-1"></i>Per Prodi</a>
+                <a href="{{ route('instansi.rekap', ['view'=>'ruangan','q'=>request('q')]) }}" class="vt {{ $view==='ruangan'?'active':'' }}"><i class="bi bi-door-open me-1"></i>Per Ruangan</a>
+                <a href="{{ route('instansi.rekap', ['view'=>'periode','q'=>request('q')]) }}" class="vt {{ $view==='periode'?'active':'' }}"><i class="bi bi-calendar-range me-1"></i>Per Periode</a>
             </div>
-            <input type="text" id="cari" class="form-control form-control-sm" style="max-width:240px;" placeholder="Cari nama/prodi...">
+            <form method="GET" class="d-flex gap-2">
+                <input type="hidden" name="view" value="{{ $view }}">
+                <input type="text" name="q" value="{{ request('q') }}" class="form-control form-control-sm" style="max-width:240px;" placeholder="Cari nama/prodi...">
+                <button class="btn btn-sm" style="background:var(--maroon);color:#fff;"><i class="bi bi-search"></i></button>
+                @if(request('q'))<a href="{{ route('instansi.rekap', ['view'=>$view]) }}" class="btn btn-sm btn-light border">Reset</a>@endif
+            </form>
         </div>
     </div>
 
     {{-- Konten --}}
     @if($view === 'semua')
         <div class="card-soft" id="tblWrap">
-            @include('instansi._rekap_table', ['list' => $mahasiswas->values()])
+            @include('instansi._rekap_table', ['list' => $pg->getCollection()])
         </div>
+        <div class="mt-3">{{ $pg->links() }}</div>
     @else
         <div id="tblWrap">
             @forelse($grouped as $judul => $list)
@@ -79,14 +85,4 @@
         </div>
     @endif
 </div>
-
-<script>
-    document.getElementById('cari').addEventListener('keyup', function(){
-        var q=this.value.toLowerCase();
-        document.querySelectorAll('#tblWrap tbody tr').forEach(function(tr){
-            if(tr.classList.contains('collapse')) return;
-            tr.style.display = tr.innerText.toLowerCase().includes(q) ? '' : 'none';
-        });
-    });
-</script>
 @endsection
