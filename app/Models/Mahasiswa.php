@@ -38,6 +38,7 @@ class Mahasiswa extends Model
         'nilai_ruangan_json',
         'nilai_evaluasi',
         'kompetensi_json',
+        'kompetensi_dimiliki_json',
     ];
 
     protected $appends = ['sisa_hari', 'absensi_percentage', 'statistik'];
@@ -50,6 +51,7 @@ class Mahasiswa extends Model
         'nilai_evaluasi' => 'array',
         'nilai_ruangan_json' => 'array',
         'kompetensi_json' => 'array',
+        'kompetensi_dimiliki_json' => 'array',
     ];
 
     public const STATUS_ACTIVE = 'aktif';

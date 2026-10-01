@@ -11,13 +11,14 @@ class BookingRuangan extends Model
     protected $fillable = [
         'mou_id', 'ruangan_id', 'user_id', 'jenjang', 'prodi', 'semester',
         'jumlah_peserta', 'tanggal_mulai', 'tanggal_selesai', 'keterangan',
-        'status', 'catatan_admin', 'batas_pengisian',
+        'status', 'catatan_admin', 'batas_pengisian', 'kompetensi_dimiliki_json',
     ];
 
     protected $casts = [
         'tanggal_mulai' => 'date',
         'tanggal_selesai' => 'date',
         'batas_pengisian' => 'date',
+        'kompetensi_dimiliki_json' => 'array',
     ];
 
     // Apakah pengisian peserta masih dibuka (belum lewat batas)

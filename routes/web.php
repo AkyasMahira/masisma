@@ -551,6 +551,8 @@ Route::middleware(['auth'])->prefix('kepala-ruangan')->name('kepala_ruangan.')->
 // =========================================================================
 Route::middleware(['auth'])->prefix('instansi')->name('instansi.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\InstansiController::class, 'dashboard'])->name('dashboard');
+    Route::get('/rekap', [\App\Http\Controllers\InstansiController::class, 'rekap'])->name('rekap');
+    Route::get('/mahasiswa/{mahasiswaId}/sertifikat-orientasi', [\App\Http\Controllers\InstansiController::class, 'sertifikatOrientasi'])->name('sertifikat.orientasi');
     Route::get('/booking/create', [\App\Http\Controllers\InstansiController::class, 'bookingCreate'])->name('booking.create');
     Route::post('/booking', [\App\Http\Controllers\InstansiController::class, 'bookingStore'])->name('booking.store');
 

@@ -287,7 +287,7 @@
 
                     <div class="row g-4 mb-4">
                         <div class="col-12">
-                            <label class="form-label text-muted small">Tambahkan kompetensi/keahlian yang Anda kuasai (Opsional)</label>
+                            <label class="form-label text-muted small">Tambahkan kompetensi/keahlian yang <strong>ingin Anda kuasai</strong> (Opsional)</label>
                             
                             <div id="kompetensi-container">
                                 @php

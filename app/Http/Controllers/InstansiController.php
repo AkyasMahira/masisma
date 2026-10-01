@@ -7,11 +7,13 @@ use App\Models\BookingPeserta;
 use App\Models\Ruangan;
 use App\Models\User;
 use App\Models\Mahasiswa;
+use App\Models\OrientasiResult;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use PDF;
 
 class InstansiController extends Controller
 {
@@ -77,6 +79,8 @@ class InstansiController extends Controller
             'tanggal_mulai'  => 'required|date',
             'tanggal_selesai'=> 'required|date|after_or_equal:tanggal_mulai',
             'keterangan'     => 'nullable|string',
+            'kompetensi_dimiliki'   => 'nullable|array',
+            'kompetensi_dimiliki.*' => 'nullable|string|max:255',
         ], [
             'ruangan_id.required' => 'Pilih ruangan tujuan.',
             'tanggal_selesai.after_or_equal' => 'Tanggal selesai harus setelah atau sama dengan tanggal mulai.',
@@ -99,6 +103,7 @@ class InstansiController extends Controller
             'jenjang'         => $data['jenjang'] ?? null,
             'prodi'           => $data['prodi'] ?? null,
             'semester'        => $data['semester'] ?? null,
+            'kompetensi_dimiliki_json' => $request->filled('kompetensi_dimiliki') ? array_values(array_filter($request->kompetensi_dimiliki)) : [],
             'jumlah_peserta'  => $data['jumlah_peserta'],
             'tanggal_mulai'   => $data['tanggal_mulai'],
             'tanggal_selesai' => $data['tanggal_selesai'],
@@ -107,6 +112,49 @@ class InstansiController extends Controller
         ]);
 
         return redirect()->route('instansi.dashboard')->with('success', 'Permintaan booking ruangan terkirim. Menunggu persetujuan admin diklat.');
+    }
+
+    /* ======================= REKAP & LAPORAN ======================= */
+
+    public function rekap()
+    {
+        $user = $this->instansi();
+        $mou = $user->mou;
+        $today = now()->startOfDay();
+
+        $mahasiswas = Mahasiswa::where('mou_id', $mou->id)
+            ->with(['roomSequences.ruangan'])
+            ->orderBy('nm_mahasiswa')
+            ->get()
+            ->map(function ($m) use ($today) {
+                $selesai = ($m->status === 'nonaktif')
+                    || ($m->tanggal_berakhir && Carbon::parse($m->tanggal_berakhir)->startOfDay()->lt($today));
+                $m->is_selesai = $selesai;
+                $m->orientasi = OrientasiResult::where('mahasiswa_id', $m->id)->first();
+                return $m;
+            });
+
+        return view('instansi.rekap', compact('mou', 'mahasiswas'));
+    }
+
+    public function sertifikatOrientasi($mahasiswaId)
+    {
+        $user = $this->instansi();
+        $m = Mahasiswa::where('id', $mahasiswaId)->where('mou_id', $user->mou->id)->firstOrFail();
+
+        $result = OrientasiResult::where('mahasiswa_id', $m->id)->first();
+        if (!$result || $result->status !== 'lulus_orientasi') {
+            return back()->with('error', 'Mahasiswa ini belum lulus orientasi, sertifikat belum tersedia.');
+        }
+
+        $akun = User::find($result->user_id) ?? $m->user;
+        $pdf = PDF::loadView('orientasi.sertifikat_pdf', [
+            'user'       => $akun,
+            'date'       => Carbon::parse($result->updated_at)->format('d F Y'),
+            'pre_score'  => $result->pre_test_score,
+            'post_score' => $result->post_test_score,
+        ]);
+        return $pdf->stream('Sertifikat-Orientasi-' . ($akun->name ?? $m->nm_mahasiswa) . '.pdf');
     }
 
     /* ======================= DAFTAR ANAK MAGANG (PESERTA) ======================= */
@@ -144,8 +192,6 @@ class InstansiController extends Controller
             'jenis_kelamin' => 'nullable|in:L,P',
             'no_hp'         => 'nullable|string|max:30',
             'foto'          => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'kompetensi'    => 'nullable|array',
-            'kompetensi.*'  => 'nullable|string|max:255',
             'keterangan'    => 'nullable|string',
         ], [
             'nama.required' => 'Nama peserta wajib diisi.',
@@ -164,10 +210,6 @@ class InstansiController extends Controller
             $data['foto_path'] = 'uploads/pas_foto/' . $namaFile;
         }
         unset($data['foto']);
-
-        // Kompetensi (array of string, dibersihkan)
-        $data['kompetensi_json'] = $request->filled('kompetensi') ? array_values(array_filter($request->kompetensi)) : [];
-        unset($data['kompetensi']);
 
         $data['weekend_aktif'] = $request->boolean('weekend_aktif');
         $data['booking_ruangan_id'] = $booking->id;
@@ -399,7 +441,9 @@ class InstansiController extends Controller
                 'tipe_mahasiswa'   => in_array($peserta->tipe_mahasiswa, ['magang', 'pkl']) ? $peserta->tipe_mahasiswa : 'magang',
                 'weekend_aktif'    => (bool) $peserta->weekend_aktif,
                 'foto_path'        => $peserta->foto_path,
-                'kompetensi_json'  => $peserta->kompetensi_json ?: [],
+                // Kompetensi DIMILIKI auto dari booking (diisi instansi); kompetensi INGIN dikuasai diisi mahasiswa sendiri nanti.
+                'kompetensi_dimiliki_json' => $booking->kompetensi_dimiliki_json ?: [],
+                'kompetensi_json'  => [],
             ]);
 
             // 3. Auto-create RoomSequence dari booking (ruangan + periode) agar absensi langsung aktif.

@@ -299,6 +299,10 @@
                     <i class="bi bi-calendar-plus"></i>
                     <span class="sidebar-text">Booking Ruangan</span>
                 </a>
+                <a class="nav-link animate-item {{ request()->is('instansi/rekap') ? 'active' : '' }}" href="{{ route('instansi.rekap') }}">
+                    <i class="bi bi-clipboard2-data"></i>
+                    <span class="sidebar-text">Rekap & Laporan</span>
+                </a>
             @endif
 
             {{-- Evaluasi Diklat: tersedia untuk semua akun --}}

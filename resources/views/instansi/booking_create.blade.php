@@ -83,6 +83,15 @@
             </div>
 
             <div class="mt-3">
+                <label class="form-label">Kompetensi yang Dimiliki Peserta</label>
+                <div id="kdWrap">
+                    <input type="text" name="kompetensi_dimiliki[]" class="form-control mb-2" placeholder="mis. Pemasangan infus">
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="tambahKD()"><i class="bi bi-plus"></i> Tambah kompetensi</button>
+                <div class="room-hint text-muted mt-1"><i class="bi bi-info-circle me-1"></i>Kompetensi ini otomatis terisi ke semua mahasiswa dari booking ini saat disetujui.</div>
+            </div>
+
+            <div class="mt-3">
                 <label class="form-label">Keterangan</label>
                 <textarea name="keterangan" class="form-control" rows="3" placeholder="mis. Program magang mahasiswa D3 Keperawatan, jumlah & kebutuhan khusus...">{{ old('keterangan') }}</textarea>
             </div>
@@ -94,4 +103,13 @@
         </form>
     </div>
 </div>
+
+<script>
+    function tambahKD(){
+        var w=document.getElementById('kdWrap');
+        var i=document.createElement('input');
+        i.type='text'; i.name='kompetensi_dimiliki[]'; i.className='form-control mb-2'; i.placeholder='Kompetensi lain';
+        w.appendChild(i);
+    }
+</script>
 @endsection

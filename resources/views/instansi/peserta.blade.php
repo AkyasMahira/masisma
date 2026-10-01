@@ -83,26 +83,10 @@
                         <label class="form-check-label small" for="wk">Aktif di akhir pekan (Sabtu/Minggu)</label>
                     </div>
                     <div class="mb-2"><label class="form-label small fw-semibold">Pas Foto <span class="text-muted">(untuk ID card)</span></label><input type="file" name="foto" class="form-control form-control-sm" accept="image/*"></div>
-                    <div class="mb-2">
-                        <label class="form-label small fw-semibold">Kompetensi</label>
-                        <div id="kompetensiWrap">
-                            <input type="text" name="kompetensi[]" class="form-control form-control-sm mb-1" placeholder="mis. Pemasangan infus">
-                        </div>
-                        <button type="button" class="btn btn-sm btn-outline-secondary w-100" onclick="tambahKompetensi()"><i class="bi bi-plus"></i> Tambah kompetensi</button>
-                    </div>
+                    <div class="alert alert-light border small py-2 mb-2"><i class="bi bi-info-circle me-1"></i>Kompetensi yang <strong>dimiliki</strong> diisi sekali di form booking (berlaku untuk semua peserta).</div>
                     <div class="mb-3"><label class="form-label small fw-semibold">Keterangan</label><textarea name="keterangan" class="form-control form-control-sm" rows="2">{{ old('keterangan') }}</textarea></div>
                     <button type="submit" class="btn-maroon btn-sm w-100"><i class="bi bi-plus-lg me-1"></i> Tambah</button>
                 </form>
-                <script>
-                    function tambahKompetensi() {
-                        var w = document.getElementById('kompetensiWrap');
-                        var i = document.createElement('input');
-                        i.type = 'text'; i.name = 'kompetensi[]';
-                        i.className = 'form-control form-control-sm mb-1';
-                        i.placeholder = 'Kompetensi lain';
-                        w.appendChild(i);
-                    }
-                </script>
                 @endif
             </div>
         </div>

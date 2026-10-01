@@ -18,24 +18,47 @@
         --border-color: #e2e8f0;
     }
 
+    /* Hero header */
+    .rolling-hero {
+        background: linear-gradient(135deg, #7c1316 0%, #5f0f12 100%);
+        border-radius: 20px;
+        padding: 20px 26px;
+        margin-bottom: 1.75rem;
+        box-shadow: 0 14px 34px rgba(124,19,22,.28);
+        position: relative;
+        overflow: hidden;
+    }
+    .rolling-hero::after { content:''; position:absolute; right:-40px; top:-40px; width:170px; height:170px; background:rgba(255,255,255,.07); border-radius:50%; }
+    .rolling-hero .avatar { width:56px; height:56px; border-radius:14px; background:rgba(255,255,255,.95); color:#7c1316; font-weight:800; font-size:1.5rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .rolling-hero h4 { color:#fff; font-weight:800; }
+    .rolling-hero .sub { background:rgba(255,255,255,.18); color:#fff; border-radius:20px; padding:3px 12px; font-size:.72rem; font-weight:700; }
+    .rolling-hero .btn-ghost-w { background:rgba(255,255,255,.15); color:#fff; border:none; border-radius:50px; font-weight:700; padding:9px 20px; }
+    .rolling-hero .btn-ghost-w:hover { background:rgba(255,255,255,.28); color:#fff; }
+    .rolling-hero .btn-save-w { background:#fff; color:#15803d; border:none; border-radius:50px; font-weight:700; padding:9px 20px; }
+    .rolling-hero .btn-save-w:hover { background:#f0fdf4; transform:translateY(-1px); }
+
     /* Card Styling */
     .master-card {
         background: white;
         border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         border: 1px solid var(--border-color);
         margin-bottom: 25px;
-        overflow: visible; 
+        overflow: visible;
+        transition: box-shadow .2s;
     }
+    .master-card:hover { box-shadow: 0 10px 28px rgba(124,19,22,.10); }
 
     .card-header-modern {
-        padding: 20px 25px;
+        padding: 18px 24px;
         border-bottom: 1px solid var(--border-color);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: #fff;
+        background: #fcf0f1;
         border-radius: 16px 16px 0 0;
+        font-weight: 700;
+        color: #7c1316;
     }
 
     /* Form Elements */
@@ -154,23 +177,20 @@
 
     <div class="container-fluid py-3 py-md-4">
         
-        {{-- HEADER (Dibuat Responsive Flexbox) --}}
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        {{-- HEADER (hero maroon) --}}
+        <div class="rolling-hero d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
             <div class="d-flex align-items-center gap-3">
-                <div class="bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center text-danger fw-bold fs-4 flex-shrink-0" 
-                     style="width: 55px; height: 55px; border: 2px solid #7c1316;">
-                    {{ substr($mahasiswa->nm_mahasiswa, 0, 1) }}
-                </div>
+                <div class="avatar">{{ substr($mahasiswa->nm_mahasiswa, 0, 1) }}</div>
                 <div>
-                    <h4 class="fw-bold mb-0 text-dark" style="font-size: clamp(1.1rem, 2.5vw, 1.5rem);">{{ $mahasiswa->nm_mahasiswa }}</h4>
-                    <span class="badge bg-light text-secondary border mt-1">Manajemen Rolling & Shift</span>
+                    <h4 class="mb-1" style="font-size: clamp(1.1rem, 2.5vw, 1.5rem);">{{ $mahasiswa->nm_mahasiswa }}</h4>
+                    <span class="sub"><i class="bi bi-arrow-repeat me-1"></i>Manajemen Rolling &amp; Shift</span>
                 </div>
             </div>
-            
+
             {{-- Action Buttons --}}
             <div class="action-buttons d-flex gap-2">
-                <a href="{{ route('mahasiswa.show', $mahasiswa->id) }}" class="btn btn-light border fw-bold px-4 rounded-pill">Batal</a>
-                <button type="button" onclick="submitForm()" class="btn btn-success fw-bold px-4 rounded-pill shadow-sm d-flex align-items-center">
+                <a href="{{ route('mahasiswa.show', $mahasiswa->id) }}" class="btn btn-ghost-w">Batal</a>
+                <button type="button" onclick="submitForm()" class="btn btn-save-w d-flex align-items-center">
                     <i class="bi bi-save me-2"></i>Simpan Perubahan
                 </button>
             </div>
