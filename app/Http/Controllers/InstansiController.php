@@ -58,11 +58,41 @@ class InstansiController extends Controller
             return $r;
         });
 
+        // Kalender okupansi: booking approved (semua instansi) + booking milik sendiri (semua status)
+        $myMouId = $user->mou->id;
+        $bookings = BookingRuangan::with('ruangan')
+            ->where(function ($q) use ($myMouId) {
+                $q->where('status', 'approved')->orWhere('mou_id', $myMouId);
+            })
+            ->where('status', '!=', 'rejected')
+            ->orderBy('tanggal_mulai')
+            ->get();
+
+        $palette = ['#7c1316', '#1d4ed8', '#15803d', '#b45309', '#7e22ce', '#0e7490', '#be123c', '#4d7c0f'];
+        $events = [];
+        foreach ($bookings as $b) {
+            $mine = (int) $b->mou_id === (int) $myMouId;
+            $namaRuangan = optional($b->ruangan)->nm_ruangan ?? 'Ruangan';
+            $warna = $palette[($b->ruangan_id ?? 0) % count($palette)];
+            if ($b->status === 'pending') $warna = '#94a3b8';
+            $events[] = [
+                'title' => $mine
+                    ? 'Booking Anda · ' . $namaRuangan . ' (' . $b->jumlah_peserta . ')'
+                    : $namaRuangan . ' · terisi (' . $b->jumlah_peserta . ' org)',
+                'start' => optional($b->tanggal_mulai)->format('Y-m-d'),
+                'end'   => optional($b->tanggal_selesai)->copy()->addDay()->format('Y-m-d'),
+                'color' => $mine ? $warna : '#cbd5e1',
+                'textColor' => $mine ? '#fff' : '#334155',
+                'extendedProps' => ['mine' => $mine, 'status' => $b->status],
+            ];
+        }
+
         return view('instansi.booking_create', [
             'mou'         => $user->mou,
             'ruangans'    => $ruangans,
             'listProdi'   => \App\Models\MasterProdi::grouped(),
             'jenjangList' => \App\Models\MasterProdi::jenjangList(),
+            'events'      => $events,
         ]);
     }
 

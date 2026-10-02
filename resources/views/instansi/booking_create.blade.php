@@ -5,8 +5,18 @@
 @section('content')
 <style>
     :root { --maroon:#7c1316; --maroon-light:#a3191d; --maroon-subtle:#fcf0f1; }
-    .form-card { background:#fff; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.08); max-width:760px; margin:0 auto; overflow:hidden; }
+    .form-card { background:#fff; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.08); overflow:hidden; }
     .card-head { background:var(--maroon); color:#fff; padding:1.2rem 1.5rem; border-bottom:4px solid var(--maroon-light); }
+    .cal-card { background:#fff; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.08); padding:16px; }
+    .legend { display:flex; gap:14px; flex-wrap:wrap; font-size:.72rem; color:#64748b; margin-top:10px; }
+    .legend .dot { width:12px; height:12px; border-radius:3px; display:inline-block; margin-right:4px; vertical-align:middle; }
+    .fc { font-size:.78rem; }
+    .fc .fc-toolbar-title { font-size:.95rem; font-weight:800; color:var(--maroon); }
+    .fc .fc-button-primary { background:var(--maroon); border-color:var(--maroon); font-size:.72rem; padding:3px 8px; }
+    .fc .fc-daygrid-day-number { text-decoration:none; color:#475569; font-size:.75rem; }
+    .fc .fc-col-header-cell-cushion { text-decoration:none; color:var(--maroon); font-weight:700; font-size:.68rem; }
+    .fc .fc-day-today { background:#fff7ed !important; }
+    .fc-daygrid-event { border:none !important; border-radius:5px !important; padding:1px 5px !important; font-size:.66rem; font-weight:600; }
     .form-label { font-weight:600; font-size:.88rem; color:#2c3e50; }
     .form-control, .form-select { border-radius:10px; padding:.6rem .8rem; }
     .form-control:focus, .form-select:focus { border-color:var(--maroon); box-shadow:0 0 0 .2rem rgba(124,19,22,.12); }
@@ -17,6 +27,8 @@
 </style>
 
 <div class="container-fluid py-4">
+  <div class="row g-4">
+    <div class="col-lg-7">
     <div class="form-card">
         <div class="card-head"><h5 class="mb-0 fw-bold"><i class="bi bi-calendar-plus me-2"></i>Booking Ruangan untuk Anak Magang</h5></div>
 
@@ -102,8 +114,24 @@
             </div>
         </form>
     </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="cal-card">
+            <h6 class="fw-bold mb-2" style="color:var(--maroon);"><i class="bi bi-calendar3-week me-1"></i>Kalender Ketersediaan Ruangan</h6>
+            <p class="text-muted small mb-2">Lihat jadwal yang sudah ter-booking sebelum mengajukan.</p>
+            <div id="calOccup"></div>
+            <div class="legend">
+                <span><span class="dot" style="background:#7c1316;"></span>Booking Anda</span>
+                <span><span class="dot" style="background:#cbd5e1;"></span>Ruangan terisi</span>
+                <span><span class="dot" style="background:#94a3b8;"></span>Menunggu ACC</span>
+            </div>
+        </div>
+    </div>
+  </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 <script>
     function tambahKD(){
         var w=document.getElementById('kdWrap');
@@ -111,5 +139,19 @@
         i.type='text'; i.name='kompetensi_dimiliki[]'; i.className='form-control mb-2'; i.placeholder='Kompetensi lain';
         w.appendChild(i);
     }
+    document.addEventListener('DOMContentLoaded', function () {
+        var el = document.getElementById('calOccup');
+        if (el && window.FullCalendar) {
+            var c = new FullCalendar.Calendar(el, {
+                initialView: 'dayGridMonth',
+                locale: 'id',
+                height: 'auto',
+                headerToolbar: { left: 'prev,next', center: 'title', right: 'today' },
+                buttonText: { today: 'Kini' },
+                events: @json($events ?? [])
+            });
+            c.render();
+        }
+    });
 </script>
 @endsection
