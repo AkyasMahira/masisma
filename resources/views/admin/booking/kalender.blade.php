@@ -83,6 +83,33 @@
         </div>
     </div>
 </div>
+
+{{-- Modal detail booking --}}
+<div class="modal fade" id="modalBooking" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:16px; overflow:hidden; border:none;">
+            <div class="modal-header text-white" style="background:linear-gradient(135deg,#7c1316,#5f0f12);">
+                <h6 class="modal-title fw-bold"><i class="bi bi-calendar-check me-2"></i><span id="mb-instansi">Detail Booking</span></h6>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-2 mb-3">
+                    <div class="col-6"><div class="text-muted small">Ruangan</div><div class="fw-bold" id="mb-ruangan">-</div></div>
+                    <div class="col-6"><div class="text-muted small">Periode</div><div class="fw-bold" id="mb-periode">-</div></div>
+                    <div class="col-6"><div class="text-muted small">Prodi / Jenjang</div><div class="fw-semibold" id="mb-prodi">-</div></div>
+                    <div class="col-6"><div class="text-muted small">Status</div><div id="mb-status">-</div></div>
+                </div>
+                <div class="fw-bold mb-2" style="color:#7c1316;"><i class="bi bi-people-fill me-1"></i>Daftar Anak Magang (<span id="mb-count">0</span>)</div>
+                <div class="table-responsive" style="max-height:280px; overflow:auto;">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead><tr><th>No</th><th>Nama</th><th>NIM</th><th>Prodi</th><th class="text-center">Status</th></tr></thead>
+                        <tbody id="mb-peserta"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -100,7 +127,34 @@
             events: @json($events),
             eventDidMount: function (info) {
                 var p = info.event.extendedProps;
-                info.el.title = p.instansi + ' — ' + p.ruangan + ' (' + p.peserta + ' orang, ' + (p.status === 'pending' ? 'menunggu ACC' : 'disetujui') + ')';
+                info.el.title = 'Klik untuk detail — ' + p.instansi + ' (' + p.ruangan + ')';
+            },
+            eventClick: function (info) {
+                info.jsEvent.preventDefault();
+                var p = info.event.extendedProps;
+                document.getElementById('mb-instansi').textContent = p.instansi || 'Detail Booking';
+                document.getElementById('mb-ruangan').textContent = p.ruangan || '-';
+                document.getElementById('mb-periode').textContent = p.periode || '-';
+                document.getElementById('mb-prodi').textContent = p.prodi || '-';
+                var stMap = { pending: ['#fef3c7','#b45309','Menunggu'], approved: ['#dcfce7','#15803d','Disetujui'] };
+                var st = stMap[p.status] || ['#f1f5f9','#64748b', p.status];
+                document.getElementById('mb-status').innerHTML = '<span style="background:'+st[0]+';color:'+st[1]+';padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700;">'+st[2]+'</span>';
+
+                var list = p.pesertaList || [];
+                document.getElementById('mb-count').textContent = list.length;
+                var pMap = { belum:['#fee2e2','#b91c1c','Menunggu'], sudah:['#dcfce7','#15803d','Mahasiswa'], approved:['#dcfce7','#15803d','Mahasiswa'], lulus:['#dbeafe','#1d4ed8','Lulus'] };
+                var rows = '';
+                if (list.length === 0) {
+                    rows = '<tr><td colspan="5" class="text-center text-muted py-3">Belum ada peserta diisi instansi.</td></tr>';
+                } else {
+                    list.forEach(function (x, i) {
+                        var ps = pMap[x.status] || ['#f1f5f9','#64748b', (x.status||'-')];
+                        rows += '<tr><td>'+(i+1)+'</td><td class="fw-semibold">'+(x.nama||'-')+'</td><td>'+(x.nim||'-')+'</td><td>'+(x.prodi||'-')+'</td>'
+                             + '<td class="text-center"><span style="background:'+ps[0]+';color:'+ps[1]+';padding:2px 8px;border-radius:20px;font-size:.68rem;font-weight:700;">'+ps[2]+'</span></td></tr>';
+                    });
+                }
+                document.getElementById('mb-peserta').innerHTML = rows;
+                new bootstrap.Modal(document.getElementById('modalBooking')).show();
             }
         });
         calendar.render();

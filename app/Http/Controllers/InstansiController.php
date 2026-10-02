@@ -414,6 +414,11 @@ class InstansiController extends Controller
                     'ruangan'  => $namaRuangan,
                     'peserta'  => $b->jumlah_peserta,
                     'status'   => $b->status,
+                    'periode'  => optional($b->tanggal_mulai)->format('d/m/Y') . ' - ' . optional($b->tanggal_selesai)->format('d/m/Y'),
+                    'prodi'    => trim(($b->jenjang ? $b->jenjang . ' ' : '') . ($b->prodi ?? '')) . ($b->semester ? ' · smt ' . $b->semester : ''),
+                    'pesertaList' => $b->pesertas->map(function ($p) {
+                        return ['nama' => $p->nama, 'nim' => $p->nim, 'prodi' => $p->prodi, 'status' => $p->status];
+                    })->values(),
                 ],
             ];
 
