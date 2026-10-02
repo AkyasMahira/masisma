@@ -9,8 +9,9 @@
     .hero::after { content:''; position:absolute; right:-40px; top:-40px; width:180px; height:180px; background:rgba(255,255,255,.07); border-radius:50%; }
     .hero h4 { font-weight:800; margin:0 0 4px; }
     .hero p { opacity:.9; margin:0; font-size:.88rem; }
-    .hero .btn-light-h { background:rgba(255,255,255,.95); color:var(--maroon); border:none; border-radius:50px; font-weight:700; padding:8px 18px; }
-    .hero .btn-light-h:hover { background:#fff; transform:translateY(-1px); }
+    .hero .btn-light-h { background:#fff; color:var(--maroon); border:none; border-radius:50px; font-weight:700; padding:8px 18px; text-decoration:none; display:inline-flex; align-items:center; box-shadow:0 4px 12px rgba(0,0,0,.15); transition:.2s; }
+    .hero .btn-light-h:hover { background:#fff; color:var(--maroon); text-decoration:none; transform:translateY(-1px); box-shadow:0 8px 18px rgba(0,0,0,.2); }
+    .hero .btn-light-h i { text-decoration:none; }
     .hero .wait-pill { background:rgba(255,255,255,.18); color:#fff; border-radius:50px; padding:8px 16px; font-weight:700; font-size:.82rem; }
     .table-card { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
     .table { margin-bottom:0; }
