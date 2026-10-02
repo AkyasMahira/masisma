@@ -4,33 +4,53 @@
 
 @section('content')
 <style>
-    :root { --maroon:#7c1316; --maroon-light:#a3191d; --maroon-subtle:#fcf0f1; --radius:12px; --shadow:0 4px 20px rgba(0,0,0,.05); }
-    .header-card { background:#fff; border-radius:var(--radius); border-left:5px solid var(--maroon); padding:20px; margin-bottom:20px; box-shadow:0 2px 4px rgba(0,0,0,.05); }
+    :root { --maroon:#7c1316; --maroon-light:#a3191d; --maroon-subtle:#fcf0f1; --radius:14px; --shadow:0 4px 20px rgba(0,0,0,.05); }
+    .hero { background:linear-gradient(135deg,#7c1316,#5f0f12); color:#fff; border-radius:20px; padding:24px 28px; margin-bottom:1.25rem; box-shadow:0 14px 34px rgba(124,19,22,.28); position:relative; overflow:hidden; }
+    .hero::after { content:''; position:absolute; right:-40px; top:-40px; width:180px; height:180px; background:rgba(255,255,255,.07); border-radius:50%; pointer-events:none; }
+    .hero h4 { font-weight:800; margin:0 0 4px; }
+    .hero p { opacity:.9; margin:0; font-size:.88rem; }
+    .hero .btn-light-h { background:#fff; color:var(--maroon); border:none; border-radius:50px; padding:9px 20px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; box-shadow:0 4px 12px rgba(0,0,0,.15); transition:.2s; }
+    .hero .btn-light-h:hover { color:var(--maroon); transform:translateY(-1px); box-shadow:0 8px 18px rgba(0,0,0,.22); }
     .cal-card, .side-card { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); padding:18px; }
-    .btn-outline-custom { border:1.5px solid var(--maroon); color:var(--maroon); background:#fff; border-radius:8px; padding:8px 16px; font-weight:600; text-decoration:none; }
-    .btn-outline-custom:hover { background:var(--maroon-subtle); }
-    .room-group { margin-bottom:16px; }
-    .room-title { font-weight:700; font-size:.9rem; display:flex; align-items:center; gap:8px; padding-bottom:6px; border-bottom:2px solid #f1f5f9; margin-bottom:8px; }
-    .room-dot { width:12px; height:12px; border-radius:3px; flex-shrink:0; }
-    .book-item { font-size:.8rem; padding:8px 10px; border-radius:8px; background:#f8fafc; margin-bottom:6px; border-left:3px solid #cbd5e1; }
-    .book-item .ins { font-weight:600; color:#2c3e50; }
-    .book-item .meta { color:#64748b; font-size:.72rem; }
+    .room-group { margin-bottom:18px; }
+    .room-title { font-weight:700; font-size:.9rem; display:flex; align-items:center; gap:8px; padding-bottom:6px; border-bottom:2px solid #f1f5f9; margin-bottom:10px; }
+    .room-dot { width:12px; height:12px; border-radius:4px; flex-shrink:0; }
+    .book-item { font-size:.8rem; padding:10px 12px; border-radius:10px; background:#f8fafc; margin-bottom:8px; border-left:4px solid #cbd5e1; }
+    .book-item .ins { font-weight:700; color:#1f2937; }
+    .book-item .meta { color:#64748b; font-size:.72rem; margin-top:2px; line-height:1.5; }
     .b-pending-txt { color:#b45309; } .b-approved-txt { color:#15803d; }
-    /* FullCalendar tweaks */
-    .fc .fc-toolbar-title { font-size:1.1rem; font-weight:700; color:var(--maroon); }
-    .fc .fc-button-primary { background:var(--maroon); border-color:var(--maroon); }
+
+    /* ===== FullCalendar polish ===== */
+    .fc { font-size:.86rem; }
+    .fc .fc-toolbar-title { font-size:1.15rem; font-weight:800; color:var(--maroon); }
+    .fc .fc-button-primary { background:var(--maroon); border-color:var(--maroon); border-radius:8px; font-weight:600; text-transform:capitalize; box-shadow:none; }
     .fc .fc-button-primary:hover { background:var(--maroon-light); border-color:var(--maroon-light); }
-    .fc .fc-button-primary:not(:disabled).fc-button-active { background:var(--maroon-light); border-color:var(--maroon-light); }
-    .fc-event { cursor:pointer; font-size:.72rem; }
+    .fc .fc-button-primary:not(:disabled).fc-button-active,
+    .fc .fc-button-primary:not(:disabled):active { background:var(--maroon-light); border-color:var(--maroon-light); }
+    .fc .fc-button:focus { box-shadow:0 0 0 .2rem rgba(124,19,22,.2); }
+    /* header hari */
+    .fc .fc-col-header-cell { background:var(--maroon-subtle); }
+    .fc .fc-col-header-cell-cushion { text-decoration:none; color:var(--maroon); font-weight:700; padding:8px 4px; text-transform:uppercase; font-size:.72rem; letter-spacing:.3px; }
+    /* angka tanggal: hilangkan underline link */
+    .fc .fc-daygrid-day-number { text-decoration:none; color:#475569; font-weight:600; padding:6px 8px; }
+    .fc .fc-daygrid-day.fc-day-today { background:#fff7ed !important; }
+    .fc .fc-day-today .fc-daygrid-day-number { color:var(--maroon); font-weight:800; }
+    .fc .fc-day-sat, .fc .fc-day-sun { background:#fafafa; }
+    .fc .fc-daygrid-day-frame { min-height:92px; }
+    .fc-theme-standard td, .fc-theme-standard th { border-color:#eef2f7; }
+    /* event jadi pill */
+    .fc-daygrid-event { border:none !important; border-radius:6px !important; padding:2px 8px !important; font-size:.72rem; font-weight:600; cursor:pointer; margin:2px 4px; box-shadow:0 1px 3px rgba(0,0,0,.12); }
+    .fc-daygrid-event .fc-event-title { white-space:normal; }
+    .fc-list-event:hover td { background:var(--maroon-subtle); }
 </style>
 
 <div class="container-fluid py-3">
-    <div class="header-card d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <div class="hero d-flex flex-wrap justify-content-between align-items-center gap-3">
         <div>
-            <h4 class="mb-1 fw-bold" style="color:var(--maroon);"><i class="bi bi-calendar3-week me-2"></i>Kalender Booking Ruangan</h4>
-            <p class="mb-0 text-muted small">Jadwal booking instansi mitra per ruangan. Warna abu = menunggu ACC.</p>
+            <h4><i class="bi bi-calendar3-week me-2"></i>Kalender Booking Ruangan</h4>
+            <p>Jadwal booking instansi mitra per ruangan. Warna abu = menunggu ACC.</p>
         </div>
-        <a href="{{ route('admin.booking.index') }}" class="btn-outline-custom"><i class="bi bi-list-ul me-1"></i> Daftar Booking</a>
+        <a href="{{ route('admin.booking.index') }}" class="btn-light-h"><i class="bi bi-list-ul me-1"></i> Daftar Booking</a>
     </div>
 
     <div class="row g-3">
