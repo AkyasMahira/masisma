@@ -35,7 +35,33 @@
             </tr>
             <tr class="collapse" id="det-{{ $m->id }}">
                 <td colspan="8" class="bg-light">
+                    @if(isset($m->stat))
                     <div class="row g-3 py-2">
+                        <div class="col-md-7">
+                            <div class="fw-bold small mb-2" style="color:var(--maroon);"><i class="bi bi-calendar-check me-1"></i>Absensi
+                                <span class="badge" style="background:var(--maroon-subtle);color:var(--maroon);">{{ $m->persen_hadir }}%</span>
+                            </div>
+                            <div class="d-flex flex-wrap gap-3 small">
+                                <span class="text-success"><i class="bi bi-check-circle me-1"></i>{{ $m->stat->hadir_fisik }} Hadir</span>
+                                <span class="text-primary"><i class="bi bi-envelope-paper me-1"></i>{{ $m->stat->dispensasi_biasa + $m->stat->dispensasi_terlambat }} Dispen</span>
+                                <span class="text-danger"><i class="bi bi-x-circle me-1"></i>{{ $m->stat->alpha }} Alpha</span>
+                                <span class="text-muted">Target: {{ $m->stat->target_sekarang }}/{{ $m->stat->target_total }} hari</span>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="fw-bold small mb-2" style="color:var(--maroon);"><i class="bi bi-file-earmark-text me-1"></i>Dispensasi ({{ $m->dispensasiApproved->count() }})</div>
+                            @forelse($m->dispensasiApproved->take(5) as $d)
+                                <div class="small d-flex justify-content-between border-bottom py-1">
+                                    <span>{{ \Carbon\Carbon::parse($d->tanggal_mulai)->format('d/m/y') }}-{{ \Carbon\Carbon::parse($d->tanggal_selesai)->format('d/m/y') }}</span>
+                                    <span class="badge {{ strtolower($d->kategori)==='terlambat' ? 'bg-warning text-dark' : 'bg-info text-dark' }}">{{ ucfirst($d->kategori) }}</span>
+                                </div>
+                            @empty
+                                <span class="text-muted small">Tidak ada dispensasi.</span>
+                            @endforelse
+                        </div>
+                    </div>
+                    @endif
+                    <div class="row g-3 py-2 border-top">
                         <div class="col-md-6">
                             <div class="fw-bold small mb-2" style="color:var(--maroon);"><i class="bi bi-door-open me-1"></i>Nilai per Ruangan</div>
                             @php $nr = is_array($m->nilai_ruangan_json) ? $m->nilai_ruangan_json : []; @endphp

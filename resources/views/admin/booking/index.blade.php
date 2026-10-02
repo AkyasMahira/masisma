@@ -61,7 +61,10 @@
             <div class="small mb-2 text-muted">Serahkan kredensial ini ke anak magang. <strong>Password hanya ditampilkan sekali.</strong></div>
             <div class="d-flex flex-wrap gap-4">
                 <div><span class="text-muted small d-block">Username (login)</span><code style="font-size:.95rem;">{{ $am['username'] }}</code></div>
-                <div><span class="text-muted small d-block">Password</span><code style="font-size:.95rem;">{{ $am['password'] }}</code></div>
+                <div><span class="text-muted small d-block">Password</span>
+                    @if(!empty($am['password']))<code style="font-size:.95rem;">{{ $am['password'] }}</code>
+                    @else<span class="small text-muted">akun lama — password tetap seperti sebelumnya</span>@endif
+                </div>
             </div>
         </div>
     @endif

@@ -986,7 +986,7 @@ public function generateSertifikatPublik(Request $request, $identifier)
         'predikatAkhir'  => $predikatAkhir,
         'total_hadir'    => $totalActualDays, 
         'total_izin'     => $totalIzin,       
-        'tanggal_terbit' => \Carbon\Carbon::now()->isoFormat('D MMMM YYYY'),
+        'tanggal_terbit' => ($mahasiswa->tanggal_berakhir ? \Carbon\Carbon::parse($mahasiswa->tanggal_berakhir) : \Carbon\Carbon::now())->isoFormat('D MMMM YYYY'),
         'qr_base64'      => $qrBase64 
     ]);
 

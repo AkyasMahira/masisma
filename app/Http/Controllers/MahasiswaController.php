@@ -1486,10 +1486,14 @@ public function dashboard()
         // Agar di view sinkron dengan persentase.
         $totalHadir = $totalHadirChart; 
 
+        // Riwayat semua periode magang user ini (untuk unduh sertifikat multiple)
+        $riwayatSertifikat = \App\Models\Mahasiswa::where('user_id', $mahasiswa->user_id)
+            ->orderBy('tanggal_mulai', 'desc')->get();
+
         return view('mahasiswa.dashboard', compact(
             'mahasiswa', 'targetTotal', 'targetBerjalan', 'totalHadir', 'alpha',
             'chartSisa', 'persentase', 'absensi', 'riwayatLengkap', 'startStr', 'endStr',
-            'jadwalRolling', 'events'
+            'jadwalRolling', 'events', 'riwayatSertifikat'
         ));
     }
  public function generateSertifikat(Request $request, $token)

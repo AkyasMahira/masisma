@@ -851,8 +851,41 @@ a.fc-event, a.fc-event:hover {
             </div>
             @endif
 
+            {{-- RIWAYAT & SERTIFIKAT PER PERIODE --}}
+            @if(isset($riwayatSertifikat) && $riwayatSertifikat->count())
+            <div class="content-card animate-up" style="animation-delay:.7s;">
+                <div class="content-header">
+                    <h5 class="content-title"><i class="bi bi-award me-2"></i> Riwayat Magang & Sertifikat</h5>
+                </div>
+                <div class="table-responsive p-2">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light"><tr><th class="ps-3">Periode</th><th>Instansi/Asal</th><th class="text-center">Status</th><th class="text-center">Sertifikat</th></tr></thead>
+                        <tbody>
+                            @foreach($riwayatSertifikat as $rs)
+                                @php $selesai = now()->gt(\Carbon\Carbon::parse($rs->tanggal_berakhir ?? now())); @endphp
+                                <tr>
+                                    <td class="ps-3 fw-semibold">{{ optional($rs->tanggal_mulai)->format('d/m/Y') }} - {{ optional($rs->tanggal_berakhir)->format('d/m/Y') }}</td>
+                                    <td class="small text-muted">{{ optional($rs->mou)->nama_instansi ?? optional($rs->mou)->nama_universitas ?? ($rs->univ_asal ?? '-') }}</td>
+                                    <td class="text-center"><span class="badge {{ $selesai ? 'bg-secondary' : 'bg-success' }} rounded-pill">{{ $selesai ? 'Selesai' : 'Berjalan' }}</span></td>
+                                    <td class="text-center">
+                                        @if($selesai && $rs->share_token)
+                                            <a href="{{ route('sertifikat.download', $rs->share_token) }}" target="_blank" class="btn btn-sm btn-success rounded-pill"><i class="bi bi-file-earmark-pdf-fill me-1"></i>Unduh</a>
+                                        @elseif(!$selesai)
+                                            <span class="text-muted small">Belum selesai</span>
+                                        @else
+                                            <span class="text-muted small">Belum rilis</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            @endif
+
         </div>
-  
+
 
     {{-- MODAL DETAIL ALPHA --}}
     <div class="modal fade" id="alphaModal" tabindex="-1" aria-hidden="true">

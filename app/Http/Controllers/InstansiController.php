@@ -75,6 +75,7 @@ class InstansiController extends Controller
             $namaRuangan = optional($b->ruangan)->nm_ruangan ?? 'Ruangan';
             $warna = $palette[($b->ruangan_id ?? 0) % count($palette)];
             if ($b->status === 'pending') $warna = '#94a3b8';
+            $sisa = $this->sisaKuota($b->ruangan, $b->tanggal_mulai, $b->tanggal_selesai);
             $events[] = [
                 'title' => $mine
                     ? 'Booking Anda · ' . $namaRuangan . ' (' . $b->jumlah_peserta . ')'
@@ -83,7 +84,14 @@ class InstansiController extends Controller
                 'end'   => optional($b->tanggal_selesai)->copy()->addDay()->format('Y-m-d'),
                 'color' => $mine ? $warna : '#cbd5e1',
                 'textColor' => $mine ? '#fff' : '#334155',
-                'extendedProps' => ['mine' => $mine, 'status' => $b->status],
+                'extendedProps' => [
+                    'mine'    => $mine,
+                    'status'  => $b->status,
+                    'ruangan' => $namaRuangan,
+                    'periode' => optional($b->tanggal_mulai)->format('d/m/Y') . ' - ' . optional($b->tanggal_selesai)->format('d/m/Y'),
+                    'jumlah'  => $b->jumlah_peserta,
+                    'sisa'    => $sisa,
+                ],
             ];
         }
 
@@ -179,7 +187,7 @@ class InstansiController extends Controller
 
         // ---- DAFTAR (pagination + eager load + batch orientasi) ----
         $query = Mahasiswa::where('mou_id', $mou->id)
-            ->with(['roomSequences.ruangan', 'ruangan'])
+            ->with(['roomSequences.ruangan', 'ruangan', 'absensis', 'shiftSchedules', 'dispensasis'])
             ->orderBy('nm_mahasiswa');
         if ($request->filled('q')) {
             $q = $request->q;
@@ -199,6 +207,9 @@ class InstansiController extends Controller
             $m->is_selesai = $selesaiFn($m->status, $m->tanggal_berakhir);
             $m->orientasi = $oriMap->get($m->id);
             $m->nilai_akhir = (float) ($m->nilai_karu_final ?? 0);
+            $m->stat = $m->statistik; // absensi: hadir_fisik, dispensasi, alpha, target
+            $m->persen_hadir = round($m->absensi_percentage);
+            $m->dispensasiApproved = $m->dispensasis->where('status', 'approved')->sortByDesc('tanggal_mulai');
             return $m;
         });
 
@@ -481,30 +492,36 @@ class InstansiController extends Controller
         }
 
         $result = DB::transaction(function () use ($peserta, $booking) {
-            // 1. Buat akun login untuk anak magang.
-            //    Pakai email dari instansi bila ada & unik; jika tidak, generate.
-            if ($peserta->email && !User::where('email', $peserta->email)->exists()) {
-                $email = $peserta->email;
+            // 1. Akun login untuk anak magang — CEGAH AKUN DOBEL.
+            //    Jika email peserta sudah terdaftar, REUSE akun itu (periode baru pakai akun sama).
+            $existing = $peserta->email ? User::where('email', $peserta->email)->first() : null;
+            if ($existing) {
+                $user = $existing;
+                $password = null; // akun lama, password tidak di-reset
             } else {
-                $base = $peserta->nim ?: Str::slug($peserta->nama);
-                if ($base === '') $base = 'magang';
-                $email = $base . '@magang.rsudslg.id';
-                $i = 1;
-                while (User::where('email', $email)->exists()) {
-                    $email = $base . $i . '@magang.rsudslg.id';
-                    $i++;
+                if ($peserta->email) {
+                    $email = $peserta->email;
+                } else {
+                    $base = $peserta->nim ?: Str::slug($peserta->nama);
+                    if ($base === '') $base = 'magang';
+                    $email = $base . '@magang.rsudslg.id';
+                    $i = 1;
+                    while (User::where('email', $email)->exists()) {
+                        $email = $base . $i . '@magang.rsudslg.id';
+                        $i++;
+                    }
                 }
+                $password = Str::random(8);
+                $user = User::create([
+                    'name'        => $peserta->nama,
+                    'email'       => $email,
+                    'password'    => Hash::make($password),
+                    'role'        => 'user',
+                    'mou_id'      => $booking->mou_id,
+                    'is_approved' => true,
+                ]);
             }
-            $password = Str::random(8);
-
-            $user = User::create([
-                'name'        => $peserta->nama,
-                'email'       => $email,
-                'password'    => Hash::make($password),
-                'role'        => 'user',
-                'mou_id'      => $booking->mou_id,
-                'is_approved' => true,
-            ]);
+            $email = $user->email;
 
             // 2. Buat record Mahasiswa (biodata lengkap dari peserta + ruangan/periode dari booking)
             do {
@@ -548,10 +565,13 @@ class InstansiController extends Controller
                 'mahasiswa_id' => $mahasiswa->id,
             ]);
 
-            return ['username' => $email, 'password' => $password, 'nama' => $peserta->nama];
+            return ['username' => $email, 'password' => $password, 'nama' => $peserta->nama, 'reused' => (bool) !$password];
         });
 
-        return back()->with('success', 'Peserta disetujui — akun mahasiswa dibuat.')->with('akun_mahasiswa', $result);
+        $msg = $result['reused']
+            ? 'Peserta disetujui — memakai akun mahasiswa yang sudah ada (tidak dibuat akun baru).'
+            : 'Peserta disetujui — akun mahasiswa dibuat.';
+        return back()->with('success', $msg)->with('akun_mahasiswa', $result);
     }
 
     public function pesertaReject(Request $request, $id)

@@ -114,12 +114,12 @@
             <div class="sec">
             <div class="sec-title"><i class="bi bi-list-check"></i> Kompetensi & Catatan</div>
             <div>
-                <label class="form-label">Kompetensi yang Dimiliki Peserta</label>
+                <label class="form-label">Kompetensi yang <u>SUDAH Dimiliki</u> Peserta</label>
                 <div id="kdWrap">
                     <input type="text" name="kompetensi_dimiliki[]" class="form-control mb-2" placeholder="mis. Pemasangan infus">
                 </div>
                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="tambahKD()"><i class="bi bi-plus"></i> Tambah kompetensi</button>
-                <div class="room-hint text-muted mt-1"><i class="bi bi-info-circle me-1"></i>Kompetensi ini otomatis terisi ke semua mahasiswa dari booking ini saat disetujui.</div>
+                <div class="room-hint text-muted mt-1"><i class="bi bi-info-circle me-1"></i>Isi kompetensi yang <b>sudah dikuasai</b> peserta — otomatis terisi ke semua mahasiswa booking ini. (Kompetensi yang <i>ingin dikuasai</i> diisi mahasiswa sendiri di profilnya.)</div>
             </div>
 
             <div class="mt-3">
@@ -151,6 +151,25 @@
   </div>
 </div>
 
+<div class="modal fade" id="modalOccup" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content" style="border-radius:14px;overflow:hidden;border:none;">
+            <div class="modal-header text-white" style="background:var(--maroon);">
+                <h6 class="modal-title fw-bold"><i class="bi bi-door-open me-1"></i>Detail Ketersediaan</h6>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2"><div class="text-muted small">Ruangan</div><div class="fw-bold" id="co-ruangan">-</div></div>
+                <div class="mb-2"><div class="text-muted small">Periode</div><div class="fw-semibold" id="co-periode">-</div></div>
+                <div class="row">
+                    <div class="col-6 mb-2"><div class="text-muted small">Terisi</div><div class="fw-bold" id="co-jumlah">-</div></div>
+                    <div class="col-6 mb-2"><div class="text-muted small">Sisa kuota</div><div class="fw-bold text-success" id="co-sisa">-</div></div>
+                </div>
+                <div><div class="text-muted small">Keterangan</div><div id="co-status">-</div></div>
+            </div>
+        </div>
+    </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 <script>
     function tambahKD(){
@@ -168,7 +187,18 @@
                 height: 'auto',
                 headerToolbar: { left: 'prev,next', center: 'title', right: 'today' },
                 buttonText: { today: 'Kini' },
-                events: @json($events ?? [])
+                events: @json($events ?? []),
+                eventClick: function (info) {
+                    info.jsEvent.preventDefault();
+                    var p = info.event.extendedProps;
+                    document.getElementById('co-ruangan').textContent = p.ruangan || '-';
+                    document.getElementById('co-periode').textContent = p.periode || '-';
+                    document.getElementById('co-jumlah').textContent = (p.jumlah || 0) + ' orang';
+                    document.getElementById('co-sisa').textContent = (p.sisa != null ? p.sisa + ' orang' : '-');
+                    var stTxt = p.mine ? (p.status === 'pending' ? 'Booking Anda (menunggu ACC)' : 'Booking Anda (disetujui)') : 'Ruangan terisi instansi lain';
+                    document.getElementById('co-status').textContent = stTxt;
+                    new bootstrap.Modal(document.getElementById('modalOccup')).show();
+                }
             });
             c.render();
         }
