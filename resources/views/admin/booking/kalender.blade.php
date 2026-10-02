@@ -44,19 +44,28 @@
     .fc-list-event:hover td { background:var(--maroon-subtle); }
 
     /* ===== Modal detail ===== */
-    #modalBooking .modal-content { border-radius:18px; overflow:hidden; border:none; box-shadow:0 20px 50px rgba(0,0,0,.25); }
-    #modalBooking .modal-header { background:linear-gradient(135deg,#7c1316,#5f0f12); padding:18px 22px; position:relative; }
-    #modalBooking .modal-header::after { content:''; position:absolute; right:-20px; top:-20px; width:90px; height:90px; background:rgba(255,255,255,.08); border-radius:50%; pointer-events:none; }
-    .mb-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
-    .mb-info { background:#f8fafc; border:1px solid #eef2f7; border-radius:12px; padding:10px 12px; display:flex; align-items:center; gap:10px; }
-    .mb-info .ic { width:34px; height:34px; border-radius:9px; background:var(--maroon-subtle); color:var(--maroon); display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
-    .mb-info .lbl { font-size:.66rem; text-transform:uppercase; color:#94a3b8; font-weight:700; letter-spacing:.3px; }
-    .mb-info .val { font-weight:700; color:#1f2937; font-size:.86rem; }
-    .mb-sec { font-weight:800; color:var(--maroon); font-size:.8rem; text-transform:uppercase; letter-spacing:.4px; display:flex; align-items:center; gap:8px; margin:4px 0 10px; }
-    .mb-sec .cnt { background:var(--maroon-subtle); color:var(--maroon); border-radius:20px; padding:1px 10px; font-size:.72rem; }
-    #modalBooking table thead th { position:sticky; top:0; background:var(--maroon-subtle); color:var(--maroon); font-size:.68rem; text-transform:uppercase; border:none; }
-    #modalBooking table tbody tr:nth-child(even) { background:#fbfcfe; }
-    .mb-pill { padding:2px 9px; border-radius:20px; font-size:.68rem; font-weight:700; }
+    #modalBooking .modal-content { border-radius:20px; overflow:hidden; border:none; box-shadow:0 24px 60px rgba(0,0,0,.28); }
+    #modalBooking .modal-header { background:linear-gradient(135deg,#7c1316,#5f0f12); padding:22px 26px; position:relative; align-items:flex-start; }
+    #modalBooking .modal-header::after { content:''; position:absolute; right:-24px; top:-24px; width:120px; height:120px; background:rgba(255,255,255,.08); border-radius:50%; pointer-events:none; }
+    #mb-instansi { font-size:1.15rem; font-weight:800; }
+    #mb-status .mb-pill { background:rgba(255,255,255,.22); color:#fff; }
+    /* strip info horizontal */
+    .mb-strip { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+    .mb-chip { flex:1; min-width:120px; background:#f8fafc; border:1px solid #eef2f7; border-radius:14px; padding:14px 16px; text-align:center; }
+    .mb-chip .ic { font-size:1.2rem; color:var(--maroon); }
+    .mb-chip .lbl { font-size:.65rem; text-transform:uppercase; color:#94a3b8; font-weight:700; letter-spacing:.3px; margin-top:4px; }
+    .mb-chip .val { font-weight:800; color:#1f2937; font-size:.95rem; margin-top:2px; }
+    .mb-prodi { background:var(--maroon-subtle); color:var(--maroon); border-radius:12px; padding:10px 14px; font-weight:600; font-size:.85rem; margin-bottom:18px; display:flex; align-items:center; gap:8px; }
+    .mb-sec { font-weight:800; color:#1f2937; font-size:.9rem; display:flex; align-items:center; gap:8px; margin:4px 0 12px; }
+    .mb-sec .cnt { background:var(--maroon); color:#fff; border-radius:20px; padding:1px 11px; font-size:.72rem; }
+    .ps-row { display:flex; align-items:center; gap:12px; padding:10px 4px; border-bottom:1px solid #f1f5f9; }
+    .ps-row:last-child { border-bottom:none; }
+    .ps-av { width:40px; height:40px; border-radius:11px; background:linear-gradient(135deg,#7c1316,#a3191d); color:#fff; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .ps-name { font-weight:700; color:#1f2937; font-size:.9rem; }
+    .ps-meta { color:#94a3b8; font-size:.74rem; }
+    .mb-pill { padding:3px 11px; border-radius:20px; font-size:.7rem; font-weight:700; }
+    .mb-empty { text-align:center; padding:28px; color:#94a3b8; }
+    .mb-empty i { font-size:2rem; display:block; margin-bottom:8px; opacity:.6; }
 </style>
 
 <div class="container-fluid py-3">
@@ -111,18 +120,13 @@
                 <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
-                <div class="mb-grid">
-                    <div class="mb-info"><span class="ic"><i class="bi bi-door-open"></i></span><div><div class="lbl">Ruangan</div><div class="val" id="mb-ruangan">-</div></div></div>
-                    <div class="mb-info"><span class="ic"><i class="bi bi-calendar-range"></i></span><div><div class="lbl">Periode</div><div class="val" id="mb-periode">-</div></div></div>
-                    <div class="mb-info" style="grid-column:1 / -1;"><span class="ic"><i class="bi bi-mortarboard"></i></span><div><div class="lbl">Prodi / Jenjang</div><div class="val" id="mb-prodi">-</div></div></div>
+                <div class="mb-strip">
+                    <div class="mb-chip"><div class="ic"><i class="bi bi-door-open"></i></div><div class="lbl">Ruangan</div><div class="val" id="mb-ruangan">-</div></div>
+                    <div class="mb-chip"><div class="ic"><i class="bi bi-calendar-range"></i></div><div class="lbl">Periode</div><div class="val" id="mb-periode">-</div></div>
                 </div>
-                <div class="mb-sec"><i class="bi bi-people-fill"></i> Daftar Anak Magang <span class="cnt" id="mb-count">0</span></div>
-                <div class="table-responsive" style="max-height:300px; overflow:auto; border:1px solid #eef2f7; border-radius:12px;">
-                    <table class="table table-sm align-middle mb-0">
-                        <thead><tr><th class="ps-3">No</th><th>Nama</th><th>NIM</th><th>Prodi</th><th class="text-center pe-3">Status</th></tr></thead>
-                        <tbody id="mb-peserta"></tbody>
-                    </table>
-                </div>
+                <div class="mb-prodi"><i class="bi bi-mortarboard"></i> <span id="mb-prodi">-</span></div>
+                <div class="mb-sec"><i class="bi bi-people-fill" style="color:var(--maroon);"></i> Daftar Anak Magang <span class="cnt" id="mb-count">0</span></div>
+                <div id="mb-peserta" style="max-height:300px; overflow:auto;"></div>
             </div>
         </div>
     </div>
@@ -153,24 +157,26 @@
                 document.getElementById('mb-ruangan').textContent = p.ruangan || '-';
                 document.getElementById('mb-periode').textContent = p.periode || '-';
                 document.getElementById('mb-prodi').textContent = p.prodi || '-';
-                var stMap = { pending: ['#fef3c7','#b45309','Menunggu'], approved: ['#dcfce7','#15803d','Disetujui'] };
-                var st = stMap[p.status] || ['#f1f5f9','#64748b', p.status];
-                document.getElementById('mb-status').innerHTML = '<span style="background:'+st[0]+';color:'+st[1]+';padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700;">'+st[2]+'</span>';
+                var stTxt = { pending: 'Menunggu ACC', approved: 'Disetujui' }[p.status] || p.status;
+                document.getElementById('mb-status').innerHTML = '<span class="mb-pill"><i class="bi bi-circle-fill me-1" style="font-size:.5rem;vertical-align:middle;"></i>' + stTxt + '</span>';
 
                 var list = p.pesertaList || [];
                 document.getElementById('mb-count').textContent = list.length;
                 var pMap = { belum:['#fee2e2','#b91c1c','Menunggu'], sudah:['#dcfce7','#15803d','Mahasiswa'], approved:['#dcfce7','#15803d','Mahasiswa'], lulus:['#dbeafe','#1d4ed8','Lulus'] };
-                var rows = '';
+                var html = '';
                 if (list.length === 0) {
-                    rows = '<tr><td colspan="5" class="text-center text-muted py-3">Belum ada peserta diisi instansi.</td></tr>';
+                    html = '<div class="mb-empty"><i class="bi bi-people"></i>Belum ada peserta yang diisi instansi untuk booking ini.</div>';
                 } else {
-                    list.forEach(function (x, i) {
+                    list.forEach(function (x) {
                         var ps = pMap[x.status] || ['#f1f5f9','#64748b', (x.status||'-')];
-                        rows += '<tr><td>'+(i+1)+'</td><td class="fw-semibold">'+(x.nama||'-')+'</td><td>'+(x.nim||'-')+'</td><td>'+(x.prodi||'-')+'</td>'
-                             + '<td class="text-center"><span style="background:'+ps[0]+';color:'+ps[1]+';padding:2px 8px;border-radius:20px;font-size:.68rem;font-weight:700;">'+ps[2]+'</span></td></tr>';
+                        var initial = (x.nama || '?').trim().charAt(0).toUpperCase();
+                        html += '<div class="ps-row"><div class="ps-av">'+initial+'</div>'
+                             +  '<div class="flex-grow-1"><div class="ps-name">'+(x.nama||'-')+'</div>'
+                             +  '<div class="ps-meta">'+(x.nim? 'NIM '+x.nim : 'NIM -')+(x.prodi? ' · '+x.prodi : '')+'</div></div>'
+                             +  '<span class="mb-pill" style="background:'+ps[0]+';color:'+ps[1]+';">'+ps[2]+'</span></div>';
                     });
                 }
-                document.getElementById('mb-peserta').innerHTML = rows;
+                document.getElementById('mb-peserta').innerHTML = html;
                 new bootstrap.Modal(document.getElementById('modalBooking')).show();
             }
         });
