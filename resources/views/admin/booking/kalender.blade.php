@@ -42,6 +42,21 @@
     .fc-daygrid-event { border:none !important; border-radius:6px !important; padding:2px 8px !important; font-size:.72rem; font-weight:600; cursor:pointer; margin:2px 4px; box-shadow:0 1px 3px rgba(0,0,0,.12); }
     .fc-daygrid-event .fc-event-title { white-space:normal; }
     .fc-list-event:hover td { background:var(--maroon-subtle); }
+
+    /* ===== Modal detail ===== */
+    #modalBooking .modal-content { border-radius:18px; overflow:hidden; border:none; box-shadow:0 20px 50px rgba(0,0,0,.25); }
+    #modalBooking .modal-header { background:linear-gradient(135deg,#7c1316,#5f0f12); padding:18px 22px; position:relative; }
+    #modalBooking .modal-header::after { content:''; position:absolute; right:-20px; top:-20px; width:90px; height:90px; background:rgba(255,255,255,.08); border-radius:50%; pointer-events:none; }
+    .mb-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+    .mb-info { background:#f8fafc; border:1px solid #eef2f7; border-radius:12px; padding:10px 12px; display:flex; align-items:center; gap:10px; }
+    .mb-info .ic { width:34px; height:34px; border-radius:9px; background:var(--maroon-subtle); color:var(--maroon); display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+    .mb-info .lbl { font-size:.66rem; text-transform:uppercase; color:#94a3b8; font-weight:700; letter-spacing:.3px; }
+    .mb-info .val { font-weight:700; color:#1f2937; font-size:.86rem; }
+    .mb-sec { font-weight:800; color:var(--maroon); font-size:.8rem; text-transform:uppercase; letter-spacing:.4px; display:flex; align-items:center; gap:8px; margin:4px 0 10px; }
+    .mb-sec .cnt { background:var(--maroon-subtle); color:var(--maroon); border-radius:20px; padding:1px 10px; font-size:.72rem; }
+    #modalBooking table thead th { position:sticky; top:0; background:var(--maroon-subtle); color:var(--maroon); font-size:.68rem; text-transform:uppercase; border:none; }
+    #modalBooking table tbody tr:nth-child(even) { background:#fbfcfe; }
+    .mb-pill { padding:2px 9px; border-radius:20px; font-size:.68rem; font-weight:700; }
 </style>
 
 <div class="container-fluid py-3">
@@ -86,23 +101,25 @@
 
 {{-- Modal detail booking --}}
 <div class="modal fade" id="modalBooking" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:16px; overflow:hidden; border:none;">
-            <div class="modal-header text-white" style="background:linear-gradient(135deg,#7c1316,#5f0f12);">
-                <h6 class="modal-title fw-bold"><i class="bi bi-calendar-check me-2"></i><span id="mb-instansi">Detail Booking</span></h6>
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header text-white border-0">
+                <div>
+                    <h6 class="modal-title fw-bold mb-0"><i class="bi bi-buildings me-2"></i><span id="mb-instansi">Detail Booking</span></h6>
+                    <div style="opacity:.85;font-size:.76rem;" class="mt-1"><span id="mb-status"></span></div>
+                </div>
                 <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div class="row g-2 mb-3">
-                    <div class="col-6"><div class="text-muted small">Ruangan</div><div class="fw-bold" id="mb-ruangan">-</div></div>
-                    <div class="col-6"><div class="text-muted small">Periode</div><div class="fw-bold" id="mb-periode">-</div></div>
-                    <div class="col-6"><div class="text-muted small">Prodi / Jenjang</div><div class="fw-semibold" id="mb-prodi">-</div></div>
-                    <div class="col-6"><div class="text-muted small">Status</div><div id="mb-status">-</div></div>
+            <div class="modal-body p-4">
+                <div class="mb-grid">
+                    <div class="mb-info"><span class="ic"><i class="bi bi-door-open"></i></span><div><div class="lbl">Ruangan</div><div class="val" id="mb-ruangan">-</div></div></div>
+                    <div class="mb-info"><span class="ic"><i class="bi bi-calendar-range"></i></span><div><div class="lbl">Periode</div><div class="val" id="mb-periode">-</div></div></div>
+                    <div class="mb-info" style="grid-column:1 / -1;"><span class="ic"><i class="bi bi-mortarboard"></i></span><div><div class="lbl">Prodi / Jenjang</div><div class="val" id="mb-prodi">-</div></div></div>
                 </div>
-                <div class="fw-bold mb-2" style="color:#7c1316;"><i class="bi bi-people-fill me-1"></i>Daftar Anak Magang (<span id="mb-count">0</span>)</div>
-                <div class="table-responsive" style="max-height:280px; overflow:auto;">
+                <div class="mb-sec"><i class="bi bi-people-fill"></i> Daftar Anak Magang <span class="cnt" id="mb-count">0</span></div>
+                <div class="table-responsive" style="max-height:300px; overflow:auto; border:1px solid #eef2f7; border-radius:12px;">
                     <table class="table table-sm align-middle mb-0">
-                        <thead><tr><th>No</th><th>Nama</th><th>NIM</th><th>Prodi</th><th class="text-center">Status</th></tr></thead>
+                        <thead><tr><th class="ps-3">No</th><th>Nama</th><th>NIM</th><th>Prodi</th><th class="text-center pe-3">Status</th></tr></thead>
                         <tbody id="mb-peserta"></tbody>
                     </table>
                 </div>

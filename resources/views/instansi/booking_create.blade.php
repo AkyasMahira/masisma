@@ -114,12 +114,12 @@
             <div class="sec">
             <div class="sec-title"><i class="bi bi-list-check"></i> Kompetensi & Catatan</div>
             <div>
-                <label class="form-label">Kompetensi yang <u>SUDAH Dimiliki</u> Peserta</label>
+                <label class="form-label">Kompetensi yang <u>Ingin Dikuasai</u> Peserta</label>
                 <div id="kdWrap">
                     <input type="text" name="kompetensi_dimiliki[]" class="form-control mb-2" placeholder="mis. Pemasangan infus">
                 </div>
                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="tambahKD()"><i class="bi bi-plus"></i> Tambah kompetensi</button>
-                <div class="room-hint text-muted mt-1"><i class="bi bi-info-circle me-1"></i>Isi kompetensi yang <b>sudah dikuasai</b> peserta — otomatis terisi ke semua mahasiswa booking ini. (Kompetensi yang <i>ingin dikuasai</i> diisi mahasiswa sendiri di profilnya.)</div>
+                <div class="room-hint text-muted mt-1"><i class="bi bi-info-circle me-1"></i>Kompetensi/target yang <b>ingin dikuasai</b> peserta selama magang — otomatis terisi ke semua mahasiswa booking ini.</div>
             </div>
 
             <div class="mt-3">
