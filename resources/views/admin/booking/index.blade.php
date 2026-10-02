@@ -28,6 +28,16 @@
     .act-edit:hover { color:#b45309; border-color:#fcd34d; }
     .act-del:hover { color:#b91c1c; border-color:#fca5a5; }
     .inst-name { font-weight:700; color:#1f2937; }
+    .prodi-tag { display:inline-block; margin-top:4px; background:var(--maroon-subtle); color:var(--maroon); font-size:.66rem; font-weight:700; padding:2px 8px; border-radius:6px; }
+    .ruang-name { font-weight:700; color:#1f2937; }
+    .act-wrap { display:flex; flex-direction:column; align-items:center; gap:6px; }
+    .act-top { display:flex; gap:6px; }
+    .btn-acc { background:#16a34a; color:#fff; border:none; border-radius:8px; font-weight:700; font-size:.78rem; padding:5px 14px; }
+    .btn-acc:hover { background:#15803d; color:#fff; }
+    .btn-tolak { background:#fff; color:#dc2626; border:1px solid #fca5a5; border-radius:8px; font-weight:700; font-size:.78rem; padding:5px 12px; }
+    .btn-tolak:hover { background:#fee2e2; color:#b91c1c; }
+    .batas-info { font-size:.72rem; color:#64748b; }
+    .batas-info b { color:#1f2937; }
 </style>
 
 <div class="container-fluid py-3">
@@ -75,9 +85,14 @@
                     @forelse($bookings as $b)
                     <tr>
                         <td class="fw-semibold">{{ optional($b->mou)->nama_instansi ?? optional($b->mou)->nama_universitas ?? '-' }}</td>
-                        <td>{{ optional($b->ruangan)->nm_ruangan ?? '-' }}
-                            @if($b->prodi || $b->jenjang || $b->semester)
-                                <div class="text-muted" style="font-size:.68rem;">{{ trim(($b->jenjang ? $b->jenjang.' ' : '').($b->prodi ?? '')) ?: '-' }}{{ $b->semester ? ' · smt '.$b->semester : '' }}</div>
+                        <td>
+                            <span class="ruang-name">{{ optional($b->ruangan)->nm_ruangan ?? '-' }}</span>
+                            @php
+                                $pr = $b->prodi ?: $b->jenjang;
+                                if ($b->jenjang && $b->prodi && stripos($b->prodi, $b->jenjang) !== 0) $pr = $b->jenjang.' '.$b->prodi;
+                            @endphp
+                            @if($pr || $b->semester)
+                                <div><span class="prodi-tag">{{ $pr ?: '-' }}{{ $b->semester ? ' · smt '.$b->semester : '' }}</span></div>
                             @endif
                         </td>
                         <td class="text-center fw-bold">{{ $b->jumlah_peserta }}</td>
@@ -95,7 +110,8 @@
                             @if($b->status!=='pending' && $b->catatan_admin)<div class="text-muted mt-1" style="font-size:.68rem;">{{ $b->catatan_admin }}</div>@endif
                         </td>
                         <td class="text-center">
-                            <div class="mb-2 d-flex justify-content-center gap-1">
+                          <div class="act-wrap">
+                            <div class="act-top">
                                 <a href="{{ route('admin.booking.edit', $b->id) }}" class="act-ic act-edit" title="Edit booking"><i class="bi bi-pencil"></i></a>
                                 <form action="{{ route('admin.booking.destroy', $b->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus booking ini beserta daftar pesertanya?');">
                                     @csrf @method('DELETE')
@@ -103,9 +119,11 @@
                                 </form>
                             </div>
                             @if($b->status === 'pending')
-                                <button class="btn btn-sm btn-success" data-bs-toggle="collapse" data-bs-target="#acc-{{ $b->id }}"><i class="bi bi-check-lg"></i> ACC</button>
-                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="collapse" data-bs-target="#rej-{{ $b->id }}"><i class="bi bi-x-lg"></i></button>
-                                <div class="collapse mt-2 text-start" id="acc-{{ $b->id }}">
+                                <div class="act-top">
+                                    <button class="btn-acc" data-bs-toggle="collapse" data-bs-target="#acc-{{ $b->id }}"><i class="bi bi-check-lg me-1"></i>ACC</button>
+                                    <button class="btn-tolak" data-bs-toggle="collapse" data-bs-target="#rej-{{ $b->id }}"><i class="bi bi-x-lg"></i></button>
+                                </div>
+                                <div class="collapse mt-1 text-start w-100" id="acc-{{ $b->id }}">
                                     <form action="{{ route('admin.booking.approve', $b->id) }}" method="POST">
                                         @csrf
                                         <label class="small fw-semibold mb-1">Batas pengisian peserta <span class="text-muted">(opsional)</span></label>
@@ -121,9 +139,9 @@
                                     </form>
                                 </div>
                             @elseif($b->status === 'approved')
-                                <div class="small mb-1">Batas isi: <strong>{{ optional($b->batas_pengisian)->format('d/m/Y') ?: 'tidak dibatasi' }}</strong></div>
-                                <button class="btn btn-sm btn-outline-dark" data-bs-toggle="collapse" data-bs-target="#batas-{{ $b->id }}"><i class="bi bi-calendar-event"></i> Atur Batas</button>
-                                <div class="collapse mt-2 text-start" id="batas-{{ $b->id }}">
+                                <div class="batas-info">Batas isi: <b>{{ optional($b->batas_pengisian)->format('d/m/Y') ?: 'tidak dibatasi' }}</b></div>
+                                <button class="btn-tolak" style="color:var(--maroon);border-color:#f3dede;" data-bs-toggle="collapse" data-bs-target="#batas-{{ $b->id }}"><i class="bi bi-calendar-event me-1"></i>Atur Batas</button>
+                                <div class="collapse mt-1 text-start w-100" id="batas-{{ $b->id }}">
                                     <form action="{{ route('admin.booking.batas', $b->id) }}" method="POST">
                                         @csrf
                                         <input type="date" name="batas_pengisian" class="form-control form-control-sm mb-1" value="{{ optional($b->batas_pengisian)->format('Y-m-d') }}">
@@ -133,6 +151,7 @@
                             @else
                                 <span class="text-muted small">-</span>
                             @endif
+                          </div>
                         </td>
                     </tr>
                     @if($b->pesertas->count())
