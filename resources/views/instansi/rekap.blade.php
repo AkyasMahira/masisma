@@ -6,7 +6,7 @@
 <style>
     :root { --maroon:#7c1316; --maroon-light:#a3191d; --maroon-subtle:#fcf0f1; --radius:14px; --shadow:0 4px 20px rgba(0,0,0,.05); }
     .hero { background: linear-gradient(135deg,#7c1316,#5f0f12); color:#fff; border-radius:20px; padding:24px 28px; margin-bottom:1.25rem; box-shadow:0 14px 34px rgba(124,19,22,.28); position:relative; overflow:hidden; }
-    .hero::after { content:''; position:absolute; right:-40px; top:-40px; width:170px; height:170px; background:rgba(255,255,255,.07); border-radius:50%; }
+    .hero::after { content:''; position:absolute; right:-40px; top:-40px; width:170px; height:170px; background:rgba(255,255,255,.07); border-radius:50%; pointer-events:none; }
     .hero h4 { font-weight:800; margin:0 0 4px; }
     .stat { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; text-align:center; height:100%; }
     .stat .n { font-size:1.7rem; font-weight:800; line-height:1; }

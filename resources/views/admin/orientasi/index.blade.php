@@ -23,7 +23,7 @@
         position: relative;
         overflow: hidden;
     }
-    .header-card::after { content:''; position:absolute; right:-40px; top:-40px; width:170px; height:170px; background:rgba(255,255,255,.07); border-radius:50%; }
+    .header-card::after { content:''; position:absolute; right:-40px; top:-40px; width:170px; height:170px; background:rgba(255,255,255,.07); border-radius:50%; pointer-events:none; }
     .header-card h4 { color:#fff !important; font-weight:800; }
     .header-card small { color:rgba(255,255,255,.85) !important; }
     .header-card .btn-outline-secondary-custom { background:rgba(255,255,255,.9); color:var(--maroon-slg); border:none; border-radius:50px; font-weight:700; }

@@ -11,7 +11,7 @@
     
     /* --- Hero Header --- */
     .page-hero { background: linear-gradient(135deg, #7c1316 0%, #5f0f12 100%); border-radius: 20px; padding: 26px 30px; margin-bottom: 1.75rem; color: #fff; box-shadow: 0 14px 34px rgba(124,19,22,.28); position: relative; overflow: hidden; }
-    .page-hero::after { content: ''; position: absolute; right: -40px; top: -40px; width: 180px; height: 180px; background: rgba(255,255,255,.06); border-radius: 50%; }
+    .page-hero::after { content: ''; position: absolute; right: -40px; top: -40px; width: 180px; height: 180px; background: rgba(255,255,255,.06); border-radius: 50%; pointer-events: none; }
     .page-hero h4 { font-weight: 800; margin: 0 0 6px; letter-spacing: .2px; }
     .page-hero .period { opacity: .9; font-size: .9rem; margin: 0; }
     .page-hero .btn-hero { background: rgba(255,255,255,.95); color: #7c1316; border: none; border-radius: 50px; font-weight: 700; padding: 10px 22px; transition: .25s; }

@@ -28,7 +28,7 @@
         position: relative;
         overflow: hidden;
     }
-    .rolling-hero::after { content:''; position:absolute; right:-40px; top:-40px; width:170px; height:170px; background:rgba(255,255,255,.07); border-radius:50%; }
+    .rolling-hero::after { content:''; position:absolute; right:-40px; top:-40px; width:170px; height:170px; background:rgba(255,255,255,.07); border-radius:50%; pointer-events:none; }
     .rolling-hero .avatar { width:56px; height:56px; border-radius:14px; background:rgba(255,255,255,.95); color:#7c1316; font-weight:800; font-size:1.5rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .rolling-hero h4 { color:#fff; font-weight:800; }
     .rolling-hero .sub { background:rgba(255,255,255,.18); color:#fff; border-radius:20px; padding:3px 12px; font-size:.72rem; font-weight:700; }
