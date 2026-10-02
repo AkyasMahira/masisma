@@ -5,8 +5,15 @@
 @section('content')
 <style>
     :root { --maroon:#7c1316; --maroon-light:#a3191d; --maroon-subtle:#fcf0f1; }
-    .form-card { background:#fff; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.08); overflow:hidden; }
-    .card-head { background:var(--maroon); color:#fff; padding:1.2rem 1.5rem; border-bottom:4px solid var(--maroon-light); }
+    .form-card { background:#fff; border-radius:18px; box-shadow:0 10px 30px rgba(0,0,0,.08); overflow:hidden; }
+    .card-head { background:linear-gradient(135deg,#7c1316,#5f0f12); color:#fff; padding:1.4rem 1.6rem; position:relative; overflow:hidden; }
+    .card-head::after { content:''; position:absolute; right:-30px; top:-30px; width:130px; height:130px; background:rgba(255,255,255,.08); border-radius:50%; pointer-events:none; }
+    .card-head h5 { font-weight:800; }
+    .card-head p { margin:2px 0 0; opacity:.85; font-size:.82rem; }
+    .sec-title { display:flex; align-items:center; gap:8px; font-weight:700; font-size:.82rem; text-transform:uppercase; letter-spacing:.4px; color:var(--maroon); margin:4px 0 14px; padding-bottom:8px; border-bottom:2px solid var(--maroon-subtle); }
+    .sec-title i { width:26px; height:26px; background:var(--maroon-subtle); border-radius:8px; display:inline-flex; align-items:center; justify-content:center; font-size:.9rem; }
+    .sec + .sec { margin-top:22px; }
+    .req { color:#dc2626; }
     .cal-card { background:#fff; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.08); padding:16px; }
     .legend { display:flex; gap:14px; flex-wrap:wrap; font-size:.72rem; color:#64748b; margin-top:10px; }
     .legend .dot { width:12px; height:12px; border-radius:3px; display:inline-block; margin-right:4px; vertical-align:middle; }
@@ -30,15 +37,21 @@
   <div class="row g-4">
     <div class="col-lg-7">
     <div class="form-card">
-        <div class="card-head"><h5 class="mb-0 fw-bold"><i class="bi bi-calendar-plus me-2"></i>Booking Ruangan untuk Anak Magang</h5></div>
+        <div class="card-head">
+            <h5 class="mb-0"><i class="bi bi-calendar-plus me-2"></i>Pengajuan Booking Ruangan</h5>
+            <p>Ajukan kuota ruangan untuk anak magang instansi Anda. Field bertanda <span class="text-warning">*</span> wajib diisi.</p>
+        </div>
 
         @if(session('error'))<div class="alert alert-danger m-3 mb-0">{{ session('error') }}</div>@endif
         @if($errors->any())<div class="alert alert-danger m-3 mb-0"><ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
 
         <form action="{{ route('instansi.booking.store') }}" method="POST" class="p-4">
             @csrf
+
+            <div class="sec">
+            <div class="sec-title"><i class="bi bi-door-open"></i> Ruangan & Program</div>
             <div class="mb-3">
-                <label class="form-label">Ruangan Tujuan <span class="text-danger">*</span></label>
+                <label class="form-label">Ruangan Tujuan <span class="req">*</span></label>
                 <select name="ruangan_id" class="form-select" required>
                     <option value="">-- Pilih ruangan --</option>
                     @foreach($ruangans as $r)
@@ -78,23 +91,29 @@
                     <input type="text" name="semester" class="form-control" value="{{ old('semester') }}" placeholder="mis. 5">
                 </div>
             </div>
+            </div>
 
+            <div class="sec">
+            <div class="sec-title"><i class="bi bi-people"></i> Jumlah & Periode</div>
             <div class="row g-3">
                 <div class="col-md-4">
-                    <label class="form-label">Jumlah Peserta <span class="text-danger">*</span></label>
+                    <label class="form-label">Jumlah Peserta <span class="req">*</span></label>
                     <input type="number" name="jumlah_peserta" class="form-control" min="1" value="{{ old('jumlah_peserta', 1) }}" required>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Tanggal Mulai <span class="text-danger">*</span></label>
+                    <label class="form-label">Tanggal Mulai <span class="req">*</span></label>
                     <input type="date" name="tanggal_mulai" class="form-control" value="{{ old('tanggal_mulai') }}" required>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Tanggal Selesai <span class="text-danger">*</span></label>
+                    <label class="form-label">Tanggal Selesai <span class="req">*</span></label>
                     <input type="date" name="tanggal_selesai" class="form-control" value="{{ old('tanggal_selesai') }}" required>
                 </div>
             </div>
+            </div>
 
-            <div class="mt-3">
+            <div class="sec">
+            <div class="sec-title"><i class="bi bi-list-check"></i> Kompetensi & Catatan</div>
+            <div>
                 <label class="form-label">Kompetensi yang Dimiliki Peserta</label>
                 <div id="kdWrap">
                     <input type="text" name="kompetensi_dimiliki[]" class="form-control mb-2" placeholder="mis. Pemasangan infus">
@@ -106,6 +125,7 @@
             <div class="mt-3">
                 <label class="form-label">Keterangan</label>
                 <textarea name="keterangan" class="form-control" rows="3" placeholder="mis. Program magang mahasiswa D3 Keperawatan, jumlah & kebutuhan khusus...">{{ old('keterangan') }}</textarea>
+            </div>
             </div>
 
             <div class="d-flex justify-content-end gap-2 mt-4">
