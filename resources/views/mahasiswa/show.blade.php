@@ -336,13 +336,13 @@
                     <div class="col-6 detail-item">
                         <div class="detail-label">Tanggal Mulai</div>
                         <div class="detail-value">
-                            {{ \Carbon\Carbon::parse($tglMulai)->format('d M Y') }}
+                            {{ $mahasiswa->tanggal_mulai ? \Carbon\Carbon::parse($mahasiswa->tanggal_mulai)->format('d M Y') : '-' }}
                         </div>
                     </div>
                     <div class="col-6 detail-item">
                         <div class="detail-label">Tanggal Berakhir</div>
                         <div class="detail-value">
-                            {{ \Carbon\Carbon::parse($tglAkhir)->format('d M Y') }}
+                            {{ $mahasiswa->tanggal_berakhir ? \Carbon\Carbon::parse($mahasiswa->tanggal_berakhir)->format('d M Y') : '-' }}
                         </div>
                     </div>
                 </div>

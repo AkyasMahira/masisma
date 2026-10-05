@@ -1336,6 +1336,7 @@ public function dashboard()
         $totalIzinValid  = $stM->dispensasi_biasa + $stM->dispensasi_terlambat;
         $totalHadirChart = $totalHadirFisik + $totalIzinValid;
         $alpha           = $stM->alpha;
+        $lupaPulang      = $stM->lupa_pulang ?? 0;
         $chartSisa       = $stM->sisa_kerja;
         $persentase      = round($mahasiswa->absensi_percentage);
 
@@ -1491,7 +1492,7 @@ public function dashboard()
             ->orderBy('tanggal_mulai', 'desc')->get();
 
         return view('mahasiswa.dashboard', compact(
-            'mahasiswa', 'targetTotal', 'targetBerjalan', 'totalHadir', 'alpha',
+            'mahasiswa', 'targetTotal', 'targetBerjalan', 'totalHadir', 'alpha', 'lupaPulang',
             'chartSisa', 'persentase', 'absensi', 'riwayatLengkap', 'startStr', 'endStr',
             'jadwalRolling', 'events', 'riwayatSertifikat'
         ));

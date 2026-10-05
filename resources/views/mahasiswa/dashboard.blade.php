@@ -601,61 +601,16 @@ a.fc-event, a.fc-event:hover {
    
         <div class="col-lg-8">
             
-            {{-- LOGIC PHP: DETEKSI DETAIL ALPHA (EXCLUDE IZIN) --}}
+            {{-- SATU SUMBER: daftar tanggal alpha diambil dari kalender model (identik dengan kartu & halaman admin) --}}
             @php
                 $listAlpha = [];
-                
-                // 1. Ambil Tanggal Absen Masuk
-                $absensiDates = $mahasiswa->absensis->filter(fn($a) => $a->type == 'masuk')
-                    ->map(fn($a) => \Carbon\Carbon::parse($a->jam_masuk)->format('Y-m-d'))->toArray();
-                
-                // 2. Ambil Tanggal Shift Libur
-                $shifts = $mahasiswa->shiftSchedules->pluck('shift_type', 'tanggal')->toArray();
-
-                // 3. Ambil Tanggal Izin/Dispensasi (Approved)
-                $izinDates = [];
-                $dispensasis = \App\Models\Dispensasi::where('mahasiswa_id', $mahasiswa->id)
-                    ->where('status', 'approved')->get();
-                
-                foreach($dispensasis as $d) {
-                    $period = \Carbon\CarbonPeriod::create($d->tanggal_mulai, $d->tanggal_selesai);
-                    foreach($period as $date) {
-                        $izinDates[] = $date->format('Y-m-d');
+                foreach (($mahasiswa->kalender_kehadiran ?? []) as $tgl => $info) {
+                    if (($info['status'] ?? null) === 'alpha') {
+                        $listAlpha[] = \Carbon\Carbon::parse($tgl)->isoFormat('dddd, D MMMM Y');
                     }
                 }
-
-                // 4. Loop Periode untuk Cari Alpha
-                // Batas akhir = Hari ini atau Tanggal Akhir Magang (mana yang lebih dulu)
-                $batasAkhir = now()->lt(\Carbon\Carbon::parse($endStr)) ? now() : \Carbon\Carbon::parse($endStr);
-                
-                if($startStr) {
-                    $periodeCek = \Carbon\CarbonPeriod::create($startStr, $batasAkhir);
-                    foreach($periodeCek as $date) {
-                        $dStr = $date->format('Y-m-d');
-                        $sType = $shifts[$dStr] ?? null;
-
-                        // Skip jika hari ini belum berlalu sepenuhnya (Opsional, tergantung kebijakan)
-                        if ($date->isToday()) continue;
-
-                        // RULE 1: Skip Libur Shift
-                        if($sType === 'Libur') continue;
-                        
-                        // RULE 2: Skip Weekend (Jika Non-Shift & Weekend Off)
-                        if(!$sType && !$mahasiswa->weekend_aktif && $date->isWeekend()) continue;
-
-                        // RULE 3: Skip Jika Sudah Absen
-                        if(in_array($dStr, $absensiDates)) continue;
-
-                        // RULE 4: Skip Jika Izin/Dispensasi (PENTING!)
-                        if(in_array($dStr, $izinDates)) continue;
-
-                        // Jika lolos semua filter di atas, berarti ALPHA
-                        $listAlpha[] = $date->isoFormat('dddd, D MMMM Y');
-                    }
-                }
-                
-                // Hitung ulang jumlah Alpha untuk tampilan kartu (agar sinkron dengan list)
-                $alphaCount = count($listAlpha);
+                // Kartu memakai angka model ($alpha) agar sinkron dengan admin/sertifikat
+                $alphaCount = $alpha;
             @endphp
 
             <div class="row g-3 mb-4 animate-up" style="animation-delay: 0.2s;">
@@ -724,6 +679,13 @@ a.fc-event, a.fc-event:hover {
                                     </div>
                                 </div>
                                 <div class="col-6">
+                                    <div class="p-3 rounded-3 border text-center" style="border-color:#fed7aa !important; background-color:#fff7ed !important;">
+                                        <small class="text-muted d-block mb-1">Lupa Pulang <span style="font-size:0.6rem;">(80%)</span></small>
+                                        <h4 class="fw-bold mb-0" style="color:#b45309;">{{ $lupaPulang }}</h4>
+                                        <small class="text-secondary" style="font-size: 0.7rem">Hari</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
                                     <div class="p-3 bg-light rounded-3 border text-center">
                                         <small class="text-muted d-block mb-1">Target Berjalan</small>
                                         <h4 class="fw-bold text-primary mb-0">{{ $targetBerjalan }}</h4>
@@ -777,6 +739,9 @@ a.fc-event, a.fc-event:hover {
                 <span class="legend-dot bg-danger"></span> Alpha
             </div>
             <div class="legend-item">
+                <span class="legend-dot" style="background:#f59e0b;"></span> Lupa Pulang
+            </div>
+            <div class="legend-item">
                 <span class="legend-dot bg-warning"></span> Izin
             </div>
         </div>
@@ -793,6 +758,7 @@ a.fc-event, a.fc-event:hover {
             <div class="legend-item"><span class="legend-dot bg-success"></span> Hadir</div>
             <div class="legend-item"><span class="legend-dot bg-secondary"></span> Libur</div>
             <div class="legend-item"><span class="legend-dot bg-danger"></span> Alpha</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span> Lupa Pulang</div>
             <div class="legend-item"><span class="legend-dot bg-warning"></span> Izin</div>
         </div>
     </div>
@@ -1069,10 +1035,10 @@ a.fc-event, a.fc-event:hover {
                 new Chart(ctx.getContext('2d'), {
                     type: 'doughnut',
                     data: {
-                        labels: ['Hadir', 'Alpha', 'Sisa'],
+                        labels: ['Hadir', 'Lupa Pulang', 'Alpha', 'Sisa'],
                         datasets: [{
-                            data: [{{ $totalHadir }}, {{ $alpha }}, {{ $chartSisa }}],
-                            backgroundColor: ['#198754', '#dc3545', '#ffc107'], borderWidth: 0, hoverOffset: 4
+                            data: [{{ $totalHadir }}, {{ $lupaPulang }}, {{ $alpha }}, {{ $chartSisa }}],
+                            backgroundColor: ['#198754', '#f59e0b', '#dc3545', '#ffc107'], borderWidth: 0, hoverOffset: 4
                         }]
                     },
                     options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } }
@@ -1171,11 +1137,11 @@ document.addEventListener("DOMContentLoaded", function() {
         new Chart(ctx.getContext('2d'), {
             type: 'doughnut',
             data: {
-                labels: ['Hadir', 'Alpha', 'Sisa'],
+                labels: ['Hadir', 'Lupa Pulang', 'Alpha', 'Sisa'],
                 datasets: [{
-                    data: [{{ $totalHadir }}, {{ $alpha }}, {{ $chartSisa }}],
-                    backgroundColor: ['#198754', '#dc3545', '#ffc107'],
-                    borderWidth: 0, 
+                    data: [{{ $totalHadir }}, {{ $lupaPulang }}, {{ $alpha }}, {{ $chartSisa }}],
+                    backgroundColor: ['#198754', '#f59e0b', '#dc3545', '#ffc107'],
+                    borderWidth: 0,
                     hoverOffset: 4
                 }]
             },
