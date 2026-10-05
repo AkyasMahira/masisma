@@ -344,9 +344,18 @@ public function dispensasis()
         foreach ($masukByDate as $date => $masuk) {
             $hasKeluar = $keluarBySession[$date] ?? null;
             if ($hasKeluar) {
-                $jamM = \Carbon\Carbon::parse($masuk->jam_masuk)->format('H:i');
-                $jamK = \Carbon\Carbon::parse($hasKeluar->jam_keluar)->format('H:i');
-                $events[] = ['title' => 'HADIR', 'start' => $date, 'color' => '#198754', 'extendedProps' => ['jam' => "$jamM - $jamK", 'ruang' => 'Absen', 'type' => 'absen']];
+                $cM = \Carbon\Carbon::parse($masuk->jam_masuk);
+                $cK = \Carbon\Carbon::parse($hasKeluar->jam_keluar);
+                $jamM = $cM->format('H:i');
+                $jamK = $cK->format('H:i');
+                // Checkout lewat tengah malam (shift malam): tandai +N hari biar jelas
+                $lintasHari = $cK->toDateString() > $cM->toDateString();
+                if ($lintasHari) {
+                    $selisihHari = \Carbon\Carbon::parse($cM->toDateString())
+                        ->diffInDays(\Carbon\Carbon::parse($cK->toDateString()));
+                    $jamK .= ' (+' . $selisihHari . ' hari)';
+                }
+                $events[] = ['title' => 'HADIR', 'start' => $date, 'color' => '#198754', 'extendedProps' => ['jam' => "$jamM - $jamK", 'ruang' => $lintasHari ? 'Hadir • Shift Malam' : 'Absen', 'type' => 'absen']];
             } else {
                 $isToday = $date == $today;
                 $events[] = ['title' => $isToday ? 'KERJA' : 'LUPA', 'start' => $date, 'color' => $isToday ? '#ffc107' : '#dc3545', 'extendedProps' => ['jam' => \Carbon\Carbon::parse($masuk->jam_masuk)->format('H:i') . ' - ?', 'ruang' => $isToday ? 'Belum checkout' : 'Lupa Pulang', 'type' => 'absen']];
