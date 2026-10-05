@@ -116,9 +116,21 @@
                     </div>
 
                     <div id="form-terlambat" style="display: none;">
-                        <div class="alert alert-danger shadow-sm border-0 mb-4">
+                        <div class="alert alert-danger shadow-sm border-0 mb-4" id="alert-note-terlambat">
                             <h6 class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-2"></i> PERHATIAN PENTING!</h6>
-                            <p class="small mb-0">Dispensasi terlambat <b>HANYA</b> berlaku untuk absensi hari ini (<b>{{ \Carbon\Carbon::now()->isoFormat('D MMMM YYYY') }}</b>). Sistem mengunci tanggal otomatis.</p>
+                            <p class="small mb-0" id="note-terlambat-text">Dispensasi terlambat <b>HANYA</b> berlaku untuk absensi hari ini (<b>{{ \Carbon\Carbon::now()->isoFormat('D MMMM YYYY') }}</b>). Sistem mengunci tanggal otomatis.</p>
+                        </div>
+
+                        {{-- Tanggal khusus Lupa Pulang (maks 2 hari ke belakang) --}}
+                        <div class="row mb-3" id="wrap-tgl-lupa" style="display: none;">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Tanggal Lupa Absen Pulang</label>
+                                <input type="date" name="tanggal_mulai" id="tgl_lupa" class="form-control" disabled
+                                       min="{{ \Carbon\Carbon::now()->subDays(2)->toDateString() }}"
+                                       max="{{ \Carbon\Carbon::now()->toDateString() }}"
+                                       value="{{ old('tanggal_mulai') }}">
+                                <small class="text-muted">Hanya bisa memilih maksimal 2 hari ke belakang.</small>
+                            </div>
                         </div>
 
                         <div class="row g-3 mb-4">
@@ -169,8 +181,8 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold small text-muted">Kronologi / Alasan Terlambat</label>
-                            <textarea name="keterangan_terlambat_input" id="ket_terlambat" class="form-control" rows="3" placeholder="Jelaskan alasan detail kenapa Anda terlambat hari ini...">{{ old('keterangan_terlambat_input') }}</textarea>
+                            <label class="form-label fw-bold small text-muted" id="label-ket-terlambat">Kronologi / Alasan Terlambat</label>
+                            <textarea name="keterangan_terlambat_input" id="ket_terlambat" class="form-control" rows="3" placeholder="Jelaskan alasan detail kenapa Anda terlambat / lupa absen pulang...">{{ old('keterangan_terlambat_input') }}</textarea>
                         </div>
 
                         <div class="card bg-light border-0 mb-4 p-3 shadow-sm">
@@ -276,33 +288,21 @@
             // Tampilkan Pop-up Pemilihan saat Halaman Dimuat pertama kali
             Swal.fire({
                 title: 'Pilih Jenis Dispensasi',
-                html: '<p class="small text-muted mb-4">Pilih jenis pengajuan sesuai dengan kondisi Anda saat ini.</p>',
                 icon: 'question',
-                showDenyButton: true,
-                showCancelButton: true,
-                confirmButtonText: '<i class="bi bi-clock-history me-1"></i> Dispen Terlambat',
-                denyButtonText: '<i class="bi bi-calendar2-check me-1"></i> Izin Biasa / Sakit',
-                cancelButtonText: 'Kembali',
-                confirmButtonColor: '#dc3545',
-                denyButtonColor: '#0d6efd',
-                cancelButtonColor: '#6c757d',
+                showConfirmButton: false,
                 allowOutsideClick: false,
                 allowEscapeKey: false,
-                customClass: {
-                    actions: 'flex-column w-100 px-4',
-                    confirmButton: 'w-100 mb-2 py-2',
-                    denyButton: 'w-100 mb-2 py-2',
-                    cancelButton: 'w-100 py-2'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    setupForm('terlambat');
-                } else if (result.isDenied) {
-                    setupForm('biasa');
-                } else {
-                    window.location.href = "{{ route('mahasiswa.dispensasi.index') }}";
-                }
+                html: `
+                    <p class="small text-muted mb-3">Pilih jenis pengajuan sesuai kondisi Anda.</p>
+                    <div class="d-grid gap-2 px-2">
+                        <button type="button" class="btn btn-danger py-2 fw-bold" onclick="window.__pilihDispen('terlambat')"><i class="bi bi-clock-history me-1"></i> Dispen Terlambat</button>
+                        <button type="button" class="btn btn-warning py-2 fw-bold text-dark" onclick="window.__pilihDispen('lupa_pulang')"><i class="bi bi-box-arrow-right me-1"></i> Dispen Lupa Pulang</button>
+                        <button type="button" class="btn btn-primary py-2 fw-bold" onclick="window.__pilihDispen('biasa')"><i class="bi bi-calendar2-check me-1"></i> Izin Biasa / Sakit</button>
+                        <a href="{{ route('mahasiswa.dispensasi.index') }}" class="btn btn-link text-muted">Kembali ke Riwayat</a>
+                    </div>
+                `
             });
+            window.__pilihDispen = function (k) { Swal.close(); setupForm(k); };
         }
 
         // Inisialisasi Choices JS
@@ -320,29 +320,43 @@
         const reqElements = document.querySelectorAll('#formDispensasi [required]');
         reqElements.forEach(el => el.removeAttribute('required'));
 
+        const tglMulaiBiasa = document.getElementById('tgl_mulai_biasa');
+        const tglSelesaiBiasa = document.getElementById('tgl_selesai_biasa');
+        const fileSurat = document.getElementById('file_surat');
+        const tglLupa = document.getElementById('tgl_lupa');
+        const wrapTglLupa = document.getElementById('wrap-tgl-lupa');
+        const noteEl = document.getElementById('note-terlambat-text');
+        const alertEl = document.getElementById('alert-note-terlambat');
+        const ketLabel = document.getElementById('label-ket-terlambat');
+
         if (kategori === 'biasa') {
             document.getElementById('form-title').innerHTML = '<i class="bi bi-calendar2-check me-2"></i> Pengajuan Izin Biasa / Sakit';
             document.getElementById('form-subtitle').innerText = 'Ikuti prosedur hard-copy dan upload PDF.';
-            
+
             document.getElementById('form-biasa').style.display = 'block';
             document.getElementById('form-terlambat').style.display = 'none';
-            
-            document.getElementById('tgl_mulai_biasa').setAttribute('required', 'true');
-            document.getElementById('tgl_selesai_biasa').setAttribute('required', 'true');
+
+            // Aktifkan input biasa, matikan input lupa pulang (agar tidak ikut terkirim)
+            tglMulaiBiasa.disabled = false; tglSelesaiBiasa.disabled = false; fileSurat.disabled = false;
+            tglLupa.disabled = true; tglLupa.removeAttribute('required');
+
+            tglMulaiBiasa.setAttribute('required', 'true');
+            tglSelesaiBiasa.setAttribute('required', 'true');
             document.getElementById('ket_biasa').setAttribute('required', 'true');
-            document.getElementById('file_surat').setAttribute('required', 'true');
+            fileSurat.setAttribute('required', 'true');
 
             // Copy value textarea (workaround for Laravel validation switching)
             document.getElementById('ket_biasa').name = 'keterangan';
-            document.getElementById('ket_terlambat').name = 'keterangan_terlambat_input'; 
+            document.getElementById('ket_terlambat').name = 'keterangan_terlambat_input';
 
-        } else if (kategori === 'terlambat') {
-            document.getElementById('form-title').innerHTML = '<i class="bi bi-clock-history me-2"></i> Pengajuan Dispensasi Terlambat';
-            document.getElementById('form-subtitle').innerText = 'Isi data dan minta validasi langsung kepada penyetuju di ruangan.';
-
+        } else if (kategori === 'terlambat' || kategori === 'lupa_pulang') {
             document.getElementById('form-biasa').style.display = 'none';
             document.getElementById('form-terlambat').style.display = 'block';
-            
+
+            // Matikan input biasa (hidden tapi masih punya name tanggal_mulai -> cegah bentrok)
+            tglMulaiBiasa.disabled = true; tglSelesaiBiasa.disabled = true; fileSurat.disabled = true;
+            tglMulaiBiasa.removeAttribute('required'); tglSelesaiBiasa.removeAttribute('required');
+
             document.getElementById('ruangan_id').setAttribute('required', 'true');
             document.getElementById('ket_terlambat').setAttribute('required', 'true');
             document.querySelector('input[name="nama_penyetuju"]').setAttribute('required', 'true');
@@ -350,7 +364,25 @@
 
             // Switch name attribute so backend receives the correct "keterangan"
             document.getElementById('ket_terlambat').name = 'keterangan';
-            document.getElementById('ket_biasa').name = 'keterangan_biasa_input'; 
+            document.getElementById('ket_biasa').name = 'keterangan_biasa_input';
+
+            if (kategori === 'terlambat') {
+                document.getElementById('form-title').innerHTML = '<i class="bi bi-clock-history me-2"></i> Pengajuan Dispensasi Terlambat';
+                document.getElementById('form-subtitle').innerText = 'Isi data dan minta validasi langsung kepada penyetuju di ruangan.';
+                wrapTglLupa.style.display = 'none';
+                tglLupa.disabled = true; tglLupa.removeAttribute('required');
+                alertEl.className = 'alert alert-danger shadow-sm border-0 mb-4';
+                noteEl.innerHTML = 'Dispensasi terlambat <b>HANYA</b> berlaku untuk absensi hari ini. Sistem mengunci tanggal otomatis.';
+                if (ketLabel) ketLabel.innerText = 'Kronologi / Alasan Terlambat';
+            } else {
+                document.getElementById('form-title').innerHTML = '<i class="bi bi-box-arrow-right me-2"></i> Pengajuan Dispensasi Lupa Pulang';
+                document.getElementById('form-subtitle').innerText = 'Untuk hari Anda lupa tap pulang (maks 2 hari lalu). Perlu validasi Karu/CI.';
+                wrapTglLupa.style.display = 'flex';
+                tglLupa.disabled = false; tglLupa.setAttribute('required', 'true');
+                alertEl.className = 'alert alert-warning shadow-sm border-0 mb-4';
+                noteEl.innerHTML = 'Lupa absen pulang dihitung <b>90%</b> bila disetujui. Pilih tanggal saat Anda lupa checkout (maksimal 2 hari ke belakang).';
+                if (ketLabel) ketLabel.innerText = 'Kronologi / Alasan Lupa Absen Pulang';
+            }
         }
     }
 
@@ -413,7 +445,7 @@
             }
         }
 
-        if(kategori === 'terlambat') {
+        if(kategori === 'terlambat' || kategori === 'lupa_pulang') {
             if(document.getElementById('ttd_penyetuju').value === "") {
                 e.preventDefault();
                 Swal.fire({icon: 'warning', title: 'Validasi Belum Lengkap', text: 'Pihak penyetuju wajib membubuhkan tanda tangan terlebih dahulu.'});

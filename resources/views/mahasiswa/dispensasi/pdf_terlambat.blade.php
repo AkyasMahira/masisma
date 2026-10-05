@@ -77,7 +77,7 @@
     <div class="garis-kop"></div>
     <!-- END KOP SURAT -->
 
-    <div class="title">SURAT DISPENSASI KETERLAMBATAN ABSENSI</div>
+    <div class="title">{{ $jenisSurat ?? 'SURAT DISPENSASI KETERLAMBATAN ABSENSI' }}</div>
 
     <p>Yang bertanda tangan di bawah ini menerangkan bahwa:</p>
 
@@ -104,7 +104,7 @@
         </tr>
     </table>
 
-    <p>Mengajukan dispensasi keterlambatan absensi pada tanggal <strong>{{ $tanggal }}</strong> dengan alasan / kronologi sebagai berikut:</p>
+    <p>{{ $aksiText ?? 'Mengajukan dispensasi keterlambatan absensi' }} pada tanggal <strong>{{ $tanggal }}</strong> dengan alasan / kronologi sebagai berikut:</p>
     
     <div class="box-keterangan">
         "{{ $keterangan }}"

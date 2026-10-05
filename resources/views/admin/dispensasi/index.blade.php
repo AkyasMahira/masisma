@@ -205,6 +205,8 @@
                                         @if(stripos($item->keterangan, 'malam') !== false)
                                             <span class="badge bg-dark text-white border border-dark mt-1 px-2 d-block"><i class="bi bi-moon-stars-fill text-warning"></i> SHIFT MALAM</span>
                                         @endif
+                                    @elseif($item->kategori == 'lupa_pulang')
+                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2">LUPA PULANG</span>
                                     @else
                                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2">IZIN BIASA</span>
                                     @endif
@@ -314,7 +316,7 @@
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="small text-muted d-block">Kategori</label>
-                            <strong>{{ strtoupper($item->kategori) }}</strong>
+                            <strong>{{ strtoupper(str_replace('_', ' ', $item->kategori)) }}</strong>
                         </div>
                         <div class="col-12">
                             <label class="small text-muted d-block">Alasan</label>

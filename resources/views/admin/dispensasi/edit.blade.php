@@ -36,6 +36,7 @@
                                 <select name="kategori" id="kategori_select" class="form-select border-2" required>
                                     <option value="biasa" {{ $dispensasi->kategori == 'biasa' ? 'selected' : '' }}>Izin / Sakit (Biasa)</option>
                                     <option value="terlambat" {{ $dispensasi->kategori == 'terlambat' ? 'selected' : '' }}>Dispensasi Terlambat</option>
+                                    <option value="lupa_pulang" {{ $dispensasi->kategori == 'lupa_pulang' ? 'selected' : '' }}>Dispensasi Lupa Pulang</option>
                                 </select>
                             </div>
 

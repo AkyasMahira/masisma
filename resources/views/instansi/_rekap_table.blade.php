@@ -54,7 +54,7 @@
                             @forelse($m->dispensasiApproved->take(5) as $d)
                                 <div class="small d-flex justify-content-between border-bottom py-1">
                                     <span>{{ \Carbon\Carbon::parse($d->tanggal_mulai)->format('d/m/y') }}-{{ \Carbon\Carbon::parse($d->tanggal_selesai)->format('d/m/y') }}</span>
-                                    <span class="badge {{ strtolower($d->kategori)==='terlambat' ? 'bg-warning text-dark' : 'bg-info text-dark' }}">{{ ucfirst($d->kategori) }}</span>
+                                    <span class="badge {{ in_array(strtolower($d->kategori), ['terlambat','lupa_pulang']) ? 'bg-warning text-dark' : 'bg-info text-dark' }}">{{ ucwords(str_replace('_', ' ', $d->kategori)) }}</span>
                                 </div>
                             @empty
                                 <span class="text-muted small">Tidak ada dispensasi.</span>

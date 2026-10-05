@@ -169,13 +169,16 @@ public function dispensasis()
 
             $shiftMap = $this->shiftSchedules()->pluck('shift_type', 'tanggal')->toArray();
 
-            // Peta dispensasi approved (biasa / terlambat) per tanggal
+            // Peta dispensasi approved (biasa / terlambat / lupa_pulang) per tanggal
             $dispBiasa = [];
             $dispTerlambat = [];
+            $dispLupaPulang = []; // dispensasi lupa pulang yang di-ACC (bobot 90%, sama seperti terlambat)
             foreach ($this->dispensasis()->where('status', 'approved')->get() as $disp) {
                 foreach (\Carbon\CarbonPeriod::create(\Carbon\Carbon::parse($disp->tanggal_mulai), \Carbon\Carbon::parse($disp->tanggal_selesai)) as $dt) {
                     $tgl = $dt->format('Y-m-d');
-                    if (strtolower($disp->kategori) === 'terlambat') $dispTerlambat[$tgl] = true;
+                    $kat = strtolower($disp->kategori);
+                    if ($kat === 'terlambat') $dispTerlambat[$tgl] = true;
+                    elseif ($kat === 'lupa_pulang') $dispLupaPulang[$tgl] = true;
                     else $dispBiasa[$tgl] = true;
                 }
             }
@@ -227,6 +230,10 @@ public function dispensasis()
                 } elseif (isset($dispTerlambat[$tgl])) {
                     $poinHadir += 0.9; $totalTerlambat++;
                     $kalender[$tgl] = ['status' => 'terlambat', 'label' => 'Dispensasi Terlambat (90%)'];
+                } elseif (isset($dispLupaPulang[$tgl])) {
+                    // Dispensasi lupa pulang di-ACC: bobot 90% (digabung ke bucket terlambat untuk agregat)
+                    $poinHadir += 0.9; $totalTerlambat++;
+                    $kalender[$tgl] = ['status' => 'terlambat', 'label' => 'Dispensasi Lupa Pulang (90%)'];
                 } elseif (isset($tappedIn[$tgl])) {
                     if (isset($keluarDates[$tgl]) || $tgl === $todayStr) {
                         // Lengkap (ada checkout), atau hari ini (masih bisa checkout) -> hadir penuh
@@ -341,6 +348,13 @@ public function dispensasis()
                 $keluarBySession[\Carbon\Carbon::parse($absen->jam_masuk)->format('Y-m-d')] = $absen;
             }
         }
+        // Tanggal yang punya dispensasi "lupa pulang" di-ACC: jangan dicat merah LUPA lagi (sudah diurus)
+        $lupaPulangDispDates = [];
+        foreach ($this->dispensasis()->where('status', 'approved')->where('kategori', 'lupa_pulang')->get() as $d) {
+            foreach (\Carbon\CarbonPeriod::create($d->tanggal_mulai, $d->tanggal_selesai) as $dt) {
+                $lupaPulangDispDates[$dt->format('Y-m-d')] = true;
+            }
+        }
         foreach ($masukByDate as $date => $masuk) {
             $hasKeluar = $keluarBySession[$date] ?? null;
             if ($hasKeluar) {
@@ -356,19 +370,24 @@ public function dispensasis()
                     $jamK .= ' (+' . $selisihHari . ' hari)';
                 }
                 $events[] = ['title' => 'HADIR', 'start' => $date, 'color' => '#198754', 'extendedProps' => ['jam' => "$jamM - $jamK", 'ruang' => $lintasHari ? 'Hadir • Shift Malam' : 'Absen', 'type' => 'absen']];
+            } elseif (isset($lupaPulangDispDates[$date])) {
+                // Lupa pulang sudah diajukan & di-ACC -> tampil sebagai dispensasi (bukan LUPA merah)
+                $events[] = ['title' => 'DISPEN', 'start' => $date, 'color' => '#fd7e14', 'extendedProps' => ['jam' => \Carbon\Carbon::parse($masuk->jam_masuk)->format('H:i') . ' - (ACC)', 'ruang' => 'Dispen Lupa Pulang', 'type' => 'izin']];
             } else {
                 $isToday = $date == $today;
                 $events[] = ['title' => $isToday ? 'KERJA' : 'LUPA', 'start' => $date, 'color' => $isToday ? '#ffc107' : '#dc3545', 'extendedProps' => ['jam' => \Carbon\Carbon::parse($masuk->jam_masuk)->format('H:i') . ' - ?', 'ruang' => $isToday ? 'Belum checkout' : 'Lupa Pulang', 'type' => 'absen']];
             }
         }
 
-        // D. DISPENSASI
+        // D. DISPENSASI (lupa_pulang sudah dirender di bagian C, jadi dilewati di sini)
+        $katLabel = ['biasa' => 'Izin / Sakit', 'terlambat' => 'Dispen Terlambat'];
         foreach ($this->dispensasis()->where('status', 'approved')->get() as $dispen) {
+            if (strtolower($dispen->kategori) === 'lupa_pulang') continue;
             $events[] = [
                 'title' => 'IZIN', 'start' => $dispen->tanggal_mulai,
                 'end'   => \Carbon\Carbon::parse($dispen->tanggal_selesai)->addDay()->format('Y-m-d'),
                 'color' => '#fd7e14',
-                'extendedProps' => ['jam' => $dispen->kategori, 'ruang' => 'Dispensasi', 'type' => 'izin'],
+                'extendedProps' => ['jam' => $katLabel[strtolower($dispen->kategori)] ?? 'Dispensasi', 'ruang' => 'Dispensasi', 'type' => 'izin'],
             ];
         }
 

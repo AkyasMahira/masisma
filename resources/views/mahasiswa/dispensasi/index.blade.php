@@ -80,6 +80,8 @@
                                     <div class="mb-1">
                                         @if($item->kategori == 'terlambat')
                                             <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2">TERLAMBAT</span>
+                                        @elseif($item->kategori == 'lupa_pulang')
+                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2">LUPA PULANG</span>
                                         @else
                                             <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2">IZIN BIASA</span>
                                         @endif

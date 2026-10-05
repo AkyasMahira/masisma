@@ -66,16 +66,24 @@ class DispensasiController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'kategori' => 'required|in:biasa,terlambat',
+            'kategori' => 'required|in:biasa,terlambat,lupa_pulang',
             'tanggal_mulai' => 'nullable|date',
             'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_mulai',
             'file_surat' => 'required_if:kategori,biasa|nullable|mimes:pdf|max:1024',
-            'ruangan_id' => 'required_if:kategori,terlambat',
-            'nama_penyetuju' => 'required_if:kategori,terlambat|nullable|string',
-            'jabatan_penyetuju' => 'required_if:kategori,terlambat|nullable|string',
-            'ttd_penyetuju' => 'required_if:kategori,terlambat|nullable|string',
-            'keterangan' => 'required|string', 
+            'ruangan_id' => 'required_unless:kategori,biasa',
+            'nama_penyetuju' => 'required_unless:kategori,biasa|nullable|string',
+            'jabatan_penyetuju' => 'required_unless:kategori,biasa|nullable|string',
+            'ttd_penyetuju' => 'required_unless:kategori,biasa|nullable|string',
+            'keterangan' => 'required|string',
         ]);
+
+        // Dispensasi Lupa Pulang: tanggal wajib & maksimal 2 hari ke belakang (tidak boleh masa depan)
+        if ($request->kategori === 'lupa_pulang') {
+            $request->validate([
+                'tanggal_mulai' => 'required|date|after_or_equal:' . Carbon::now()->subDays(2)->toDateString()
+                                   . '|before_or_equal:' . Carbon::now()->toDateString(),
+            ], [], ['tanggal_mulai' => 'Tanggal Lupa Pulang']);
+        }
 
         $user = Auth::user();
         
@@ -97,27 +105,44 @@ class DispensasiController extends Controller
                 $path = $request->file('file_surat')->store('dispensasi', 'public');
             }
         } else {
-            $tanggalMulai = $request->tanggal_mulai ?? Carbon::now()->toDateString(); 
-            $tanggalSelesai = $request->tanggal_selesai ?? $tanggalMulai;
-            
+            // terlambat & lupa_pulang: butuh ruangan + otorisasi penyetuju (Karu/CI)
+            if ($request->kategori === 'lupa_pulang') {
+                $tanggalMulai = $request->tanggal_mulai;              // tanggal lupa checkout (maks 2 hari lalu)
+            } else {
+                $tanggalMulai = $request->tanggal_mulai ?? Carbon::now()->toDateString(); // terlambat = hari ini
+            }
+            $tanggalSelesai = $tanggalMulai;
+
             $ruangan = Ruangan::find($request->ruangan_id);
 
             $dataTerlambat = [
                 'ruangan' => $ruangan ? $ruangan->nm_ruangan : '-',
                 'nama_penyetuju' => $request->nama_penyetuju,
                 'jabatan_penyetuju' => $request->jabatan_penyetuju,
-                'ttd_penyetuju' => $request->ttd_penyetuju, 
+                'ttd_penyetuju' => $request->ttd_penyetuju,
             ];
             $keteranganTerlambatJson = json_encode($dataTerlambat);
+
+            if ($request->kategori === 'lupa_pulang') {
+                $jenisSurat = 'SURAT DISPENSASI LUPA ABSEN PULANG';
+                $aksiText   = 'Mengajukan dispensasi tidak melakukan absen pulang (lupa checkout)';
+                $prefix     = 'LupaPulang_';
+            } else {
+                $jenisSurat = 'SURAT DISPENSASI KETERLAMBATAN ABSENSI';
+                $aksiText   = 'Mengajukan dispensasi keterlambatan absensi';
+                $prefix     = 'Terlambat_';
+            }
 
             $pdf = Pdf::loadView('mahasiswa.dispensasi.pdf_terlambat', [
                 'mahasiswa' => $mahasiswa,
                 'dataTerlambat' => $dataTerlambat,
                 'keterangan' => $request->keterangan,
                 'tanggal' => Carbon::parse($tanggalMulai)->isoFormat('D MMMM YYYY'),
+                'jenisSurat' => $jenisSurat,
+                'aksiText' => $aksiText,
             ]);
 
-            $fileName = 'dispensasi/Terlambat_' . Str::slug($mahasiswa->nm_mahasiswa) . '_' . time() . '.pdf';
+            $fileName = 'dispensasi/' . $prefix . Str::slug($mahasiswa->nm_mahasiswa) . '_' . time() . '.pdf';
             Storage::disk('public')->put($fileName, $pdf->output());
             $path = $fileName;
         }
@@ -208,7 +233,7 @@ class DispensasiController extends Controller
         $request->validate([
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-            'kategori' => 'required|in:biasa,terlambat',
+            'kategori' => 'required|in:biasa,terlambat,lupa_pulang',
             'status' => 'required|in:pending,approved,rejected',
             'catatan_admin' => 'nullable|string'
         ]);
