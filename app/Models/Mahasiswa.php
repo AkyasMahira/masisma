@@ -329,20 +329,27 @@ public function dispensasis()
         }
 
         // C. REALISASI ABSENSI
-        $absensiGrouped = $this->absensis->groupBy(function ($item) {
-            return \Carbon\Carbon::parse($item->created_at)->format('Y-m-d');
-        });
-        foreach ($absensiGrouped as $date => $logs) {
-            $masuk = $logs->where('type', 'masuk')->first();
-            $hasKeluar = $logs->where('type', 'keluar')->first();
-            if (isset($liburDates[$date]) && !$masuk) continue;
-            if ($masuk && $hasKeluar) {
+        // Satu sumber dengan hitungKehadiran(): masuk dipetakan ke tanggal tap (created_at),
+        // keluar dipetakan ke tanggal SESI (jam_masuk) agar shift malam yang checkout
+        // lewat tengah malam tetap berpasangan di tanggal yang sama (bukan dianggap LUPA).
+        $masukByDate = [];
+        $keluarBySession = [];
+        foreach ($this->absensis as $absen) {
+            if ($absen->type === 'masuk' && $absen->created_at) {
+                $masukByDate[$absen->created_at->format('Y-m-d')] = $absen;
+            } elseif ($absen->type === 'keluar' && $absen->jam_masuk) {
+                $keluarBySession[\Carbon\Carbon::parse($absen->jam_masuk)->format('Y-m-d')] = $absen;
+            }
+        }
+        foreach ($masukByDate as $date => $masuk) {
+            $hasKeluar = $keluarBySession[$date] ?? null;
+            if ($hasKeluar) {
                 $jamM = \Carbon\Carbon::parse($masuk->jam_masuk)->format('H:i');
                 $jamK = \Carbon\Carbon::parse($hasKeluar->jam_keluar)->format('H:i');
                 $events[] = ['title' => 'HADIR', 'start' => $date, 'color' => '#198754', 'extendedProps' => ['jam' => "$jamM - $jamK", 'ruang' => 'Absen', 'type' => 'absen']];
-            } elseif ($masuk) {
+            } else {
                 $isToday = $date == $today;
-                $events[] = ['title' => $isToday ? 'KERJA' : 'LUPA', 'start' => $date, 'color' => $isToday ? '#ffc107' : '#dc3545', 'extendedProps' => ['jam' => \Carbon\Carbon::parse($masuk->jam_masuk)->format('H:i') . ' - ?', 'ruang' => 'Incomplete', 'type' => 'absen']];
+                $events[] = ['title' => $isToday ? 'KERJA' : 'LUPA', 'start' => $date, 'color' => $isToday ? '#ffc107' : '#dc3545', 'extendedProps' => ['jam' => \Carbon\Carbon::parse($masuk->jam_masuk)->format('H:i') . ' - ?', 'ruang' => $isToday ? 'Belum checkout' : 'Lupa Pulang', 'type' => 'absen']];
             }
         }
 
