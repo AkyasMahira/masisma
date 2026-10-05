@@ -288,8 +288,11 @@
                                 <div class="progress-bar bg-{{ $color }}" style="width: {{ $persen }}%"></div>
                             </div>
                             <div class="d-flex flex-wrap gap-2 small">
-                                <span class="text-success"><i class="bi bi-check-circle me-1"></i>{{ $mhs->stat_hadir }} Masuk</span>
+                                <span class="text-success"><i class="bi bi-check-circle me-1"></i>{{ $mhs->stat_hadir }} Hadir</span>
                                 <span class="text-warning"><i class="bi bi-envelope-paper me-1"></i>{{ $mhs->stat_dispen }} Dispen</span>
+                                @if(($mhs->stat_lupa ?? 0) > 0)
+                                <span style="color:#b45309;"><i class="bi bi-clock-history me-1"></i>{{ $mhs->stat_lupa }} Lupa Pulang</span>
+                                @endif
                                 <span class="text-danger"><i class="bi bi-x-circle me-1"></i>{{ $mhs->stat_alfa }} Alfa</span>
                             </div>
                         </td>
@@ -563,19 +566,23 @@
                             @php
                                 $masuk = collect($logs)->where('type', 'masuk')->first();
                                 $keluar = collect($logs)->where('type', 'keluar')->first();
+                                $lupaPulang = $masuk && !$keluar && \Carbon\Carbon::parse($tgl)->lt(\Carbon\Carbon::today());
                             @endphp
-                            <div class="d-flex align-items-center justify-content-between p-3 mb-2 bg-white border rounded-3 shadow-sm transition-hover">
+                            <div class="d-flex align-items-center justify-content-between p-3 mb-2 bg-white border rounded-3 shadow-sm transition-hover {{ $lupaPulang ? 'border-warning' : '' }}">
                                 <div>
                                     <span class="d-block fw-bold text-dark" style="font-size: 0.85rem;">
                                         <i class="bi bi-calendar2-day text-primary me-1"></i> {{ \Carbon\Carbon::parse($tgl)->isoFormat('dddd, D MMM YYYY') }}
                                     </span>
+                                    @if($lupaPulang)
+                                        <span class="badge bg-warning text-dark mt-1" style="font-size:.68rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Lupa Pulang (nilai 80%)</span>
+                                    @endif
                                 </div>
                                 <div class="text-end d-flex flex-column gap-1">
                                     <span class="badge bg-soft-success border border-success text-success" style="font-size: 0.75rem;">
                                         IN: {{ $masuk && $masuk->jam_masuk ? \Carbon\Carbon::parse($masuk->jam_masuk)->format('H:i') : '--:--' }}
                                     </span>
-                                    <span class="badge bg-soft-danger border border-danger text-danger" style="font-size: 0.75rem;">
-                                        OUT: {{ $keluar && $keluar->jam_keluar ? \Carbon\Carbon::parse($keluar->jam_keluar)->format('H:i') : '--:--' }}
+                                    <span class="badge {{ $lupaPulang ? 'bg-warning text-dark border border-warning' : 'bg-soft-danger border border-danger text-danger' }}" style="font-size: 0.75rem;">
+                                        OUT: {{ $keluar && $keluar->jam_keluar ? \Carbon\Carbon::parse($keluar->jam_keluar)->format('H:i') : ($lupaPulang ? 'Lupa' : '--:--') }}
                                     </span>
                                 </div>
                             </div>

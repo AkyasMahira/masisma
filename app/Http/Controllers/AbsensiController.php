@@ -337,6 +337,68 @@ if ($lastAbsen && $lastAbsen->type === 'masuk') {
         return back()->with('success', 'Absen MASUK Berhasil.');
     }
 
+    /**
+     * Absen Pulang untuk sesi yang LUPA CHECKOUT (backdate maksimal 2 hari).
+     * Jam pulang = jam selesai shift/jadwal pada tanggal masuk sesi tsb.
+     */
+    public function backdatePulang(Request $request, $token)
+    {
+        $mahasiswa = Mahasiswa::where('share_token', $token)->first();
+        if (!$mahasiswa) return back()->with('error', 'Data mahasiswa tidak ditemukan.');
+
+        $batasBawah = Carbon::today()->subDays(2)->startOfDay();   // 2 hari ke belakang
+        $batasAtas  = Carbon::today()->startOfDay();                // sebelum hari ini
+
+        // Cari sesi MASUK yang belum ada checkout (dalam 2 hari terakhir, bukan hari ini)
+        $target = null;
+        $masukRecs = Absensi::where('mahasiswa_id', $mahasiswa->id)
+            ->where('type', 'masuk')
+            ->whereBetween('jam_masuk', [$batasBawah, $batasAtas])
+            ->orderBy('jam_masuk', 'desc')->get();
+        foreach ($masukRecs as $mk) {
+            $sudahKeluar = Absensi::where('mahasiswa_id', $mahasiswa->id)
+                ->where('type', 'keluar')->where('jam_masuk', $mk->jam_masuk)->exists();
+            if (!$sudahKeluar) { $target = $mk; break; }
+        }
+
+        if (!$target) {
+            return back()->with('error', 'Tidak ada sesi masuk yang lupa checkout dalam 2 hari terakhir.');
+        }
+
+        $jamMasuk = Carbon::parse($target->jam_masuk);
+        $tglMasuk = $jamMasuk->toDateString();
+
+        // Tentukan ruangan & shift pada tanggal masuk tsb
+        $sequence = RoomSequence::where('mahasiswa_id', $mahasiswa->id)
+            ->where('start_date', '<=', $tglMasuk)->where('end_date', '>=', $tglMasuk)
+            ->with('ruangan')->first();
+        $roomId = $sequence && $sequence->ruangan ? $sequence->ruangan->id : 0;
+
+        $jadwalDb = ShiftSchedule::where('mahasiswa_id', $mahasiswa->id)->where('tanggal', $tglMasuk)->first();
+        if ($jadwalDb) {
+            $shift = $jadwalDb->shift_type;
+        } else {
+            $dayIso = $jamMasuk->dayOfWeekIso;
+            $shift = $dayIso == 5 ? 'Jumat' : (($dayIso >= 1 && $dayIso <= 4) ? 'Reguler' : 'Libur');
+        }
+
+        // Jam selesai shift
+        $times = $this->getShiftTimes($shift, $jamMasuk, $roomId);
+        $jamKeluar = ($times && !empty($times['end'])) ? $times['end']->copy() : $jamMasuk->copy()->addHours(7);
+        if ($jamKeluar->lte($jamMasuk)) $jamKeluar = $jamMasuk->copy()->addHours(7);
+
+        Absensi::create([
+            'mahasiswa_id' => $mahasiswa->id,
+            'jam_masuk'    => $jamMasuk,
+            'jam_keluar'   => $jamKeluar,
+            'type'         => 'keluar',
+            'durasi_menit' => $jamMasuk->diffInMinutes($jamKeluar),
+            'keterangan'   => 'Backdate Lupa Checkout (' . $shift . ')',
+        ]);
+
+        return back()->with('success', 'Absen pulang (lupa checkout) untuk ' . $jamMasuk->isoFormat('D MMM') . ' berhasil dicatat (jam pulang: ' . $jamKeluar->format('H:i') . ').');
+    }
+
     // =========================================================================
     // 3. REGISTER DEVICE & HELPER
     // =========================================================================

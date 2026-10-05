@@ -205,6 +205,7 @@ class KepalaRuanganController extends Controller
             $mhs->stat_hadir  = $sm['hadir_fisik'];
             $mhs->stat_alfa   = $sm['alpha'];
             $mhs->stat_dispen = $sm['dispensasi_biasa'] + $sm['dispensasi_terlambat'];
+            $mhs->stat_lupa   = $sm['lupa_pulang'] ?? 0;
             $mhs->stat_target = $sm['target_sekarang'];
             $mhs->stat_persen = $sm['target_sekarang'] > 0 ? round(min($sm['hadir'] / $sm['target_sekarang'] * 100, 100), 1) : 0;
             

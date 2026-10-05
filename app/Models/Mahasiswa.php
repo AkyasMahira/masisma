@@ -155,7 +155,7 @@ public function dispensasis()
 
         $default = [
             'hadir' => 0, 'hadir_fisik' => 0, 'dispensasi_biasa' => 0, 'dispensasi_terlambat' => 0,
-            'alpha' => 0, 'target_sekarang' => 0, 'target_total' => 0, 'sisa_kerja' => 0,
+            'lupa_pulang' => 0, 'alpha' => 0, 'target_sekarang' => 0, 'target_total' => 0, 'sisa_kerja' => 0,
         ];
 
         if (!$this->tanggal_mulai || !$this->tanggal_berakhir) {
@@ -180,15 +180,20 @@ public function dispensasis()
                 }
             }
 
-            // Tanggal tap masuk aktual
+            // Tanggal tap masuk aktual, dan tanggal sesi yang SUDAH checkout (keluar)
             $tappedIn = [];
+            $keluarDates = [];
             foreach ($this->absensis as $absen) {
-                if ($absen->type !== 'masuk' || !$absen->created_at) continue;
-                $tappedIn[$absen->created_at->format('Y-m-d')] = true;
+                if ($absen->type === 'masuk' && $absen->created_at) {
+                    $tappedIn[$absen->created_at->format('Y-m-d')] = true;
+                } elseif ($absen->type === 'keluar' && $absen->jam_masuk) {
+                    // Sesi dianggap lengkap berdasarkan TANGGAL MASUK sesi tsb (aman untuk backdate)
+                    $keluarDates[\Carbon\Carbon::parse($absen->jam_masuk)->format('Y-m-d')] = true;
+                }
             }
 
             $targetTotal = 0; $targetSekarang = 0;
-            $poinHadir = 0; $hadirFisik = 0; $totalBiasa = 0; $totalTerlambat = 0; $alpha = 0;
+            $poinHadir = 0; $hadirFisik = 0; $totalBiasa = 0; $totalTerlambat = 0; $alpha = 0; $lupaPulang = 0;
             $kalender = [];
 
             foreach (\Carbon\CarbonPeriod::create($startStr, $endStr) as $dt) {
@@ -223,8 +228,15 @@ public function dispensasis()
                     $poinHadir += 0.9; $totalTerlambat++;
                     $kalender[$tgl] = ['status' => 'terlambat', 'label' => 'Dispensasi Terlambat (90%)'];
                 } elseif (isset($tappedIn[$tgl])) {
-                    $poinHadir += 1; $hadirFisik++;
-                    $kalender[$tgl] = ['status' => 'hadir', 'label' => 'Hadir'];
+                    if (isset($keluarDates[$tgl]) || $tgl === $todayStr) {
+                        // Lengkap (ada checkout), atau hari ini (masih bisa checkout) -> hadir penuh
+                        $poinHadir += 1; $hadirFisik++;
+                        $kalender[$tgl] = ['status' => 'hadir', 'label' => 'Hadir'];
+                    } else {
+                        // Tap masuk tapi tidak pernah checkout (hari lampau) -> LUPA PULANG, bobot 0.8
+                        $poinHadir += 0.8; $lupaPulang++;
+                        $kalender[$tgl] = ['status' => 'lupa', 'label' => 'Lupa Pulang (80%)'];
+                    }
                 } elseif ($tgl === $todayStr) {
                     // Hari ini belum berakhir -> jangan hitung alpha
                     $targetSekarang--;
@@ -241,6 +253,7 @@ public function dispensasis()
                     'hadir_fisik' => $hadirFisik,
                     'dispensasi_biasa' => $totalBiasa,
                     'dispensasi_terlambat' => $totalTerlambat,
+                    'lupa_pulang' => $lupaPulang,
                     'alpha' => $alpha,
                     'target_sekarang' => $targetSekarang,
                     'target_total' => $targetTotal,
