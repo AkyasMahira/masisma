@@ -72,7 +72,13 @@
             </div>
         @endif
 
-        <form action="{{ route('evaluasi.public.store') }}" method="POST">
+        @if(!empty($gateNote))
+            <div style="background:#fffbeb; border:1px solid #fde68a; border-left:5px solid #f59e0b; border-radius:14px; padding:14px 18px; margin-bottom:18px; color:#92400e; font-size:.9rem;">
+                <strong><i class="fas fa-lock me-1"></i> Wajib diisi:</strong> {{ $gateNote }}
+            </div>
+        @endif
+
+        <form action="{{ $actionUrl ?? route('evaluasi.public.store') }}" method="POST">
             @csrf
 
             {{-- Identitas responden --}}
@@ -81,11 +87,11 @@
                 <div class="form-row">
                     <div class="col-md-6 mb-3">
                         <label class="field-label">Nama</label>
-                        <input type="text" name="nama" class="form-control-ultra" value="{{ old('nama') }}" placeholder="Nama Anda">
+                        <input type="text" name="nama" class="form-control-ultra" value="{{ old('nama', $prefill['nama'] ?? '') }}" placeholder="Nama Anda">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="field-label">Instansi / Asal</label>
-                        <input type="text" name="instansi" class="form-control-ultra" value="{{ old('instansi') }}" placeholder="Instansi / unit kerja">
+                        <input type="text" name="instansi" class="form-control-ultra" value="{{ old('instansi', $prefill['instansi'] ?? '') }}" placeholder="Instansi / unit kerja">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="field-label">No. HP / Email</label>
@@ -93,7 +99,7 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="field-label">Nama Kegiatan / Diklat</label>
-                        <input type="text" name="nama_kegiatan" class="form-control-ultra" value="{{ old('nama_kegiatan') }}" placeholder="Diklat yang diikuti">
+                        <input type="text" name="nama_kegiatan" class="form-control-ultra" value="{{ old('nama_kegiatan', $prefill['nama_kegiatan'] ?? '') }}" placeholder="Diklat yang diikuti">
                     </div>
                     <div class="col-md-4 mb-3 mb-md-0">
                         <label class="field-label">Jenis Kelamin</label>

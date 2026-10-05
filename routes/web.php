@@ -107,6 +107,10 @@ Route::post('/absensi/{token}/register-device', [AbsensiController::class, 'regi
 // =========================================================================
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Evaluasi magang (wajib sebelum unduh sertifikat)
+    Route::get('/evaluasi-magang', [\App\Http\Controllers\EvaluasiController::class, 'magangForm'])->name('evaluasi.magang.form');
+    Route::post('/evaluasi-magang', [\App\Http\Controllers\EvaluasiController::class, 'magangStore'])->name('evaluasi.magang.store');
     Route::get('/mahasiswa/{id}/rolling', [MahasiswaController::class, 'editRolling'])->name('mahasiswa.rolling.edit');
     Route::put('/mahasiswa/{id}/rolling', [MahasiswaController::class, 'updateRolling'])->name('mahasiswa.rolling.update');
     Route::get('/room-sequences/{id}/manage-shift', [ShiftScheduleController::class, 'manage'])->name('shift_schedule.manage');

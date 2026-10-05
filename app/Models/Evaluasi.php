@@ -8,7 +8,7 @@ class Evaluasi extends Model
 {
     protected $table = 'evaluasis';
     protected $fillable = [
-        'nama', 'instansi', 'kontak', 'jenis_kelamin', 'pendidikan',
+        'mahasiswa_id', 'nama', 'instansi', 'kontak', 'jenis_kelamin', 'pendidikan',
         'umur', 'nama_kegiatan', 'kritik', 'saran', 'nilai_ikm',
     ];
 

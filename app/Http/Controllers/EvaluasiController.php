@@ -92,6 +92,76 @@ class EvaluasiController extends Controller
         return view('public.evaluasi.success');
     }
 
+    /* ============ EVALUASI MAGANG (syarat unduh sertifikat) ============ */
+
+    private function mahasiswaLogin()
+    {
+        return \App\Models\Mahasiswa::where('user_id', auth()->id())->latest()->first();
+    }
+
+    public function magangForm()
+    {
+        $mhs = $this->mahasiswaLogin();
+        if (!$mhs) return redirect()->route('dashboard')->with('error', 'Data magang tidak ditemukan.');
+        if ($mhs->evaluasi_at) {
+            // Sudah evaluasi -> langsung ke unduh sertifikat
+            return redirect()->route('sertifikat.download', $mhs->share_token);
+        }
+        $unsur = MasterEvaluasi::aktif()->orderBy('urutan')->orderBy('id')->get();
+        return view('public.evaluasi.form', [
+            'unsur'     => $unsur,
+            'actionUrl' => route('evaluasi.magang.store'),
+            'prefill'   => ['nama' => $mhs->nm_mahasiswa, 'instansi' => optional($mhs->mou)->nama_instansi ?? $mhs->univ_asal, 'nama_kegiatan' => 'Magang/PKL'],
+            'gateNote'  => 'Isi evaluasi ini terlebih dahulu untuk dapat mengunduh sertifikat magang Anda.',
+        ]);
+    }
+
+    public function magangStore(Request $request)
+    {
+        $mhs = $this->mahasiswaLogin();
+        if (!$mhs) return redirect()->route('dashboard')->with('error', 'Data magang tidak ditemukan.');
+        if ($mhs->evaluasi_at) return redirect()->route('sertifikat.download', $mhs->share_token);
+
+        $unsur = MasterEvaluasi::aktif()->orderBy('urutan')->get();
+        $rules = [
+            'nama' => 'nullable|string|max:255', 'instansi' => 'nullable|string|max:255',
+            'kontak' => 'nullable|string|max:255', 'jenis_kelamin' => 'nullable|in:L,P',
+            'pendidikan' => 'nullable|string|max:255', 'umur' => 'nullable|string|max:10',
+            'nama_kegiatan' => 'nullable|string|max:255', 'kritik' => 'nullable|string',
+            'saran' => 'nullable|string', 'jawaban' => 'required|array',
+        ];
+        foreach ($unsur as $u) {
+            $rules['jawaban.' . $u->id] = $u->tipe === 'rating' ? 'required|integer|min:1|max:4' : 'nullable|string';
+        }
+        $request->validate($rules, ['jawaban.*.required' => 'Mohon lengkapi semua penilaian.']);
+
+        DB::transaction(function () use ($request, $unsur, $mhs) {
+            $evaluasi = Evaluasi::create([
+                'mahasiswa_id' => $mhs->id,
+                'nama' => $request->nama ?: $mhs->nm_mahasiswa,
+                'instansi' => $request->instansi, 'kontak' => $request->kontak,
+                'jenis_kelamin' => $request->jenis_kelamin, 'pendidikan' => $request->pendidikan,
+                'umur' => $request->umur, 'nama_kegiatan' => $request->nama_kegiatan ?: 'Magang/PKL',
+                'kritik' => $request->kritik, 'saran' => $request->saran,
+            ]);
+            $sum = 0; $n = 0;
+            foreach ($unsur as $u) {
+                $jwb = $request->input('jawaban.' . $u->id);
+                $row = ['evaluasi_id' => $evaluasi->id, 'master_evaluasi_id' => $u->id];
+                if ($u->tipe === 'rating') { $row['nilai'] = (int) $jwb; $sum += (int) $jwb; $n++; }
+                else { $row['jawaban_text'] = $jwb; }
+                EvaluasiJawaban::create($row);
+            }
+            if ($n > 0) { $evaluasi->nilai_ikm = round(($sum / $n) * 25, 2); $evaluasi->save(); }
+
+            $mhs->evaluasi_at = now();
+            $mhs->save();
+        });
+
+        return redirect()->route('sertifikat.download', $mhs->share_token)
+            ->with('success', 'Terima kasih! Evaluasi tersimpan. Sertifikat Anda siap diunduh.');
+    }
+
     /* ===================== ADMIN ===================== */
 
     public function index(Request $request)

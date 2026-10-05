@@ -39,6 +39,7 @@ class Mahasiswa extends Model
         'nilai_evaluasi',
         'kompetensi_json',
         'kompetensi_dimiliki_json',
+        'evaluasi_at',
     ];
 
     protected $appends = ['sisa_hari', 'absensi_percentage', 'statistik'];

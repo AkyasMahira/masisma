@@ -887,6 +887,13 @@ public function generateSertifikatPublik(Request $request, $identifier)
     // Refresh model untuk memastikan kita ambil data statistik/relasi paling mutakhir
     $mahasiswa->refresh();
 
+    // GATE: pemilik akun wajib mengisi evaluasi magang dulu sebelum unduh sertifikat.
+    // Admin / pihak lain (validasi via token) tidak terkena gate.
+    if (auth()->check() && (int) auth()->id() === (int) $mahasiswa->user_id && empty($mahasiswa->evaluasi_at)) {
+        return redirect()->route('evaluasi.magang.form')
+            ->with('error', 'Silakan isi evaluasi magang terlebih dahulu untuk mengunduh sertifikat.');
+    }
+
     // =========================================================================
     // 2. AMBIL STATISTIK DARI MODEL
     // =========================================================================
