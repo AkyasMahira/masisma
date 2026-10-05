@@ -76,6 +76,7 @@
         $targetBerjalan = $stM->target_sekarang;
         $totalHadirReal = $stM->hadir_fisik + $stM->dispensasi_biasa + $stM->dispensasi_terlambat;
         $alphaCount     = $stM->alpha;
+        $lupaPulang     = $stM->lupa_pulang ?? 0;
         $sisaPeriode    = $stM->sisa_kerja;
         $persentase     = round($mahasiswa->absensi_percentage);
 
@@ -386,6 +387,18 @@
         </div>
     </div>
 
+    @if($lupaPulang > 0)
+    {{-- KARTU: LUPA PULANG --}}
+    <div class="col-md-3 col-6">
+        <div class="stat-card" style="background: #fff7ed; border-left: 4px solid #f59e0b;">
+            <div class="position-relative z-1">
+                <h2 class="fw-bold mb-0" style="color:#b45309;">{{ $lupaPulang }}</h2>
+                <small class="fw-bold" style="font-size: 0.65rem; color:#b45309;">LUPA PULANG (80%)</small>
+            </div>
+        </div>
+    </div>
+    @endif
+
     {{-- KARTU 3: TARGET BERJALAN --}}
     <div class="col-md-3 col-6">
         <div class="stat-card" style="background: #fff; border-left: 4px solid #0d6efd;">
@@ -424,6 +437,9 @@
                         <li>Total Hari Kerja: <strong>{{ $targetTotal }} Hari</strong></li>
                         <li>Sudah Berjalan: <strong>{{ $targetBerjalan }} Hari</strong></li>
                         <li>Total Masuk (Fisik/Izin): <strong class="text-success">{{ $totalHadirReal }} Hari</strong></li>
+                        @if($lupaPulang > 0)
+                        <li>Lupa Pulang (nilai 80%): <strong style="color:#b45309;">{{ $lupaPulang }} Hari</strong></li>
+                        @endif
                         <li>Alpha (Mangkir): <strong class="text-danger">{{ $alphaCount }} Hari</strong></li>
                     </ul>
                 </div>
