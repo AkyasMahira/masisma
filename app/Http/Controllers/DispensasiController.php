@@ -40,16 +40,26 @@ class DispensasiController extends Controller
     public function create()
     {
         $user = Auth::user();
-        
-        // FIX: Selalu ambil data magang yang sedang AKTIF dan PALING BARU
+
+        // Ambil data magang yang sedang AKTIF dan PALING BARU milik user ini
         $mahasiswa = Mahasiswa::with('mou')
                         ->where('user_id', $user->id)
                         ->where('status', 'aktif')
                         ->latest()
-                        ->firstOrFail();
-        
+                        ->first();
+
+        // Form ini khusus akun mahasiswa magang. Jangan lempar 404 buta.
+        if (!$mahasiswa) {
+            if (($user->role ?? null) === 'admin') {
+                return redirect()->route('admin.dispensasi.index')
+                    ->with('info', 'Form pengajuan dispensasi hanya untuk akun mahasiswa magang. Gunakan menu Dispensasi admin untuk mengelola pengajuan.');
+            }
+            return redirect()->route('mahasiswa.dashboard')
+                ->with('error', 'Anda belum memiliki data magang berstatus AKTIF, sehingga belum dapat mengajukan dispensasi. Hubungi admin bila ini keliru.');
+        }
+
         $ruangans = Ruangan::orderBy('nm_ruangan', 'asc')->get();
-        
+
         return view('mahasiswa.dispensasi.create', compact('mahasiswa', 'ruangans'));
     }
 
