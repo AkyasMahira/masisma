@@ -97,9 +97,11 @@
 
                 {{-- Pendidikan --}}
                 @php
-                    $isPendidikanActive = request()->is('mahasiswa*') || request()->is('ruangan*') || 
-                                          request()->is('room_sequences*') || request()->is('room_schedules*') || 
-                                          request()->is('absensi*') || request()->is('admin.dispensasi*');
+                    $isPendidikanActive = request()->is('mahasiswa*') || request()->is('ruangan*') ||
+                                          request()->is('room_sequences*') || request()->is('room_schedules*') ||
+                                          request()->is('absensi*') || request()->is('admin.dispensasi*') ||
+                                          request()->is('admin/master-prodi*') || request()->is('evaluasi_institusi*') ||
+                                          request()->is('admin/evaluasi*') || request()->is('admin/master-evaluasi*');
                 @endphp
                 <div class="nav-item-dropdown animate-item">
                     <a class="nav-link {{ $isPendidikanActive ? 'active-parent' : '' }}" data-bs-toggle="collapse" href="#menuPendidikan" role="button">
@@ -110,10 +112,13 @@
                     <div class="collapse sub-menu {{ $isPendidikanActive ? 'show' : '' }}" id="menuPendidikan">
                         <a class="nav-link {{ request()->is('mahasiswa*') ? 'active' : '' }}" href="{{ route('mahasiswa.index') }}"><span class="sidebar-text">Mahasiswa</span></a>
                         <a class="nav-link {{ request()->is('ruangan*') ? 'active' : '' }}" href="{{ route('ruangan.index') }}"><span class="sidebar-text">Ruangan</span></a>
+                        <a class="nav-link {{ request()->is('admin/master-prodi*') ? 'active' : '' }}" href="{{ route('admin.master_prodi.index') }}"><span class="sidebar-text">Program Studi</span></a>
                         <a class="nav-link {{ request()->is('admin.dispensasi*') ? 'active' : '' }}" href="{{ route('admin.dispensasi.index') }}"><span class="sidebar-text">Dispensasi</span></a>
                         <a class="nav-link {{ request()->is('absensi*') ? 'active' : '' }}" href="{{ route('absensi.index') }}"><span class="sidebar-text">Riwayat Absensi</span></a>
-                          <a class="nav-link {{ request()->is('evaluasi_institusi*') ? 'active' : '' }}" href="{{ route('admin.evaluasi_institusi') }}"><span class="sidebar-text">Evaluasi Institusi</span></a>
-                          
+                        <a class="nav-link {{ request()->is('evaluasi_institusi*') ? 'active' : '' }}" href="{{ route('admin.evaluasi_institusi') }}"><span class="sidebar-text">Evaluasi Institusi</span></a>
+                        <a class="nav-link {{ request()->is('admin/evaluasi*') ? 'active' : '' }}" href="{{ route('admin.evaluasi.index') }}"><span class="sidebar-text">Evaluasi &amp; IKM</span></a>
+                        <a class="nav-link {{ request()->is('admin/master-evaluasi*') ? 'active' : '' }}" href="{{ route('admin.master_evaluasi.index') }}"><span class="sidebar-text">Master Evaluasi</span></a>
+
                     </div>
                 </div>
 
@@ -122,8 +127,9 @@
                     // PERBAIKAN: Gunakan '/' bukan '.' untuk request()->is() karena ini membaca path URL
                     $isPelatihanActive = request()->is('pelatihan*') ||
                                          request()->is('diklat*') ||
-                                         request()->is('admin/master*') ||
-                                         request()->is('admin/evaluasi*') ||
+                                         request()->is('admin/master_instansi*') ||
+                                         request()->is('admin/master_kompetensi*') ||
+                                         request()->is('admin/master_ruangan*') ||
                                          request()->is('admin/kegiatan*') || // <-- Ini akan menjaga menu terbuka saat di dalam rute penilaian
                                          request()->is('admin/forms*') ||
                                          request()->is('admin/linktree*');
@@ -138,8 +144,7 @@
                         <a class="nav-link {{ request()->is('admin/master_instansi*') ? 'active' : '' }}" href="{{ route('admin.master_instansi.index') }}">Instansi</a>
                         <a class="nav-link {{ request()->is('admin/master_ruangan*') ? 'active' : '' }}" href="{{ route('admin.master_ruangan.index') }}">Ruangan</a>
                         <a class="nav-link {{ request()->is('admin/master_kompetensi*') ? 'active' : '' }}" href="{{ route('admin.master_kompetensi.index') }}">Kompetensi</a>
-                        <a class="nav-link {{ request()->is('admin/master-prodi*') ? 'active' : '' }}" href="{{ route('admin.master_prodi.index') }}">Program Studi</a>
-                        
+
                         {{-- Menu Kegiatan Utama --}}
                         <a class="nav-link {{ request()->routeIs('admin.kegiatan.index', 'admin.kegiatan.create', 'admin.kegiatan.edit') ? 'active' : '' }}" href="{{ route('admin.kegiatan.index') }}">Pelatihan</a>
 
@@ -157,8 +162,6 @@
                         <a class="nav-link {{ request()->is('diklat*') ? 'active' : '' }}" href="{{ route('diklat.index') }}">Pendaftaran</a>
                         <a class="nav-link {{ request()->is('admin/forms*') ? 'active' : '' }}" href="{{ route('admin.forms.index') }}">Buat Formulir</a>
                         <a class="nav-link {{ request()->is('admin/linktree*') ? 'active' : '' }}" href="{{ route('admin.linktree.index') }}">Paket Link</a>
-                        <a class="nav-link {{ request()->is('admin/evaluasi*') ? 'active' : '' }}" href="{{ route('admin.evaluasi.index') }}">Evaluasi &amp; IKM</a>
-                        <a class="nav-link {{ request()->is('admin/master-evaluasi*') ? 'active' : '' }}" href="{{ route('admin.master_evaluasi.index') }}">Master Evaluasi</a>
                     </div>
                 </div>
          {{-- Penelitian --}}
