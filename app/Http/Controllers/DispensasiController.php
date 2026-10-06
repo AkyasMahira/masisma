@@ -94,6 +94,19 @@ class DispensasiController extends Controller
                         ->latest()
                         ->firstOrFail();
 
+        // Lupa Pulang WAJIB ada absen masuk di tanggal tsb (lupa pulang = masuk tanpa checkout).
+        if ($request->kategori === 'lupa_pulang') {
+            $adaMasuk = Absensi::where('mahasiswa_id', $mahasiswa->id)
+                ->where('type', 'masuk')
+                ->whereDate('created_at', $request->tanggal_mulai)
+                ->exists();
+            if (!$adaMasuk) {
+                return back()->withInput()->withErrors([
+                    'tanggal_mulai' => 'Tidak ada absen masuk pada tanggal tersebut. Dispensasi Lupa Pulang hanya untuk hari yang sudah absen masuk tetapi lupa tap pulang. Jika memang tidak hadir, gunakan Izin Biasa/Sakit.',
+                ]);
+            }
+        }
+
         $path = null;
         $keteranganTerlambatJson = null;
 
@@ -433,10 +446,60 @@ class DispensasiController extends Controller
                     $keluarBaru->type = 'keluar'; 
                     $keluarBaru->durasi_menit = $waktuMasuk->diffInMinutes($jamKeluar);
                     $keluarBaru->keterangan = "Dispen Pulang Disetujui (Shift $tipeShift)";
-                    $keluarBaru->created_at = $jamKeluar; 
+                    $keluarBaru->created_at = $jamKeluar;
                     $keluarBaru->updated_at = $jamKeluar;
                     $keluarBaru->save();
                 }
+            }
+            // ==========================================================
+            // LOGIKA 3: DISPENSASI LUPA PULANG
+            // Lengkapi CHECKOUT yang hilang untuk hari yang lupa pulang (tanggal dispensasi).
+            // Jam pulang = jam selesai shift hari itu; dicatat di TANGGAL tsb (BUKAN tanggal ACC).
+            // ==========================================================
+            else if ($dispensasi->kategori === 'lupa_pulang') {
+                // Syarat: harus sudah ada absen MASUK di hari itu (lupa pulang = masuk tanpa checkout).
+                $masuk = Absensi::where('mahasiswa_id', $dispensasi->mahasiswa_id)
+                    ->where('type', 'masuk')
+                    ->whereDate('created_at', $date)
+                    ->orderBy('jam_masuk')
+                    ->first();
+                if (!$masuk) continue; // tidak ada masuk -> tidak bisa dibuatkan checkout
+
+                $sudahKeluar = Absensi::where('mahasiswa_id', $dispensasi->mahasiswa_id)
+                    ->where('type', 'keluar')
+                    ->where('jam_masuk', $masuk->jam_masuk)
+                    ->exists();
+                if ($sudahKeluar) continue;
+
+                $jamMasuk = Carbon::parse($masuk->jam_masuk);
+
+                // Jam selesai dari jadwal shift hari itu (fallback via kata kunci keterangan / reguler)
+                $jadwal = \App\Models\ShiftSchedule::where('mahasiswa_id', $dispensasi->mahasiswa_id)
+                    ->where('tanggal', $date->toDateString())
+                    ->first();
+                $shift = $jadwal ? $jadwal->shift_type : null;
+
+                if ($shift === 'Malam' || stripos($dispensasi->keterangan, 'malam') !== false) {
+                    $jamKeluar = $date->copy()->addDay()->setTime(7, 0, 0);   // lintas hari
+                } elseif ($shift === 'Siang' || stripos($dispensasi->keterangan, 'siang') !== false) {
+                    $jamKeluar = $date->copy()->setTime(21, 0, 0);
+                } elseif ($shift === 'Pagi') {
+                    $jamKeluar = $date->copy()->setTime(14, 0, 0);
+                } else {
+                    $jamKeluar = $date->copy()->setTime(15, 30, 0);           // reguler
+                }
+                if ($jamKeluar->lte($jamMasuk)) $jamKeluar = $jamMasuk->copy()->addHours(7);
+
+                $keluarBaru = new Absensi();
+                $keluarBaru->mahasiswa_id = $dispensasi->mahasiswa_id;
+                $keluarBaru->jam_masuk = $jamMasuk;
+                $keluarBaru->jam_keluar = $jamKeluar;
+                $keluarBaru->type = 'keluar';
+                $keluarBaru->durasi_menit = $jamMasuk->diffInMinutes($jamKeluar);
+                $keluarBaru->keterangan = 'Dispen Lupa Pulang Disetujui';
+                $keluarBaru->created_at = $jamKeluar;   // TANGGAL yang benar (hari lupa pulang), bukan tanggal ACC
+                $keluarBaru->updated_at = $jamKeluar;
+                $keluarBaru->save();
             }
         }
     }

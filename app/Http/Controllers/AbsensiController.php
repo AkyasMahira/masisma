@@ -394,6 +394,9 @@ if ($lastAbsen && $lastAbsen->type === 'masuk') {
             'type'         => 'keluar',
             'durasi_menit' => $jamMasuk->diffInMinutes($jamKeluar),
             'keterangan'   => 'Backdate Lupa Checkout (' . $shift . ')',
+            // Catat di TANGGAL sesi yang lupa pulang, bukan tanggal hari ini (tanggal input/ACC)
+            'created_at'   => $jamKeluar,
+            'updated_at'   => $jamKeluar,
         ]);
 
         return back()->with('success', 'Absen pulang (lupa checkout) untuk ' . $jamMasuk->isoFormat('D MMM') . ' berhasil dicatat (jam pulang: ' . $jamKeluar->format('H:i') . ').');
