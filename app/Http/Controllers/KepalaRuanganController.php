@@ -341,6 +341,59 @@ class KepalaRuanganController extends Controller
             'exportData' => []
         ]);
     }
+
+    /**
+     * Halaman khusus kelola dispensasi untuk kepala ruangan:
+     * tab status + pencarian nama + filter rentang tanggal + pagination.
+     */
+    public function dispensasiIndex(Request $request)
+    {
+        if (Auth::user()->role !== 'ruangan') {
+            abort(403, 'Akses Ditolak.');
+        }
+        $ruangan = Ruangan::where('user_id', Auth::id())->first();
+        if (!$ruangan) {
+            return abort(404, 'Akun Ruangan belum disetting.');
+        }
+
+        $status = $request->query('status', 'pending'); // pending | approved | rejected | all
+        $q      = trim((string) $request->query('q', ''));
+        $start  = $request->query('start');
+        $end    = $request->query('end');
+
+        $mahasiswaIds = Mahasiswa::where(function ($qq) use ($ruangan) {
+            $qq->where('ruangan_id', $ruangan->id)
+               ->orWhereHas('roomSequences', function ($s) use ($ruangan) { $s->where('ruangan_id', $ruangan->id); })
+               ->orWhereHas('shiftSchedules', function ($s) use ($ruangan) { $s->where('ruangan_id', $ruangan->id); });
+        })->pluck('id');
+
+        $query = \App\Models\Dispensasi::with('mahasiswa')->whereIn('mahasiswa_id', $mahasiswaIds);
+
+        if (in_array($status, ['pending', 'approved', 'rejected'], true)) {
+            $query->where('status', $status);
+        }
+        if ($q !== '') {
+            $query->whereHas('mahasiswa', function ($m) use ($q) { $m->where('nm_mahasiswa', 'like', "%{$q}%"); });
+        }
+        // Rentang: dispensasi yang bersinggungan dengan [start, end]
+        if ($start) $query->whereDate('tanggal_selesai', '>=', $start);
+        if ($end)   $query->whereDate('tanggal_mulai', '<=', $end);
+
+        $dispensasis = $query->orderByRaw("FIELD(status,'pending','approved','rejected')")
+            ->orderBy('created_at', 'desc')
+            ->paginate(12)
+            ->appends($request->query());
+
+        $base = \App\Models\Dispensasi::whereIn('mahasiswa_id', $mahasiswaIds);
+        $counts = [
+            'pending'  => (clone $base)->where('status', 'pending')->count(),
+            'approved' => (clone $base)->where('status', 'approved')->count(),
+            'rejected' => (clone $base)->where('status', 'rejected')->count(),
+        ];
+
+        return view('ruangan_dashboard.dispensasi', compact('ruangan', 'dispensasis', 'status', 'q', 'start', 'end', 'counts'));
+    }
+
  public function simpanNilai(Request $request, $id)
     {
         // 1. Validasi Input (Termasuk Array Evaluasi Baru)

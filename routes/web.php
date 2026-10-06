@@ -553,6 +553,9 @@ Route::middleware(['auth'])->prefix('kepala-ruangan')->name('kepala_ruangan.')->
     Route::get('/dashboard', [\App\Http\Controllers\KepalaRuanganController::class, 'dashboard'])->name('dashboard');
     Route::post('/ruangan/mahasiswa/{id}/nilai', [\App\Http\Controllers\KepalaRuanganController::class, 'simpanNilai'])->name('simpan_nilai');
 
+    // Halaman khusus kelola dispensasi (search + filter rentang + pagination)
+    Route::get('/dispensasi', [\App\Http\Controllers\KepalaRuanganController::class, 'dispensasiIndex'])->name('dispensasi.index');
+
     // Kepala ruangan boleh ACC / tolak dispensasi mahasiswa di ruangannya
     // (otorisasi kepemilikan ruangan dicek di DispensasiController::bolehKelola)
     Route::post('/dispensasi/{id}/approve', [\App\Http\Controllers\DispensasiController::class, 'approve'])->name('dispensasi.approve');

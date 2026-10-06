@@ -214,6 +214,27 @@
                     <i class="bi bi-house-door"></i>
                     <span class="sidebar-text">Dashboard Ruangan</span>
                 </a>
+                @php
+                    $karuPendingDisp = 0;
+                    try {
+                        $rgKaru = \App\Models\Ruangan::where('user_id', auth()->id())->first();
+                        if ($rgKaru) {
+                            $idsKaru = \App\Models\Mahasiswa::where(function ($q) use ($rgKaru) {
+                                $q->where('ruangan_id', $rgKaru->id)
+                                  ->orWhereHas('roomSequences', function ($s) use ($rgKaru) { $s->where('ruangan_id', $rgKaru->id); })
+                                  ->orWhereHas('shiftSchedules', function ($s) use ($rgKaru) { $s->where('ruangan_id', $rgKaru->id); });
+                            })->pluck('id');
+                            $karuPendingDisp = \App\Models\Dispensasi::whereIn('mahasiswa_id', $idsKaru)->where('status', 'pending')->count();
+                        }
+                    } catch (\Throwable $e) { $karuPendingDisp = 0; }
+                @endphp
+                <a class="nav-link animate-item {{ request()->routeIs('kepala_ruangan.dispensasi.index') ? 'active' : '' }}" href="{{ route('kepala_ruangan.dispensasi.index') }}">
+                    <i class="bi bi-envelope-paper-heart"></i>
+                    <span class="sidebar-text">Dispensasi</span>
+                    @if($karuPendingDisp > 0)
+                        <span class="badge bg-warning text-dark rounded-pill ms-auto">{{ $karuPendingDisp }}</span>
+                    @endif
+                </a>
             @endif
 
        {{-- ========== MENU USER (MAHASISWA) ========== --}}
