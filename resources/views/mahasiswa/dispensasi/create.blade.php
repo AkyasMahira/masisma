@@ -288,18 +288,48 @@
             // Tampilkan Pop-up Pemilihan saat Halaman Dimuat pertama kali
             Swal.fire({
                 title: 'Pilih Jenis Dispensasi',
-                icon: 'question',
                 showConfirmButton: false,
                 allowOutsideClick: false,
                 allowEscapeKey: false,
+                width: 440,
+                customClass: { popup: 'dsp-popup' },
                 html: `
-                    <p class="small text-muted mb-3">Pilih jenis pengajuan sesuai kondisi Anda.</p>
-                    <div class="d-grid gap-2 px-2">
-                        <button type="button" class="btn btn-danger py-2 fw-bold" onclick="window.__pilihDispen('terlambat')"><i class="bi bi-clock-history me-1"></i> Dispen Terlambat</button>
-                        <button type="button" class="btn btn-warning py-2 fw-bold text-dark" onclick="window.__pilihDispen('lupa_pulang')"><i class="bi bi-box-arrow-right me-1"></i> Dispen Lupa Pulang</button>
-                        <button type="button" class="btn btn-primary py-2 fw-bold" onclick="window.__pilihDispen('biasa')"><i class="bi bi-calendar2-check me-1"></i> Izin Biasa / Sakit</button>
-                        <a href="{{ route('mahasiswa.dispensasi.index') }}" class="btn btn-link text-muted">Kembali ke Riwayat</a>
+                    <style>
+                        .dsp-popup{border-radius:20px !important}
+                        .dsp-popup .swal2-title{font-size:1.15rem;color:#7c1316;padding-top:4px}
+                        .dsp-sub{font-size:.82rem;color:#8a8a8a;margin:-4px 0 14px}
+                        .dsp-list{display:flex;flex-direction:column;gap:10px;text-align:left}
+                        .dsp-opt{display:flex;align-items:center;gap:12px;width:100%;border:1.5px solid #eee;background:#fff;
+                                 border-radius:14px;padding:12px 14px;cursor:pointer;transition:.15s;font-family:inherit}
+                        .dsp-opt:hover{border-color:var(--c);box-shadow:0 8px 20px rgba(0,0,0,.09);transform:translateY(-1px)}
+                        .dsp-opt .ic{flex:0 0 44px;height:44px;border-radius:12px;display:flex;align-items:center;
+                                     justify-content:center;background:var(--cb);color:var(--c);font-size:1.3rem}
+                        .dsp-opt .tx{display:flex;flex-direction:column;line-height:1.25;flex:1;min-width:0}
+                        .dsp-opt .tx b{color:#222;font-size:.95rem}
+                        .dsp-opt .tx small{color:#8a8a8a;font-size:.76rem;margin-top:2px}
+                        .dsp-opt .chev{color:#d0d0d0;font-size:1rem}
+                        .dsp-back{margin-top:16px;background:none;border:none;color:#9a9a9a;font-size:.85rem;cursor:pointer}
+                        .dsp-back:hover{color:#7c1316;text-decoration:underline}
+                    </style>
+                    <p class="dsp-sub">Pilih jenis pengajuan sesuai kondisi Anda saat ini.</p>
+                    <div class="dsp-list">
+                        <button type="button" class="dsp-opt" style="--c:#dc3545;--cb:#fdecee" onclick="window.__pilihDispen('terlambat')">
+                            <span class="ic"><i class="bi bi-clock-history"></i></span>
+                            <span class="tx"><b>Dispensasi Terlambat</b><small>Telat absen masuk — berlaku hari ini</small></span>
+                            <i class="bi bi-chevron-right chev"></i>
+                        </button>
+                        <button type="button" class="dsp-opt" style="--c:#f59e0b;--cb:#fef3e2" onclick="window.__pilihDispen('lupa_pulang')">
+                            <span class="ic"><i class="bi bi-box-arrow-right"></i></span>
+                            <span class="tx"><b>Dispensasi Lupa Pulang</b><small>Lupa tap pulang — maksimal 2 hari lalu</small></span>
+                            <i class="bi bi-chevron-right chev"></i>
+                        </button>
+                        <button type="button" class="dsp-opt" style="--c:#0d6efd;--cb:#e7f0ff" onclick="window.__pilihDispen('biasa')">
+                            <span class="ic"><i class="bi bi-calendar2-check"></i></span>
+                            <span class="tx"><b>Izin Biasa / Sakit</b><small>Pakai surat — hard copy &amp; upload PDF</small></span>
+                            <i class="bi bi-chevron-right chev"></i>
+                        </button>
                     </div>
+                    <button type="button" class="dsp-back" onclick="window.location.href='{{ route('mahasiswa.dispensasi.index') }}'">&larr; Kembali ke Riwayat</button>
                 `
             });
             window.__pilihDispen = function (k) { Swal.close(); setupForm(k); };

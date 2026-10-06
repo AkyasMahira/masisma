@@ -169,6 +169,19 @@ public function dispensasis()
 
             $shiftMap = $this->shiftSchedules()->pluck('shift_type', 'tanggal')->toArray();
 
+            // Peta kategori ruangan per tanggal (dari roomSequences) -> menentukan rezim hari kerja.
+            // Rezim shift: hari kerja HANYA bila ada shift nyata yang di-roster (selaras dgn kalender).
+            // Rezim non_shift (reguler): hari kerja = hari biasa, weekend libur (kecuali weekend_aktif).
+            $kategoriByDate = [];
+            foreach ($this->roomSequences as $seq) {
+                if (!$seq->ruangan || !$seq->start_date || !$seq->end_date) continue;
+                $kat = $seq->ruangan->kategori ?? 'non_shift';
+                foreach (\Carbon\CarbonPeriod::create($seq->start_date, $seq->end_date) as $d) {
+                    $kategoriByDate[$d->format('Y-m-d')] = $kat;
+                }
+            }
+            $pakaiRoomSeq = !empty($kategoriByDate);
+
             // Peta dispensasi approved (biasa / terlambat / lupa_pulang) per tanggal
             $dispBiasa = [];
             $dispTerlambat = [];
@@ -207,8 +220,22 @@ public function dispensasis()
 
                 $shiftType = $shiftMap[$tgl] ?? null;
 
-                // Hari libur / akhir pekan (tidak wajib)
-                $isLibur = ($shiftType === 'Libur') || (!$shiftType && !$this->weekend_aktif && $dt->isWeekend());
+                // Hari libur / akhir pekan (tidak wajib) — ikut rezim ruangan hari itu
+                if ($pakaiRoomSeq) {
+                    $katHari = $kategoriByDate[$tgl] ?? null;
+                    if ($katHari === null) {
+                        // Tidak ditugaskan ke ruangan mana pun pada tanggal ini -> libur
+                        $isLibur = true;
+                    } elseif ($katHari === 'non_shift') {
+                        $isLibur = ($shiftType === 'Libur') || (!$shiftType && !$this->weekend_aktif && $dt->isWeekend());
+                    } else {
+                        // Rezim shift: hanya hari dgn shift nyata yang dihitung kerja
+                        $isLibur = ($shiftType === null || $shiftType === 'Libur');
+                    }
+                } else {
+                    // Fallback lama (mahasiswa tanpa roomSequences)
+                    $isLibur = ($shiftType === 'Libur') || (!$shiftType && !$this->weekend_aktif && $dt->isWeekend());
+                }
                 if ($isLibur) {
                     $kalender[$tgl] = ['status' => 'libur', 'label' => 'Libur'];
                     continue;
