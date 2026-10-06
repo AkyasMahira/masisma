@@ -1459,7 +1459,7 @@
 
         <div class="row g-4 justify-content-center">
             <div class="col-md-5 col-lg-4 reveal-on-scroll">
-                <div class="maskot-card text-center p-4">
+                <div class="maskot-card maskot-live text-center p-4">
                     <div class="maskot-circle mb-3">
                         <img src="{{ asset('1.png') }}" alt="Sindi" class="img-fluid">
                     </div>
@@ -1470,7 +1470,7 @@
             </div>
 
             <div class="col-md-5 col-lg-4 reveal-on-scroll">
-                <div class="maskot-card text-center p-4">
+                <div class="maskot-card maskot-live text-center p-4">
                     <div class="maskot-circle mb-3">
                         <img src="{{ asset('2.png') }}" alt="Dika" class="img-fluid">
                     </div>
@@ -1482,6 +1482,70 @@
         </div>
     </div>
 </section>
+
+<style>
+    /* ===== Maskot hidup & interaktif dengan kursor ===== */
+    #sobat-sindikat .maskot-live{
+        transition: transform .18s cubic-bezier(.2,.7,.3,1), box-shadow .3s ease, border-color .3s ease;
+        transform-style: preserve-3d;
+        will-change: transform;
+        cursor: pointer;
+    }
+    #sobat-sindikat .maskot-live:hover{
+        box-shadow: 0 26px 55px rgba(124,19,22,.18);
+        border-color: var(--primary);
+    }
+    #sobat-sindikat .maskot-circle{
+        transition: transform .25s ease, box-shadow .3s ease;
+    }
+    #sobat-sindikat .maskot-live:hover .maskot-circle{
+        transform: scale(1.05);
+        box-shadow: 0 0 0 6px rgba(124,19,22,.06), 0 16px 34px rgba(124,19,22,.22);
+    }
+    #sobat-sindikat .maskot-circle img{
+        animation: maskotFloat 4s ease-in-out infinite;
+        will-change: transform;
+    }
+    #sobat-sindikat .maskot-live:hover .maskot-circle img{ animation-play-state: paused; }
+    @keyframes maskotFloat{
+        0%,100%{ transform: translateY(0) rotate(0deg); }
+        50%{ transform: translateY(-8px) rotate(-1.5deg); }
+    }
+    #sobat-sindikat .maskot-live:hover .badge{ animation: maskotBadge 1.2s ease-in-out infinite; }
+    @keyframes maskotBadge{ 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-3px); } }
+    @media (prefers-reduced-motion: reduce){
+        #sobat-sindikat .maskot-circle img{ animation: none; }
+        #sobat-sindikat .maskot-live{ transition: none; }
+    }
+</style>
+
+<script>
+    (function(){
+        var cards = document.querySelectorAll('#sobat-sindikat .maskot-live');
+        if(!cards.length) return;
+        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        cards.forEach(function(card){
+            var img = card.querySelector('.maskot-circle img');
+            var TILT = 12; // derajat kemiringan maksimum
+            card.addEventListener('mousemove', function(e){
+                if(reduce) return;
+                var r = card.getBoundingClientRect();
+                var px = (e.clientX - r.left) / r.width - .5;   // -0.5 .. 0.5
+                var py = (e.clientY - r.top) / r.height - .5;
+                card.style.transform = 'perspective(900px) rotateY(' + (px*TILT) + 'deg) rotateX(' + (-py*TILT) + 'deg) translateY(-6px)';
+                if(img){
+                    img.style.animation = 'none';
+                    // maskot "melirik" ke arah kursor
+                    img.style.transform = 'translate(' + (px*18) + 'px,' + (py*14) + 'px) scale(1.07) rotate(' + (px*4) + 'deg)';
+                }
+            });
+            card.addEventListener('mouseleave', function(){
+                card.style.transform = '';
+                if(img){ img.style.transform = ''; img.style.animation = ''; }
+            });
+        });
+    })();
+</script>
     <!-- FITUR UTAMA -->
     <section class="section" id="fitur">
         <div class="container">
