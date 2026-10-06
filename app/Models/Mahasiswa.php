@@ -123,7 +123,8 @@ public function dispensasis()
      */
    /**
      * Menghitung Statistik Lengkap (Hadir, Alpha, Target, Sisa)
-     * Menggunakan Sistem Poin: Masuk=1, Dispensasi Biasa=1, Terlambat=0.8
+     * Sistem Poin: Hadir=1, Dispensasi Biasa=1, Terlambat=0.9, Dispensasi Lupa Pulang (ACC)=0.9,
+     * Lupa absen pulang yang BELUM di-ACC=0 (masuk Alfa, berketerangan), Alfa=0.
      */
     public function getStatistikAttribute()
     {
@@ -267,9 +268,10 @@ public function dispensasis()
                         $poinHadir += 1; $hadirFisik++;
                         $kalender[$tgl] = ['status' => 'hadir', 'label' => 'Hadir'];
                     } else {
-                        // Tap masuk tapi tidak pernah checkout (hari lampau) -> LUPA PULANG, bobot 0.8
-                        $poinHadir += 0.8; $lupaPulang++;
-                        $kalender[$tgl] = ['status' => 'lupa', 'label' => 'Lupa Pulang (80%)'];
+                        // Tap masuk tapi tidak pernah checkout (hari lampau) & belum ada dispensasi lupa pulang
+                        // -> MASUK ALFA (0 poin), tetapi diberi keterangan "Lupa Absen Pulang".
+                        $alpha++; $lupaPulang++;
+                        $kalender[$tgl] = ['status' => 'alpha', 'label' => 'Alpha (Lupa Absen Pulang)'];
                     }
                 } elseif ($tgl === $todayStr) {
                     // Hari ini belum berakhir -> jangan hitung alpha

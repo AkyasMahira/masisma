@@ -80,11 +80,14 @@
         $sisaPeriode    = $stM->sisa_kerja;
         $persentase     = round($mahasiswa->absensi_percentage);
 
-        // Daftar tanggal alpha untuk modal, dari kalender model
+        // Daftar tanggal alpha untuk modal, dari kalender model (termasuk lupa absen pulang)
         $listAlpha = [];
         foreach(($mahasiswa->kalender_kehadiran ?? []) as $tgl => $info) {
             if(($info['status'] ?? '') === 'alpha') {
-                $listAlpha[] = \Carbon\Carbon::parse($tgl)->isoFormat('dddd, D MMMM Y');
+                $listAlpha[] = [
+                    'tgl'  => \Carbon\Carbon::parse($tgl)->isoFormat('dddd, D MMMM Y'),
+                    'lupa' => stripos($info['label'] ?? '', 'Lupa') !== false,
+                ];
             }
         }
     @endphp
@@ -387,17 +390,6 @@
         </div>
     </div>
 
-    @if($lupaPulang > 0)
-    {{-- KARTU: LUPA PULANG --}}
-    <div class="col-md-3 col-6">
-        <div class="stat-card" style="background: #fff7ed; border-left: 4px solid #f59e0b;">
-            <div class="position-relative z-1">
-                <h2 class="fw-bold mb-0" style="color:#b45309;">{{ $lupaPulang }}</h2>
-                <small class="fw-bold" style="font-size: 0.65rem; color:#b45309;">LUPA PULANG (80%)</small>
-            </div>
-        </div>
-    </div>
-    @endif
 
     {{-- KARTU 3: TARGET BERJALAN --}}
     <div class="col-md-3 col-6">
@@ -437,10 +429,7 @@
                         <li>Total Hari Kerja: <strong>{{ $targetTotal }} Hari</strong></li>
                         <li>Sudah Berjalan: <strong>{{ $targetBerjalan }} Hari</strong></li>
                         <li>Total Masuk (Fisik/Izin): <strong class="text-success">{{ $totalHadirReal }} Hari</strong></li>
-                        @if($lupaPulang > 0)
-                        <li>Lupa Pulang (nilai 80%): <strong style="color:#b45309;">{{ $lupaPulang }} Hari</strong></li>
-                        @endif
-                        <li>Alpha (Mangkir): <strong class="text-danger">{{ $alphaCount }} Hari</strong></li>
+                        <li>Alpha (termasuk Lupa Absen Pulang): <strong class="text-danger">{{ $alphaCount }} Hari</strong>@if($lupaPulang > 0) <span style="color:#b45309;font-size:.9em;">(di antaranya {{ $lupaPulang }} lupa absen pulang)</span>@endif</li>
                     </ul>
                 </div>
             </div>
@@ -548,10 +537,15 @@
                 <div class="modal-body p-0" style="max-height: 300px; overflow-y: auto;">
                     @if(count($listAlpha) > 0)
                         <ul class="list-group list-group-flush">
-                            @foreach($listAlpha as $tgl)
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span style="font-size: 0.85rem;">{{ $tgl }}</span>
-                                    <span class="badge bg-danger rounded-pill" style="font-size: 0.65rem;">A</span>
+                            @foreach($listAlpha as $a)
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span style="font-size: 0.85rem;">{{ $a['tgl'] }}</span>
+                                        <span class="badge {{ $a['lupa'] ? 'bg-warning text-dark' : 'bg-danger' }} rounded-pill" style="font-size: 0.65rem;">{{ $a['lupa'] ? 'LP' : 'A' }}</span>
+                                    </div>
+                                    @if($a['lupa'])
+                                        <div style="font-size:.7rem;color:#b45309;"><i class="bi bi-box-arrow-right me-1"></i>Lupa Absen Pulang (dihitung alfa)</div>
+                                    @endif
                                 </li>
                             @endforeach
                         </ul>

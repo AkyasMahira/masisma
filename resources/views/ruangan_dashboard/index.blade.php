@@ -258,10 +258,7 @@
                             <div class="d-flex flex-wrap gap-2 small">
                                 <span class="text-success"><i class="bi bi-check-circle me-1"></i>{{ $mhs->stat_hadir }} Hadir</span>
                                 <span class="text-warning"><i class="bi bi-envelope-paper me-1"></i>{{ $mhs->stat_dispen }} Dispen</span>
-                                @if(($mhs->stat_lupa ?? 0) > 0)
-                                <span style="color:#b45309;"><i class="bi bi-clock-history me-1"></i>{{ $mhs->stat_lupa }} Lupa Pulang</span>
-                                @endif
-                                <span class="text-danger"><i class="bi bi-x-circle me-1"></i>{{ $mhs->stat_alfa }} Alfa</span>
+                                <span class="text-danger"><i class="bi bi-x-circle me-1"></i>{{ $mhs->stat_alfa }} Alfa@if(($mhs->stat_lupa ?? 0) > 0) <span style="color:#b45309;font-size:.9em;">({{ $mhs->stat_lupa }} lupa absen)</span>@endif</span>
                             </div>
                         </td>
 
@@ -542,7 +539,7 @@
                                         <i class="bi bi-calendar2-day text-primary me-1"></i> {{ \Carbon\Carbon::parse($tgl)->isoFormat('dddd, D MMM YYYY') }}
                                     </span>
                                     @if($lupaPulang)
-                                        <span class="badge bg-warning text-dark mt-1" style="font-size:.68rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Lupa Pulang (nilai 80%)</span>
+                                        <span class="badge bg-danger text-white mt-1" style="font-size:.68rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Lupa Absen Pulang (dihitung Alfa)</span>
                                     @endif
                                 </div>
                                 <div class="text-end d-flex flex-column gap-1">

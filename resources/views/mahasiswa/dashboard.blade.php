@@ -606,7 +606,11 @@ a.fc-event, a.fc-event:hover {
                 $listAlpha = [];
                 foreach (($mahasiswa->kalender_kehadiran ?? []) as $tgl => $info) {
                     if (($info['status'] ?? null) === 'alpha') {
-                        $listAlpha[] = \Carbon\Carbon::parse($tgl)->isoFormat('dddd, D MMMM Y');
+                        $isLupa = stripos($info['label'] ?? '', 'Lupa') !== false;
+                        $listAlpha[] = [
+                            'tgl'  => \Carbon\Carbon::parse($tgl)->isoFormat('dddd, D MMMM Y'),
+                            'lupa' => $isLupa,
+                        ];
                     }
                 }
                 // Kartu memakai angka model ($alpha) agar sinkron dengan admin/sertifikat
@@ -679,13 +683,6 @@ a.fc-event, a.fc-event:hover {
                                     </div>
                                 </div>
                                 <div class="col-6">
-                                    <div class="p-3 rounded-3 border text-center" style="border-color:#fed7aa !important; background-color:#fff7ed !important;">
-                                        <small class="text-muted d-block mb-1">Lupa Pulang <span style="font-size:0.6rem;">(80%)</span></small>
-                                        <h4 class="fw-bold mb-0" style="color:#b45309;">{{ $lupaPulang }}</h4>
-                                        <small class="text-secondary" style="font-size: 0.7rem">Hari</small>
-                                    </div>
-                                </div>
-                                <div class="col-6">
                                     <div class="p-3 bg-light rounded-3 border text-center">
                                         <small class="text-muted d-block mb-1">Target Berjalan</small>
                                         <h4 class="fw-bold text-primary mb-0">{{ $targetBerjalan }}</h4>
@@ -739,9 +736,6 @@ a.fc-event, a.fc-event:hover {
                 <span class="legend-dot bg-danger"></span> Alpha
             </div>
             <div class="legend-item">
-                <span class="legend-dot" style="background:#f59e0b;"></span> Lupa Pulang
-            </div>
-            <div class="legend-item">
                 <span class="legend-dot bg-warning"></span> Izin
             </div>
         </div>
@@ -758,7 +752,6 @@ a.fc-event, a.fc-event:hover {
             <div class="legend-item"><span class="legend-dot bg-success"></span> Hadir</div>
             <div class="legend-item"><span class="legend-dot bg-secondary"></span> Libur</div>
             <div class="legend-item"><span class="legend-dot bg-danger"></span> Alpha</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span> Lupa Pulang</div>
             <div class="legend-item"><span class="legend-dot bg-warning"></span> Izin</div>
         </div>
     </div>
@@ -864,10 +857,15 @@ a.fc-event, a.fc-event:hover {
                 <div class="modal-body p-0" style="max-height: 300px; overflow-y: auto;">
                     @if(count($listAlpha) > 0)
                         <ul class="list-group list-group-flush">
-                            @foreach($listAlpha as $tgl)
-                                <li class="list-group-item d-flex justify-content-between align-items-center small px-3">
-                                    <span>{{ $tgl }}</span>
-                                    <span class="badge bg-danger rounded-pill">A</span>
+                            @foreach($listAlpha as $a)
+                                <li class="list-group-item small px-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span>{{ $a['tgl'] }}</span>
+                                        <span class="badge {{ $a['lupa'] ? 'bg-warning text-dark' : 'bg-danger' }} rounded-pill">{{ $a['lupa'] ? 'LP' : 'A' }}</span>
+                                    </div>
+                                    @if($a['lupa'])
+                                        <div style="font-size:.68rem;color:#b45309;"><i class="bi bi-box-arrow-right me-1"></i>Lupa Absen Pulang (dihitung alfa)</div>
+                                    @endif
                                 </li>
                             @endforeach
                         </ul>
@@ -879,7 +877,7 @@ a.fc-event, a.fc-event:hover {
                     @endif
                 </div>
                 <div class="modal-footer p-2 bg-light justify-content-center">
-                    <small class="text-muted" style="font-size: 0.65rem;">*Alpha = Tidak Hadir & Tidak Izin di Hari Kerja.</small>
+                    <small class="text-muted" style="font-size: 0.65rem;">*Alpha = Tidak Hadir / Tidak Izin, termasuk Lupa Absen Pulang (LP) yang belum di-ACC.</small>
                 </div>
             </div>
         </div>
@@ -1035,10 +1033,10 @@ a.fc-event, a.fc-event:hover {
                 new Chart(ctx.getContext('2d'), {
                     type: 'doughnut',
                     data: {
-                        labels: ['Hadir', 'Lupa Pulang', 'Alpha', 'Sisa'],
+                        labels: ['Hadir', 'Alpha', 'Sisa'],
                         datasets: [{
-                            data: [{{ $totalHadir }}, {{ $lupaPulang }}, {{ $alpha }}, {{ $chartSisa }}],
-                            backgroundColor: ['#198754', '#f59e0b', '#dc3545', '#ffc107'], borderWidth: 0, hoverOffset: 4
+                            data: [{{ $totalHadir }}, {{ $alpha }}, {{ $chartSisa }}],
+                            backgroundColor: ['#198754', '#dc3545', '#ffc107'], borderWidth: 0, hoverOffset: 4
                         }]
                     },
                     options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } }
@@ -1137,10 +1135,10 @@ document.addEventListener("DOMContentLoaded", function() {
         new Chart(ctx.getContext('2d'), {
             type: 'doughnut',
             data: {
-                labels: ['Hadir', 'Lupa Pulang', 'Alpha', 'Sisa'],
+                labels: ['Hadir', 'Alpha', 'Sisa'],
                 datasets: [{
-                    data: [{{ $totalHadir }}, {{ $lupaPulang }}, {{ $alpha }}, {{ $chartSisa }}],
-                    backgroundColor: ['#198754', '#f59e0b', '#dc3545', '#ffc107'],
+                    data: [{{ $totalHadir }}, {{ $alpha }}, {{ $chartSisa }}],
+                    backgroundColor: ['#198754', '#dc3545', '#ffc107'],
                     borderWidth: 0,
                     hoverOffset: 4
                 }]
