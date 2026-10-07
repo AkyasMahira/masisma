@@ -21,6 +21,21 @@ class AbsensiController extends Controller
     protected $rsudLat = -7.82159559;
     protected $rsudLng = 112.05786417;
 
+   /**
+    * Sesi masuk dianggap "hangus" (lupa absen pulang) sehingga mahasiswa boleh
+    * absen masuk lagi di hari berikutnya. Diberi kelonggaran shift malam untuk
+    * checkout pagi hari sampai jam 10. Sesi hangus TIDAK dapat kredit (jadi Alfa).
+    */
+   private function sesiHangus($jamMasukStr, Carbon $now = null)
+   {
+       if (!$jamMasukStr) return false;
+       $now = $now ?: Carbon::now();
+       try { $masuk = Carbon::parse($jamMasukStr); } catch (\Exception $e) { return false; }
+       $bedaHari = $masuk->toDateString() !== $now->toDateString();
+       $elapsed  = $masuk->diffInHours($now);
+       return $elapsed > 16 || ($bedaHari && $now->hour >= 10);
+   }
+
    public function card($token)
     {
         try {
@@ -121,15 +136,13 @@ class AbsensiController extends Controller
             $lastAbsen = Absensi::where('mahasiswa_id', $mahasiswa->id)->latest()->first();
 
             if ($lastAbsen && $lastAbsen->type === 'masuk') {
-                $waktuMasuk = Carbon::parse($lastAbsen->jam_masuk);
-                
-                // CEK: Jika sudah lewat 14 jam, anggap hangus
-                if ($waktuMasuk->diffInHours($now) > 14) {
-                    $data['absenHariIni'] = null; 
-                    $data['error_state'] = 'Sesi sebelumnya hangus (Lupa absen pulang). Silakan absen masuk kembali.';
+                // Sesi masuk yang belum checkout -> hangus bila sudah ganti hari / lewat window.
+                if ($this->sesiHangus($lastAbsen->jam_masuk, $now)) {
+                    $data['absenHariIni'] = null;
+                    $data['error_state'] = 'Sesi sebelumnya hangus karena lupa absen pulang (dihitung Alfa). Silakan absen masuk untuk hari ini. Jika ingin dinilai, ajukan Dispensasi Lupa Pulang dari Dashboard Magang (maks 2 hari).';
                 } else {
                     $data['absenHariIni'] = $lastAbsen;
-                    if($data['error_state']) $data['error_state'] = null; 
+                    if($data['error_state']) $data['error_state'] = null;
                 }
             }
 
@@ -196,10 +209,9 @@ if (!$this->isInRsudArea($request->lat, $request->lng, 300)) {
 
 $isCheckout = false;
 if ($lastAbsen && $lastAbsen->type === 'masuk') {
-    $waktuMasuk = Carbon::parse($lastAbsen->jam_masuk);
-    
-    // Hanya proses PULANG jika sesi masuknya belum lewat 14 jam
-    if ($waktuMasuk->diffInHours($now) <= 14) {
+    // Proses PULANG hanya jika sesi masuknya BELUM hangus (belum ganti hari / masih di window).
+    // Jika sudah hangus -> bukan checkout, melainkan mulai sesi masuk baru (sesi lama jadi Alfa).
+    if (!$this->sesiHangus($lastAbsen->jam_masuk, $now)) {
         $isCheckout = true;
     }
 }
