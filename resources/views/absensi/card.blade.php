@@ -347,14 +347,7 @@
                         @endif
                     </form>
 
-                    {{-- Absen pulang untuk sesi yang lupa checkout (maks 2 hari) --}}
-                    <form action="{{ route('absensi.backdate_pulang', $mahasiswa->share_token) }}" method="POST" class="mt-2"
-                          onsubmit="return confirm('Catat absen pulang untuk sesi yang LUPA checkout? (jam pulang = jam selesai shift, maks 2 hari ke belakang)');">
-                        @csrf
-                        <button type="submit" style="width:100%; background:#fff7ed; color:#b45309; border:1px solid #fed7aa; border-radius:14px; padding:10px; font-weight:700; font-size:.85rem;">
-                            <i class="bi bi-clock-history me-1"></i> Lupa Absen Pulang? Catat di sini
-                        </button>
-                    </form>
+                    {{-- Lupa absen pulang kini lewat: Dashboard Magang > Izin Baru > Dispensasi Lupa Pulang (perlu ACC Karu) --}}
 
                 @else
                     {{-- Tampilan Jika Sedang Izin (Dispensasi) --}}

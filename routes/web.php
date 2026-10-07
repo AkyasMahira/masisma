@@ -101,7 +101,8 @@ Route::get('/sertifikat/peserta/{id}/{hash}', [KegiatanPesertaController::class,
 Route::get('/absensi/{token}', [AbsensiController::class, 'card'])->name('absensi.card');
 Route::post('/absensi/{token}/toggle', [AbsensiController::class, 'toggle'])->name('absensi.toggle');
 Route::post('/absensi/{token}/register-device', [AbsensiController::class, 'registerDevice'])->name('absensi.register_device');
-Route::post('/absensi/{token}/backdate-pulang', [AbsensiController::class, 'backdatePulang'])->name('absensi.backdate_pulang');
+// Self-service backdate pulang DINONAKTIFKAN: lupa pulang wajib lewat Dispensasi Lupa Pulang (ACC Karu = 90%).
+// Route::post('/absensi/{token}/backdate-pulang', [AbsensiController::class, 'backdatePulang'])->name('absensi.backdate_pulang');
 
 // =========================================================================
 // 1. ROUTES UNTUK USER LOGIN (UMUM)

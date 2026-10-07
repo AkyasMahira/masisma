@@ -258,7 +258,7 @@
                             <div class="d-flex flex-wrap gap-2 small">
                                 <span class="text-success"><i class="bi bi-check-circle me-1"></i>{{ $mhs->stat_hadir }} Hadir</span>
                                 <span class="text-warning"><i class="bi bi-envelope-paper me-1"></i>{{ $mhs->stat_dispen }} Dispen</span>
-                                <span class="text-danger"><i class="bi bi-x-circle me-1"></i>{{ $mhs->stat_alfa }} Alfa@if(($mhs->stat_lupa ?? 0) > 0) <span style="color:#b45309;font-size:.9em;">({{ $mhs->stat_lupa }} lupa absen)</span>@endif</span>
+                                <span class="text-danger"><i class="bi bi-x-circle me-1"></i>{{ $mhs->stat_alfa }} Alfa @if(($mhs->stat_lupa ?? 0) > 0)<span style="color:#b45309;font-size:.9em;">({{ $mhs->stat_lupa }} lupa absen)</span>@endif</span>
                             </div>
                         </td>
 

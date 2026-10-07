@@ -44,7 +44,7 @@
                             <div class="d-flex flex-wrap gap-3 small">
                                 <span class="text-success"><i class="bi bi-check-circle me-1"></i>{{ $m->stat->hadir_fisik }} Hadir</span>
                                 <span class="text-primary"><i class="bi bi-envelope-paper me-1"></i>{{ $m->stat->dispensasi_biasa + $m->stat->dispensasi_terlambat }} Dispen</span>
-                                <span class="text-danger"><i class="bi bi-x-circle me-1"></i>{{ $m->stat->alpha }} Alpha@if(($m->stat->lupa_pulang ?? 0) > 0) <span style="color:#b45309;font-size:.9em;">({{ $m->stat->lupa_pulang }} lupa absen)</span>@endif</span>
+                                <span class="text-danger"><i class="bi bi-x-circle me-1"></i>{{ $m->stat->alpha }} Alpha @if(($m->stat->lupa_pulang ?? 0) > 0)<span style="color:#b45309;font-size:.9em;">({{ $m->stat->lupa_pulang }} lupa absen)</span>@endif</span>
                                 <span class="text-muted">Target: {{ $m->stat->target_sekarang }}/{{ $m->stat->target_total }} hari</span>
                             </div>
                         </div>
