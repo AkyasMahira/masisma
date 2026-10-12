@@ -303,6 +303,9 @@
                                     <i class="bi bi-calendar-week me-1"></i> Atur Shift &amp; Rentang
                                 </a>
                             @endif
+                            <a href="{{ route('kepala_ruangan.mahasiswa.edit', $mhs->id) }}" class="btn btn-sm btn-outline-secondary w-100 fw-bold mb-2">
+                                <i class="bi bi-pencil-square me-1"></i> Edit Biodata
+                            </a>
 
                             <div class="mt-2">
                                 <span class="d-block text-muted fw-bold mb-1" style="font-size: 0.7rem; text-transform:uppercase;">Histori Ruangan Lain:</span>

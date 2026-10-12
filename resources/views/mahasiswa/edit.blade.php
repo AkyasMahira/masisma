@@ -135,7 +135,7 @@
             </div>
         @endif
 
-        <form action="{{ route('mahasiswa.update', $mahasiswa->id) }}" method="POST" enctype="multipart/form-data" id="form-mahasiswa">
+        <form action="{{ $updateAction ?? route('mahasiswa.update', $mahasiswa->id) }}" method="POST" enctype="multipart/form-data" id="form-mahasiswa">
             @csrf
             @method('PUT')
 
@@ -379,7 +379,7 @@
 
                 {{-- FOOTER --}}
                 <div class="card-footer bg-white border-0 p-3 p-md-4 pt-0 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-                    <a href="{{ auth()->user()->role === 'admin' ? route('mahasiswa.index') : route('dashboard') }}" 
+                    <a href="{{ $backUrl ?? (auth()->user()->role === 'admin' ? route('mahasiswa.index') : route('dashboard')) }}"
                        class="btn btn-light shadow-sm px-4 rounded-pill fw-bold w-100 w-md-auto text-center">
                         <i class="bi bi-arrow-left me-2"></i> Kembali
                     </a>

@@ -235,6 +235,10 @@
                         <span class="badge bg-warning text-dark rounded-pill ms-auto">{{ $karuPendingDisp }}</span>
                     @endif
                 </a>
+                <a class="nav-link animate-item {{ request()->routeIs('kepala_ruangan.kalender') ? 'active' : '' }}" href="{{ route('kepala_ruangan.kalender') }}">
+                    <i class="bi bi-calendar-week"></i>
+                    <span class="sidebar-text">Kalender Ruangan</span>
+                </a>
             @endif
 
        {{-- ========== MENU USER (MAHASISWA) ========== --}}

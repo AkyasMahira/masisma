@@ -558,6 +558,13 @@ Route::middleware(['auth'])->prefix('kepala-ruangan')->name('kepala_ruangan.')->
     // Halaman khusus kelola dispensasi (search + filter rentang + pagination)
     Route::get('/dispensasi', [\App\Http\Controllers\KepalaRuanganController::class, 'dispensasiIndex'])->name('dispensasi.index');
 
+    // Kalender roster ruangan (klik -> biodata mahasiswa, tanpa no HP)
+    Route::get('/kalender', [\App\Http\Controllers\KepalaRuanganController::class, 'kalender'])->name('kalender');
+
+    // Edit biodata mahasiswa di ruangannya
+    Route::get('/mahasiswa/{id}/edit', [\App\Http\Controllers\KepalaRuanganController::class, 'editMahasiswa'])->name('mahasiswa.edit');
+    Route::put('/mahasiswa/{id}', [\App\Http\Controllers\KepalaRuanganController::class, 'updateMahasiswa'])->name('mahasiswa.update');
+
     // Kepala ruangan boleh ACC / tolak dispensasi mahasiswa di ruangannya
     // (otorisasi kepemilikan ruangan dicek di DispensasiController::bolehKelola)
     Route::post('/dispensasi/{id}/approve', [\App\Http\Controllers\DispensasiController::class, 'approve'])->name('dispensasi.approve');

@@ -467,6 +467,90 @@ class KepalaRuanganController extends Controller
         return view('ruangan_dashboard.kalender', compact('ruangan', 'events', 'bio'));
     }
 
+    /** Apakah mahasiswa ini berada di bawah ruangan Karu ini. */
+    private function karuBoleh($ruangan, $mahasiswa)
+    {
+        if (!$ruangan || !$mahasiswa) return false;
+        if ((int) $mahasiswa->ruangan_id === (int) $ruangan->id) return true;
+        if ($mahasiswa->roomSequences()->where('ruangan_id', $ruangan->id)->exists()) return true;
+        if ($mahasiswa->shiftSchedules()->where('ruangan_id', $ruangan->id)->exists()) return true;
+        return false;
+    }
+
+    /** Karu membuka form edit biodata mahasiswa di ruangannya (pakai view admin). */
+    public function editMahasiswa($id)
+    {
+        if (Auth::user()->role !== 'ruangan') abort(403, 'Akses Ditolak.');
+        $ruangan = Ruangan::where('user_id', Auth::id())->first();
+        $mahasiswa = Mahasiswa::findOrFail($id);
+        if (!$this->karuBoleh($ruangan, $mahasiswa)) abort(403, 'Mahasiswa ini bukan di ruangan Anda.');
+
+        $ruangans = Ruangan::all();
+        $mous = \App\Models\Mou::orderBy('nama_instansi', 'asc')->get();
+        $updateAction = route('kepala_ruangan.mahasiswa.update', $mahasiswa->id);
+        $backUrl = route('kepala_ruangan.dashboard');
+
+        return view('mahasiswa.edit', compact('mahasiswa', 'ruangans', 'mous', 'updateAction', 'backUrl'));
+    }
+
+    /** Update biodata mahasiswa oleh Karu (scoped, tanpa utak-atik ruangan/kuota & tanpa kunci 1x edit). */
+    public function updateMahasiswa(Request $request, $id)
+    {
+        if (Auth::user()->role !== 'ruangan') abort(403, 'Akses Ditolak.');
+        $ruangan = Ruangan::where('user_id', Auth::id())->first();
+        $mahasiswa = Mahasiswa::with('user')->findOrFail($id);
+        if (!$this->karuBoleh($ruangan, $mahasiswa)) abort(403, 'Mahasiswa ini bukan di ruangan Anda.');
+
+        $data = $request->validate([
+            'nm_mahasiswa'     => 'required|string|max:255',
+            'prodi'            => 'nullable|string|max:255',
+            'email'            => 'nullable|email|unique:users,email,' . ($mahasiswa->user ? $mahasiswa->user->id : 'NULL'),
+            'mou_id'           => 'nullable|exists:mous,id',
+            'tanggal_mulai'    => 'nullable|date',
+            'tanggal_berakhir' => 'nullable|date|after_or_equal:tanggal_mulai',
+            'weekend_aktif'    => 'nullable|boolean',
+            'no_hp'            => 'nullable|string|max:20',
+            'status'           => 'nullable|in:aktif,nonaktif',
+            'foto'             => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        // Pertahankan nilai lama jika tidak dikirim
+        $data['status']           = $data['status'] ?? $mahasiswa->status;
+        $data['tanggal_mulai']    = $data['tanggal_mulai'] ?? $mahasiswa->tanggal_mulai;
+        $data['tanggal_berakhir'] = $data['tanggal_berakhir'] ?? $mahasiswa->tanggal_berakhir;
+        $data['nm_mahasiswa']     = strtoupper($data['nm_mahasiswa']);
+        if (!empty($data['prodi'])) $data['prodi'] = strtoupper($data['prodi']);
+        $data['weekend_aktif']    = $request->boolean('weekend_aktif');
+
+        // Update akun user (email & nama) bila ada
+        if ($mahasiswa->user) {
+            $mahasiswa->user->update([
+                'email' => $data['email'] ?? $mahasiswa->user->email,
+                'name'  => $data['nm_mahasiswa'],
+            ]);
+        }
+        unset($data['email']);
+
+        // Foto
+        if ($request->hasFile('foto')) {
+            if ($mahasiswa->foto_path && \Illuminate\Support\Facades\File::exists(public_path($mahasiswa->foto_path))) {
+                \Illuminate\Support\Facades\File::delete(public_path($mahasiswa->foto_path));
+            }
+            $file = $request->file('foto');
+            $nama_file = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
+            $file->move(public_path('uploads/pas_foto'), $nama_file);
+            $data['foto_path'] = 'uploads/pas_foto/' . $nama_file;
+        }
+        unset($data['foto']);
+
+        // Karu TIDAK mengubah penempatan ruangan/kuota -> abaikan ruangan_id
+        unset($data['ruangan_id']);
+
+        $mahasiswa->update($data);
+
+        return redirect()->route('kepala_ruangan.dashboard')->with('success', 'Biodata mahasiswa berhasil diperbarui.');
+    }
+
  public function simpanNilai(Request $request, $id)
     {
         // 1. Validasi Input (Termasuk Array Evaluasi Baru)
