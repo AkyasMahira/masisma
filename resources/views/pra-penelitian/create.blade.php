@@ -315,77 +315,13 @@
             <span class="input-group-text"><i class="bi bi-mortarboard-fill"></i></span>
           <select name="prodi" id="prodi-select" required>
     <option value="">Pilih atau Cari Program Studi...</option>
-    <option value="S2 FISIKA">S2 FISIKA</option>
-    <option value="SMK REKAYASA PERANGKAT LUNAK">SMK REKAYASA PERANGKAT LUNAK</option>
-    <option value="SMK TEKNIK KOMPUTER JARINGAN">SMK TEKNIK KOMPUTER JARINGAN</option>
-    <option value="SMK MULTIMEDIA">SMK MULTIMEDIA</option>
-    <option value="S1 TEKNIK INFORMATIKA">S1 TEKNIK INFORMATIKA</option>
-    <option value="S1 SISTEM INFORMASI">S1 SISTEM INFORMASI</option>
-    <option value="S1 ILMU KOMPUTER">S1 ILMU KOMPUTER</option>
-    <option value="D3 TEKNIK ELEKTROMEDIK">D3 TEKNIK ELEKTROMEDIK</option>
-    <option value="D4 TEKNIK ELEKTROMEDIK">D4 TEKNIK ELEKTROMEDIK</option>
-    <option value="S1 TEKNIK ELEKTRO">S1 TEKNIK ELEKTRO</option>
-    <option value="S1 TEKNIK LINGKUNGAN">S1 TEKNIK LINGKUNGAN</option>
-          <option value="S1 ADMINISTRASI KESEHATAN">S1 ADMINISTRASI KESEHATAN</option>
-    <option value="S2 MAGISTER MANAJEMEN">S2 MAGISTER MANAJEMEN</option>
-    <option value="SMK ASISTEN KEPERAWATAN">SMK ASISTEN KEPERAWATAN</option>
-     <option value="S2 MAGISTER KESEHATAN">S2 MAGISTER KESEHATAN</option>
-        <option value="S3 FARMASI">S3 FARMASI</option>
-                                          <option value="S2 MAGISTER KESEHATAN MASYARAKAT">S2 MAGISTER KESEHATAN MASYARAKAT</option>
-    <option value="D3 KEPERAWATAN">D3 KEPERAWATAN</option>
-    <option value="D4 KEPERAWATAN">D4 KEPERAWATAN</option>
-    <option value="S1 KEPERAWATAN">S1 KEPERAWATAN</option>
-    <option value="PROFESI NERS">PROFESI NERS</option>
-    <option value="S2 KEPERAWATAN">S2 KEPERAWATAN</option>
-    <option value="D3 KEBIDANAN">D3 KEBIDANAN</option>
-    <option value="D4 KEBIDANAN">D4 KEBIDANAN</option>
-    <option value="S1 KEBIDANAN">S1 KEBIDANAN</option>
-    <option value="PROFESI BIDAN">PROFESI BIDAN</option>
-    <option value="S2 KEBIDANAN">S2 KEBIDANAN</option>
-  <option value="S1 FISIKA">S1 FISIKA</option>
-    <option value="SMK FARMASI">SMK FARMASI</option>
-    <option value="D3 FARMASI">D3 FARMASI</option>
-    <option value="S1 FARMASI">S1 FARMASI</option>
-    <option value="PROFESI APOTEKER">PROFESI APOTEKER</option>
-    <option value="S1 TEKNOLOGI LABORATORIUM MEDIK">S1 TEKNOLOGI LABORATORIUM MEDIK</option>
-    <option value="D4 TEKNOLOGI LABORATORIUM MEDIK">D4 TEKNOLOGI LABORATORIUM MEDIK</option>
-    <option value="D3 ANALIS KESEHATAN (TLM)">D3 ANALIS KESEHATAN (TLM)</option>
-    <option value="D4 ANALIS KESEHATAN (TLM)">D4 ANALIS KESEHATAN (TLM)</option>
-
-    <option value="S1 KEDOKTERAN UMUM">S1 KEDOKTERAN UMUM</option>
-    <option value="PROFESI DOKTER (KOAS)">PROFESI DOKTER (KOAS)</option>
-    <option value="S1 KEDOKTERAN GIGI">S1 KEDOKTERAN GIGI</option>
-    <option value="PROFESI DOKTER GIGI">PROFESI DOKTER GIGI</option>
-    <option value="PPDS (SPESIALIS)">PPDS (SPESIALIS)</option>
-
-    <option value="D3 RADIOLOGI">D3 RADIOLOGI</option>
-    <option value="D4 RADIOLOGI">D4 RADIOLOGI</option>
-    <option value="D3 FISIOTERAPI">D3 FISIOTERAPI</option>
-    <option value="S1 FISIOTERAPI">S1 FISIOTERAPI</option>
-    <option value="PROFESI FISIOTERAPI">PROFESI FISIOTERAPI</option>
-    <option value="D3 GIZI">D3 GIZI</option>
-    <option value="S1 GIZI">S1 GIZI</option>
-    <option value="PROFESI DIETISIEN">PROFESI DIETISIEN</option>
-    <option value="S1 KESELAMATAN DAN KESEHATAN KERJA (K3)">S1 KESELAMATAN DAN KESEHATAN KERJA (K3)</option>
-    <option value="D4 KESELAMATAN DAN KESEHATAN KERJA (K3)">D4 KESELAMATAN DAN KESEHATAN KERJA (K3)</option>
-
-    <option value="D3 REKAM MEDIK">D3 REKAM MEDIK</option>
-    <option value="D4 REKAM MEDIK">D4 REKAM MEDIK</option>
-    <option value="D3 REKAM MEDIS & INFORMASI KESEHATAN">D3 REKAM MEDIS & INFORMASI KESEHATAN</option>
-    <option value="D4 REKAM MEDIS & INFORMASI KESEHATAN">D4 REKAM MEDIS & INFORMASI KESEHATAN</option>
-    <option value="D3 KESEHATAN LINGKUNGAN (SANITASI)">D3 KESEHATAN LINGKUNGAN (SANITASI)</option>
-    <option value="S1 KESEHATAN MASYARAKAT">S1 KESEHATAN MASYARAKAT</option>
-    <option value="D4 PROMOSI KESEHATAN">D4 PROMOSI KESEHATAN</option>
-    <option value="S1 ADMINISTRASI RUMAH SAKIT">S1 ADMINISTRASI RUMAH SAKIT</option>
-
-    <option value="SMK OTOMATISASI TATA KELOLA PERKANTORAN (OTKP)">SMK OTKP</option>
-    <option value="SMK AKUNTANSI">SMK AKUNTANSI</option>
-    <option value="D3 AKUNTANSI">D3 AKUNTANSI</option>
-    <option value="S1 AKUNTANSI">S1 AKUNTANSI</option>
-    <option value="S1 MANAJEMEN">S1 MANAJEMEN</option>
-    <option value="S1 HUKUM">S1 HUKUM</option>
-    <option value="S1 PSIKOLOGI">S1 PSIKOLOGI</option>
-    <option value="S1 ADMINISTRASI PUBLIK">S1 ADMINISTRASI PUBLIK</option>
+    @foreach(($listProdi ?? []) as $kategori => $prodis)
+        <optgroup label="{{ $kategori }}">
+            @foreach($prodis as $p)
+                <option value="{{ $p }}" {{ old('prodi') == $p ? 'selected' : '' }}>{{ $p }}</option>
+            @endforeach
+        </optgroup>
+    @endforeach
 </select>
         </div>
     </div>

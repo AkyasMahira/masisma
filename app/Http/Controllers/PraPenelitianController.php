@@ -93,7 +93,9 @@ public function index(Request $request)
             ->orderBy('nama_instansi')
             ->get();
 
-        return view('pra-penelitian.create', compact('mous'));
+        $listProdi = \App\Models\MasterProdi::grouped(); // [kategori => [nama_prodi, ...]]
+
+        return view('pra-penelitian.create', compact('mous', 'listProdi'));
     }
 
     /**
@@ -215,7 +217,9 @@ public function index(Request $request)
             ->orderBy('nama_instansi')
             ->get();
 
-        return view('pra-penelitian.edit', compact('praPenelitian', 'mous'));
+        $listProdi = \App\Models\MasterProdi::grouped();
+
+        return view('pra-penelitian.edit', compact('praPenelitian', 'mous', 'listProdi'));
     }
 
     /**

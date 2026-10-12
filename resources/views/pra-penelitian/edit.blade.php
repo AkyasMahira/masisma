@@ -248,8 +248,23 @@
                                 <label class="form-label">Program Studi</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-book"></i></span>
-                                    <input type="text" name="prodi" class="form-control"
-                                           value="{{ old('prodi', $praPenelitian->prodi) }}" required>
+                                    @php
+                                        $prodiTerpilih = old('prodi', $praPenelitian->prodi);
+                                        $semuaProdi = collect($listProdi ?? [])->flatten()->all();
+                                    @endphp
+                                    <select name="prodi" class="form-control" required>
+                                        <option value="">Pilih Program Studi...</option>
+                                        @if($prodiTerpilih && !in_array($prodiTerpilih, $semuaProdi))
+                                            <option value="{{ $prodiTerpilih }}" selected>{{ $prodiTerpilih }} (lama)</option>
+                                        @endif
+                                        @foreach(($listProdi ?? []) as $kategori => $prodis)
+                                            <optgroup label="{{ $kategori }}">
+                                                @foreach($prodis as $p)
+                                                    <option value="{{ $p }}" {{ $prodiTerpilih == $p ? 'selected' : '' }}>{{ $p }}</option>
+                                                @endforeach
+                                            </optgroup>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                             <div class="col-md-6">
