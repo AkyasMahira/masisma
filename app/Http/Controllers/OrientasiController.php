@@ -591,4 +591,30 @@ public function completeMaterial($id)
 
         return $pdf->stream('Sertifikat-Orientasi.pdf');
     }
+
+    /**
+     * Unduh sertifikat orientasi tertentu (dari riwayat). Hanya pemilik atau admin.
+     */
+    public function unduhSertifikat($id)
+    {
+        $result = OrientasiResult::findOrFail($id);
+
+        if (auth()->user()->role !== 'admin' && (int) $result->user_id !== (int) auth()->id()) {
+            abort(403, 'Ini bukan sertifikat orientasi Anda.');
+        }
+        if ($result->status !== 'lulus_orientasi') {
+            return back()->with('error', 'Sertifikat orientasi belum tersedia (belum lulus).');
+        }
+
+        $user = \App\Models\User::findOrFail($result->user_id);
+
+        $pdf = Pdf::loadView('orientasi.sertifikat_pdf', [
+            'user'       => $user,
+            'date'       => Carbon::parse($result->updated_at)->format('d F Y'),
+            'pre_score'  => $result->pre_test_score,
+            'post_score' => $result->post_test_score,
+        ]);
+
+        return $pdf->stream('Sertifikat-Orientasi-' . $user->name . '.pdf');
+    }
 }

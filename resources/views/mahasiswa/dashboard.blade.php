@@ -843,6 +843,38 @@ a.fc-event, a.fc-event:hover {
             </div>
             @endif
 
+            {{-- RIWAYAT SERTIFIKAT ORIENTASI --}}
+            @if(isset($riwayatOrientasi) && $riwayatOrientasi->count())
+            <div class="content-card animate-up" style="animation-delay:.75s;">
+                <div class="content-header">
+                    <h5 class="content-title"><i class="bi bi-patch-check me-2"></i> Riwayat Sertifikat Orientasi</h5>
+                </div>
+                <div class="table-responsive p-2">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light"><tr><th class="ps-3">Tanggal</th><th class="text-center">Gelombang</th><th class="text-center">Nilai (Pre/Post)</th><th class="text-center">Status</th><th class="text-center">Sertifikat</th></tr></thead>
+                        <tbody>
+                            @foreach($riwayatOrientasi as $ro)
+                                @php $lulus = $ro->status === 'lulus_orientasi'; @endphp
+                                <tr>
+                                    <td class="ps-3 fw-semibold">{{ optional($ro->updated_at)->format('d/m/Y') }}</td>
+                                    <td class="text-center small">{{ $ro->gelombang ? ('Gel. '.$ro->gelombang) : '-' }}{{ $ro->tahun ? ' / '.$ro->tahun : '' }}</td>
+                                    <td class="text-center small text-muted">{{ $ro->pre_test_score ?? '-' }} / {{ $ro->post_test_score ?? '-' }}</td>
+                                    <td class="text-center"><span class="badge {{ $lulus ? 'bg-success' : 'bg-secondary' }} rounded-pill">{{ $lulus ? 'Lulus' : 'Proses' }}</span></td>
+                                    <td class="text-center">
+                                        @if($lulus)
+                                            <a href="{{ route('orientasi.sertifikat.unduh', $ro->id) }}" target="_blank" class="btn btn-sm btn-success rounded-pill"><i class="bi bi-file-earmark-pdf-fill me-1"></i>Unduh</a>
+                                        @else
+                                            <span class="text-muted small">Belum lulus</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            @endif
+
         </div>
 
 

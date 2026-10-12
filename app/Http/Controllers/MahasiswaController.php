@@ -1491,10 +1491,14 @@ public function dashboard()
         $riwayatSertifikat = \App\Models\Mahasiswa::where('user_id', $mahasiswa->user_id)
             ->orderBy('tanggal_mulai', 'desc')->get();
 
+        // Riwayat sertifikat ORIENTASI user ini (bisa >1 gelombang)
+        $riwayatOrientasi = \App\Models\OrientasiResult::where('user_id', $mahasiswa->user_id)
+            ->orderBy('created_at', 'desc')->get();
+
         return view('mahasiswa.dashboard', compact(
             'mahasiswa', 'targetTotal', 'targetBerjalan', 'totalHadir', 'alpha', 'lupaPulang',
             'chartSisa', 'persentase', 'absensi', 'riwayatLengkap', 'startStr', 'endStr',
-            'jadwalRolling', 'events', 'riwayatSertifikat'
+            'jadwalRolling', 'events', 'riwayatSertifikat', 'riwayatOrientasi'
         ));
     }
  public function generateSertifikat(Request $request, $token)

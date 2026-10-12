@@ -174,6 +174,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/orientasi/post-test', [OrientasiController::class, 'showPostTest'])->name('orientasi.post');
     Route::post('/orientasi/post-test', [OrientasiController::class, 'submitPostTest'])->name('orientasi.post.submit');
     Route::get('/orientasi/sertifikat', [OrientasiController::class, 'sertifikat'])->name('orientasi.sertifikat');
+    Route::get('/orientasi/sertifikat/{id}/unduh', [OrientasiController::class, 'unduhSertifikat'])->name('orientasi.sertifikat.unduh');
     Route::post('/orientasi/complete/{id}', [OrientasiController::class, 'completeMaterial'])->name('orientasi.complete');
     Route::get('/orientasi/materi/{id}', [OrientasiController::class, 'showMaterial'])->name('orientasi.materi.show');
     Route::post('/orientasi/materi/{id}/complete', [OrientasiController::class, 'completeMaterial'])->name('orientasi.materi.complete');
