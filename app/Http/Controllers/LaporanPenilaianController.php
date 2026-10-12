@@ -119,4 +119,71 @@ class LaporanPenilaianController extends Controller
             'search', 'prodi', 'instansi', 'ruanganId', 'start', 'end'
         ));
     }
+
+    /** Pastikan ruangan punya indikator default (sama seperti sisi Karu). */
+    private function ensureDefault($ruanganId)
+    {
+        $ada = IndikatorPenilaian::where('ruangan_id', $ruanganId)->exists();
+        if ($ada) return;
+        $defaults = [
+            ['Sikap & Kedisiplinan', 'Kedisiplinan Waktu'],
+            ['Sikap & Kedisiplinan', 'Komunikasi & Etika'],
+            ['Sikap & Kedisiplinan', 'Kepatuhan SOP/PPI'],
+            ['Keahlian & Kompetensi', 'Pemahaman Teoritis'],
+            ['Keahlian & Kompetensi', 'Keterampilan Tindakan'],
+        ];
+        $u = 0;
+        foreach ($defaults as [$kat, $nama]) {
+            IndikatorPenilaian::create(['ruangan_id' => $ruanganId, 'nama' => $nama, 'kategori' => $kat, 'urutan' => $u++, 'aktif' => true]);
+        }
+    }
+
+    /** ADMIN: setup indikator penilaian untuk ruangan yang dipilih. */
+    public function setupPenilaian(Request $request)
+    {
+        $ruanganSelector = Ruangan::orderBy('nm_ruangan')->pluck('nm_ruangan', 'id');
+        $ruanganId = $request->get('ruangan');
+
+        $ruangan = null;
+        $indikators = collect();
+        if ($ruanganId) {
+            $ruangan = Ruangan::find($ruanganId);
+            if ($ruangan) {
+                $this->ensureDefault($ruangan->id);
+                $indikators = IndikatorPenilaian::where('ruangan_id', $ruangan->id)
+                    ->orderBy('urutan')->orderBy('id')->get();
+            }
+        }
+
+        $syncAction = route('admin.setup_penilaian.sync');
+        $backUrl    = route('admin.laporan_penilaian');
+
+        return view('ruangan_dashboard.setup_penilaian', compact('ruangan', 'indikators', 'syncAction', 'backUrl', 'ruanganSelector', 'ruanganId'));
+    }
+
+    /** ADMIN: simpan indikator untuk ruangan tertentu (ruangan_id dari form). */
+    public function syncPenilaian(Request $request)
+    {
+        $request->validate(['ruangan_id' => 'required|exists:ruangans,id']);
+        $ruanganId = (int) $request->ruangan_id;
+
+        $rows = $request->input('indikator', []);
+        $keepIds = [];
+        $u = 0;
+        foreach ($rows as $row) {
+            $nama = trim($row['nama'] ?? '');
+            if ($nama === '') continue;
+            $kategori = trim($row['kategori'] ?? '') ?: null;
+            if (!empty($row['id'])) {
+                $ind = IndikatorPenilaian::where('ruangan_id', $ruanganId)->find($row['id']);
+                if ($ind) { $ind->update(['nama' => $nama, 'kategori' => $kategori, 'urutan' => $u++, 'aktif' => true]); $keepIds[] = $ind->id; }
+            } else {
+                $ind = IndikatorPenilaian::create(['ruangan_id' => $ruanganId, 'nama' => $nama, 'kategori' => $kategori, 'urutan' => $u++, 'aktif' => true]);
+                $keepIds[] = $ind->id;
+            }
+        }
+        IndikatorPenilaian::where('ruangan_id', $ruanganId)->whereNotIn('id', $keepIds)->delete();
+
+        return redirect()->route('admin.setup_penilaian', ['ruangan' => $ruanganId])->with('success', 'Indikator penilaian ruangan berhasil disimpan.');
+    }
 }

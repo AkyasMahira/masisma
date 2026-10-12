@@ -74,7 +74,7 @@
                 </div>
             </div>
             <div class="modal-footer border-0 pt-0">
-                <a id="bio-edit" href="#" class="btn btn-outline-secondary btn-sm fw-semibold"><i class="bi bi-pencil-square me-1"></i>Edit Biodata</a>
+                <a id="bio-komp" href="#" class="btn btn-outline-secondary btn-sm fw-semibold"><i class="bi bi-stars me-1"></i>Kelola Kompetensi</a>
                 <a id="bio-shift" href="#" class="btn btn-sm fw-semibold text-white" style="background:#7c1316;"><i class="bi bi-calendar-week me-1"></i>Atur Shift &amp; Rentang</a>
             </div>
         </div>
@@ -140,7 +140,7 @@
                 } else {
                     btnShift.style.display = 'none';
                 }
-                document.getElementById('bio-edit').href = b.edit_url || '#';
+                document.getElementById('bio-komp').href = b.kompetensi_url || '#';
 
                 new bootstrap.Modal(document.getElementById('bioModal')).show();
             }

@@ -20,24 +20,55 @@
     <div class="sp-head d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <div>
             <h5 class="fw-bold mb-1"><i class="bi bi-sliders me-2"></i>Setup Indikator Penilaian</h5>
-            <div class="opacity-75 small"><i class="bi bi-door-open me-1"></i>{{ $ruangan->nm_ruangan }} — nilai akhir sertifikat = <b>rata-rata</b> semua indikator ini</div>
+            <div class="opacity-75 small">
+                @if($ruangan)<i class="bi bi-door-open me-1"></i>{{ $ruangan->nm_ruangan }} — @endif
+                nilai akhir sertifikat = <b>rata-rata</b> semua indikator
+            </div>
         </div>
-        <a href="{{ route('kepala_ruangan.dashboard') }}" class="btn btn-light btn-sm rounded-pill fw-semibold"><i class="bi bi-arrow-left me-1"></i> Dashboard</a>
+        <a href="{{ $backUrl ?? route('kepala_ruangan.dashboard') }}" class="btn btn-light btn-sm rounded-pill fw-semibold"><i class="bi bi-arrow-left me-1"></i> Kembali</a>
     </div>
 
     @if(session('success'))
         <div class="alert alert-success border-0 shadow-sm"><i class="bi bi-check-circle me-1"></i>{{ session('success') }}</div>
     @endif
 
+    {{-- ADMIN: pemilih ruangan --}}
+    @if(!empty($ruanganSelector))
+        <div class="sp-card mb-3">
+            <form method="GET" action="{{ route('admin.setup_penilaian') }}" class="row g-2 align-items-end">
+                <div class="col-md-8">
+                    <label class="form-label small fw-semibold text-muted mb-1">Pilih Ruangan</label>
+                    <select name="ruangan" class="form-select" onchange="this.form.submit()">
+                        <option value="">-- Pilih ruangan untuk diatur indikatornya --</option>
+                        @foreach($ruanganSelector as $rid => $rnama)
+                            <option value="{{ $rid }}" {{ (string)$ruanganId === (string)$rid ? 'selected' : '' }}>{{ $rnama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-4 d-grid">
+                    <button type="submit" class="btn btn-outline-dark fw-semibold"><i class="bi bi-arrow-repeat me-1"></i>Tampilkan</button>
+                </div>
+            </form>
+        </div>
+        @if(!$ruangan)
+            <div class="empty-state" style="background:#fff;border:1.5px dashed #d8dee6;border-radius:16px;padding:40px 20px;text-align:center;color:#94a3b8;">
+                <i class="bi bi-hand-index-thumb fs-1 d-block mb-2"></i>
+                <div class="fw-semibold">Pilih ruangan di atas untuk mengatur indikator penilaiannya.</div>
+            </div>
+        @endif
+    @endif
+
+    @if($ruangan)
     <div class="sp-card">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="fw-bold text-dark"><i class="bi bi-list-check me-2" style="color:var(--maroon);"></i>Daftar Indikator</div>
             <button type="button" id="btn-add" class="btn btn-sm btn-outline-dark fw-semibold"><i class="bi bi-plus-lg me-1"></i>Tambah Indikator</button>
         </div>
 
-        <form action="{{ route('kepala_ruangan.penilaian.sync') }}" method="POST" id="form-indikator"
+        <form action="{{ $syncAction ?? route('kepala_ruangan.penilaian.sync') }}" method="POST" id="form-indikator"
               onsubmit="return confirm('Simpan perubahan indikator? Indikator yang dihapus akan hilang beserta nilainya di evaluasi berikutnya.');">
             @csrf
+            <input type="hidden" name="ruangan_id" value="{{ $ruanganId }}">
 
             <div class="row fw-bold small text-muted px-1 mb-1 d-none d-md-flex">
                 <div class="col-md-5">Nama Indikator</div>
@@ -70,17 +101,20 @@
             </datalist>
 
             <div class="d-flex justify-content-end gap-2 mt-3">
-                <a href="{{ route('kepala_ruangan.dashboard') }}" class="btn btn-light border rounded-pill px-4">Batal</a>
+                <a href="{{ $backUrl ?? route('kepala_ruangan.dashboard') }}" class="btn btn-light border rounded-pill px-4">Batal</a>
                 <button type="submit" class="btn text-white fw-bold rounded-pill px-4" style="background:var(--maroon);"><i class="bi bi-check-lg me-1"></i>Simpan Indikator</button>
             </div>
         </form>
     </div>
+    @endif
 </div>
 
 <script>
     (function () {
         var rows = document.getElementById('rows');
-        var idx = {{ count($indikators) }};
+        var addBtn = document.getElementById('btn-add');
+        if (!rows || !addBtn) return;
+        var idx = {{ $ruangan ? count($indikators) : 0 }};
         function rowHtml(i) {
             return '<div class="ind-row">'
                 + '<div class="row g-2 flex-grow-1">'
@@ -89,7 +123,7 @@
                 + '  <div class="col-md-2 d-grid"><button type="button" class="btn btn-outline-danger btn-remove"><i class="bi bi-trash"></i></button></div>'
                 + '</div></div>';
         }
-        document.getElementById('btn-add').addEventListener('click', function () {
+        addBtn.addEventListener('click', function () {
             rows.insertAdjacentHTML('beforeend', rowHtml(idx++));
         });
         rows.addEventListener('click', function (e) {

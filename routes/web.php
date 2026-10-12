@@ -199,6 +199,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Laporan penilaian lintas ruangan (tabel berfilter + unduh CSV)
     Route::get('/admin/laporan-penilaian', [\App\Http\Controllers\LaporanPenilaianController::class, 'laporan'])->name('admin.laporan_penilaian');
 
+    // Setup indikator penilaian per ruangan (admin memilih ruangan)
+    Route::get('/admin/setup-penilaian', [\App\Http\Controllers\LaporanPenilaianController::class, 'setupPenilaian'])->name('admin.setup_penilaian');
+    Route::post('/admin/setup-penilaian', [\App\Http\Controllers\LaporanPenilaianController::class, 'syncPenilaian'])->name('admin.setup_penilaian.sync');
+
     Route::get('/admin/evaluasi-institusi', [DashboardController::class, 'evaluasiInstitusi'])->name('admin.evaluasi_institusi');
     Route::delete('/admin/hapus-nilai-magang/{mahasiswa_id}/{ruangan_id}', [DashboardController::class, 'hapusNilai'])->name('admin.hapus_nilai_magang');
 
@@ -571,9 +575,9 @@ Route::middleware(['auth'])->prefix('kepala-ruangan')->name('kepala_ruangan.')->
     // Laporan penilaian (tabel berfilter + unduh CSV)
     Route::get('/laporan-penilaian', [\App\Http\Controllers\KepalaRuanganController::class, 'laporanPenilaian'])->name('penilaian.laporan');
 
-    // Edit biodata mahasiswa di ruangannya
-    Route::get('/mahasiswa/{id}/edit', [\App\Http\Controllers\KepalaRuanganController::class, 'editMahasiswa'])->name('mahasiswa.edit');
-    Route::put('/mahasiswa/{id}', [\App\Http\Controllers\KepalaRuanganController::class, 'updateMahasiswa'])->name('mahasiswa.update');
+    // Kelola kompetensi/keahlian mahasiswa (Karu TIDAK bisa edit biodata)
+    Route::get('/mahasiswa/{id}/kompetensi', [\App\Http\Controllers\KepalaRuanganController::class, 'editKompetensi'])->name('mahasiswa.kompetensi');
+    Route::put('/mahasiswa/{id}/kompetensi', [\App\Http\Controllers\KepalaRuanganController::class, 'updateKompetensi'])->name('mahasiswa.kompetensi.update');
 
     // Kepala ruangan boleh ACC / tolak dispensasi mahasiswa di ruangannya
     // (otorisasi kepemilikan ruangan dicek di DispensasiController::bolehKelola)

@@ -117,6 +117,7 @@
                         <a class="nav-link {{ request()->is('admin.dispensasi*') ? 'active' : '' }}" href="{{ route('admin.dispensasi.index') }}"><span class="sidebar-text">Dispensasi</span></a>
                         <a class="nav-link {{ request()->is('absensi*') ? 'active' : '' }}" href="{{ route('absensi.index') }}"><span class="sidebar-text">Riwayat Absensi</span></a>
                         <a class="nav-link {{ request()->is('admin/laporan-penilaian*') ? 'active' : '' }}" href="{{ route('admin.laporan_penilaian') }}"><span class="sidebar-text">Laporan Penilaian</span></a>
+                        <a class="nav-link {{ request()->is('admin/setup-penilaian*') ? 'active' : '' }}" href="{{ route('admin.setup_penilaian') }}"><span class="sidebar-text">Setup Penilaian</span></a>
                         <a class="nav-link {{ request()->is('evaluasi_institusi*') ? 'active' : '' }}" href="{{ route('admin.evaluasi_institusi') }}"><span class="sidebar-text">Evaluasi Institusi</span></a>
                         <a class="nav-link {{ request()->is('admin/evaluasi*') ? 'active' : '' }}" href="{{ route('admin.evaluasi.index') }}"><span class="sidebar-text">Evaluasi &amp; IKM</span></a>
                         <a class="nav-link {{ request()->is('admin/master-evaluasi*') ? 'active' : '' }}" href="{{ route('admin.master_evaluasi.index') }}"><span class="sidebar-text">Master Evaluasi</span></a>
