@@ -265,12 +265,22 @@ public function evaluasiInstitusi(Request $request)
                 $rincian_ruangan = [];
 
                 foreach ($evaluasi as $ruangan_id => $nilai) {
-                    // Ambil detail nilai per kriteria
-                    $v_disiplin = $nilai['sikap']['kedisiplinan'] ?? 0;
-                    $v_komunikasi = $nilai['sikap']['komunikasi'] ?? 0;
-                    $v_kepatuhan = $nilai['sikap']['kepatuhan'] ?? 0;
-                    $v_pemahaman = $nilai['keahlian']['pemahaman'] ?? 0;
-                    $v_keterampilan = $nilai['keahlian']['keterampilan'] ?? 0;
+                    if (!is_array($nilai)) continue;
+
+                    if (isset($nilai['sikap']) || isset($nilai['keahlian'])) {
+                        // Struktur LAMA (5 kriteria tetap)
+                        $v_disiplin = $nilai['sikap']['kedisiplinan'] ?? 0;
+                        $v_komunikasi = $nilai['sikap']['komunikasi'] ?? 0;
+                        $v_kepatuhan = $nilai['sikap']['kepatuhan'] ?? 0;
+                        $v_pemahaman = $nilai['keahlian']['pemahaman'] ?? 0;
+                        $v_keterampilan = $nilai['keahlian']['keterampilan'] ?? 0;
+                    } else {
+                        // Struktur BARU (indikator custom) -> pakai rata-rata sebagai nilai tiap sumbu radar
+                        $vals = [];
+                        foreach ($nilai as $k => $v) { if ($k !== 'catatan' && is_numeric($v)) $vals[] = (float) $v; }
+                        $avg = count($vals) ? array_sum($vals) / count($vals) : 0;
+                        $v_disiplin = $v_komunikasi = $v_kepatuhan = $v_pemahaman = $v_keterampilan = $avg;
+                    }
                     $catatan = $nilai['catatan'] ?? 'Tidak ada catatan.';
 
                     $rekap[$key]['total_penilaian']++;

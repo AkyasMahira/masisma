@@ -196,6 +196,9 @@ Route::middleware(['auth', 'admin.kasir'])->prefix('admin/invoices')->name('admi
 // 2. ROUTES KHUSUS ADMIN
 // =========================================================================
 Route::middleware(['auth', 'admin'])->group(function () {
+    // Laporan penilaian lintas ruangan (tabel berfilter + unduh CSV)
+    Route::get('/admin/laporan-penilaian', [\App\Http\Controllers\LaporanPenilaianController::class, 'laporan'])->name('admin.laporan_penilaian');
+
     Route::get('/admin/evaluasi-institusi', [DashboardController::class, 'evaluasiInstitusi'])->name('admin.evaluasi_institusi');
     Route::delete('/admin/hapus-nilai-magang/{mahasiswa_id}/{ruangan_id}', [DashboardController::class, 'hapusNilai'])->name('admin.hapus_nilai_magang');
 
