@@ -243,6 +243,10 @@
                     <i class="bi bi-sliders"></i>
                     <span class="sidebar-text">Setup Penilaian</span>
                 </a>
+                <a class="nav-link animate-item {{ request()->routeIs('kepala_ruangan.penilaian.laporan') ? 'active' : '' }}" href="{{ route('kepala_ruangan.penilaian.laporan') }}">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    <span class="sidebar-text">Laporan Penilaian</span>
+                </a>
             @endif
 
        {{-- ========== MENU USER (MAHASISWA) ========== --}}

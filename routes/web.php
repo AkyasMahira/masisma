@@ -565,6 +565,9 @@ Route::middleware(['auth'])->prefix('kepala-ruangan')->name('kepala_ruangan.')->
     Route::get('/setup-penilaian', [\App\Http\Controllers\KepalaRuanganController::class, 'setupPenilaian'])->name('penilaian.setup');
     Route::post('/setup-penilaian', [\App\Http\Controllers\KepalaRuanganController::class, 'syncPenilaian'])->name('penilaian.sync');
 
+    // Laporan penilaian (tabel berfilter + unduh CSV)
+    Route::get('/laporan-penilaian', [\App\Http\Controllers\KepalaRuanganController::class, 'laporanPenilaian'])->name('penilaian.laporan');
+
     // Edit biodata mahasiswa di ruangannya
     Route::get('/mahasiswa/{id}/edit', [\App\Http\Controllers\KepalaRuanganController::class, 'editMahasiswa'])->name('mahasiswa.edit');
     Route::put('/mahasiswa/{id}', [\App\Http\Controllers\KepalaRuanganController::class, 'updateMahasiswa'])->name('mahasiswa.update');

@@ -414,6 +414,104 @@ class KepalaRuanganController extends Controller
     }
 
     /**
+     * Laporan penilaian: tabel detail per mahasiswa dengan filter
+     * (rentang periode / nama / instansi / prodi) + unduh CSV.
+     */
+    public function laporanPenilaian(Request $request)
+    {
+        if (Auth::user()->role !== 'ruangan') abort(403, 'Akses Ditolak.');
+        $ruangan = Ruangan::where('user_id', Auth::id())->first();
+        if (!$ruangan) return abort(404, 'Akun Ruangan belum disetting.');
+
+        $indikators = $this->indikatorRuangan($ruangan->id);
+
+        $mahasiswaIds = Mahasiswa::where(function ($qq) use ($ruangan) {
+            $qq->where('ruangan_id', $ruangan->id)
+               ->orWhereHas('roomSequences', function ($s) use ($ruangan) { $s->where('ruangan_id', $ruangan->id); })
+               ->orWhereHas('shiftSchedules', function ($s) use ($ruangan) { $s->where('ruangan_id', $ruangan->id); });
+        })->pluck('id');
+
+        // Opsi dropdown (dari semua mahasiswa di ruangan ini)
+        $allInRuangan   = Mahasiswa::with('mou')->whereIn('id', $mahasiswaIds)->get();
+        $prodiOptions   = $allInRuangan->pluck('prodi')->filter()->unique()->sort()->values();
+        $instansiOptions = $allInRuangan->map(function ($m) { return $m->mou->nama_universitas ?? $m->univ_asal; })->filter()->unique()->sort()->values();
+
+        // Filter
+        $search   = trim((string) $request->get('q', ''));
+        $prodi    = $request->get('prodi');
+        $instansi = $request->get('instansi');
+        $start    = $request->get('start');
+        $end      = $request->get('end');
+
+        $q = Mahasiswa::with('mou')->whereIn('id', $mahasiswaIds);
+        if ($search !== '') $q->where('nm_mahasiswa', 'like', "%{$search}%");
+        if ($prodi) $q->where('prodi', $prodi);
+        if ($instansi) {
+            $q->where(function ($w) use ($instansi) {
+                $w->where('univ_asal', $instansi)
+                  ->orWhereHas('mou', function ($m) use ($instansi) { $m->where('nama_universitas', $instansi); });
+            });
+        }
+        // Rentang: periode magang bersinggungan dengan [start, end]
+        if ($start) $q->whereDate('tanggal_berakhir', '>=', $start);
+        if ($end)   $q->whereDate('tanggal_mulai', '<=', $end);
+
+        $list = $q->orderBy('nm_mahasiswa')->get();
+
+        $rows = [];
+        foreach ($list as $m) {
+            $evalJson  = is_string($m->nilai_evaluasi) ? json_decode($m->nilai_evaluasi, true) : ($m->nilai_evaluasi ?? []);
+            $nilaiJson = is_string($m->nilai_ruangan_json) ? json_decode($m->nilai_ruangan_json, true) : ($m->nilai_ruangan_json ?? []);
+            $eval = $evalJson[$ruangan->id] ?? [];
+            if (!is_array($eval)) $eval = [];
+
+            $perInd = [];
+            foreach ($indikators as $ind) $perInd[$ind->nama] = $eval[$ind->nama] ?? '';
+
+            $rows[] = [
+                'mhs'       => $m,
+                'instansi'  => $m->mou->nama_universitas ?? ($m->univ_asal ?: '-'),
+                'periode'   => optional($m->tanggal_mulai)->format('d/m/Y') . ' - ' . optional($m->tanggal_berakhir)->format('d/m/Y'),
+                'nilai'     => $nilaiJson[$ruangan->id] ?? null,
+                'indikator' => $perInd,
+                'catatan'   => $eval['catatan'] ?? '',
+            ];
+        }
+
+        // Unduh CSV
+        if ($request->get('export') === 'csv') {
+            $filename = 'Laporan_Penilaian_' . preg_replace('/\s+/', '_', $ruangan->nm_ruangan) . '_' . date('Ymd_His') . '.csv';
+            return response()->stream(function () use ($rows, $indikators) {
+                $out = fopen('php://output', 'w');
+                fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM agar Excel kenal UTF-8
+                $head = ['No', 'Nama', 'Prodi', 'Instansi', 'Periode'];
+                foreach ($indikators as $ind) $head[] = $ind->nama;
+                $head[] = 'Nilai Akhir';
+                $head[] = 'Catatan';
+                fputcsv($out, $head);
+                $no = 1;
+                foreach ($rows as $r) {
+                    $m = $r['mhs'];
+                    $line = [$no++, $m->nm_mahasiswa, $m->prodi, $r['instansi'], $r['periode']];
+                    foreach ($indikators as $ind) $line[] = $r['indikator'][$ind->nama];
+                    $line[] = $r['nilai'];
+                    $line[] = $r['catatan'];
+                    fputcsv($out, $line);
+                }
+                fclose($out);
+            }, 200, [
+                'Content-Type'        => 'text/csv; charset=UTF-8',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            ]);
+        }
+
+        return view('ruangan_dashboard.laporan_penilaian', compact(
+            'ruangan', 'rows', 'indikators', 'prodiOptions', 'instansiOptions',
+            'search', 'prodi', 'instansi', 'start', 'end'
+        ));
+    }
+
+    /**
      * Halaman khusus kelola dispensasi untuk kepala ruangan:
      * tab status + pencarian nama + filter rentang tanggal + pagination.
      */
