@@ -382,7 +382,12 @@ class KepalaRuanganController extends Controller
         $indikators = \App\Models\IndikatorPenilaian::where('ruangan_id', $ruangan->id)
             ->orderBy('urutan')->orderBy('id')->get();
 
-        return view('ruangan_dashboard.setup_penilaian', compact('ruangan', 'indikators'));
+        $syncAction      = route('kepala_ruangan.penilaian.sync');
+        $backUrl         = route('kepala_ruangan.dashboard');
+        $ruanganSelector = null;            // Karu tidak perlu memilih ruangan
+        $ruanganId       = $ruangan->id;
+
+        return view('ruangan_dashboard.setup_penilaian', compact('ruangan', 'indikators', 'syncAction', 'backUrl', 'ruanganSelector', 'ruanganId'));
     }
 
     /** Simpan (sinkron) daftar indikator penilaian ruangan. */
