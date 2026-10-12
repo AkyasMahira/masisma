@@ -13,6 +13,22 @@
     .card-header-custom::after { content:''; position:absolute; right:-40px; top:-40px; width:160px; height:160px; background:rgba(255,255,255,.07); border-radius:50%; pointer-events:none; }
     .btn-maroon { background-color: #7c1316; color: white; border: none; border-radius: 50px; padding: 0.8rem 2rem; font-weight: 600; }
     .btn-maroon:hover { background-color: #a3191d; color: white; transform: translateY(-2px); }
+
+    /* --- Tabel shift yang lebih rapi --- */
+    .shift-table thead th { background:#fcf0f1; color:#7c1316; text-transform:uppercase; font-size:.76rem; letter-spacing:.5px; border-bottom:2px solid #f0d3d5; }
+    .shift-table tbody td { padding:.85rem 1rem; border-bottom:1px solid #f3f4f6; }
+    .shift-table tbody tr:last-child td { border-bottom:none; }
+    .shift-table tbody tr.row-weekend td { background:#fafafb; }
+    .shift-table tbody tr.row-today td { background:#fff8e6; }
+    .shift-table tbody tr:hover td { background:#fcf0f1; }
+    .shift-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; box-shadow:0 0 0 3px rgba(0,0,0,.04); }
+    .shift-select { border-radius:10px; border:1.5px solid #e2e8f0; font-weight:600; color:#334155; max-width:260px; }
+    .shift-select:focus { border-color:#7c1316; box-shadow:0 0 0 .2rem rgba(124,19,22,.12); }
+    .tgl-pill { display:inline-flex; flex-direction:column; align-items:center; justify-content:center; width:46px; height:46px; border-radius:12px; background:#7c1316; color:#fff; line-height:1; }
+    .tgl-pill .d { font-size:1.1rem; font-weight:800; }
+    .tgl-pill .m { font-size:.6rem; text-transform:uppercase; letter-spacing:.5px; opacity:.85; }
+    .row-weekend .tgl-pill { background:#94a3b8; }
+    .row-today .tgl-pill { background:#f59e0b; }
 </style>
 @php
     // Cek apakah ruangan ini mengandung kata "Gizi"
@@ -130,27 +146,35 @@
                         @csrf
                         
                         <div class="table-responsive border rounded-3 mb-4">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="bg-light">
+                            <table class="table shift-table align-middle mb-0">
+                                <thead>
                                     <tr>
-                                        <th class="ps-4 py-3" style="width: 30%">Tanggal</th>
-                                        <th style="width: 20%">Hari</th>
+                                        <th class="ps-4 py-3" style="width: 34%">Tanggal</th>
+                                        <th style="width: 18%">Hari</th>
                                         <th class="pe-4">Shift</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($period as $date)
-                                    @php 
+                                    @php
                                         $d = $date->format('Y-m-d');
-                                        $val = $existingShifts[$d] ?? ''; 
+                                        $val = $existingShifts[$d] ?? '';
                                         $isToday = $date->isToday();
+                                        $isWeekend = $date->isWeekend();
+                                        $shiftColors = ['pagi'=>'#0d6efd','siang'=>'#fd7e14','malam'=>'#6f42c1','reguler'=>'#6610f2','jumat'=>'#20c997','libur'=>'#94a3b8'];
+                                        $dotColor = $shiftColors[strtolower($val)] ?? '#cbd5e1';
                                     @endphp
-                                    <tr class="{{ $isToday ? 'table-warning' : '' }}">
-                                        <td class="ps-4 fw-bold">
-                                            {{ $date->translatedFormat('d F Y') }}
-                                            @if($isToday) <span class="badge bg-danger ms-2">HARI INI</span> @endif
+                                    <tr class="{{ $isToday ? 'row-today' : ($isWeekend ? 'row-weekend' : '') }}">
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <span class="tgl-pill"><span class="d">{{ $date->format('d') }}</span><span class="m">{{ $date->translatedFormat('M') }}</span></span>
+                                                <div>
+                                                    <div class="fw-bold text-dark">{{ $date->translatedFormat('d F Y') }}</div>
+                                                    @if($isToday)<span class="badge bg-danger">HARI INI</span>@endif
+                                                </div>
+                                            </div>
                                         </td>
-                                        <td class="text-muted">{{ $date->translatedFormat('l') }}</td>
+                                        <td class="{{ $isWeekend ? 'text-danger fw-semibold' : 'text-muted' }}">{{ $date->translatedFormat('l') }}</td>
                                         <!--<td class="pe-4">-->
                                         <!--    <select name="shifts[{{ $d }}]" class="form-select border-primary" -->
                                         <!--        required -->
@@ -174,7 +198,9 @@
                                         <!--    </select>-->
                                         <!--</td>-->
                                         <td class="pe-4">
-    <select name="shifts[{{ $d }}]" class="form-select border-primary" required {{ $isLocked ? 'disabled' : '' }}>
+    <div class="d-flex align-items-center gap-2">
+    <span class="shift-dot" data-dot style="background: {{ $dotColor }};"></span>
+    <select name="shifts[{{ $d }}]" data-shift class="form-select shift-select" required {{ $isLocked ? 'disabled' : '' }}>
         <option value="" disabled {{ $val == '' ? 'selected' : '' }}>-- Pilih --</option>
         
         @foreach($availableShifts as $shiftOption)
@@ -182,8 +208,9 @@
                 {{ $shiftOption }}
             </option>
         @endforeach
-        
+
     </select>
+    </div>
 </td>
                                     </tr>
                                     @endforeach
@@ -208,4 +235,16 @@
         </div>
     </div>
 </div>
+
+<script>
+    (function () {
+        var COL = { pagi:'#0d6efd', siang:'#fd7e14', malam:'#6f42c1', reguler:'#6610f2', jumat:'#20c997', libur:'#94a3b8' };
+        document.querySelectorAll('select[data-shift]').forEach(function (sel) {
+            sel.addEventListener('change', function () {
+                var dot = this.closest('td').querySelector('[data-dot]');
+                if (dot) dot.style.background = COL[(this.value || '').toLowerCase()] || '#cbd5e1';
+            });
+        });
+    })();
+</script>
 @endsection
