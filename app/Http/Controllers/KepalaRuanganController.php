@@ -48,7 +48,7 @@ class KepalaRuanganController extends Controller
         }
 
         // 3. AMBIL SEMUA DATA (TANPA FILTER NILAI_KARU LAMA)
-        $query = Mahasiswa::with(['roomSequences', 'shiftSchedules', 'absensis', 'dispensasis'])
+        $query = Mahasiswa::with(['roomSequences.ruangan', 'shiftSchedules', 'absensis', 'dispensasis'])
             ->where(function ($q) use ($ruangan) {
                 // Pokoknya, kalau dia pernah/sedang di ruangan ini, TAMPILKAN!
                 $q->where('ruangan_id', $ruangan->id)
@@ -416,7 +416,9 @@ class KepalaRuanganController extends Controller
 
         // Biodata (TANPA no_hp/WA)
         $bio = [];
-        foreach (Mahasiswa::with('mou')->whereIn('id', $mahasiswaIds)->get() as $m) {
+        foreach (Mahasiswa::with(['mou', 'roomSequences'])->whereIn('id', $mahasiswaIds)->get() as $m) {
+            $seqIni = $m->roomSequences->where('ruangan_id', $ruangan->id)->sortByDesc('start_date')->first();
+            $keahlian = is_array($m->kompetensi_json) ? array_values(array_filter($m->kompetensi_json)) : [];
             $bio[$m->id] = [
                 'nama'     => $m->nm_mahasiswa,
                 'prodi'    => $m->prodi ?: '-',
@@ -425,6 +427,9 @@ class KepalaRuanganController extends Controller
                 'status'   => ucfirst($m->status ?? '-'),
                 'periode'  => optional($m->tanggal_mulai)->format('d/m/Y') . ' - ' . optional($m->tanggal_berakhir)->format('d/m/Y'),
                 'foto'     => $m->foto_path ? asset($m->foto_path) : null,
+                'keahlian' => $keahlian,
+                'seq_id'   => $seqIni ? $seqIni->id : null,
+                'edit_url' => route('kepala_ruangan.mahasiswa.edit', $m->id),
             ];
         }
 

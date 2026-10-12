@@ -168,7 +168,9 @@ public function dispensasis()
             $endStr   = optional($this->tanggal_berakhir)->format('Y-m-d');
             $todayStr = now()->format('Y-m-d');
 
-            $shiftMap = $this->shiftSchedules()->pluck('shift_type', 'tanggal')->toArray();
+            // Pakai relasi yang sudah di-eager-load bila ada (hindari N+1 di dashboard ruangan)
+            $shiftMap = ($this->relationLoaded('shiftSchedules') ? $this->shiftSchedules : $this->shiftSchedules()->get())
+                        ->pluck('shift_type', 'tanggal')->toArray();
 
             // Peta kategori ruangan per tanggal (dari roomSequences) -> menentukan rezim hari kerja.
             // Rezim shift: hari kerja HANYA bila ada shift nyata yang di-roster (selaras dgn kalender).
@@ -187,7 +189,10 @@ public function dispensasis()
             $dispBiasa = [];
             $dispTerlambat = [];
             $dispLupaPulang = []; // dispensasi lupa pulang yang di-ACC (bobot 90%, sama seperti terlambat)
-            foreach ($this->dispensasis()->where('status', 'approved')->get() as $disp) {
+            $dispApproved = $this->relationLoaded('dispensasis')
+                ? $this->dispensasis->where('status', 'approved')
+                : $this->dispensasis()->where('status', 'approved')->get();
+            foreach ($dispApproved as $disp) {
                 foreach (\Carbon\CarbonPeriod::create(\Carbon\Carbon::parse($disp->tanggal_mulai), \Carbon\Carbon::parse($disp->tanggal_selesai)) as $dt) {
                     $tgl = $dt->format('Y-m-d');
                     $kat = strtolower($disp->kategori);

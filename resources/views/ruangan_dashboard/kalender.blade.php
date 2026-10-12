@@ -67,7 +67,15 @@
                 <div class="bio-row"><span class="lbl">Jadwal diklik</span><span class="val" id="bio-jadwal"></span></div>
                 <div class="bio-row"><span class="lbl">Asal Instansi</span><span class="val" id="bio-instansi"></span></div>
                 <div class="bio-row"><span class="lbl">Periode Magang</span><span class="val" id="bio-periode"></span></div>
-                <div class="bio-row" style="border-bottom:none;"><span class="lbl">Status</span><span class="val" id="bio-status"></span></div>
+                <div class="bio-row"><span class="lbl">Status</span><span class="val" id="bio-status"></span></div>
+                <div class="pt-2">
+                    <div class="lbl mb-1" style="color:#94a3b8;font-size:.8rem;">Keahlian / Kompetensi</div>
+                    <div id="bio-keahlian" class="d-flex flex-wrap gap-1"></div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <a id="bio-edit" href="#" class="btn btn-outline-secondary btn-sm fw-semibold"><i class="bi bi-pencil-square me-1"></i>Edit Biodata</a>
+                <a id="bio-shift" href="#" class="btn btn-sm fw-semibold text-white" style="background:#7c1316;"><i class="bi bi-calendar-week me-1"></i>Atur Shift &amp; Rentang</a>
             </div>
         </div>
     </div>
@@ -77,6 +85,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         var BIO = {!! json_encode($bio) !!};
         var events = {!! json_encode($events) !!};
+        var SHIFT_URL = "{{ route('shift_schedule.manage', '__ID__') }}";
         var el = document.getElementById('kalender');
         if (!el) return;
 
@@ -107,6 +116,32 @@
                 document.getElementById('bio-instansi').innerText = b.instansi || '-';
                 document.getElementById('bio-periode').innerText = b.periode || '-';
                 document.getElementById('bio-status').innerText = b.status || '-';
+
+                // Keahlian / kompetensi
+                var kWrap = document.getElementById('bio-keahlian');
+                kWrap.innerHTML = '';
+                if (b.keahlian && b.keahlian.length) {
+                    b.keahlian.forEach(function (k) {
+                        var s = document.createElement('span');
+                        s.className = 'badge';
+                        s.style.cssText = 'background:#fcf0f1;color:#7c1316;border:1px solid #f0d3d5;font-weight:600;';
+                        s.innerText = k;
+                        kWrap.appendChild(s);
+                    });
+                } else {
+                    kWrap.innerHTML = '<span class="text-muted small">Belum diisi</span>';
+                }
+
+                // Tombol aksi
+                var btnShift = document.getElementById('bio-shift');
+                if (b.seq_id) {
+                    btnShift.style.display = '';
+                    btnShift.href = SHIFT_URL.replace('__ID__', b.seq_id);
+                } else {
+                    btnShift.style.display = 'none';
+                }
+                document.getElementById('bio-edit').href = b.edit_url || '#';
+
                 new bootstrap.Modal(document.getElementById('bioModal')).show();
             }
         });

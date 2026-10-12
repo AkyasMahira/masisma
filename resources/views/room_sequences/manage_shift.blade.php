@@ -43,8 +43,8 @@
                 
                 <div class="card-body p-4 p-md-5">
                     @if(!empty($canRentang))
-                        <div class="alert alert-warning border-0 mb-4">
-                            <div class="fw-bold mb-2"><i class="bi bi-calendar-range me-2"></i>Ubah Rentang Tanggal (Periode di ruangan ini)</div>
+                        <div class="p-3 mb-4 rounded-3" style="background:#fcf0f1;border:1px solid #f0d3d5;">
+                            <div class="fw-bold mb-2" style="color:#7c1316;"><i class="bi bi-calendar-range me-2"></i>Ubah Rentang Tanggal (Periode di ruangan ini)</div>
                             <form action="{{ route('shift_schedule.rentang', $sequence->id) }}" method="POST" class="row g-2 align-items-end"
                                   onsubmit="return confirm('Ubah rentang tanggal mahasiswa ini? Daftar tanggal shift akan menyesuaikan.');">
                                 @csrf
@@ -57,7 +57,7 @@
                                     <input type="date" name="end_date" class="form-control" value="{{ \Carbon\Carbon::parse($sequence->end_date)->format('Y-m-d') }}" required>
                                 </div>
                                 <div class="col-sm-2 d-grid">
-                                    <button type="submit" class="btn btn-warning fw-bold"><i class="bi bi-check2-circle me-1"></i>Simpan</button>
+                                    <button type="submit" class="btn fw-bold text-white" style="background:#7c1316;"><i class="bi bi-check2-circle me-1"></i>Simpan</button>
                                 </div>
                             </form>
                             <small class="text-muted d-block mt-2">Setelah rentang diubah, periksa & isi shift untuk tanggal yang baru.</small>
