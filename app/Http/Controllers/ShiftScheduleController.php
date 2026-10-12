@@ -87,7 +87,23 @@ class ShiftScheduleController extends Controller
         $backUrl    = $isKaru ? route('kepala_ruangan.dashboard') : route('room_sequences.index');
         $canRentang = ($user->role === 'admin' || $isKaru); // hanya admin/karu boleh ubah rentang
 
-        return view('room_sequences.manage_shift', compact('sequence', 'period', 'existingShifts', 'isLocked', 'availableShifts', 'backUrl', 'canRentang'));
+        // Semua rotasi mahasiswa ini (untuk "jadwal sebelumnya" + deteksi bentrok rentang)
+        $curStart = \Carbon\Carbon::parse($sequence->start_date);
+        $curEnd   = \Carbon\Carbon::parse($sequence->end_date);
+        $semuaSequences = RoomSequence::with('ruangan')
+            ->where('mahasiswa_id', $sequence->mahasiswa_id)
+            ->orderBy('start_date')
+            ->get()
+            ->map(function ($s) use ($sequence, $curStart, $curEnd) {
+                $s->is_current = ((int) $s->id === (int) $sequence->id);
+                // Bentrok bila rentang beririsan dengan sequence yang sedang dibuka (dan bukan dirinya)
+                $s->is_bentrok = !$s->is_current
+                    && \Carbon\Carbon::parse($s->start_date)->lte($curEnd)
+                    && \Carbon\Carbon::parse($s->end_date)->gte($curStart);
+                return $s;
+            });
+
+        return view('room_sequences.manage_shift', compact('sequence', 'period', 'existingShifts', 'isLocked', 'availableShifts', 'backUrl', 'canRentang', 'semuaSequences'));
     }
 
     // =========================================================================

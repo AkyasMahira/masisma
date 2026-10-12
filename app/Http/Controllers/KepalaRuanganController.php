@@ -394,6 +394,79 @@ class KepalaRuanganController extends Controller
         return view('ruangan_dashboard.dispensasi', compact('ruangan', 'dispensasis', 'status', 'q', 'start', 'end', 'counts'));
     }
 
+    /**
+     * Kalender roster ruangan: tiap tanggal menampilkan mahasiswa + shift-nya.
+     * Klik event -> biodata mahasiswa (TANPA nomor HP/WA).
+     */
+    public function kalender(Request $request)
+    {
+        if (Auth::user()->role !== 'ruangan') {
+            abort(403, 'Akses Ditolak.');
+        }
+        $ruangan = Ruangan::where('user_id', Auth::id())->first();
+        if (!$ruangan) {
+            return abort(404, 'Akun Ruangan belum disetting.');
+        }
+
+        $mahasiswaIds = Mahasiswa::where(function ($qq) use ($ruangan) {
+            $qq->where('ruangan_id', $ruangan->id)
+               ->orWhereHas('roomSequences', function ($s) use ($ruangan) { $s->where('ruangan_id', $ruangan->id); })
+               ->orWhereHas('shiftSchedules', function ($s) use ($ruangan) { $s->where('ruangan_id', $ruangan->id); });
+        })->pluck('id');
+
+        // Biodata (TANPA no_hp/WA)
+        $bio = [];
+        foreach (Mahasiswa::with('mou')->whereIn('id', $mahasiswaIds)->get() as $m) {
+            $bio[$m->id] = [
+                'nama'     => $m->nm_mahasiswa,
+                'prodi'    => $m->prodi ?: '-',
+                'instansi' => $m->mou->nama_universitas ?? ($m->univ_asal ?: '-'),
+                'tipe'     => strtoupper($m->tipe_mahasiswa ?? 'MAGANG'),
+                'status'   => ucfirst($m->status ?? '-'),
+                'periode'  => optional($m->tanggal_mulai)->format('d/m/Y') . ' - ' . optional($m->tanggal_berakhir)->format('d/m/Y'),
+                'foto'     => $m->foto_path ? asset($m->foto_path) : null,
+            ];
+        }
+
+        $warna = ['pagi' => '#0d6efd', 'siang' => '#fd7e14', 'malam' => '#6f42c1', 'reguler' => '#6610f2', 'jumat' => '#20c997'];
+        $events = [];
+
+        // Dari jadwal shift (ruangan shift)
+        $liburDates = []; // [mahasiswa_id][tanggal] = true
+        foreach (\App\Models\ShiftSchedule::where('ruangan_id', $ruangan->id)->whereIn('mahasiswa_id', $mahasiswaIds)->get() as $s) {
+            if (strtolower($s->shift_type) === 'libur') { $liburDates[$s->mahasiswa_id][$s->tanggal] = true; continue; }
+            $nama = $bio[$s->mahasiswa_id]['nama'] ?? 'Mahasiswa';
+            $events[] = [
+                'title' => $nama . ' • ' . $s->shift_type,
+                'start' => $s->tanggal,
+                'color' => $warna[strtolower($s->shift_type)] ?? '#7c1316',
+                'extendedProps' => ['mid' => $s->mahasiswa_id, 'shift' => $s->shift_type],
+            ];
+        }
+
+        // Ruangan non-shift: hasilkan dari rentang roomSequences (hari kerja)
+        if (($ruangan->kategori ?? 'non_shift') === 'non_shift') {
+            $seqs = \App\Models\RoomSequence::where('ruangan_id', $ruangan->id)->whereIn('mahasiswa_id', $mahasiswaIds)->get();
+            foreach ($seqs as $seq) {
+                if (!$seq->start_date || !$seq->end_date) continue;
+                foreach (\Carbon\CarbonPeriod::create($seq->start_date, $seq->end_date) as $d) {
+                    if ($d->isWeekend()) continue;
+                    $tgl = $d->format('Y-m-d');
+                    if (isset($liburDates[$seq->mahasiswa_id][$tgl])) continue;
+                    $nama = $bio[$seq->mahasiswa_id]['nama'] ?? 'Mahasiswa';
+                    $events[] = [
+                        'title' => $nama . ' • ' . ($d->dayOfWeekIso == 5 ? 'Jumat' : 'Reguler'),
+                        'start' => $tgl,
+                        'color' => $d->dayOfWeekIso == 5 ? '#20c997' : '#6610f2',
+                        'extendedProps' => ['mid' => $seq->mahasiswa_id, 'shift' => $d->dayOfWeekIso == 5 ? 'Jumat' : 'Reguler'],
+                    ];
+                }
+            }
+        }
+
+        return view('ruangan_dashboard.kalender', compact('ruangan', 'events', 'bio'));
+    }
+
  public function simpanNilai(Request $request, $id)
     {
         // 1. Validasi Input (Termasuk Array Evaluasi Baru)

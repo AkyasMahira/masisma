@@ -5,10 +5,12 @@
 @section('content')
 <style>
     .form-card { border: none; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); background: #fff; overflow: hidden; }
-    .card-header-custom { 
-        background-color: {{ $isLocked ? '#0d6efd' : '#7c1316' }}; /* Biru jika Detail, Merah jika Edit */
-        padding: 1.5rem; color: white; border-bottom: 4px solid rgba(0,0,0,0.1); 
+    .card-header-custom {
+        background: {{ $isLocked ? 'linear-gradient(135deg,#0d6efd,#0a58ca)' : 'linear-gradient(135deg,#7c1316,#5f0f12)' }};
+        padding: 1.6rem 1.75rem; color: white; border-bottom: 4px solid rgba(0,0,0,0.1);
+        position: relative; overflow: hidden;
     }
+    .card-header-custom::after { content:''; position:absolute; right:-40px; top:-40px; width:160px; height:160px; background:rgba(255,255,255,.07); border-radius:50%; pointer-events:none; }
     .btn-maroon { background-color: #7c1316; color: white; border: none; border-radius: 50px; padding: 0.8rem 2rem; font-weight: 600; }
     .btn-maroon:hover { background-color: #a3191d; color: white; transform: translateY(-2px); }
 </style>
@@ -59,6 +61,41 @@
                                 </div>
                             </form>
                             <small class="text-muted d-block mt-2">Setelah rentang diubah, periksa & isi shift untuk tanggal yang baru.</small>
+                        </div>
+                    @endif
+
+                    @if(!empty($semuaSequences) && count($semuaSequences))
+                        @php $adaBentrok = $semuaSequences->contains(function($s){ return $s->is_bentrok; }); @endphp
+                        <div class="mb-4">
+                            <div class="fw-bold mb-2 text-dark"><i class="bi bi-signpost-split me-2" style="color:#7c1316;"></i>Rotasi / Jadwal Mahasiswa Ini</div>
+                            @if($adaBentrok)
+                                <div class="alert alert-danger py-2 small mb-2">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i><strong>Rentang bentrok terdeteksi!</strong>
+                                    Ada rotasi ruangan lain yang tanggalnya beririsan dengan rentang ini. Mohon minta mahasiswa memperbaiki rentang yang bertabrakan.
+                                </div>
+                            @endif
+                            <div class="table-responsive border rounded-3">
+                                <table class="table table-sm align-middle mb-0">
+                                    <thead class="bg-light"><tr><th class="ps-3 py-2">Ruangan</th><th>Rentang</th><th class="text-center pe-3">Status</th></tr></thead>
+                                    <tbody>
+                                        @foreach($semuaSequences as $s)
+                                        <tr class="{{ $s->is_current ? 'table-warning' : ($s->is_bentrok ? 'table-danger' : '') }}">
+                                            <td class="ps-3 fw-semibold">{{ optional($s->ruangan)->nm_ruangan ?? '-' }}</td>
+                                            <td class="small">{{ \Carbon\Carbon::parse($s->start_date)->format('d M Y') }} &ndash; {{ \Carbon\Carbon::parse($s->end_date)->format('d M Y') }}</td>
+                                            <td class="text-center pe-3">
+                                                @if($s->is_current)
+                                                    <span class="badge bg-warning text-dark">Ruangan Ini</span>
+                                                @elseif($s->is_bentrok)
+                                                    <span class="badge bg-danger">Bentrok</span>
+                                                @else
+                                                    <span class="badge bg-light text-secondary border">Lain</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     @endif
 
