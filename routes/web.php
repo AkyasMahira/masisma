@@ -117,6 +117,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/mahasiswa/{id}/rolling', [MahasiswaController::class, 'updateRolling'])->name('mahasiswa.rolling.update');
     Route::get('/room-sequences/{id}/manage-shift', [ShiftScheduleController::class, 'manage'])->name('shift_schedule.manage');
     Route::post('/room-sequences/{id}/manage-shift', [ShiftScheduleController::class, 'store'])->name('shift_schedule.store');
+    Route::post('/room-sequences/{id}/rentang', [ShiftScheduleController::class, 'updateRentang'])->name('shift_schedule.rentang');
     Route::prefix('pengajuan')->name('pengajuan.')->group(function () {
         Route::get('/', [PengajuanController::class, 'index'])->name('index');
         Route::get('/detail/{jenis}', [PengajuanController::class, 'detail'])->name('detail');

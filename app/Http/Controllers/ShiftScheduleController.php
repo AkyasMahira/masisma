@@ -13,20 +13,40 @@ class ShiftScheduleController extends Controller
     // =========================================================================
     // 1. TAMPILKAN FORM INPUT (LIST TANGGAL)
     // =========================================================================
+    /**
+     * Mengembalikan jenis akses atas sebuah sequence: 'admin' | 'owner' | 'ruangan' | false.
+     * - admin: bebas
+     * - owner: mahasiswa pemilik sequence
+     * - ruangan: kepala ruangan yang membawahi ruangan sequence tsb
+     */
+    private function cekAkses(RoomSequence $sequence, $user)
+    {
+        if (!$user) return false;
+        if ($user->role === 'admin') return 'admin';
+        if ($sequence->mahasiswa && (int) $sequence->mahasiswa->user_id === (int) $user->id) return 'owner';
+        if ($user->role === 'ruangan') {
+            $ruangan = \App\Models\Ruangan::where('user_id', $user->id)->first();
+            if ($ruangan && (int) $sequence->ruangan_id === (int) $ruangan->id) return 'ruangan';
+        }
+        return false;
+    }
+
     public function manage($sequence_id)
     {
         // Tarik data sequence beserta relasi ruangan dan shift custom-nya
         $sequence = RoomSequence::with(['mahasiswa', 'ruangan.roomShifts'])->findOrFail($sequence_id);
         $user = auth()->user();
 
-        // 1. Validasi Akses
-        if ($user->role !== 'admin' && $sequence->mahasiswa->user_id !== $user->id) {
+        // 1. Validasi Akses (admin / pemilik / kepala ruangan)
+        $akses = $this->cekAkses($sequence, $user);
+        if (!$akses) {
             abort(403, 'Akses Ditolak.');
         }
+        $isKaru = ($akses === 'ruangan');
 
-        // 2. Cek Lock / Kunci Jadwal
+        // 2. Cek Lock / Kunci Jadwal (hanya untuk mahasiswa; admin & kepala ruangan bebas edit)
         $isLocked = false;
-        if ($user->role !== 'admin') {
+        if ($user->role !== 'admin' && !$isKaru) {
             $start = \Carbon\Carbon::parse($sequence->start_date)->startOfDay();
             $end   = \Carbon\Carbon::parse($sequence->end_date)->startOfDay();
             $totalDaysNeeded = $start->diffInDays($end) + 1;
@@ -64,7 +84,10 @@ class ShiftScheduleController extends Controller
             $availableShifts = array_merge($customShifts, ['Libur']);
         }
 
-        return view('room_sequences.manage_shift', compact('sequence', 'period', 'existingShifts', 'isLocked', 'availableShifts'));
+        $backUrl    = $isKaru ? route('kepala_ruangan.dashboard') : route('room_sequences.index');
+        $canRentang = ($user->role === 'admin' || $isKaru); // hanya admin/karu boleh ubah rentang
+
+        return view('room_sequences.manage_shift', compact('sequence', 'period', 'existingShifts', 'isLocked', 'availableShifts', 'backUrl', 'canRentang'));
     }
 
     // =========================================================================
@@ -72,12 +95,14 @@ class ShiftScheduleController extends Controller
     // =========================================================================
     public function store(Request $request, $sequence_id)
     {
-        $sequence = RoomSequence::findOrFail($sequence_id);
+        $sequence = RoomSequence::with('mahasiswa')->findOrFail($sequence_id);
+        $akses = $this->cekAkses($sequence, auth()->user());
+        if (!$akses) abort(403, 'Akses Ditolak.');
 
         // Validasi 'in:Pagi,Siang...' dihapus, diganti 'string' agar bisa menerima nama shift custom dari database
         $request->validate([
             'shifts' => 'required|array',
-            'shifts.*' => 'required|string', 
+            'shifts.*' => 'required|string',
         ]);
 
         DB::transaction(function() use ($request, $sequence) {
@@ -88,15 +113,45 @@ class ShiftScheduleController extends Controller
                         'tanggal'      => $date
                     ],
                     [
-                        'room_sequence_id' => $sequence->id, 
+                        'room_sequence_id' => $sequence->id,
                         'ruangan_id'       => $sequence->ruangan_id,
-                        'shift_type'       => $shiftValue 
+                        'shift_type'       => $shiftValue
                     ]
                 );
             }
         });
 
+        if ($akses === 'ruangan') {
+            return redirect()->route('kepala_ruangan.dashboard')
+                ->with('success', 'Jadwal shift mahasiswa berhasil diperbarui.');
+        }
+
         return redirect()->route('room_sequences.index')
             ->with('success', 'Jadwal Shift berhasil disimpan! Silakan absen sesuai jadwal.');
+    }
+
+    // =========================================================================
+    // 3. UBAH RENTANG (PERIODE) SEQUENCE — admin & kepala ruangan
+    // =========================================================================
+    public function updateRentang(Request $request, $sequence_id)
+    {
+        $sequence = RoomSequence::with('mahasiswa')->findOrFail($sequence_id);
+        $akses = $this->cekAkses($sequence, auth()->user());
+        if (!$akses || $akses === 'owner') {
+            abort(403, 'Hanya admin / kepala ruangan yang dapat mengubah rentang.');
+        }
+
+        $data = $request->validate([
+            'start_date' => 'required|date',
+            'end_date'   => 'required|date|after_or_equal:start_date',
+        ]);
+
+        $sequence->update([
+            'start_date' => $data['start_date'],
+            'end_date'   => $data['end_date'],
+        ]);
+
+        return redirect()->route('shift_schedule.manage', $sequence->id)
+            ->with('success', 'Rentang tanggal berhasil diperbarui. Silakan atur shift untuk tanggal baru bila ada.');
     }
 }

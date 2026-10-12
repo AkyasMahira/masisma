@@ -28,7 +28,8 @@
                                 {{ $isLocked ? 'Detail Shift Harian (Read Only)' : 'Atur Shift Harian' }}
                             </h5>
                             <p class="mb-0 opacity-75 small">
-                                Ruangan: <strong>{{ $sequence->ruangan->nm_ruangan }}</strong> | 
+                                @if(isset($sequence->mahasiswa))Mahasiswa: <strong>{{ $sequence->mahasiswa->nm_mahasiswa }}</strong> | @endif
+                                Ruangan: <strong>{{ $sequence->ruangan->nm_ruangan }}</strong> |
                                 Periode: {{ \Carbon\Carbon::parse($sequence->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($sequence->end_date)->format('d M Y') }}
                             </p>
                         </div>
@@ -39,6 +40,28 @@
                 </div>
                 
                 <div class="card-body p-4 p-md-5">
+                    @if(!empty($canRentang))
+                        <div class="alert alert-warning border-0 mb-4">
+                            <div class="fw-bold mb-2"><i class="bi bi-calendar-range me-2"></i>Ubah Rentang Tanggal (Periode di ruangan ini)</div>
+                            <form action="{{ route('shift_schedule.rentang', $sequence->id) }}" method="POST" class="row g-2 align-items-end"
+                                  onsubmit="return confirm('Ubah rentang tanggal mahasiswa ini? Daftar tanggal shift akan menyesuaikan.');">
+                                @csrf
+                                <div class="col-sm-5">
+                                    <label class="form-label small mb-1 fw-semibold">Tanggal Mulai</label>
+                                    <input type="date" name="start_date" class="form-control" value="{{ \Carbon\Carbon::parse($sequence->start_date)->format('Y-m-d') }}" required>
+                                </div>
+                                <div class="col-sm-5">
+                                    <label class="form-label small mb-1 fw-semibold">Tanggal Selesai</label>
+                                    <input type="date" name="end_date" class="form-control" value="{{ \Carbon\Carbon::parse($sequence->end_date)->format('Y-m-d') }}" required>
+                                </div>
+                                <div class="col-sm-2 d-grid">
+                                    <button type="submit" class="btn btn-warning fw-bold"><i class="bi bi-check2-circle me-1"></i>Simpan</button>
+                                </div>
+                            </form>
+                            <small class="text-muted d-block mt-2">Setelah rentang diubah, periksa & isi shift untuk tanggal yang baru.</small>
+                        </div>
+                    @endif
+
                     @if($isLocked)
                         <div class="alert alert-success border-0 d-flex align-items-center mb-4">
                             <i class="bi bi-check-circle-fill fs-4 me-3"></i>
@@ -132,7 +155,7 @@
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center">
-                            <a href="{{ route('room_sequences.index') }}" class="btn btn-light border shadow-sm px-4 rounded-pill">
+                            <a href="{{ $backUrl ?? route('room_sequences.index') }}" class="btn btn-light border shadow-sm px-4 rounded-pill">
                                 <i class="bi bi-arrow-left me-2"></i> {{ $isLocked ? 'Kembali' : 'Batal' }}
                             </a>
                             
