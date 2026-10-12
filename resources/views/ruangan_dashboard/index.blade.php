@@ -390,7 +390,8 @@
             @php 
                 // Ambil data evaluasi JSON yang sudah ada (jika sedang mode edit)
                 $evalJson = is_string($mhs->nilai_evaluasi) ? json_decode($mhs->nilai_evaluasi, true) : ($mhs->nilai_evaluasi ?? []);
-                $evalRuanganIni = $evalJson[$ruangan->id] ?? null;
+                $evalRuanganIni = $evalJson[$ruangan->id] ?? [];
+                if (!is_array($evalRuanganIni)) $evalRuanganIni = [];
                 
                 // Ambil nilai utama untuk sertifikat
                 $nilaiJson = is_string($mhs->nilai_ruangan_json) ? json_decode($mhs->nilai_ruangan_json, true) : ($mhs->nilai_ruangan_json ?? []);
@@ -412,88 +413,56 @@
             <form action="{{ route('kepala_ruangan.simpan_nilai', $mhs->id) }}" method="POST">
                 @csrf
                 <div class="modal-body p-4 bg-light">
-                    <!-- 1. Nilai Akhir (Sertifikat) -->
+                    <!-- 1. Nilai Akhir (Sertifikat) - OTOMATIS rata-rata indikator -->
                     <div class="card border-0 shadow-sm mb-4 border-start border-4 border-primary">
                         <div class="card-body">
-                            <h6 class="fw-bold text-dark mb-3">Nilai Akhir Ruangan (Masuk ke Sertifikat)</h6>
+                            <h6 class="fw-bold text-dark mb-2">Nilai Akhir Ruangan (Masuk ke Sertifikat)</h6>
                             <div class="row align-items-center">
                                 <div class="col-md-8 text-muted small">
-                                    Berikan nilai rata-rata keseluruhan (0-100). Nilai ini akan digabungkan dengan nilai presensi untuk dicetak di sertifikat mahasiswa.
+                                    Otomatis dihitung dari <b>rata-rata</b> semua indikator di bawah. Nilai ini digabung dengan presensi untuk sertifikat.
                                 </div>
                                 <div class="col-md-4">
-<input type="number" name="nilai_karu" class="form-control form-control-lg text-center fw-bold text-primary input-nilai-akhir" placeholder="0 - 100" value="{{ $nilaiRuanganIni }}" required min="0" max="100" readonly style="background-color: #f8f9fa;">
+                                    <input type="number" class="form-control form-control-lg text-center fw-bold text-primary input-nilai-akhir" value="{{ $nilaiRuanganIni }}" readonly placeholder="--" style="background-color:#f8f9fa;">
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 2. Detail Evaluasi -->
-                    <h6 class="fw-bold text-dark mb-3 px-1"><i class="bi bi-bar-chart-steps me-2"></i>Indikator Evaluasi (Sorot ikon <i class="bi bi-info-circle"></i> untuk melihat dasar aturan)</h6>
-                    
-                    <div class="row g-3">
-                        <!-- Kolom Soft Skill -->
-                        <div class="col-md-6">
-                            <div class="card border-0 shadow-sm h-100">
-                                <div class="card-header bg-white fw-bold text-primary border-bottom-0 pt-3">
-                                    Sikap & Kedisiplinan
-                                </div>
-                                <div class="card-body pt-0">
-                                    <div class="mb-3">
-                                        <label class="form-label small text-muted d-flex justify-content-between align-items-center">
-                                            Kedisiplinan Waktu (0-100)
-                                            <i class="bi bi-info-circle text-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Dasar: Standar Kualifikasi dan Pendidikan Staf (KKS) Akreditasi RS terkait kepatuhan jam shift dan absensi."></i>
-                                        </label>
-                                        <input type="number" name="evaluasi[sikap][kedisiplinan]" class="form-control input-indikator" value="{{ $evalRuanganIni['sikap']['kedisiplinan'] ?? '' }}" required min="0" max="100">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label small text-muted d-flex justify-content-between align-items-center">
-                                            Komunikasi & Etika (0-100)
-                                            <i class="bi bi-info-circle text-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Dasar: UU No. 17 Tahun 2023 tentang Kesehatan & Hak Pasien terkait etika komunikasi terapeutik PPA."></i>
-                                        </label>
-                                        <input type="number" name="evaluasi[sikap][komunikasi]" class="form-control input-indikator" value="{{ $evalRuanganIni['sikap']['komunikasi'] ?? '' }}" required min="0" max="100">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label small text-muted d-flex justify-content-between align-items-center">
-                                            Kepatuhan SOP/PPI (0-100)
-                                            <i class="bi bi-info-circle text-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Dasar: Standar Pencegahan & Pengendalian Infeksi (PPI) RS, termasuk Five Moments cuci tangan dan penggunaan APD."></i>
-                                        </label>
-                                        <input type="number" name="evaluasi[sikap][kepatuhan]" class="form-control input-indikator" value="{{ $evalRuanganIni['sikap']['kepatuhan'] ?? '' }}" required min="0" max="100">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <!-- 2. Indikator dinamis per ruangan -->
+                    <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                        <h6 class="fw-bold text-dark mb-0"><i class="bi bi-bar-chart-steps me-2"></i>Indikator Evaluasi</h6>
+                        <a href="{{ route('kepala_ruangan.penilaian.setup') }}" class="small text-decoration-none"><i class="bi bi-sliders me-1"></i>Atur Indikator</a>
+                    </div>
 
-                        <!-- Kolom Hard Skill -->
+                    @php $grup = ($indikators ?? collect())->groupBy(function($i){ return $i->kategori ?: 'Indikator'; }); @endphp
+                    <div class="row g-3">
+                        @forelse($grup as $kategori => $items)
                         <div class="col-md-6">
                             <div class="card border-0 shadow-sm h-100">
-                                <div class="card-header bg-white fw-bold text-success border-bottom-0 pt-3">
-                                    Keahlian & Kompetensi
-                                </div>
+                                <div class="card-header bg-white fw-bold text-primary border-bottom-0 pt-3">{{ $kategori }}</div>
                                 <div class="card-body pt-0">
+                                    @foreach($items as $ind)
                                     <div class="mb-3">
-                                        <label class="form-label small text-muted d-flex justify-content-between align-items-center">
-                                            Pemahaman Teoritis (0-100)
-                                            <i class="bi bi-info-circle text-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Dasar: Panduan Praktik Klinis (PPK) Institusi Pendidikan yang disinkronkan dengan Standar Pelayanan Rumah Sakit."></i>
-                                        </label>
-                                        <input type="number" name="evaluasi[keahlian][pemahaman]" class="form-control input-indikator" value="{{ $evalRuanganIni['keahlian']['pemahaman'] ?? '' }}" required min="0" max="100">
+                                        <label class="form-label small text-muted">{{ $ind->nama }} <span class="text-secondary">(0-100)</span></label>
+                                        <input type="number" name="evaluasi[nilai][{{ $ind->nama }}]" class="form-control input-indikator"
+                                               value="{{ $evalRuanganIni[$ind->nama] ?? '' }}" min="0" max="100" placeholder="0 - 100">
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label small text-muted d-flex justify-content-between align-items-center">
-                                            Keterampilan Tindakan (0-100)
-                                            <i class="bi bi-info-circle text-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Dasar: Rincian Kewenangan Klinis Dasar (SPK/RKK) yang diizinkan untuk mahasiswa praktik di lingkungan RS."></i>
-                                        </label>
-                                        <input type="number" name="evaluasi[keahlian][keterampilan]" class="form-control input-indikator" value="{{ $evalRuanganIni['keahlian']['keterampilan'] ?? '' }}" required min="0" max="100">
-                                    </div>
+                                    @endforeach
                                 </div>
                             </div>
                         </div>
-                        
+                        @empty
+                        <div class="col-12">
+                            <div class="alert alert-warning mb-0">Belum ada indikator untuk ruangan ini. <a href="{{ route('kepala_ruangan.penilaian.setup') }}" class="fw-bold">Setup indikator dulu</a>.</div>
+                        </div>
+                        @endforelse
+
                         <!-- Catatan Karu -->
-                        <div class="col-12 mt-3">
+                        <div class="col-12 mt-2">
                             <div class="card border-0 shadow-sm">
                                 <div class="card-body">
                                     <label class="form-label small text-muted fw-bold">Catatan Khusus Kepala Ruangan</label>
-                                    <textarea name="evaluasi[catatan]" class="form-control" rows="3" placeholder="Masukkan catatan evaluasi, teguran, atau apresiasi...">{{ $evalRuanganIni['catatan'] ?? '' }}</textarea>
+                                    <textarea name="evaluasi[catatan]" class="form-control" rows="3" placeholder="Masukkan catatan evaluasi, teguran, atau apresiasi...">{{ is_array($evalRuanganIni) ? ($evalRuanganIni['catatan'] ?? '') : '' }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -635,37 +604,19 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('input', function(e) {
         // Cek apakah yang diubah adalah input indikator
         if (e.target.classList.contains('input-indikator')) {
-            
-            // Ambil form terdekat dari input yang sedang diketik
+            // Nilai akhir = rata-rata dari indikator yang TERISI (dinamis, berapa pun jumlahnya)
             let form = e.target.closest('form');
-            
-            // Ambil semua input indikator dalam form tersebut
             let indikators = form.querySelectorAll('.input-indikator');
             let targetNilaiAkhir = form.querySelector('.input-nilai-akhir');
-            
-            let total = 0;
-            let count = 0;
-            
-            // Hitung total nilai yang sudah diisi
-            indikators.forEach(function(input) {
+            if (!targetNilaiAkhir) return;
+
+            let total = 0, count = 0;
+            indikators.forEach(function (input) {
                 let val = parseFloat(input.value);
-                if (!isNaN(val)) {
-                    total += val;
-                    count++;
-                }
+                if (!isNaN(val)) { total += val; count++; }
             });
-            
-            // Jika kelima indikator sudah diisi, hitung rata-rata dan bulatkan
-            if (count === 5) {
-                let rataRata = Math.round(total / 5);
-                targetNilaiAkhir.value = rataRata;
-            } else if (count > 0 && count < 5) {
-                // Opsional: jika ingin nilai akhir otomatis terhitung meski belum semua terisi (dibagi 5)
-                let rataRataSementara = Math.round(total / 5);
-                targetNilaiAkhir.value = rataRataSementara;
-            } else {
-                targetNilaiAkhir.value = '';
-            }
+
+            targetNilaiAkhir.value = count > 0 ? (Math.round((total / count) * 10) / 10) : '';
         }
     });
 });

@@ -561,6 +561,10 @@ Route::middleware(['auth'])->prefix('kepala-ruangan')->name('kepala_ruangan.')->
     // Kalender roster ruangan (klik -> biodata mahasiswa, tanpa no HP)
     Route::get('/kalender', [\App\Http\Controllers\KepalaRuanganController::class, 'kalender'])->name('kalender');
 
+    // Setup indikator penilaian ruangan
+    Route::get('/setup-penilaian', [\App\Http\Controllers\KepalaRuanganController::class, 'setupPenilaian'])->name('penilaian.setup');
+    Route::post('/setup-penilaian', [\App\Http\Controllers\KepalaRuanganController::class, 'syncPenilaian'])->name('penilaian.sync');
+
     // Edit biodata mahasiswa di ruangannya
     Route::get('/mahasiswa/{id}/edit', [\App\Http\Controllers\KepalaRuanganController::class, 'editMahasiswa'])->name('mahasiswa.edit');
     Route::put('/mahasiswa/{id}', [\App\Http\Controllers\KepalaRuanganController::class, 'updateMahasiswa'])->name('mahasiswa.update');

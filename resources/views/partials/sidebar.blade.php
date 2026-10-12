@@ -239,6 +239,10 @@
                     <i class="bi bi-calendar-week"></i>
                     <span class="sidebar-text">Kalender Ruangan</span>
                 </a>
+                <a class="nav-link animate-item {{ request()->routeIs('kepala_ruangan.penilaian.setup') ? 'active' : '' }}" href="{{ route('kepala_ruangan.penilaian.setup') }}">
+                    <i class="bi bi-sliders"></i>
+                    <span class="sidebar-text">Setup Penilaian</span>
+                </a>
             @endif
 
        {{-- ========== MENU USER (MAHASISWA) ========== --}}

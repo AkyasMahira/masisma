@@ -338,8 +338,79 @@ class KepalaRuanganController extends Controller
             'totalMahasiswa' => $total,
             'hadirCountGlobal' => $globalHadir,
             'targetGlobalFull' => $targetGlobal,
+            'indikators' => $this->indikatorRuangan($ruangan->id), // indikator aktif untuk form evaluasi
             'exportData' => []
         ]);
+    }
+
+    /**
+     * Ambil indikator penilaian ruangan. Bila belum ada, buat 5 default dulu.
+     * $aktifSaja true -> hanya yang aktif (untuk form evaluasi).
+     */
+    private function indikatorRuangan($ruanganId, $aktifSaja = true)
+    {
+        $items = \App\Models\IndikatorPenilaian::where('ruangan_id', $ruanganId)
+            ->orderBy('urutan')->orderBy('id')->get();
+
+        if ($items->isEmpty()) {
+            $defaults = [
+                ['Sikap & Kedisiplinan', 'Kedisiplinan Waktu'],
+                ['Sikap & Kedisiplinan', 'Komunikasi & Etika'],
+                ['Sikap & Kedisiplinan', 'Kepatuhan SOP/PPI'],
+                ['Keahlian & Kompetensi', 'Pemahaman Teoritis'],
+                ['Keahlian & Kompetensi', 'Keterampilan Tindakan'],
+            ];
+            $u = 0;
+            foreach ($defaults as [$kat, $nama]) {
+                \App\Models\IndikatorPenilaian::create(['ruangan_id' => $ruanganId, 'nama' => $nama, 'kategori' => $kat, 'urutan' => $u++, 'aktif' => true]);
+            }
+            $items = \App\Models\IndikatorPenilaian::where('ruangan_id', $ruanganId)
+                ->orderBy('urutan')->orderBy('id')->get();
+        }
+
+        return $aktifSaja ? $items->where('aktif', true)->values() : $items;
+    }
+
+    /** Halaman setup indikator penilaian ruangan. */
+    public function setupPenilaian()
+    {
+        if (Auth::user()->role !== 'ruangan') abort(403, 'Akses Ditolak.');
+        $ruangan = Ruangan::where('user_id', Auth::id())->first();
+        if (!$ruangan) return abort(404, 'Akun Ruangan belum disetting.');
+
+        $this->indikatorRuangan($ruangan->id); // pastikan default ada
+        $indikators = \App\Models\IndikatorPenilaian::where('ruangan_id', $ruangan->id)
+            ->orderBy('urutan')->orderBy('id')->get();
+
+        return view('ruangan_dashboard.setup_penilaian', compact('ruangan', 'indikators'));
+    }
+
+    /** Simpan (sinkron) daftar indikator penilaian ruangan. */
+    public function syncPenilaian(Request $request)
+    {
+        if (Auth::user()->role !== 'ruangan') abort(403, 'Akses Ditolak.');
+        $ruangan = Ruangan::where('user_id', Auth::id())->first();
+        if (!$ruangan) return abort(404);
+
+        $rows = $request->input('indikator', []);
+        $keepIds = [];
+        $u = 0;
+        foreach ($rows as $row) {
+            $nama = trim($row['nama'] ?? '');
+            if ($nama === '') continue;
+            $kategori = trim($row['kategori'] ?? '') ?: null;
+            if (!empty($row['id'])) {
+                $ind = \App\Models\IndikatorPenilaian::where('ruangan_id', $ruangan->id)->find($row['id']);
+                if ($ind) { $ind->update(['nama' => $nama, 'kategori' => $kategori, 'urutan' => $u++, 'aktif' => true]); $keepIds[] = $ind->id; }
+            } else {
+                $ind = \App\Models\IndikatorPenilaian::create(['ruangan_id' => $ruangan->id, 'nama' => $nama, 'kategori' => $kategori, 'urutan' => $u++, 'aktif' => true]);
+                $keepIds[] = $ind->id;
+            }
+        }
+        // Hapus indikator yang tidak ikut dikirim (dihapus Karu dari form)
+        \App\Models\IndikatorPenilaian::where('ruangan_id', $ruangan->id)->whereNotIn('id', $keepIds)->delete();
+
+        return redirect()->route('kepala_ruangan.penilaian.setup')->with('success', 'Indikator penilaian berhasil disimpan.');
     }
 
     /**
@@ -558,15 +629,10 @@ class KepalaRuanganController extends Controller
 
  public function simpanNilai(Request $request, $id)
     {
-        // 1. Validasi Input (Termasuk Array Evaluasi Baru)
+        // 1. Validasi Input (indikator dinamis per ruangan)
         $request->validate([
-            'nilai_karu' => 'nullable|numeric|min:0|max:100',
             'evaluasi' => 'nullable|array',
-            'evaluasi.sikap.kedisiplinan' => 'nullable|numeric|min:0|max:100',
-            'evaluasi.sikap.komunikasi' => 'nullable|numeric|min:0|max:100',
-            'evaluasi.sikap.kepatuhan' => 'nullable|numeric|min:0|max:100',
-            'evaluasi.keahlian.pemahaman' => 'nullable|numeric|min:0|max:100',
-            'evaluasi.keahlian.keterampilan' => 'nullable|numeric|min:0|max:100',
+            'evaluasi.nilai.*' => 'nullable|numeric|min:0|max:100',
             'evaluasi.catatan' => 'nullable|string',
         ]);
 
@@ -598,30 +664,32 @@ class KepalaRuanganController extends Controller
             ? json_decode($mahasiswa->nilai_evaluasi, true) 
             : ($mahasiswa->nilai_evaluasi ?? []);
 
-        // 5. Eksekusi Simpan atau Hapus
-        if (is_null($request->nilai_karu)) {
-            // Jika input dikosongkan, hapus data nilai dari ruangan ini
+        // 5. Hitung nilai akhir = RATA-RATA semua indikator yang diisi
+        $evalInput  = $request->input('evaluasi', []);
+        $nilaiItems = $evalInput['nilai'] ?? [];   // { "<nama indikator>": nilai }
+        $catatan    = $evalInput['catatan'] ?? null;
+
+        $numeric = [];
+        foreach ($nilaiItems as $nama => $v) {
+            if ($v !== null && $v !== '' && is_numeric($v)) {
+                $numeric[$nama] = (float) $v;
+            }
+        }
+
+        if (empty($numeric)) {
+            // Tidak ada nilai terisi -> hapus evaluasi ruangan ini
             unset($nilaiJson[$ruangan->id]);
             unset($evaluasiJson[$ruangan->id]);
-            $pesan = 'Data evaluasi dan nilai berhasil dihapus!';
+            $pesan = 'Evaluasi ruangan ini dihapus (tidak ada nilai terisi).';
         } else {
-            // Set/Update nilai utama
-            $nilaiJson[$ruangan->id] = (float) $request->nilai_karu;
-            
-            // Set/Update data evaluasi detail jika dikirim dari form
-            if ($request->has('evaluasi')) {
-                // Memastikan nilai string angka di-casting jadi int/float agar seragam
-                $evalArray = $request->evaluasi;
-                array_walk_recursive($evalArray, function(&$item, $key) {
-                    if (is_numeric($item) && $key !== 'catatan') {
-                        $item = (float) $item;
-                    }
-                });
-                
-                $evaluasiJson[$ruangan->id] = $evalArray;
-            }
-            
-            $pesan = 'Evaluasi dan nilai berhasil disimpan!';
+            $rata = round(array_sum($numeric) / count($numeric), 1);
+            $nilaiJson[$ruangan->id] = $rata; // nilai akhir untuk sertifikat (rata-rata)
+
+            $simpanEval = $numeric; // { nama: nilai }
+            if ($catatan !== null && $catatan !== '') $simpanEval['catatan'] = $catatan;
+            $evaluasiJson[$ruangan->id] = $simpanEval;
+
+            $pesan = 'Evaluasi disimpan. Nilai akhir (rata-rata) = ' . $rata . '.';
         }
 
         // 6. Simpan Kembali ke Database
