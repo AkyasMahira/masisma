@@ -82,6 +82,13 @@
         .qr-code { margin: 5px auto; width: 60px; height: 60px; }
         .director-name { font-size: 16px; font-weight: bold; text-decoration: underline; margin-top: 5px; display: block; }
         .verification { position: absolute; bottom: 8mm; left: 12mm; font-size: 8px; color: #aaa; text-align: left; }
+
+        /* Blok tanda tangan Penguji (kiri bawah) */
+        .penguji-section { position: absolute; bottom: 14mm; left: 18mm; width: 150mm; z-index: 10; }
+        .penguji-section table { width: 100%; border-collapse: collapse; }
+        .penguji-section td { text-align: center; font-size: 12px; vertical-align: top; padding: 0 6mm; }
+        .penguji-label { font-size: 11px; color: #555; }
+        .penguji-name { display: block; margin-top: 14mm; font-weight: bold; text-decoration: underline; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -131,6 +138,23 @@
                     <td width="50%" style="background: #fcf0f1;">
                         <span class="score-head">Hasil Penilaian Akhir (Final)</span>
                         <span class="score-val-final">{{ $hurufFinal }} ({{ $ketFinal }})</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Tanda Tangan Penguji -->
+        @php $pengujis = $presentasi->penilaianDetails->pluck('nama_ci')->filter()->unique()->values(); @endphp
+        <div class="penguji-section">
+            <table>
+                <tr>
+                    <td width="50%">
+                        <span class="penguji-label">Penguji 1</span>
+                        <span class="penguji-name">{{ $pengujis[0] ?? '( .......................... )' }}</span>
+                    </td>
+                    <td width="50%">
+                        <span class="penguji-label">Penguji 2</span>
+                        <span class="penguji-name">{{ $pengujis[1] ?? '( .......................... )' }}</span>
                     </td>
                 </tr>
             </table>
