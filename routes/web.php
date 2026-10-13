@@ -63,6 +63,7 @@ Route::get('/forms/{slug}/sukses', [CustomFormController::class, 'showSuccess'])
 Route::get('/forms/{slug}', [CustomFormController::class, 'showPublic'])->name('forms.public.show');
 Route::post('/forms/{slug}', [CustomFormController::class, 'submitPublic'])->name('forms.public.submit');
 Route::view('/sosmed', 'public.sosmed')->name('sosmed');
+Route::get('/galeri', [\App\Http\Controllers\GaleriController::class, 'publik'])->name('galeri.publik');
 Route::get('/', [PublicController::class, 'landing'])->name('landing');
 Route::post('/chatbot', [PublicController::class, 'chatbot'])->name('chatbot.ask');
 
@@ -197,6 +198,14 @@ Route::middleware(['auth', 'admin.kasir'])->prefix('admin/invoices')->name('admi
 // 2. ROUTES KHUSUS ADMIN
 // =========================================================================
 Route::middleware(['auth', 'admin'])->group(function () {
+    // Galeri (admin kelola; publik di /galeri)
+    Route::prefix('admin/galeri')->name('admin.galeri.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\GaleriController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\GaleriController::class, 'store'])->name('store');
+        Route::put('/{id}', [\App\Http\Controllers\GaleriController::class, 'update'])->name('update');
+        Route::delete('/{id}', [\App\Http\Controllers\GaleriController::class, 'destroy'])->name('destroy');
+    });
+
     // Laporan penilaian lintas ruangan (tabel berfilter + unduh CSV)
     Route::get('/admin/laporan-penilaian', [\App\Http\Controllers\LaporanPenilaianController::class, 'laporan'])->name('admin.laporan_penilaian');
 
