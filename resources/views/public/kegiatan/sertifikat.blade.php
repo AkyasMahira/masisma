@@ -296,7 +296,16 @@
             <div class="cert-body">
                 <div class="text-pengantar">diberikan Kepada:</div>
                 <h2 class="nama-peserta">{{ $peserta->nama_lengkap_gelar }}</h2>
-                <div class="detail-peserta">{{ $peserta->profesi ?? 'Peserta' }} &bull; {{ $peserta->instansi->nama_instansi ?? 'RSUD Simpang Lima Gumul' }}</div>
+                @php
+                    // Training internal atau peserta KARYAWAN = staf RSUD -> instansi = RSUD SLG.
+                    // Selain itu (eksternal) baru tampilkan instansi asal peserta.
+                    $jenisKeg   = optional($peserta->kegiatan)->jenis_kegiatan;
+                    $isInternal = ($jenisKeg === 'internal') || (stripos($peserta->profesi ?? '', 'karyawan') !== false);
+                    $asalPeserta = $isInternal
+                        ? 'RSUD Simpang Lima Gumul'
+                        : ($peserta->instansi->nama_instansi ?? 'RSUD Simpang Lima Gumul');
+                @endphp
+                <div class="detail-peserta">{{ $peserta->profesi ?? 'Peserta' }} &bull; {{ $asalPeserta }}</div>
                 
                 <div class="garis-emas"></div>
 
