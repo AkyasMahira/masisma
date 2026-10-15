@@ -412,7 +412,7 @@
             
             <form action="{{ route('kepala_ruangan.simpan_nilai', $mhs->id) }}" method="POST">
                 @csrf
-                <div class="modal-body p-4 bg-light">
+                <div class="modal-body p-4 bg-light" style="max-height:62vh; overflow-y:auto;">
                     <!-- 1. Nilai Akhir (Sertifikat) - OTOMATIS rata-rata indikator -->
                     <div class="card border-0 shadow-sm mb-4 border-start border-4 border-primary">
                         <div class="card-body">
