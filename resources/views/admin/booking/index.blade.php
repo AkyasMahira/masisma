@@ -13,63 +13,73 @@
     .btn-light-h:hover { color:var(--maroon); text-decoration:none; transform:translateY(-1px); }
     .wait-pill { background:rgba(255,255,255,.18); color:#fff; border-radius:50px; padding:7px 15px; font-weight:700; font-size:.8rem; }
 
-    .panel { background:#fff; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,.05); overflow:hidden; }
-    .filter-sel { border-radius:10px; border:1px solid #e4e7ec; font-weight:600; color:#475569; font-size:.84rem; }
-    .toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:12px 16px; border-bottom:1px solid #f1f3f5; background:#fcfcfd; }
+    .panel { background:#fff; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,.05); border:1px solid #eef2f7; }
+    .filter-sel { border-radius:10px; border:1.5px solid #e2e8f0; font-weight:600; color:#475569; font-size:.84rem; }
+    .filter-sel:focus { border-color:var(--maroon); box-shadow:0 0 0 .2rem rgba(124,19,22,.12); }
+    .toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:12px 16px; }
     .sort-mini { display:flex; align-items:center; gap:6px; margin-left:auto; }
-    .sort-mini select { border-radius:8px; border:1px solid #e4e7ec; font-size:.8rem; font-weight:600; color:#475569; padding:4px 8px; }
+    .sort-mini select { border-radius:8px; border:1.5px solid #e2e8f0; font-size:.8rem; font-weight:600; color:#475569; padding:4px 8px; }
+    .ic-btn { width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; border-radius:9px; border:1px solid #e5e7eb; background:#fff; color:#64748b; transition:.12s; text-decoration:none; }
+    .ic-btn:hover { background:var(--maroon-subtle); color:var(--maroon); border-color:#ecd3d5; }
+    .chev { transition:transform .18s; }
+    .ic-btn[aria-expanded="true"] .chev { transform:rotate(180deg); }
+    .ic-btn[aria-expanded="true"] { background:var(--maroon-subtle); color:var(--maroon); }
 
-    /* ===== LEDGER ===== */
-    .led { display:flex; flex-direction:column; }
-    .led-head { display:grid; grid-template-columns: 1fr 138px 66px 104px 96px; gap:10px; padding:9px 18px; background:var(--maroon-subtle); color:var(--maroon); font-size:.68rem; font-weight:800; letter-spacing:.5px; text-transform:uppercase; }
-    .led-head .tc { text-align:center; } .led-head .te { text-align:right; }
-    .led-row { display:grid; grid-template-columns: 1fr 138px 66px 104px 96px; gap:10px; align-items:center; padding:11px 18px; border-top:1px solid #f1f3f5; border-left:3px solid transparent; transition:background .12s; }
-    .led-row:hover { background:#fcfbfb; }
-    .led-row.s-approved { border-left-color:#16a34a; }
-    .led-row.s-pending  { border-left-color:#f59e0b; }
-    .led-row.s-rejected { border-left-color:#dc2626; }
-    .led-main { min-width:0; display:flex; align-items:center; gap:9px; }
-    .rdot { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
-    .led-txt { min-width:0; }
-    .led-inst { font-weight:700; color:#1f2937; font-size:.9rem; }
-    .led-sub { color:#94a3b8; font-size:.8rem; }
-    .led-sub .rm { color:#475569; font-weight:600; }
-    .imp-badge { display:inline-block; background:#eef2ff; color:#4338ca; font-size:.58rem; font-weight:800; padding:1px 6px; border-radius:5px; vertical-align:middle; margin-left:4px; }
-    .led-periode { font-size:.78rem; color:#475569; }
-    .fase { display:inline-block; font-size:.6rem; font-weight:800; padding:1px 8px; border-radius:20px; letter-spacing:.3px; margin-top:2px; }
+    /* ===== Baris booking (gaya sama dgn kalender > Daftar) ===== */
+    .bl-list { padding:0 16px 8px; }
+    .bl-item { border:1px solid #eef2f7; border-radius:12px; margin-bottom:8px; background:#fff; overflow:hidden; transition:border-color .12s, box-shadow .12s; }
+    .bl-item:hover { border-color:#e3c3c6; box-shadow:0 4px 14px rgba(124,19,22,.07); }
+    .bl-row { display:grid; grid-template-columns: 4px minmax(0,1fr) 170px 130px 104px 96px 78px; gap:12px; align-items:center; padding:11px 12px 11px 0; }
+    .bl-bar { align-self:stretch; margin:-11px 0; }
+    .bl-ins { font-weight:700; color:#1f2937; font-size:.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .bl-sub { font-size:.76rem; color:#64748b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
+    .bl-room { display:inline-flex; align-items:center; gap:6px; font-weight:700; color:#334155; font-size:.78rem; background:#f8fafc; border:1px solid #eef0f3; border-radius:20px; padding:3px 10px; max-width:100%; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+    .bl-room i { width:8px; height:8px; border-radius:2px; flex-shrink:0; }
+    .bl-per { font-size:.76rem; color:#475569; white-space:nowrap; }
+    .fase { display:inline-block; font-size:.6rem; font-weight:800; padding:1px 8px; border-radius:20px; letter-spacing:.3px; margin-top:3px; }
     .fase-berjalan { background:#dcfce7; color:#15803d; } .fase-selesai { background:#eef2f7; color:#64748b; } .fase-akan { background:#dbeafe; color:#1d4ed8; }
-    .led-kuota { text-align:center; font-size:.86rem; white-space:nowrap; }
-    .led-kuota b { color:var(--maroon); font-size:1.02rem; } .led-kuota .tot { color:#94a3b8; }
-    .led-kuota .pk { display:inline-flex; align-items:center; gap:3px; cursor:pointer; }
+    .bl-ppl { text-align:right; white-space:nowrap; }
+    .bl-ppl b { font-size:1rem; color:var(--maroon); font-weight:800; }
+    .bl-ppl small { display:block; font-size:.66rem; color:#94a3b8; font-weight:600; }
+    .bl-ppl small.ok { color:#15803d; }
     .pill { padding:3px 11px; border-radius:20px; font-size:.7rem; font-weight:700; display:inline-block; white-space:nowrap; }
     .b-pending { background:#fef3c7; color:#b45309; } .b-approved { background:#dcfce7; color:#15803d; } .b-rejected { background:#fee2e2; color:#b91c1c; }
-    .led-aksi { display:flex; gap:5px; justify-content:flex-end; align-items:center; }
-    .ic-btn { width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#64748b; transition:.12s; }
-    .ic-btn:hover { background:#f8fafc; color:#334155; }
-    .btn-acc { background:#16a34a; color:#fff; border:none; border-radius:8px; font-weight:700; font-size:.74rem; padding:0 11px; height:30px; }
+    .imp { display:inline-block; background:#eef2ff; color:#4338ca; font-size:.56rem; font-weight:800; padding:1px 5px; border-radius:4px; vertical-align:middle; margin-left:5px; }
+    .bl-aksi { display:flex; gap:5px; justify-content:flex-end; align-items:center; }
+    .btn-acc { background:#16a34a; color:#fff; border:none; border-radius:9px; font-weight:700; font-size:.78rem; width:32px; height:32px; }
     .btn-acc:hover { background:#15803d; color:#fff; }
-    .chev { transition:transform .18s; }
-    .led-row[aria-expanded="true"] .chev, .ic-btn[aria-expanded="true"] .chev { transform:rotate(180deg); }
 
     /* drawer */
-    .led-drawer { border-top:1px solid #f1f3f5; background:#fafbfc; padding:0; }
-    .drawer-in { padding:14px 18px 16px 24px; }
-    .drawer-grid { display:flex; flex-wrap:wrap; gap:18px; }
-    .dw-block { flex:1; min-width:230px; }
-    .dw-lbl { font-size:.66rem; font-weight:800; letter-spacing:.4px; color:#94a3b8; text-transform:uppercase; margin-bottom:5px; }
+    .dw { border-top:1px solid #f1f3f5; background:#fafbfc; }
+    .dw-in { padding:14px 18px 16px 20px; }
+    .dw-grid { display:grid; grid-template-columns: 1fr 1fr; gap:18px; }
+    .dw-lbl { font-size:.66rem; font-weight:800; letter-spacing:.4px; color:var(--maroon); text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+    .dw-lbl .c { background:var(--maroon-subtle); border-radius:20px; padding:1px 8px; }
     .dw-ket { font-size:.82rem; color:#475569; }
-    .mini-form .form-control, .mini-form .form-select { font-size:.82rem; }
+    .dw-box { background:#fff; border:1px solid #eef2f7; border-radius:11px; padding:12px; }
+    .mini-form .form-control { font-size:.82rem; }
+    .mh-row { display:flex; align-items:center; gap:10px; padding:7px 2px; border-bottom:1px solid #f1f5f9; }
+    .mh-row:last-child { border-bottom:none; }
+    .mh-av { width:30px; height:30px; border-radius:50%; background:var(--maroon-subtle); color:var(--maroon); font-weight:800; font-size:.68rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .mh-tx { flex:1; min-width:0; }
+    .mh-tx b { display:block; font-size:.82rem; color:#1f2937; }
+    .mh-tx small { color:#94a3b8; font-size:.7rem; }
+    .mh-st { font-size:.6rem; font-weight:800; padding:2px 8px; border-radius:20px; white-space:nowrap; }
+    .mh-st.aktif, .mh-st.approved { background:#dcfce7; color:#15803d; }
+    .mh-st.nonaktif, .mh-st.pending { background:#eef2f7; color:#64748b; }
+    .mh-st.rejected { background:#fee2e2; color:#b91c1c; }
+    .md-empty { background:#fff; border:1px dashed #e2e8f0; border-radius:11px; padding:12px; text-align:center; color:#94a3b8; font-size:.78rem; }
     .ps-table { font-size:.8rem; }
     .ps-table th { background:#f1f3f5; color:#475569; font-size:.68rem; text-transform:uppercase; letter-spacing:.3px; border:none; padding:7px 10px; }
     .ps-table td { padding:7px 10px; vertical-align:middle; }
 
-    @media (max-width: 820px) {
-        .led-head { display:none; }
-        .led-row { grid-template-columns: 1fr auto; gap:6px 10px; row-gap:6px; }
-        .led-main { grid-column:1 / -1; }
-        .led-periode { grid-column:1; } .led-kuota { grid-column:2; text-align:right; }
-        .led-row .pill { justify-self:start; }
-        .led-aksi { grid-column:2; }
+    @media (max-width: 992px) {
+        .bl-row { grid-template-columns: 4px minmax(0,1fr) auto; row-gap:6px; }
+        .bl-bar { grid-row:1 / span 4; }
+        .bl-c-room, .bl-c-per, .bl-c-st { grid-column:2; }
+        .bl-ppl { grid-column:3; grid-row:1; }
+        .bl-aksi { grid-column:3; grid-row:2 / span 2; align-self:end; }
+        .dw-grid { grid-template-columns: 1fr; }
     }
 </style>
 
@@ -102,67 +112,65 @@
         </div>
     @endif
 
-    <div class="panel">
-        {{-- FILTER --}}
-        <div class="p-3 border-bottom">
-            <form method="GET" class="row g-2 align-items-end">
-                <input type="hidden" name="sort" value="{{ $sort }}"><input type="hidden" name="dir" value="{{ $dir }}">
-                <div class="col-md-3">
-                    <label class="small fw-semibold text-muted mb-1">Cari (instansi/prodi)</label>
-                    <input type="text" name="q" value="{{ request('q') }}" class="form-control form-control-sm filter-sel" placeholder="Nama instansi / prodi...">
-                </div>
-                <div class="col-md-3">
-                    <label class="small fw-semibold text-muted mb-1">Ruangan</label>
-                    <select name="ruangan" class="form-select form-select-sm filter-sel">
-                        <option value="">Semua Ruangan</option>
-                        @foreach($ruanganOptions as $id => $nm)
-                            <option value="{{ $id }}" {{ (string)request('ruangan')===(string)$id?'selected':'' }}>{{ $nm }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-6 col-md-2">
-                    <label class="small fw-semibold text-muted mb-1">Jenjang</label>
-                    <select name="jenjang" class="form-select form-select-sm filter-sel">
-                        <option value="">Semua</option>
-                        @foreach($jenjangOptions as $j)
-                            <option value="{{ $j }}" {{ request('jenjang')===$j?'selected':'' }}>{{ $j }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-6 col-md-2">
-                    <label class="small fw-semibold text-muted mb-1">Status</label>
-                    <select name="status" class="form-select form-select-sm filter-sel">
-                        <option value="">Semua</option>
-                        <option value="pending" {{ request('status')==='pending'?'selected':'' }}>Menunggu</option>
-                        <option value="approved" {{ request('status')==='approved'?'selected':'' }}>Disetujui</option>
-                        <option value="rejected" {{ request('status')==='rejected'?'selected':'' }}>Ditolak</option>
-                    </select>
-                </div>
-                <div class="col-6 col-md-1">
-                    <label class="small fw-semibold text-muted mb-1">Dari</label>
-                    <input type="date" name="start" value="{{ request('start') }}" class="form-control form-control-sm filter-sel">
-                </div>
-                <div class="col-6 col-md-1">
-                    <label class="small fw-semibold text-muted mb-1">Sampai</label>
-                    <input type="date" name="end" value="{{ request('end') }}" class="form-control form-control-sm filter-sel">
-                </div>
-                <div class="col-md-12 d-flex gap-2 mt-1">
-                    <button type="submit" class="btn btn-sm text-white fw-semibold" style="background:#7c1316;"><i class="bi bi-funnel me-1"></i>Terapkan</button>
-                    @if(request('q')||request('ruangan')||request('jenjang')||request('status')||request('start')||request('end'))
-                        <a href="{{ route('admin.booking.index') }}" class="btn btn-sm btn-light border">Reset</a>
-                    @endif
-                </div>
-            </form>
-        </div>
+    {{-- FILTER --}}
+    <div class="panel p-3 mb-3">
+        <form method="GET" class="row g-2 align-items-end">
+            <input type="hidden" name="sort" value="{{ $sort }}"><input type="hidden" name="dir" value="{{ $dir }}">
+            <div class="col-md-4">
+                <label class="small fw-semibold text-muted mb-1">Cari (instansi/prodi)</label>
+                <input type="text" name="q" value="{{ request('q') }}" class="form-control form-control-sm filter-sel" placeholder="Nama instansi / prodi...">
+            </div>
+            <div class="col-md-4">
+                <label class="small fw-semibold text-muted mb-1">Ruangan</label>
+                <select name="ruangan" class="form-select form-select-sm filter-sel">
+                    <option value="">Semua Ruangan</option>
+                    @foreach($ruanganOptions as $id => $nm)
+                        <option value="{{ $id }}" {{ (string)request('ruangan')===(string)$id?'selected':'' }}>{{ $nm }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="small fw-semibold text-muted mb-1">Jenjang</label>
+                <select name="jenjang" class="form-select form-select-sm filter-sel">
+                    <option value="">Semua</option>
+                    @foreach($jenjangOptions as $j)
+                        <option value="{{ $j }}" {{ request('jenjang')===$j?'selected':'' }}>{{ $j }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="small fw-semibold text-muted mb-1">Status</label>
+                <select name="status" class="form-select form-select-sm filter-sel">
+                    <option value="">Semua</option>
+                    <option value="pending" {{ request('status')==='pending'?'selected':'' }}>Menunggu</option>
+                    <option value="approved" {{ request('status')==='approved'?'selected':'' }}>Disetujui</option>
+                    <option value="rejected" {{ request('status')==='rejected'?'selected':'' }}>Ditolak</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="small fw-semibold text-muted mb-1">Dari</label>
+                <input type="date" name="start" value="{{ request('start') }}" class="form-control form-control-sm filter-sel">
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="small fw-semibold text-muted mb-1">Sampai</label>
+                <input type="date" name="end" value="{{ request('end') }}" class="form-control form-control-sm filter-sel">
+            </div>
+            <div class="col-md-8 d-flex gap-2 align-items-end">
+                <button type="submit" class="btn btn-sm text-white fw-semibold px-3" style="background:#7c1316;"><i class="bi bi-funnel me-1"></i>Terapkan</button>
+                @if(request('q')||request('ruangan')||request('jenjang')||request('status')||request('start')||request('end'))
+                    <a href="{{ route('admin.booking.index') }}" class="btn btn-sm btn-light border">Reset</a>
+                @endif
+            </div>
+        </form>
+    </div>
 
-        {{-- TOOLBAR: urutkan --}}
-        @php
-            $sortOpts = ['instansi'=>'Instansi','ruangan'=>'Ruangan','kuota'=>'Kuota','periode'=>'Periode','status'=>'Status'];
-        @endphp
+    <div class="panel">
+        {{-- TOOLBAR --}}
+        @php $sortOpts = ['instansi'=>'Instansi','ruangan'=>'Ruangan','kuota'=>'Kuota','periode'=>'Periode','status'=>'Status']; @endphp
         <div class="toolbar">
-            <span class="text-muted small"><i class="bi bi-list-ul me-1"></i>Menampilkan {{ $bookings->firstItem() ?? 0 }}–{{ $bookings->lastItem() ?? 0 }} dari {{ $bookings->total() }}</span>
+            <span class="text-muted small fw-semibold"><i class="bi bi-list-ul me-1"></i>{{ $bookings->firstItem() ?? 0 }}–{{ $bookings->lastItem() ?? 0 }} dari {{ $bookings->total() }} booking</span>
             <div class="sort-mini">
-                <span class="text-muted small fw-semibold">Urutkan:</span>
+                <span class="text-muted small fw-semibold">Urutkan</span>
                 <select onchange="location.href=this.value">
                     @foreach($sortOpts as $k => $lbl)
                         <option value="{{ request()->fullUrlWithQuery(['sort'=>$k,'dir'=>$dir,'page'=>null]) }}" {{ $sort===$k?'selected':'' }}>{{ $lbl }}</option>
@@ -174,158 +182,162 @@
             </div>
         </div>
 
-        {{-- LEDGER --}}
-        <div class="led">
-            <div class="led-head">
-                <span>Instansi · Ruangan · Prodi</span>
-                <span>Periode</span>
-                <span class="tc">Terisi</span>
-                <span class="tc">Status</span>
-                <span class="te">Aksi</span>
-            </div>
+        <div class="bl-list">
             @php $palette = ['#7c1316','#1d4ed8','#15803d','#b45309','#7e22ce','#0e7490','#be123c','#4d7c0f','#0f766e','#9333ea']; @endphp
             @forelse($bookings as $b)
             @php
                 $isImpor = \Illuminate\Support\Str::contains((string)$b->keterangan, '[IMPOR-MAPPING]');
                 $ketBersih = trim(str_replace('[IMPOR-MAPPING]', '', (string)$b->keterangan));
-                $rclr = $palette[($b->ruangan_id ?? 0) % count($palette)];
-                $pr = $b->prodi ?: $b->jenjang;
-                if ($b->jenjang && $b->prodi && stripos($b->prodi, $b->jenjang) !== 0) $pr = $b->jenjang.' '.$b->prodi;
-                if ($pr && $b->semester) $pr .= ' · smt '.$b->semester;
+                $rclr = $b->status === 'pending' ? '#f59e0b' : ($b->status === 'rejected' ? '#dc2626' : $palette[($b->ruangan_id ?? 0) % count($palette)]);
+                $pr = \App\Http\Controllers\InstansiController::prodiLabel($b);
                 $m = optional($b->tanggal_mulai); $s = optional($b->tanggal_selesai); $tdy = now()->startOfDay();
                 $fase = (!$b->tanggal_mulai || !$b->tanggal_selesai) ? null : ($s->lt($tdy) ? ['Selesai','selesai'] : ($m->gt($tdy) ? ['Akan Datang','akan'] : ['Berjalan','berjalan']));
+                $mhs = $mhsMap[$b->id] ?? [];
                 $terisi = $b->pesertas->count();
                 $namaInstansi = optional($b->mou)->nama_instansi ?? optional($b->mou)->nama_universitas ?? '-';
                 $namaRuangan = optional($b->ruangan)->nm_ruangan ?? '-';
             @endphp
-            <div class="led-row s-{{ $b->status }}">
-                <div class="led-main">
-                    <span class="rdot" style="background:{{ $rclr }};"></span>
-                    <div class="led-txt text-truncate">
-                        <span class="led-inst">{{ $namaInstansi }}</span>@if($isImpor)<span class="imp-badge" title="Dari impor mapping manual">IMPOR</span>@endif
-                        <span class="led-sub"> · <span class="rm">{{ $namaRuangan }}</span>@if($pr) · {{ $pr }}@endif</span>
+            <div class="bl-item">
+                <div class="bl-row">
+                    <span class="bl-bar" style="background:{{ $rclr }};"></span>
+                    <div style="min-width:0;">
+                        <div class="bl-ins">{{ $namaInstansi }}@if($isImpor)<span class="imp" title="Dari impor mapping manual">IMPOR</span>@endif</div>
+                        <div class="bl-sub">{{ $pr ?: '-' }}</div>
+                    </div>
+                    <div class="bl-c-room" style="min-width:0;">
+                        <span class="bl-room"><i style="background:{{ $palette[($b->ruangan_id ?? 0) % count($palette)] }};"></i>{{ $namaRuangan }}</span>
+                    </div>
+                    <div class="bl-c-per">
+                        <div class="bl-per">{{ $b->tanggal_mulai ? $m->format('d M') : '-' }} – {{ $b->tanggal_selesai ? $s->format('d M y') : '-' }}</div>
+                        @if($fase)<span class="fase fase-{{ $fase[1] }}">{{ $fase[0] }}</span>@endif
+                    </div>
+                    <div class="bl-ppl">
+                        <b>{{ $b->jumlah_peserta }}</b> <span class="text-muted small">org</span>
+                        <small class="{{ count($mhs) ? 'ok' : '' }}">@if(count($mhs))<i class="bi bi-person-check"></i> {{ count($mhs) }} tercatat @else belum tercatat @endif</small>
+                    </div>
+                    <div class="bl-c-st text-lg-center"><span class="pill b-{{ $b->status }}">{{ ['pending'=>'Menunggu','approved'=>'Disetujui','rejected'=>'Ditolak'][$b->status] ?? $b->status }}</span></div>
+                    <div class="bl-aksi">
+                        @if($b->status === 'pending')
+                            <form action="{{ route('admin.booking.approve', $b->id) }}" method="POST" onsubmit="return confirm('Setujui booking ini?');">
+                                @csrf<button class="btn-acc" title="Setujui"><i class="bi bi-check-lg"></i></button>
+                            </form>
+                        @endif
+                        <button class="ic-btn" data-bs-toggle="collapse" data-bs-target="#dw-{{ $b->id }}" aria-expanded="false" title="Detail & aksi"><i class="bi bi-chevron-down chev"></i></button>
                     </div>
                 </div>
-                <div class="led-periode">
-                    <div class="text-nowrap">{{ $b->tanggal_mulai ? $m->format('d M y') : '-' }} – {{ $b->tanggal_selesai ? $s->format('d M y') : '-' }}</div>
-                    @if($fase)<span class="fase fase-{{ $fase[1] }}">{{ $fase[0] }}</span>@endif
-                </div>
-                <div class="led-kuota">
-                    @if($terisi)
-                        <span class="pk" data-bs-toggle="collapse" data-bs-target="#dw-{{ $b->id }}"><b>{{ $terisi }}</b><span class="tot">/{{ $b->jumlah_peserta }}</span></span>
-                    @else
-                        <b>0</b><span class="tot">/{{ $b->jumlah_peserta }}</span>
-                    @endif
-                </div>
-                <div class="text-center"><span class="pill b-{{ $b->status }}">{{ ['pending'=>'Menunggu','approved'=>'Disetujui','rejected'=>'Ditolak'][$b->status] ?? $b->status }}</span></div>
-                <div class="led-aksi">
-                    @if($b->status === 'pending')
-                        <form action="{{ route('admin.booking.approve', $b->id) }}" method="POST" onsubmit="return confirm('Setujui booking ini?');">
-                            @csrf<button class="btn-acc" title="Setujui"><i class="bi bi-check-lg"></i></button>
-                        </form>
-                    @endif
-                    <button class="ic-btn" data-bs-toggle="collapse" data-bs-target="#dw-{{ $b->id }}" aria-expanded="false" title="Detail & aksi"><i class="bi bi-chevron-down chev"></i></button>
-                </div>
-            </div>
 
-            {{-- DRAWER --}}
-            <div class="collapse led-drawer" id="dw-{{ $b->id }}">
-                <div class="drawer-in">
-                    <div class="drawer-grid">
-                        {{-- kolom info + aksi utama --}}
-                        <div class="dw-block">
-                            <div class="dw-lbl">Detail</div>
-                            <div class="dw-ket mb-2">
-                                <div><i class="bi bi-calendar3 me-1 text-muted"></i>{{ $b->tanggal_mulai ? $m->format('d/m/Y') : '-' }} – {{ $b->tanggal_selesai ? $s->format('d/m/Y') : '-' }}</div>
-                                @if($ketBersih)<div class="mt-1 text-muted" style="font-size:.78rem;"><i class="bi bi-chat-left-text me-1"></i>{{ $ketBersih }}</div>@endif
-                                @if($b->status==='rejected' && $b->catatan_admin)<div class="mt-1 text-danger" style="font-size:.78rem;"><i class="bi bi-x-circle me-1"></i>{{ $b->catatan_admin }}</div>@endif
+                {{-- DRAWER --}}
+                <div class="collapse dw" id="dw-{{ $b->id }}">
+                    <div class="dw-in">
+                        <div class="dw-grid">
+                            <div>
+                                <div class="dw-lbl"><i class="bi bi-people-fill"></i>Mahasiswa di ruangan ini <span class="c">{{ count($mhs) }}</span></div>
+                                @if(count($mhs))
+                                    <div class="dw-box py-1">
+                                        @foreach($mhs as $x)
+                                        <div class="mh-row">
+                                            <div class="mh-av">{{ strtoupper(collect(preg_split('/\s+/', trim((string)$x['nama'])))->take(2)->map(function ($w) { return mb_substr($w, 0, 1); })->implode('')) }}</div>
+                                            <div class="mh-tx"><b>{{ $x['nama'] }}</b><small>{{ $x['prodi'] ?: '-' }}{{ $x['mulai'] ? ' · '.$x['mulai'].' – '.$x['selesai'] : '' }}</small></div>
+                                            <span class="mh-st {{ $x['status'] }}">{{ ucfirst($x['status'] ?: '-') }}</span>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="md-empty"><i class="bi bi-person-dash me-1"></i>Belum ada mahasiswa dari instansi ini yang tercatat di ruangan ini pada periode tersebut.</div>
+                                @endif
                             </div>
-                            <div class="d-flex gap-2">
-                                <a href="{{ route('admin.booking.edit', $b->id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil me-1"></i>Edit</a>
-                                <form action="{{ route('admin.booking.destroy', $b->id) }}" method="POST" onsubmit="return confirm('Hapus booking ini beserta daftar pesertanya?');">
-                                    @csrf @method('DELETE')
-                                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash me-1"></i>Hapus</button>
-                                </form>
+
+                            <div>
+                                <div class="dw-lbl"><i class="bi bi-info-circle"></i>Detail &amp; aksi</div>
+                                <div class="dw-box mini-form">
+                                    <div class="dw-ket mb-2">
+                                        <div><i class="bi bi-calendar3 me-1 text-muted"></i>{{ $b->tanggal_mulai ? $m->format('d/m/Y') : '-' }} – {{ $b->tanggal_selesai ? $s->format('d/m/Y') : '-' }}</div>
+                                        @if($ketBersih)<div class="mt-1 text-muted" style="font-size:.78rem;"><i class="bi bi-chat-left-text me-1"></i>{{ $ketBersih }}</div>@endif
+                                        @if($b->status==='rejected' && $b->catatan_admin)<div class="mt-1 text-danger" style="font-size:.78rem;"><i class="bi bi-x-circle me-1"></i>{{ $b->catatan_admin }}</div>@endif
+                                    </div>
+
+                                    @if($b->status === 'pending')
+                                        <form action="{{ route('admin.booking.approve', $b->id) }}" method="POST" class="mb-2">
+                                            @csrf
+                                            <label class="small fw-semibold mb-1">Setujui — batas pengisian peserta <span class="text-muted">(opsional)</span></label>
+                                            <div class="input-group input-group-sm">
+                                                <input type="date" name="batas_pengisian" class="form-control">
+                                                <button class="btn btn-success fw-semibold"><i class="bi bi-check-lg me-1"></i>Setujui</button>
+                                            </div>
+                                        </form>
+                                        <form action="{{ route('admin.booking.reject', $b->id) }}" method="POST" class="mb-2">
+                                            @csrf
+                                            <label class="small fw-semibold mb-1">Tolak — alasan</label>
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" name="catatan_admin" class="form-control" placeholder="Alasan penolakan..." required>
+                                                <button class="btn btn-outline-danger fw-semibold">Tolak</button>
+                                            </div>
+                                        </form>
+                                    @elseif($b->status === 'approved')
+                                        <form action="{{ route('admin.booking.batas', $b->id) }}" method="POST" class="mb-2">
+                                            @csrf
+                                            <label class="small fw-semibold mb-1">Batas pengisian peserta <span class="text-muted">(saat ini: {{ optional($b->batas_pengisian)->format('d/m/Y') ?: 'tidak dibatasi' }})</span></label>
+                                            <div class="input-group input-group-sm">
+                                                <input type="date" name="batas_pengisian" class="form-control" value="{{ optional($b->batas_pengisian)->format('Y-m-d') }}">
+                                                <button class="btn btn-outline-dark fw-semibold">Simpan</button>
+                                            </div>
+                                        </form>
+                                    @endif
+
+                                    <div class="d-flex gap-2 pt-1">
+                                        <a href="{{ route('admin.booking.edit', $b->id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil me-1"></i>Edit</a>
+                                        <form action="{{ route('admin.booking.destroy', $b->id) }}" method="POST" onsubmit="return confirm('Hapus booking ini beserta daftar pesertanya?');">
+                                            @csrf @method('DELETE')
+                                            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash me-1"></i>Hapus</button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        {{-- kolom keputusan --}}
-                        <div class="dw-block mini-form">
-                            @if($b->status === 'pending')
-                                <div class="dw-lbl">Keputusan</div>
-                                <form action="{{ route('admin.booking.approve', $b->id) }}" method="POST" class="mb-2">
-                                    @csrf
-                                    <label class="small fw-semibold mb-1">Setujui — batas pengisian peserta <span class="text-muted">(opsional)</span></label>
-                                    <div class="input-group input-group-sm">
-                                        <input type="date" name="batas_pengisian" class="form-control">
-                                        <button class="btn btn-success fw-semibold"><i class="bi bi-check-lg me-1"></i>Setujui</button>
-                                    </div>
-                                </form>
-                                <form action="{{ route('admin.booking.reject', $b->id) }}" method="POST">
-                                    @csrf
-                                    <label class="small fw-semibold mb-1">Tolak — alasan</label>
-                                    <div class="input-group input-group-sm">
-                                        <input type="text" name="catatan_admin" class="form-control" placeholder="Alasan penolakan..." required>
-                                        <button class="btn btn-outline-danger fw-semibold">Tolak</button>
-                                    </div>
-                                </form>
-                            @elseif($b->status === 'approved')
-                                <div class="dw-lbl">Batas Pengisian</div>
-                                <div class="small text-muted mb-1">Saat ini: <b class="text-dark">{{ optional($b->batas_pengisian)->format('d/m/Y') ?: 'tidak dibatasi' }}</b></div>
-                                <form action="{{ route('admin.booking.batas', $b->id) }}" method="POST">
-                                    @csrf
-                                    <div class="input-group input-group-sm">
-                                        <input type="date" name="batas_pengisian" class="form-control" value="{{ optional($b->batas_pengisian)->format('Y-m-d') }}">
-                                        <button class="btn btn-outline-dark fw-semibold">Simpan</button>
-                                    </div>
-                                </form>
-                            @endif
-                        </div>
-                    </div>
-
-                    {{-- peserta --}}
-                    @if($terisi)
-                    <div class="mt-3">
-                        <div class="dw-lbl mb-2"><i class="bi bi-people-fill me-1"></i>Daftar Anak Magang ({{ $terisi }})</div>
-                        <div class="table-responsive">
-                            <table class="table table-sm ps-table bg-white align-middle mb-0 border rounded">
-                                <thead><tr><th>No</th><th>Nama</th><th>NIM</th><th>Prodi</th><th>JK</th><th>No. HP</th><th class="text-center">Status</th><th class="text-center">Aksi (ACC → akun mahasiswa)</th></tr></thead>
-                                <tbody>
-                                    @foreach($b->pesertas as $i => $p)
-                                    <tr>
-                                        <td>{{ $i+1 }}</td><td>{{ $p->nama }}</td><td>{{ $p->nim ?: '-' }}</td><td>{{ $p->prodi ?: '-' }}</td><td>{{ $p->jenis_kelamin ?: '-' }}</td><td>{{ $p->no_hp ?: '-' }}</td>
-                                        <td class="text-center"><span class="pill b-{{ $p->status ?? 'pending' }}">{{ ['pending'=>'Menunggu','approved'=>'Jadi Mahasiswa','rejected'=>'Ditolak'][$p->status ?? 'pending'] ?? $p->status }}</span></td>
-                                        <td class="text-center">
-                                            @if(($p->status ?? 'pending') === 'pending')
-                                                <form action="{{ route('admin.booking.peserta.approve', $p->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Setujui & buat akun mahasiswa untuk {{ $p->nama }}?');">
-                                                    @csrf<button class="btn btn-sm btn-success"><i class="bi bi-person-check"></i> ACC</button>
-                                                </form>
-                                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="collapse" data-bs-target="#rejp-{{ $p->id }}"><i class="bi bi-x-lg"></i></button>
-                                                <div class="collapse mt-1 text-start" id="rejp-{{ $p->id }}">
-                                                    <form action="{{ route('admin.booking.peserta.reject', $p->id) }}" method="POST">
-                                                        @csrf
-                                                        <textarea name="catatan_admin" class="form-control form-control-sm mb-1" rows="1" placeholder="Alasan..." required></textarea>
-                                                        <button class="btn btn-sm btn-danger w-100">Tolak</button>
+                        @if($terisi)
+                        <div class="mt-3">
+                            <div class="dw-lbl"><i class="bi bi-person-lines-fill"></i>Peserta didaftarkan instansi <span class="c">{{ $terisi }}</span></div>
+                            <div class="table-responsive dw-box p-0">
+                                <table class="table table-sm ps-table align-middle mb-0">
+                                    <thead><tr><th>No</th><th>Nama</th><th>NIM</th><th>Prodi</th><th>JK</th><th>No. HP</th><th class="text-center">Status</th><th class="text-center">Aksi (ACC → akun mahasiswa)</th></tr></thead>
+                                    <tbody>
+                                        @foreach($b->pesertas as $i => $p)
+                                        <tr>
+                                            <td>{{ $i+1 }}</td><td>{{ $p->nama }}</td><td>{{ $p->nim ?: '-' }}</td><td>{{ $p->prodi ?: '-' }}</td><td>{{ $p->jenis_kelamin ?: '-' }}</td><td>{{ $p->no_hp ?: '-' }}</td>
+                                            <td class="text-center"><span class="pill b-{{ $p->status ?? 'pending' }}">{{ ['pending'=>'Menunggu','approved'=>'Jadi Mahasiswa','rejected'=>'Ditolak'][$p->status ?? 'pending'] ?? $p->status }}</span></td>
+                                            <td class="text-center">
+                                                @if(($p->status ?? 'pending') === 'pending')
+                                                    <form action="{{ route('admin.booking.peserta.approve', $p->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Setujui & buat akun mahasiswa untuk {{ $p->nama }}?');">
+                                                        @csrf<button class="btn btn-sm btn-success"><i class="bi bi-person-check"></i> ACC</button>
                                                     </form>
-                                                </div>
-                                            @else
-                                                <span class="text-muted small">{{ $p->catatan_admin ?: '-' }}</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                                                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="collapse" data-bs-target="#rejp-{{ $p->id }}"><i class="bi bi-x-lg"></i></button>
+                                                    <div class="collapse mt-1 text-start" id="rejp-{{ $p->id }}">
+                                                        <form action="{{ route('admin.booking.peserta.reject', $p->id) }}" method="POST">
+                                                            @csrf
+                                                            <textarea name="catatan_admin" class="form-control form-control-sm mb-1" rows="1" placeholder="Alasan..." required></textarea>
+                                                            <button class="btn btn-sm btn-danger w-100">Tolak</button>
+                                                        </form>
+                                                    </div>
+                                                @else
+                                                    <span class="text-muted small">{{ $p->catatan_admin ?: '-' }}</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
+                        @endif
                     </div>
-                    @endif
                 </div>
             </div>
             @empty
             <div class="text-center text-muted py-5"><i class="bi bi-inbox fs-3 d-block mb-2"></i>Belum ada booking.</div>
             @endforelse
         </div>
-        <div class="p-3">{{ $bookings->appends(request()->except('page'))->links() }}</div>
+        <div class="px-3 pb-3">{{ $bookings->appends(request()->except('page'))->links() }}</div>
     </div>
 </div>
 @endsection

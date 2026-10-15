@@ -371,12 +371,13 @@ class InstansiController extends Controller
 
         $bookings = $query->paginate(15)->withQueryString();
         $jmlPending = BookingRuangan::where('status', 'pending')->count();
+        $mhsMap = $this->mahasiswaPerBooking($bookings->getCollection());
 
         $ruanganOptions = Ruangan::orderBy('nm_ruangan')->pluck('nm_ruangan', 'id');
         $jenjangOptions = BookingRuangan::whereNotNull('jenjang')->where('jenjang', '!=', '')
             ->distinct()->orderBy('jenjang')->pluck('jenjang');
 
-        return view('admin.booking.index', compact('bookings', 'jmlPending', 'ruanganOptions', 'jenjangOptions', 'sort', 'dir'));
+        return view('admin.booking.index', compact('bookings', 'jmlPending', 'ruanganOptions', 'jenjangOptions', 'sort', 'dir', 'mhsMap'));
     }
 
     public function adminApprove(Request $request, $id)
@@ -515,6 +516,7 @@ class InstansiController extends Controller
         }
 
         $palette = ['#7c1316', '#1d4ed8', '#15803d', '#b45309', '#7e22ce', '#0e7490', '#be123c', '#4d7c0f', '#0f766e', '#9333ea'];
+        $mhsMap = $this->mahasiswaPerBooking($bookings);
 
         $events = [];
         $perRuangan = [];
@@ -531,16 +533,20 @@ class InstansiController extends Controller
                 'end'   => $s ? $s->copy()->addDay()->format('Y-m-d') : null,
                 'color' => $warna,
                 'extendedProps' => [
+                    'id'       => $b->id,
                     'instansi' => $namaInstansi,
                     'ruangan'  => $namaRuangan,
                     'peserta'  => $b->jumlah_peserta,
                     'status'   => $b->status,
                     'fase'     => $fase,
                     'periode'  => ($m ? $m->format('d/m/Y') : '-') . ' - ' . ($s ? $s->format('d/m/Y') : '-'),
-                    'prodi'    => trim(($b->jenjang ? $b->jenjang . ' ' : '') . ($b->prodi ?? '')) . ($b->semester ? ' · smt ' . $b->semester : ''),
+                    'prodi'    => self::prodiLabel($b),
+                    'impor'    => Str::contains((string) $b->keterangan, '[IMPOR-MAPPING]'),
+                    'ket'      => trim(str_replace('[IMPOR-MAPPING]', '', (string) $b->keterangan)),
                     'pesertaList' => $b->pesertas->map(function ($p) {
                         return ['nama' => $p->nama, 'nim' => $p->nim, 'prodi' => $p->prodi, 'status' => $p->status];
                     })->values(),
+                    'mahasiswa' => $mhsMap[$b->id] ?? [],
                 ],
             ];
             $perRuangan[$namaRuangan][] = $b;
@@ -563,6 +569,87 @@ class InstansiController extends Controller
             'f' => compact('fRuangan', 'fMou', 'fJenjang', 'fStatus', 'fStart', 'fEnd', 'q'),
             'total' => count($events),
         ]);
+    }
+
+    /** Label prodi tanpa dobel jenjang ("S1 S1 Keperawatan" -> "S1 Keperawatan"). */
+    public static function prodiLabel($b)
+    {
+        $prodi = trim((string) $b->prodi);
+        $label = $prodi !== '' ? $prodi : trim((string) $b->jenjang);
+        if ($b->semester) $label .= ($label !== '' ? ' · ' : '') . 'smt ' . $b->semester;
+        return $label;
+    }
+
+    private static function normInstansi($n)
+    {
+        $n = mb_strtolower(preg_replace('/\(.*?\)/', '', (string) $n));
+        return preg_replace('/[^a-z0-9]/', '', $n);
+    }
+
+    /**
+     * Cocokkan mahasiswa ke booking: instansi sama (mou_id / nama instansi),
+     * ruangan sama, dan rentang tanggal beririsan.
+     * @return array [booking_id => [['nama','prodi','status','mulai','selesai'], ...]]
+     */
+    private function mahasiswaPerBooking($bookings)
+    {
+        $out = [];
+        if (!$bookings || !count($bookings)) return $out;
+
+        $ruanganIds = collect($bookings)->pluck('ruangan_id')->filter()->unique()->values()->all();
+        if (!$ruanganIds) return $out;
+        $minStart = collect($bookings)->map(function ($b) { return optional($b->tanggal_mulai)->format('Y-m-d'); })->filter()->min();
+        $maxEnd   = collect($bookings)->map(function ($b) { return optional($b->tanggal_selesai)->format('Y-m-d'); })->filter()->max();
+
+        // Kandidat: dari room_sequences + kolom legacy ruangan_id di mahasiswa
+        $cand = [];
+        $seqs = \App\Models\RoomSequence::with('mahasiswa.mou')
+            ->whereIn('ruangan_id', $ruanganIds)
+            ->when($maxEnd, function ($q) use ($maxEnd) { $q->whereDate('start_date', '<=', $maxEnd); })
+            ->when($minStart, function ($q) use ($minStart) { $q->whereDate('end_date', '>=', $minStart); })
+            ->get();
+        foreach ($seqs as $sq) {
+            if (!$sq->mahasiswa) continue;
+            $cand[] = [$sq->mahasiswa, $sq->ruangan_id, substr((string) $sq->start_date, 0, 10), substr((string) $sq->end_date, 0, 10)];
+        }
+        $legacy = Mahasiswa::with('mou')->whereIn('ruangan_id', $ruanganIds)
+            ->whereNotNull('tanggal_mulai')->whereNotNull('tanggal_berakhir')
+            ->when($maxEnd, function ($q) use ($maxEnd) { $q->whereDate('tanggal_mulai', '<=', $maxEnd); })
+            ->when($minStart, function ($q) use ($minStart) { $q->whereDate('tanggal_berakhir', '>=', $minStart); })
+            ->get();
+        foreach ($legacy as $mh) {
+            $cand[] = [$mh, $mh->ruangan_id, substr((string) $mh->tanggal_mulai, 0, 10), substr((string) $mh->tanggal_berakhir, 0, 10)];
+        }
+
+        foreach ($bookings as $b) {
+            $bs = optional($b->tanggal_mulai)->format('Y-m-d');
+            $be = optional($b->tanggal_selesai)->format('Y-m-d');
+            if (!$bs || !$be) continue;
+            $bNama = self::normInstansi(optional($b->mou)->nama_instansi ?: optional($b->mou)->nama_universitas);
+            $seen = [];
+            foreach ($cand as $c) {
+                list($mh, $rid, $ms, $me) = $c;
+                if ((int) $rid !== (int) $b->ruangan_id || isset($seen[$mh->id])) continue;
+                if ($ms > $be || $me < $bs) continue;
+                $sameMou = $mh->mou_id && (int) $mh->mou_id === (int) $b->mou_id;
+                if (!$sameMou) {
+                    $mNama = self::normInstansi(optional($mh->mou)->nama_instansi ?: optional($mh->mou)->nama_universitas);
+                    if ($mNama === '' || $mNama !== $bNama) continue;
+                }
+                $seen[$mh->id] = true;
+                $out[$b->id][] = [
+                    'nama'    => $mh->nm_mahasiswa,
+                    'prodi'   => $mh->prodi,
+                    'status'  => $mh->status,
+                    'mulai'   => $ms ? Carbon::parse($ms)->format('d/m') : '',
+                    'selesai' => $me ? Carbon::parse($me)->format('d/m/y') : '',
+                ];
+            }
+            if (!empty($out[$b->id])) {
+                usort($out[$b->id], function ($x, $y) { return strcmp((string) $x['nama'], (string) $y['nama']); });
+            }
+        }
+        return $out;
     }
 
     /**
