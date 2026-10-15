@@ -111,7 +111,14 @@
         .bg-soft-secondary { background-color: #f3f4f6; color: #4b5563; }
         .bg-soft-info { background-color: #dbeafe; color: #1e40af; }
         .bg-soft-danger { background-color: #fee2e2; color: #991b1b; }
-        
+        .bg-soft-warning { background-color: #fef3c7; color: #92400e; }
+
+        /* baris hidup + chip ruangan (samakan dengan daftar booking) */
+        .m-row.s-aktif td:first-child { box-shadow: inset 4px 0 0 #16a34a; }
+        .m-row.s-nonaktif td:first-child { box-shadow: inset 4px 0 0 #94a3b8; }
+        .room-chip { display:inline-flex; align-items:center; gap:7px; font-weight:700; color:#1f2937; background:#f8fafc; border:1px solid #e9edf2; padding:5px 11px; border-radius:50px; font-size:.8rem; }
+        .room-dot { width:10px; height:10px; border-radius:3px; display:inline-block; flex-shrink:0; }
+
         .action-btn { width: 32px; height: 32px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; color: #6c757d; background: transparent; border: 1px solid transparent; transition: var(--transition);}
         .action-btn:hover { background: var(--custom-maroon-subtle); color: var(--custom-maroon); }
         .action-btn.delete:hover { background: #fee2e2; color: #dc2626; }
@@ -294,8 +301,9 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php $palette = ['#7c1316','#1d4ed8','#15803d','#b45309','#7e22ce','#0e7490','#be123c','#4d7c0f','#0f766e','#9333ea']; @endphp
                     @forelse ($mahasiswas as $m)
-                        <tr>
+                        <tr class="m-row s-{{ $m->status }}">
                             <td class="text-center text-muted font-weight-bold">{{ $loop->iteration + $mahasiswas->firstItem() - 1 }}</td>
                             <td>
                                 <div class="d-flex align-items-center">
@@ -330,7 +338,7 @@
                             </td>
                             <td>
                                 @if ($m->ruangan)
-                                    <span class="badge badge-light border text-dark p-2"><i class="bi bi-geo-alt mr-1"></i>{{ $m->nama_ruangan_saat_ini }}</span>
+                                    <span class="room-chip"><span class="room-dot" style="background: {{ $palette[($m->ruangan_id ?? 0) % count($palette)] }};"></span>{{ $m->nama_ruangan_saat_ini }}</span>
                                 @else
                                     <span class="text-muted font-italic">-</span>
                                 @endif
