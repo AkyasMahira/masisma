@@ -12,6 +12,7 @@ class MouMatcher
     {
         $s = mb_strtolower((string) $s);
         $s = preg_replace('/\(.*?\)/u', ' ', $s);                 // buang isi kurung: (KD), ( Gadar ), (SMT IV)
+        $s = preg_replace('/\(.*$/u', ' ', $s);                   // kurung tidak ditutup: "( Meternitas Anak"
         $s = str_replace(['&', '.', ',', '-', '/', "'"], ' ', $s);
         $map = [
             'sekolah tinggi ilmu kesehatan' => 'stikes',

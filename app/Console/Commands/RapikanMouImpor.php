@@ -18,7 +18,8 @@ class RapikanMouImpor extends Command
     protected $signature = 'pkl:rapikan-mou
         {--apply : Jalankan perubahan (tanpa ini hanya menampilkan rencana)}
         {--min=0.88 : Skor minimal untuk dicocokkan otomatis (0..1)}
-        {--map=* : Pemetaan manual ID_MOU_IMPOR:ID_MOU_TUJUAN, boleh berulang}';
+        {--map=* : Pemetaan manual ID_MOU_IMPOR:ID_MOU_TUJUAN, boleh berulang}
+        {--skip=* : ID MOU impor yang dibiarkan apa adanya, boleh berulang}';
 
     protected $description = 'Gabungkan MOU hasil impor mapping PKL ke MOU yang sudah ada';
 
@@ -33,7 +34,9 @@ class RapikanMouImpor extends Command
             if (preg_match('/^(\d+):(\d+)$/', trim($m), $x)) $manual[(int) $x[1]] = (int) $x[2];
         }
 
-        $impor = Mou::where('keterangan', self::KET_IMPOR)->get();
+        $skip = array_map('intval', (array) $this->option('skip'));
+        $impor = Mou::where('keterangan', self::KET_IMPOR)->whereNotIn('id', $skip ?: [0])->get();
+        if ($skip) $this->line('Dilewati: #' . implode(', #', $skip));
         $asli  = Mou::where(function ($q) { $q->whereNull('keterangan')->orWhere('keterangan', '!=', self::KET_IMPOR); })->get();
         $namaAsli = $asli->mapWithKeys(function ($m) { return [$m->id => ($m->nama_instansi ?: $m->nama_universitas)]; })->all();
 
