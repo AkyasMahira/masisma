@@ -196,6 +196,57 @@ class DispensasiController extends Controller
     }
 
     /**
+     * Jam mulai/selesai shift mahasiswa pada $date: dari jadwal shift (ShiftSchedule)
+     * + jam shift ruangan (getShiftTimes, termasuk custom RoomShift). Kata kunci
+     * "malam/siang/pagi" di keterangan hanya dipakai bila jadwal kosong.
+     * @return array ['start' => Carbon, 'end' => Carbon, 'shift' => string]
+     */
+    private function jadwalShiftTanggal($mahasiswaId, Carbon $date, $keterangan = '')
+    {
+        $date = $date->copy()->startOfDay();
+        $tanggal = $date->toDateString();
+        $seq = \App\Models\RoomSequence::where('mahasiswa_id', $mahasiswaId)
+            ->where('start_date', '<=', $tanggal)->where('end_date', '>=', $tanggal)
+            ->with('ruangan')->first();
+        $roomId = $seq && $seq->ruangan ? $seq->ruangan->id : 0;
+
+        $jadwal = \App\Models\ShiftSchedule::where('mahasiswa_id', $mahasiswaId)->where('tanggal', $tanggal)->first();
+        $ket = (string) $keterangan;
+        if ($jadwal && strtolower($jadwal->shift_type) !== 'libur') {
+            $shift = $jadwal->shift_type;
+        } elseif (stripos($ket, 'malam') !== false) {
+            $shift = 'Malam';
+        } elseif (stripos($ket, 'siang') !== false) {
+            $shift = 'Siang';
+        } elseif (stripos($ket, 'pagi') !== false) {
+            $shift = 'Pagi';
+        } else {
+            $shift = $date->dayOfWeekIso == 5 ? 'Jumat' : 'Reguler';
+        }
+
+        $t = app(AbsensiController::class)->getShiftTimes($shift, $date, $roomId);
+        $start = !empty($t['start']) ? $t['start']->copy() : null;
+        $end   = !empty($t['end']) ? $t['end']->copy() : null;
+
+        if (!$start || !$end) {
+            // cadangan bila jam shift tidak terdefinisi
+            $map = [
+                'Malam' => [[21, 0], [7, 0], true],
+                'Siang' => [[14, 0], [21, 0], false],
+                'Pagi'  => [[7, 0], [14, 0], false],
+                'Jumat' => [[7, 0], [14, 30], false],
+            ];
+            $m = $map[$shift] ?? [[7, 15], [15, 30], false];
+            $start = $date->copy()->setTime($m[0][0], $m[0][1]);
+            $end   = $date->copy()->setTime($m[1][0], $m[1][1]);
+            if ($m[2]) $end->addDay();
+        }
+        if ($end->lte($start)) $end->addDay();
+
+        return ['start' => $start, 'end' => $end, 'shift' => $shift];
+    }
+
+    /**
      * Apakah $now berada di jendela shift (mulai -30 menit s/d selesai) untuk
      * jadwal hari ini, atau shift kemarin yang lintas hari (shift malam).
      */
@@ -419,19 +470,11 @@ class DispensasiController extends Controller
             // ==========================================================
             else if ($dispensasi->kategori === 'terlambat') {
                 
-                $jamMasuk = $date->copy()->setTime(7, 0, 0);
-                $jamKeluar = $date->copy()->setTime(14, 0, 0);
-                $tipeShift = "Pagi/Reguler";
-
-                if (stripos($dispensasi->keterangan, 'malam') !== false) {
-                    $jamMasuk = $date->copy()->setTime(21, 0, 0);
-                    $jamKeluar = $date->copy()->addDay()->setTime(7, 0, 0); // Lintas Hari
-                    $tipeShift = "Malam";
-                } elseif (stripos($dispensasi->keterangan, 'siang') !== false) {
-                    $jamMasuk = $date->copy()->setTime(14, 0, 0);
-                    $jamKeluar = $date->copy()->setTime(21, 0, 0);
-                    $tipeShift = "Siang";
-                }
+                // Jam masuk/pulang mengikuti JADWAL SHIFT tanggal tsb + jam shift ruangannya
+                $js = $this->jadwalShiftTanggal($dispensasi->mahasiswa_id, $date, $dispensasi->keterangan);
+                $jamMasuk  = $js['start'];
+                $jamKeluar = $js['end'];
+                $tipeShift = $js['shift'];
 
                 $absenMasuk = Absensi::where('mahasiswa_id', $dispensasi->mahasiswa_id)
                     ->where('type', 'masuk')
@@ -439,21 +482,16 @@ class DispensasiController extends Controller
                     ->latest()
                     ->first();
 
-                $absenKeluar = Absensi::where('mahasiswa_id', $dispensasi->mahasiswa_id)
-                    ->where('type', 'keluar')
-                    ->where(function($q) use ($date, $jamKeluar) {
-                        $q->whereDate('created_at', $date)
-                          ->orWhereDate('created_at', $jamKeluar->toDateString());
-                    })
-                    ->latest()
-                    ->first();
-
                 // EKSEKUSI: BUAT / UPDATE ABSEN MASUK
                 if ($absenMasuk) {
-                    if (str_contains($absenMasuk->keterangan, 'Pending')) {
+                    if (strpos((string) $absenMasuk->keterangan, 'Pending') !== false) {
+                        $jamLama = $absenMasuk->jam_masuk;
                         $absenMasuk->jam_masuk = $jamMasuk;
                         $absenMasuk->keterangan = "Dispen Disetujui (Shift $tipeShift)";
                         $absenMasuk->save();
+                        // pasangan checkout (bila sudah ada) ikut disesuaikan
+                        Absensi::where('mahasiswa_id', $dispensasi->mahasiswa_id)->where('type', 'keluar')
+                            ->where('jam_masuk', $jamLama)->update(['jam_masuk' => $jamMasuk]);
                     }
                 } else {
                     $masukBaru = new Absensi();
@@ -469,8 +507,14 @@ class DispensasiController extends Controller
 
                 // EKSEKUSI: BUAT ABSEN KELUAR (JIKA JAM SHIFT SUDAH SELESAI)
                 // Jika belum selesai, biarkan mahasiswa absen pulang manual via QR
-                if (!$absenKeluar && \Carbon\Carbon::now()->gt($jamKeluar)) { 
-                    $waktuMasuk = $absenMasuk ? Carbon::parse($absenMasuk->jam_masuk) : $jamMasuk;
+                $waktuMasuk = $absenMasuk ? Carbon::parse($absenMasuk->jam_masuk) : $jamMasuk;
+                $absenKeluar = Absensi::where('mahasiswa_id', $dispensasi->mahasiswa_id)
+                    ->where('type', 'keluar')
+                    ->where('jam_masuk', $waktuMasuk)
+                    ->exists();
+                if ($jamKeluar->lte($waktuMasuk)) $jamKeluar = $waktuMasuk->copy()->addHours(7);
+
+                if (!$absenKeluar && \Carbon\Carbon::now()->gt($jamKeluar)) {
                     
                     $keluarBaru = new Absensi();
                     $keluarBaru->mahasiswa_id = $dispensasi->mahasiswa_id;
@@ -506,21 +550,8 @@ class DispensasiController extends Controller
 
                 $jamMasuk = Carbon::parse($masuk->jam_masuk);
 
-                // Jam selesai dari jadwal shift hari itu (fallback via kata kunci keterangan / reguler)
-                $jadwal = \App\Models\ShiftSchedule::where('mahasiswa_id', $dispensasi->mahasiswa_id)
-                    ->where('tanggal', $date->toDateString())
-                    ->first();
-                $shift = $jadwal ? $jadwal->shift_type : null;
-
-                if ($shift === 'Malam' || stripos($dispensasi->keterangan, 'malam') !== false) {
-                    $jamKeluar = $date->copy()->addDay()->setTime(7, 0, 0);   // lintas hari
-                } elseif ($shift === 'Siang' || stripos($dispensasi->keterangan, 'siang') !== false) {
-                    $jamKeluar = $date->copy()->setTime(21, 0, 0);
-                } elseif ($shift === 'Pagi') {
-                    $jamKeluar = $date->copy()->setTime(14, 0, 0);
-                } else {
-                    $jamKeluar = $date->copy()->setTime(15, 30, 0);           // reguler
-                }
+                // Jam selesai dari jadwal shift hari itu + jam shift ruangannya
+                $jamKeluar = $this->jadwalShiftTanggal($dispensasi->mahasiswa_id, $date, $dispensasi->keterangan)['end'];
                 if ($jamKeluar->lte($jamMasuk)) $jamKeluar = $jamMasuk->copy()->addHours(7);
 
                 $keluarBaru = new Absensi();
