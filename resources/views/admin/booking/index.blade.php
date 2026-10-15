@@ -91,7 +91,8 @@
         </div>
         <div class="d-flex align-items-center gap-2">
             <span class="wait-pill"><i class="bi bi-hourglass-split me-1"></i>{{ $jmlPending }} menunggu</span>
-            <a href="{{ route('admin.booking.kalender') }}" class="btn-light-h"><i class="bi bi-calendar3-week me-1"></i> Kalender</a>
+            <a href="{{ route('admin.booking.kalender') }}" class="btn-light-h" style="background:rgba(255,255,255,.16);color:#fff;box-shadow:none;"><i class="bi bi-calendar3-week me-1"></i> Kalender</a>
+            <a href="{{ route('admin.booking.create') }}" class="btn-light-h"><i class="bi bi-plus-lg me-1"></i> Tambah Booking</a>
         </div>
     </div>
 

@@ -51,58 +51,76 @@ class InstansiController extends Controller
     public function bookingCreate()
     {
         $user = $this->instansi();
-        $today = now()->toDateString();
+        return view('instansi.booking_create', $this->bookingFormData($user->mou->id) + [
+            'isAdmin'   => false,
+            'mou'       => $user->mou,
+            'action'    => route('instansi.booking.store'),
+            'cancelUrl' => route('instansi.dashboard'),
+        ]);
+    }
 
-        // Daftar ruangan + sisa kuota (indikatif, memakai hari ini sebagai acuan)
-        $ruangans = Ruangan::orderBy('nm_ruangan')->get()->map(function ($r) use ($today) {
-            $r->sisa_kuota = $this->sisaKuota($r, $today, $today);
-            return $r;
-        });
+    /**
+     * Data form booking (dipakai portal instansi & admin):
+     * ruangan + kuota, master prodi, event kalender okupansi, dan data okupansi
+     * (booking approved) untuk cek kuota langsung di browser.
+     * $myMouId terisi = mode instansi (hanya lihat booking approved + miliknya).
+     */
+    private function bookingFormData($myMouId = null)
+    {
+        $ruangans = Ruangan::orderBy('nm_ruangan')->get(['id', 'nm_ruangan', 'kuota_ruangan']);
 
-        // Kalender okupansi: booking approved (semua instansi) + booking milik sendiri (semua status)
-        $myMouId = $user->mou->id;
-        $bookings = BookingRuangan::with('ruangan')
-            ->where(function ($q) use ($myMouId) {
-                $q->where('status', 'approved')->orWhere('mou_id', $myMouId);
-            })
+        $bookings = BookingRuangan::with(['ruangan:id,nm_ruangan', 'mou:id,nama_instansi,nama_universitas'])
             ->where('status', '!=', 'rejected')
+            ->when($myMouId, function ($q) use ($myMouId) {
+                $q->where(function ($w) use ($myMouId) {
+                    $w->where('status', 'approved')->orWhere('mou_id', $myMouId);
+                });
+            })
             ->orderBy('tanggal_mulai')
             ->get();
 
-        $palette = ['#7c1316', '#1d4ed8', '#15803d', '#b45309', '#7e22ce', '#0e7490', '#be123c', '#4d7c0f'];
-        $events = [];
+        $palette = ['#7c1316', '#1d4ed8', '#15803d', '#b45309', '#7e22ce', '#0e7490', '#be123c', '#4d7c0f', '#0f766e', '#9333ea'];
+        $events = []; $occ = [];
         foreach ($bookings as $b) {
-            $mine = (int) $b->mou_id === (int) $myMouId;
+            if (!$b->tanggal_mulai || !$b->tanggal_selesai) continue;
+            $mine = $myMouId && (int) $b->mou_id === (int) $myMouId;
             $namaRuangan = optional($b->ruangan)->nm_ruangan ?? 'Ruangan';
-            $warna = $palette[($b->ruangan_id ?? 0) % count($palette)];
-            if ($b->status === 'pending') $warna = '#94a3b8';
-            $sisa = $this->sisaKuota($b->ruangan, $b->tanggal_mulai, $b->tanggal_selesai);
+            $namaInstansi = optional($b->mou)->nama_instansi ?: (optional($b->mou)->nama_universitas ?: 'Instansi');
+            $warna = $b->status === 'pending' ? '#94a3b8' : $palette[($b->ruangan_id ?? 0) % count($palette)];
+            if ($myMouId && !$mine) {
+                $title = $namaRuangan . ' · terisi ' . $b->jumlah_peserta . ' org';
+                $warna = '#cbd5e1';
+            } else {
+                $title = ($mine ? 'Booking Anda' : $namaInstansi) . ' (' . $b->jumlah_peserta . ') · ' . $namaRuangan;
+            }
             $events[] = [
-                'title' => $mine
-                    ? 'Booking Anda · ' . $namaRuangan . ' (' . $b->jumlah_peserta . ')'
-                    : $namaRuangan . ' · terisi (' . $b->jumlah_peserta . ' org)',
-                'start' => optional($b->tanggal_mulai)->format('Y-m-d'),
-                'end'   => optional($b->tanggal_selesai)->copy()->addDay()->format('Y-m-d'),
-                'color' => $mine ? $warna : '#cbd5e1',
-                'textColor' => $mine ? '#fff' : '#334155',
+                'title' => $title,
+                'start' => $b->tanggal_mulai->format('Y-m-d'),
+                'end'   => $b->tanggal_selesai->copy()->addDay()->format('Y-m-d'),
+                'color' => $warna,
+                'textColor' => ($myMouId && !$mine) ? '#334155' : '#fff',
                 'extendedProps' => [
-                    'mine'    => $mine,
+                    'rid'     => (int) $b->ruangan_id,
+                    'mine'    => (bool) $mine,
                     'status'  => $b->status,
                     'ruangan' => $namaRuangan,
-                    'periode' => optional($b->tanggal_mulai)->format('d/m/Y') . ' - ' . optional($b->tanggal_selesai)->format('d/m/Y'),
+                    'instansi'=> $myMouId && !$mine ? null : $namaInstansi,
+                    'periode' => $b->tanggal_mulai->format('d/m/Y') . ' - ' . $b->tanggal_selesai->format('d/m/Y'),
                     'jumlah'  => $b->jumlah_peserta,
-                    'sisa'    => $sisa,
                 ],
             ];
+            if ($b->status === 'approved') {
+                $occ[] = ['r' => (int) $b->ruangan_id, 's' => $b->tanggal_mulai->format('Y-m-d'), 'e' => $b->tanggal_selesai->format('Y-m-d'), 'n' => (int) $b->jumlah_peserta];
+            }
         }
 
-        return view('instansi.booking_create', [
-            'mou'         => $user->mou,
+        return [
             'ruangans'    => $ruangans,
             'listProdi'   => \App\Models\MasterProdi::grouped(),
             'jenjangList' => \App\Models\MasterProdi::jenjangList(),
             'events'      => $events,
-        ]);
+            'occ'         => $occ,
+        ];
     }
 
     public function bookingStore(Request $request)
@@ -401,6 +419,75 @@ class InstansiController extends Controller
             'batas_pengisian' => $request->batas_pengisian ?: null,
         ]);
         return back()->with('success', 'Booking disetujui.');
+    }
+
+    /** Admin: form tambah booking atas nama instansi. */
+    public function adminCreateBooking()
+    {
+        $mouOptions = Mou::orderBy('nama_universitas')->get(['id', 'nama_instansi', 'nama_universitas'])
+            ->mapWithKeys(function ($m) { return [$m->id => ($m->nama_instansi ?: $m->nama_universitas)]; })
+            ->sort();
+
+        return view('instansi.booking_create', $this->bookingFormData(null) + [
+            'isAdmin'    => true,
+            'mou'        => null,
+            'mouOptions' => $mouOptions,
+            'action'     => route('admin.booking.store'),
+            'cancelUrl'  => route('admin.booking.index'),
+        ]);
+    }
+
+    /** Admin: simpan booking baru (boleh langsung disetujui, dengan cek kuota). */
+    public function adminStoreBooking(Request $request)
+    {
+        $data = $request->validate([
+            'mou_id'         => 'required|exists:mous,id',
+            'ruangan_id'     => 'required|exists:ruangans,id',
+            'jenjang'        => 'nullable|string|max:20',
+            'prodi'          => 'nullable|string|max:255',
+            'semester'       => 'nullable|string|max:20',
+            'jumlah_peserta' => 'required|integer|min:1',
+            'tanggal_mulai'  => 'required|date',
+            'tanggal_selesai'=> 'required|date|after_or_equal:tanggal_mulai',
+            'keterangan'     => 'nullable|string',
+            'status'         => 'required|in:pending,approved',
+            'batas_pengisian'=> 'nullable|date',
+            'kompetensi_dimiliki'   => 'nullable|array',
+            'kompetensi_dimiliki.*' => 'nullable|string|max:255',
+        ], [
+            'mou_id.required'     => 'Pilih instansi.',
+            'ruangan_id.required' => 'Pilih ruangan tujuan.',
+            'tanggal_selesai.after_or_equal' => 'Tanggal selesai harus setelah atau sama dengan tanggal mulai.',
+        ]);
+
+        $ruangan = Ruangan::findOrFail($data['ruangan_id']);
+        if ($data['status'] === 'approved') {
+            $sisa = $this->sisaKuota($ruangan, $data['tanggal_mulai'], $data['tanggal_selesai']);
+            if ($data['jumlah_peserta'] > $sisa) {
+                return back()->withInput()->with('error',
+                    "Sisa kuota {$ruangan->nm_ruangan} untuk periode itu hanya {$sisa} orang. Kurangi jumlah, ganti periode/ruangan, atau simpan sebagai Menunggu.");
+            }
+        }
+
+        BookingRuangan::create([
+            'mou_id'          => $data['mou_id'],
+            'user_id'         => auth()->id(),
+            'ruangan_id'      => $ruangan->id,
+            'jenjang'         => $data['jenjang'] ?? null,
+            'prodi'           => $data['prodi'] ?? null,
+            'semester'        => $data['semester'] ?? null,
+            'kompetensi_dimiliki_json' => $request->filled('kompetensi_dimiliki') ? array_values(array_filter($request->kompetensi_dimiliki)) : [],
+            'jumlah_peserta'  => $data['jumlah_peserta'],
+            'tanggal_mulai'   => $data['tanggal_mulai'],
+            'tanggal_selesai' => $data['tanggal_selesai'],
+            'keterangan'      => $data['keterangan'] ?? null,
+            'status'          => $data['status'],
+            'batas_pengisian' => $data['batas_pengisian'] ?? null,
+            'catatan_admin'   => 'Dibuat oleh admin.',
+        ]);
+
+        return redirect()->route('admin.booking.index')->with('success',
+            'Booking ditambahkan' . ($data['status'] === 'approved' ? ' dan langsung disetujui.' : ' (status menunggu).'));
     }
 
     public function adminEditBooking($id)

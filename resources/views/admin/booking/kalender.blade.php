@@ -160,7 +160,10 @@
             <h5 class="fw-bold mb-1"><i class="bi bi-calendar-week me-2"></i>Kalender Booking Ruangan</h5>
             <div class="opacity-75 small">{{ $total }} booking · klik tanggal / booking untuk detail</div>
         </div>
-        <a href="{{ route('admin.booking.index') }}" class="btn-light-h"><i class="bi bi-list-ul me-1"></i> Daftar Booking</a>
+        <div class="d-flex gap-2 flex-wrap" style="position:relative;z-index:1;">
+            <a href="{{ route('admin.booking.index') }}" class="btn-light-h" style="background:rgba(255,255,255,.16);color:#fff;box-shadow:none;"><i class="bi bi-list-ul me-1"></i> Daftar Booking</a>
+            <a href="{{ route('admin.booking.create') }}" class="btn-light-h"><i class="bi bi-plus-lg me-1"></i> Tambah Booking</a>
+        </div>
     </div>
 
     {{-- FILTER --}}

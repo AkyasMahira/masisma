@@ -502,6 +502,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::prefix('admin/booking')->name('admin.booking.')->group(function () {
         Route::get('/', [\App\Http\Controllers\InstansiController::class, 'adminIndex'])->name('index');
         Route::get('/kalender', [\App\Http\Controllers\InstansiController::class, 'adminKalender'])->name('kalender');
+        Route::get('/create', [\App\Http\Controllers\InstansiController::class, 'adminCreateBooking'])->name('create');
+        Route::post('/', [\App\Http\Controllers\InstansiController::class, 'adminStoreBooking'])->name('store');
         Route::get('/{id}/edit', [\App\Http\Controllers\InstansiController::class, 'adminEditBooking'])->name('edit');
         Route::put('/{id}', [\App\Http\Controllers\InstansiController::class, 'adminUpdateBooking'])->name('update');
         Route::delete('/{id}', [\App\Http\Controllers\InstansiController::class, 'adminDestroyBooking'])->name('destroy');
