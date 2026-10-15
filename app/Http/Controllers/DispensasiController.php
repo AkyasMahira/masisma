@@ -411,9 +411,9 @@ class DispensasiController extends Controller
             $mhs = $dispensasi->mahasiswa;
             if (!$ruangan || !$mhs) return false;
 
-            if ((int) $mhs->ruangan_id === (int) $ruangan->id) return true;
-            if ($mhs->roomSequences()->where('ruangan_id', $ruangan->id)->exists()) return true;
-            if ($mhs->shiftSchedules()->where('ruangan_id', $ruangan->id)->exists()) return true;
+            // Hanya bila tanggal dispensasi jatuh di periode mahasiswa berada di ruangan Karu ini
+            // (mahasiswa rolling: Karu ruangan lama tidak bisa ACC dispensasi di ruangan baru)
+            return Dispensasi::where('id', $dispensasi->id)->untukRuangan($ruangan->id)->exists();
         }
 
         return false;

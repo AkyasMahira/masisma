@@ -235,6 +235,25 @@ class KepalaRuanganController extends Controller
                 $mhs->status_badge = 'Bukan Jadwal';
             }
 
+            // Status rolling terhadap ruangan ini
+            $seqSini = $mhs->roomSequences->where('ruangan_id', $ruangan->id);
+            $mhs->rolling = null;
+            if ($seqSini->count()) {
+                $kini = $seqSini->first(function ($s) use ($todayStr) { return $s->start_date <= $todayStr && $s->end_date >= $todayStr; });
+                $nanti = $seqSini->filter(function ($s) use ($todayStr) { return $s->start_date > $todayStr; })->sortBy('start_date')->first();
+                if ($kini) {
+                    $mhs->rolling = ['tipe' => 'sini', 'teks' => 'Di ruangan ini s/d ' . Carbon::parse($kini->end_date)->isoFormat('D MMM')];
+                } elseif ($nanti) {
+                    $mhs->rolling = ['tipe' => 'akan', 'teks' => 'Masuk ruangan ini ' . Carbon::parse($nanti->start_date)->isoFormat('D MMM')];
+                } else {
+                    $seqKini = $mhs->roomSequences->first(function ($s) use ($todayStr) { return $s->start_date <= $todayStr && $s->end_date >= $todayStr; });
+                    $akhirSini = $seqSini->sortByDesc('end_date')->first();
+                    $mhs->rolling = ($seqKini && $seqKini->ruangan)
+                        ? ['tipe' => 'pindah', 'teks' => 'Sudah pindah ke ' . $seqKini->ruangan->nm_ruangan]
+                        : ['tipe' => 'selesai', 'teks' => 'Selesai di sini ' . Carbon::parse($akhirSini->end_date)->isoFormat('D MMM')];
+                }
+            }
+
             $processedData->push($mhs);
         }
         // =================================================================
@@ -311,19 +330,10 @@ class KepalaRuanganController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        // Dispensasi menunggu persetujuan untuk mahasiswa di ruangan ini (semua, tanpa pagination)
-        $mahasiswaIdsRuangan = Mahasiswa::where(function ($q) use ($ruangan) {
-                $q->where('ruangan_id', $ruangan->id)
-                  ->orWhereHas('roomSequences', function ($sq) use ($ruangan) {
-                      $sq->where('ruangan_id', $ruangan->id);
-                  })
-                  ->orWhereHas('shiftSchedules', function ($sq) use ($ruangan) {
-                      $sq->where('ruangan_id', $ruangan->id);
-                  });
-            })->pluck('id');
-
+        // Dispensasi menunggu persetujuan untuk periode mahasiswa berada di ruangan ini
+        // (mahasiswa yang sudah rolling ke ruangan lain: dispensasi di sana tidak ikut)
         $pendingDispensasi = \App\Models\Dispensasi::with('mahasiswa')
-            ->whereIn('mahasiswa_id', $mahasiswaIdsRuangan)
+            ->untukRuangan($ruangan->id)
             ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -541,7 +551,12 @@ class KepalaRuanganController extends Controller
                ->orWhereHas('shiftSchedules', function ($s) use ($ruangan) { $s->where('ruangan_id', $ruangan->id); });
         })->pluck('id');
 
-        $query = \App\Models\Dispensasi::with('mahasiswa')->whereIn('mahasiswa_id', $mahasiswaIds);
+        // Rolling: hanya dispensasi yang tanggalnya jatuh di periode mahasiswa berada di ruangan ini
+        $scope = function ($qq) use ($ruangan, $mahasiswaIds) {
+            $qq->whereIn('mahasiswa_id', $mahasiswaIds)->untukRuangan($ruangan->id);
+        };
+
+        $query = \App\Models\Dispensasi::with('mahasiswa')->where($scope);
 
         if (in_array($status, ['pending', 'approved', 'rejected'], true)) {
             $query->where('status', $status);
@@ -558,7 +573,7 @@ class KepalaRuanganController extends Controller
             ->paginate(12)
             ->appends($request->query());
 
-        $base = \App\Models\Dispensasi::whereIn('mahasiswa_id', $mahasiswaIds);
+        $base = \App\Models\Dispensasi::where($scope);
         $counts = [
             'pending'  => (clone $base)->where('status', 'pending')->count(),
             'approved' => (clone $base)->where('status', 'approved')->count(),

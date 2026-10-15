@@ -225,7 +225,7 @@
 
                 <div class="card-x cal-wrap">
                     <div class="fw-bold mb-1" style="color:var(--maroon);"><i class="bi bi-calendar3-week me-1"></i>Kalender Ketersediaan</div>
-                    <div class="cal-note" id="calNote">Menampilkan semua ruangan. Pilih ruangan untuk melihat jadwalnya saja.</div>
+                    <div class="cal-note" id="calNote">Menampilkan semua ruangan. Klik tanggal atau seret rentang untuk cek ketersediaan.</div>
                     <div id="calOccup"></div>
                     <div class="legend">
                         @if($isAdmin)
@@ -263,6 +263,52 @@
         </div>
     </div>
 </div>
+
+{{-- MODAL KETERSEDIAAN (klik tanggal / pilih rentang di kalender) --}}
+<div class="modal fade" id="modalAvail" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content" style="border-radius:16px;overflow:hidden;border:none;">
+            <div class="modal-header text-white align-items-start" style="background:linear-gradient(135deg,#7c1316,#5f0f12);">
+                <div>
+                    <h6 class="modal-title fw-bold mb-0"><i class="bi bi-calendar-range me-1"></i>Ketersediaan Ruangan</h6>
+                    <div class="small opacity-75" id="av-range"></div>
+                </div>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+                    <div class="nv-sum" id="av-sum"></div>
+                    <input type="search" id="av-q" class="form-control form-control-sm ms-auto" style="max-width:230px;" placeholder="Cari ruangan / kampus...">
+                </div>
+                <div id="av-list"></div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <span class="text-muted small me-auto"><i class="bi bi-info-circle me-1"></i>Terisi = jumlah booking disetujui yang beririsan dengan rentang ini.</span>
+                <button type="button" class="btn-maroon" id="av-use"><i class="bi bi-check2-square me-1"></i>Pakai tanggal ini</button>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .av-room { border:1px solid #eef2f7; border-radius:12px; margin-bottom:8px; overflow:hidden; }
+    .av-top { display:grid; grid-template-columns:minmax(0,1fr) 70px 70px 84px 92px; gap:10px; align-items:center; padding:10px 12px; }
+    .av-name { font-weight:800; color:#1f2937; font-size:.86rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .av-name small { display:block; font-weight:600; color:#94a3b8; font-size:.7rem; }
+    .av-num { text-align:center; line-height:1.1; }
+    .av-num b { display:block; font-size:1rem; font-weight:800; color:#1f2937; }
+    .av-num span { font-size:.58rem; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:.3px; }
+    .av-pick { border:1.5px solid #e2e8f0; background:#fff; border-radius:9px; font-size:.72rem; font-weight:700; color:#475569; padding:5px 8px; }
+    .av-pick:hover, .av-pick.on { border-color:var(--maroon); color:var(--maroon); background:var(--maroon-subtle); }
+    .av-bar { height:5px; background:#eef2f7; }
+    .av-bar span { display:block; height:100%; }
+    .av-kampus { padding:6px 12px 10px; background:#fcfcfd; border-top:1px solid #f4f6f8; }
+    .av-k { display:flex; justify-content:space-between; gap:10px; font-size:.76rem; padding:3px 0; color:#475569; }
+    .av-k b { color:#1f2937; font-weight:700; }
+    .av-k .n { color:var(--maroon); font-weight:800; white-space:nowrap; }
+    .av-none { font-size:.74rem; color:#94a3b8; }
+    .nv-sum { font-size:.8rem; color:#475569; font-weight:600; }
+    @media (max-width: 576px) { .av-top { grid-template-columns:minmax(0,1fr) 54px 54px 62px; } .av-top .av-act { grid-column:1 / -1; } }
+</style>
 
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 <script>
@@ -357,6 +403,12 @@
                 buttonText: { today: 'Hari ini' },
                 dayMaxEvents: 3,
                 displayEventTime: false,
+                selectable: true,
+                select: function (info) {
+                    var en = new Date(info.end.getTime() - 864e5);
+                    openAvail(info.startStr, ymd(en));
+                    cal.unselect();
+                },
                 events: function (info, ok) {
                     var rid = fR.value;
                     var list = rid ? EVENTS.filter(function (e) { return e.extendedProps.rid === +rid; }) : EVENTS.slice();
@@ -385,12 +437,89 @@
             cal.render();
         }
 
+        // ===== Ketersediaan per ruangan untuk tanggal/rentang yang diklik =====
+        function ymd(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+        var av = { s: null, e: null, pick: null };
+
+        function availData(s, e) {
+            return Object.keys(ROOMS).map(function (rid) {
+                var kampus = {}, used = 0;
+                OCC.forEach(function (o) {
+                    if (o.r !== +rid || o.s > e || o.e < s) return;
+                    used += o.n;
+                    var k = o.i || 'Instansi';
+                    if (!kampus[k]) kampus[k] = { n: 0, per: [] };
+                    kampus[k].n += o.n;
+                    kampus[k].per.push(fmt(o.s) + ' – ' + fmt(o.e));
+                });
+                var kap = ROOMS[rid].kuota || 0;
+                return { rid: +rid, nama: ROOMS[rid].nama, kap: kap, used: used, sisa: Math.max(0, kap - used), kampus: kampus };
+            });
+        }
+
+        function renderAvail() {
+            var q = ($('av-q').value || '').toLowerCase().trim();
+            var data = availData(av.s, av.e);
+            var sel = +fR.value || null;
+            data.sort(function (a, b) {
+                if (a.rid === sel) return -1; if (b.rid === sel) return 1;
+                return b.sisa - a.sisa || a.nama.localeCompare(b.nama);
+            });
+            var adaSisa = data.filter(function (d) { return d.sisa > 0; }).length;
+            $('av-sum').innerHTML = '<span style="color:#15803d">' + adaSisa + ' ruangan masih ada sisa</span> · <span style="color:#b91c1c">' + (data.length - adaSisa) + ' penuh</span>';
+            if (q) data = data.filter(function (d) {
+                return d.nama.toLowerCase().indexOf(q) >= 0 || Object.keys(d.kampus).some(function (k) { return k.toLowerCase().indexOf(q) >= 0; });
+            });
+            var html = '';
+            data.forEach(function (d) {
+                var pUsed = d.kap ? Math.min(100, d.used / d.kap * 100) : 100;
+                var warna = d.sisa <= 0 ? '#dc2626' : (d.sisa <= Math.max(1, d.kap * 0.25) ? '#f59e0b' : '#16a34a');
+                var ks = Object.keys(d.kampus).sort(function (a, b) { return d.kampus[b].n - d.kampus[a].n; });
+                var kampusHtml = ks.length ? ks.map(function (k) {
+                    return '<div class="av-k"><span><b>' + esc(k) + '</b> <span class="text-muted">· ' + esc(d.kampus[k].per.join(', ')) + '</span></span><span class="n">' + d.kampus[k].n + ' org</span></div>';
+                }).join('') : '<div class="av-none">Belum ada kampus yang mengisi pada rentang ini.</div>';
+                html += '<div class="av-room"' + (d.rid === sel ? ' style="border-color:#e3b3b8;box-shadow:0 0 0 2px #fbe4e6"' : '') + '>'
+                    + '<div class="av-top"><div class="av-name">' + esc(d.nama) + (d.rid === sel ? ' <span class="badge" style="background:#fcf0f1;color:#7c1316;font-size:.6rem;">dipilih di form</span>' : '') + '<small>' + ks.length + ' kampus mengisi</small></div>'
+                    + '<div class="av-num"><b>' + d.kap + '</b><span>Kuota</span></div>'
+                    + '<div class="av-num"><b>' + d.used + '</b><span>Terisi</span></div>'
+                    + '<div class="av-num"><b style="color:' + warna + '">' + (d.sisa > 0 ? d.sisa : 'Penuh') + '</b><span>' + (d.sisa > 0 ? 'Kurang/sisa' : '') + '</span></div>'
+                    + '<div class="av-act text-end"><button type="button" class="av-pick' + (av.pick === d.rid ? ' on' : '') + '" data-rid="' + d.rid + '">' + (av.pick === d.rid ? '<i class="bi bi-check-lg"></i> Dipilih' : 'Pilih') + '</button></div></div>'
+                    + '<div class="av-bar"><span style="width:' + pUsed + '%;background:' + warna + '"></span></div>'
+                    + '<div class="av-kampus">' + kampusHtml + '</div></div>';
+            });
+            $('av-list').innerHTML = html || '<div class="quota-empty">Tidak ada ruangan yang cocok.</div>';
+        }
+
+        function openAvail(s, e) {
+            av.s = s; av.e = e; av.pick = +fR.value || null;
+            var hari = Math.round((parse(e) - parse(s)) / 864e5) + 1;
+            $('av-range').innerText = (s === e ? fmt(s) : fmt(s) + ' – ' + fmt(e)) + ' · ' + hari + ' hari';
+            $('av-q').value = '';
+            renderAvail();
+            bootstrap.Modal.getOrCreateInstance($('modalAvail')).show();
+        }
+
+        $('av-list').addEventListener('click', function (ev) {
+            var b = ev.target.closest('.av-pick'); if (!b) return;
+            var rid = +b.getAttribute('data-rid');
+            av.pick = av.pick === rid ? null : rid;
+            renderAvail();
+        });
+        $('av-q').addEventListener('input', renderAvail);
+        $('av-use').addEventListener('click', function () {
+            fM.value = av.s; fS.min = av.s; fS.value = av.e;
+            if (av.pick) fR.value = String(av.pick);
+            bootstrap.Modal.getOrCreateInstance($('modalAvail')).hide();
+            updateQuota(); refreshCal(true);
+            fJ.focus();
+        });
+
         function refreshCal(jump) {
             if (!cal) return;
             var rid = fR.value;
             $('calNote').innerHTML = rid
                 ? 'Jadwal ruangan: <span class="cal-chip"><i class="bi bi-door-open"></i>' + esc(ROOMS[rid] ? ROOMS[rid].nama : '') + '</span>'
-                : 'Menampilkan semua ruangan. Pilih ruangan untuk melihat jadwalnya saja.';
+                : 'Menampilkan semua ruangan. Klik tanggal atau seret rentang untuk cek ketersediaan.';
             cal.refetchEvents();
             if (jump && fM.value) cal.gotoDate(fM.value);
         }

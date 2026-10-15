@@ -89,6 +89,8 @@ class ImportPklBookings extends Command
 
         $mouCache = [];
         $ok = 0; $skipRuangan = 0;
+        // Nama MOU yang sudah ada, untuk dicocokkan (toleran ejaan) sebelum membuat MOU baru
+        $mouAda = Mou::all()->mapWithKeys(function ($m) { return [$m->id => ($m->nama_instansi ?: $m->nama_universitas)]; })->all();
 
         DB::beginTransaction();
         try {
@@ -114,15 +116,19 @@ class ImportPklBookings extends Command
                 if ($namaInstansi === '') $namaInstansi = 'Instansi PKL';
                 $mkey = mb_strtolower($namaInstansi);
                 if (!isset($mouCache[$mkey])) {
-                    $mouCache[$mkey] = Mou::firstOrCreate(
-                        ['nama_universitas' => $namaInstansi],
-                        [
-                            'nama_instansi' => $namaInstansi,
-                            'tanggal_masuk' => '2026-01-01',
-                            'tanggal_keluar' => '2030-12-31',
-                            'keterangan'    => 'Dibuat dari impor mapping PKL',
-                        ]
-                    );
+                    list($idCocok, $skor) = \App\Support\MouMatcher::best($namaInstansi, $mouAda);
+                    if ($idCocok && $skor >= 0.88) {
+                        $mouCache[$mkey] = Mou::find($idCocok);
+                    } else {
+                        $mouCache[$mkey] = Mou::create([
+                            'nama_universitas' => $namaInstansi,
+                            'nama_instansi'    => $namaInstansi,
+                            'tanggal_masuk'    => '2026-01-01',
+                            'tanggal_keluar'   => '2030-12-31',
+                            'keterangan'       => 'Dibuat dari impor mapping PKL',
+                        ]);
+                        $mouAda[$mouCache[$mkey]->id] = $namaInstansi;
+                    }
                 }
                 $mou = $mouCache[$mkey];
 

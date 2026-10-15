@@ -110,7 +110,7 @@ class InstansiController extends Controller
                 ],
             ];
             if ($b->status === 'approved') {
-                $occ[] = ['r' => (int) $b->ruangan_id, 's' => $b->tanggal_mulai->format('Y-m-d'), 'e' => $b->tanggal_selesai->format('Y-m-d'), 'n' => (int) $b->jumlah_peserta];
+                $occ[] = ['r' => (int) $b->ruangan_id, 's' => $b->tanggal_mulai->format('Y-m-d'), 'e' => $b->tanggal_selesai->format('Y-m-d'), 'n' => (int) $b->jumlah_peserta, 'i' => $namaInstansi];
             }
         }
 

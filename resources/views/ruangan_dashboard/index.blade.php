@@ -225,7 +225,15 @@
                             @else
                                 <div class="status-badge status-idle"><i class="bi bi-calendar-minus"></i> Bukan Jadwal</div>
                             @endif
-                            
+                            @if(!empty($mhs->rolling))
+                                @php
+                                    $rl = $mhs->rolling;
+                                    $rlStyle = ['sini' => 'color:#15803d;background:#dcfce7', 'akan' => 'color:#1d4ed8;background:#dbeafe', 'pindah' => 'color:#b45309;background:#fef3c7', 'selesai' => 'color:#64748b;background:#eef2f7'][$rl['tipe']] ?? '';
+                                    $rlIcon = ['sini' => 'bi-geo-alt-fill', 'akan' => 'bi-calendar-plus', 'pindah' => 'bi-arrow-left-right', 'selesai' => 'bi-flag'][$rl['tipe']] ?? 'bi-info-circle';
+                                @endphp
+                                <div class="mt-1"><span style="{{ $rlStyle }};font-size:.66rem;font-weight:700;border-radius:20px;padding:2px 8px;display:inline-flex;align-items:center;gap:4px;"><i class="bi {{ $rlIcon }}"></i> {{ $rl['teks'] }}</span></div>
+                            @endif
+
                             @php
                                 $sisaHari = \Carbon\Carbon::now()->startOfDay()->diffInDays(\Carbon\Carbon::parse($mhs->tanggal_berakhir)->startOfDay(), false);
                             @endphp
