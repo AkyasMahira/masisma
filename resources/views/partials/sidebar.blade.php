@@ -136,7 +136,8 @@
                                          request()->is('admin/kegiatan*') || // <-- Ini akan menjaga menu terbuka saat di dalam rute penilaian
                                          request()->is('admin/forms*') ||
                                          request()->is('admin/linktree*') ||
-                                         request()->is('admin/galeri*');
+                                         request()->is('admin/galeri*') ||
+                                         request()->is('admin/cari-sertifikat*');
                 @endphp
                 <div class="nav-item-dropdown animate-item">
                     <a class="nav-link {{ $isPelatihanActive ? 'active-parent' : '' }}" data-bs-toggle="collapse" href="#menuPelatihan">
@@ -167,6 +168,7 @@
                         <a class="nav-link {{ request()->is('admin/forms*') ? 'active' : '' }}" href="{{ route('admin.forms.index') }}">Buat Formulir</a>
                         <a class="nav-link {{ request()->is('admin/linktree*') ? 'active' : '' }}" href="{{ route('admin.linktree.index') }}">Paket Link</a>
                         <a class="nav-link {{ request()->is('admin/galeri*') ? 'active' : '' }}" href="{{ route('admin.galeri.index') }}">Galeri</a>
+                        <a class="nav-link {{ request()->is('admin/cari-sertifikat*') ? 'active' : '' }}" href="{{ route('admin.cari_sertifikat') }}">Cari Sertifikat</a>
                     </div>
                 </div>
          {{-- Penelitian --}}

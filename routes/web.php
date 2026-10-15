@@ -198,6 +198,9 @@ Route::middleware(['auth', 'admin.kasir'])->prefix('admin/invoices')->name('admi
 // 2. ROUTES KHUSUS ADMIN
 // =========================================================================
 Route::middleware(['auth', 'admin'])->group(function () {
+    // Cari sertifikat peserta lintas kegiatan
+    Route::get('/admin/cari-sertifikat', [\App\Http\Controllers\KegiatanPesertaController::class, 'cariSertifikat'])->name('admin.cari_sertifikat');
+
     // Galeri (admin kelola; publik di /galeri)
     Route::prefix('admin/galeri')->name('admin.galeri.')->group(function () {
         Route::get('/', [\App\Http\Controllers\GaleriController::class, 'index'])->name('index');

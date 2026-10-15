@@ -185,6 +185,29 @@ class KegiatanPesertaController extends Controller
     }
 
     // ==========================================
+    // CARI SERTIFIKAT PESERTA LINTAS KEGIATAN (admin)
+    // ==========================================
+    public function cariSertifikat(Request $request)
+    {
+        $q = trim((string) $request->get('q', ''));
+        $hasil = collect();
+
+        if ($q !== '') {
+            $hasil = KegiatanPeserta::with('kegiatan')
+                ->where('nama_lengkap_gelar', 'like', "%{$q}%")
+                ->orderBy('nama_lengkap_gelar')
+                ->get()
+                ->map(function ($p) {
+                    $hash = md5($p->id . $this->secretKey);
+                    $p->link_sertifikat = route('public.sertifikat.peserta', [$p->id, $hash]);
+                    return $p;
+                });
+        }
+
+        return view('admin.cari_sertifikat', compact('q', 'hasil'));
+    }
+
+    // ==========================================
     // SET INSTANSI SEMUA PESERTA -> RSUD SLG (in-house training)
     // ==========================================
     public function setInstansiRsud($kegiatan_id)
