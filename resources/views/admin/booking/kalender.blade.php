@@ -164,12 +164,13 @@
         var el = document.getElementById('bkcal');
         if (!el) return;
         var cal = new FullCalendar.Calendar(el, {
-            initialView: 'dayGridMonth',
+            initialView: 'listMonth',
             locale: 'id',
             height: 'auto',
-            headerToolbar: { left:'prev,next today', center:'title', right:'dayGridMonth,listMonth' },
+            headerToolbar: { left:'prev,next today', center:'title', right:'listMonth,dayGridMonth' },
             buttonText: { today:'Hari Ini', month:'Bulan', list:'Daftar' },
-            dayMaxEvents: 4,
+            dayMaxEvents: 3,
+            noEventsText: 'Tidak ada booking pada rentang ini',
             events: {!! json_encode($events) !!},
             eventClick: function (info) {
                 var p = info.event.extendedProps;

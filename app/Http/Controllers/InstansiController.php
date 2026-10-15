@@ -330,7 +330,9 @@ class InstansiController extends Controller
         $fStart   = $request->get('start');
         $fEnd     = $request->get('end');
 
-        $query = BookingRuangan::with(['mou', 'ruangan', 'pesertas'])->orderBy('created_at', 'desc');
+        $query = BookingRuangan::with(['mou', 'ruangan', 'pesertas'])
+            ->withCount('pesertas')
+            ->select('booking_ruangans.*');
 
         if ($request->filled('status') && in_array($request->status, ['pending', 'approved', 'rejected'], true)) {
             $query->where('status', $request->status);
@@ -348,6 +350,25 @@ class InstansiController extends Controller
             });
         }
 
+        // ===== Sorting per kolom =====
+        $sort = $request->get('sort', 'created');
+        $dir  = $request->get('dir', 'desc') === 'asc' ? 'asc' : 'desc';
+        switch ($sort) {
+            case 'instansi':
+                $query->leftJoin('mous', 'mous.id', '=', 'booking_ruangans.mou_id')
+                      ->orderByRaw('COALESCE(mous.nama_instansi, mous.nama_universitas) ' . $dir);
+                break;
+            case 'ruangan':
+                $query->leftJoin('ruangans', 'ruangans.id', '=', 'booking_ruangans.ruangan_id')
+                      ->orderBy('ruangans.nm_ruangan', $dir);
+                break;
+            case 'kuota':    $query->orderBy('jumlah_peserta', $dir); break;
+            case 'peserta':  $query->orderBy('pesertas_count', $dir); break;
+            case 'periode':  $query->orderBy('tanggal_mulai', $dir); break;
+            case 'status':   $query->orderBy('status', $dir); break;
+            default:         $query->orderBy('created_at', $dir); $sort = 'created';
+        }
+
         $bookings = $query->paginate(15)->withQueryString();
         $jmlPending = BookingRuangan::where('status', 'pending')->count();
 
@@ -355,7 +376,7 @@ class InstansiController extends Controller
         $jenjangOptions = BookingRuangan::whereNotNull('jenjang')->where('jenjang', '!=', '')
             ->distinct()->orderBy('jenjang')->pluck('jenjang');
 
-        return view('admin.booking.index', compact('bookings', 'jmlPending', 'ruanganOptions', 'jenjangOptions'));
+        return view('admin.booking.index', compact('bookings', 'jmlPending', 'ruanganOptions', 'jenjangOptions', 'sort', 'dir'));
     }
 
     public function adminApprove(Request $request, $id)

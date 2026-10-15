@@ -23,6 +23,22 @@
     .btn-maroon { background:var(--maroon); color:#fff; border:none; border-radius:8px; font-weight:600; }
     .btn-maroon:hover { background:var(--maroon-light); color:#fff; }
     .filter-sel { border-radius:10px; border:1px solid #e2e8f0; font-weight:600; color:#475569; }
+    .th-sort { color:var(--maroon); text-decoration:none; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+    .th-sort:hover { color:var(--maroon-light); }
+    .th-sort i { font-size:.68rem; }
+    .imp-badge { display:inline-block; background:#eef2ff; color:#4338ca; font-size:.6rem; font-weight:700; padding:1px 6px; border-radius:5px; vertical-align:middle; }
+    /* baris hidup */
+    .b-row.s-approved td:first-child { box-shadow:inset 4px 0 0 #16a34a; }
+    .b-row.s-pending  td:first-child { box-shadow:inset 4px 0 0 #f59e0b; }
+    .b-row.s-rejected td:first-child { box-shadow:inset 4px 0 0 #dc2626; }
+    .room-chip { display:inline-flex; align-items:center; gap:7px; font-weight:800; color:#1f2937; }
+    .room-dot { width:11px; height:11px; border-radius:3px; display:inline-block; flex-shrink:0; }
+    .num-badge { display:inline-flex; align-items:center; justify-content:center; min-width:36px; height:30px; border-radius:9px; font-weight:800; background:var(--maroon-subtle); color:var(--maroon); padding:0 8px; }
+    .num-soft { background:#eef2f7; color:#475569; }
+    .fase { font-size:.62rem; font-weight:800; padding:2px 9px; border-radius:20px; letter-spacing:.3px; }
+    .fase-berjalan { background:#dcfce7; color:#15803d; } .fase-selesai { background:#eef2f7; color:#64748b; } .fase-akan { background:#dbeafe; color:#1d4ed8; }
+    .peek-btn { border:1px solid #e2e8f0; background:#fff; border-radius:50px; font-weight:700; font-size:.72rem; color:#475569; padding:3px 10px; }
+    .peek-btn:hover { border-color:var(--maroon); color:var(--maroon); }
     .act-ic { width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid #e2e8f0; background:#fff; color:#64748b; transition:.15s; }
     .act-ic:hover { background:#f8fafc; }
     .act-edit:hover { color:#b45309; border-color:#fcd34d; }
@@ -120,36 +136,65 @@
                 </div>
             </form>
         </div>
+        @php
+            $arrow = function ($col) use ($sort, $dir) {
+                if ($sort !== $col) return '<i class="bi bi-arrow-down-up" style="opacity:.35;"></i>';
+                return $dir === 'asc' ? '<i class="bi bi-caret-up-fill"></i>' : '<i class="bi bi-caret-down-fill"></i>';
+            };
+            $slink = function ($col) use ($sort, $dir) {
+                $nd = ($sort === $col && $dir === 'asc') ? 'desc' : 'asc';
+                return request()->fullUrlWithQuery(['sort' => $col, 'dir' => $nd]);
+            };
+        @endphp
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead><tr><th>Instansi</th><th>Ruangan</th><th class="text-center">Kuota</th><th class="text-center">Anak Magang</th><th>Periode</th><th class="text-center">Status</th><th class="text-center" width="16%">Aksi</th></tr></thead>
+                <thead><tr>
+                    <th><a href="{{ $slink('instansi') }}" class="th-sort">Instansi {!! $arrow('instansi') !!}</a></th>
+                    <th><a href="{{ $slink('ruangan') }}" class="th-sort">Ruangan {!! $arrow('ruangan') !!}</a></th>
+                    <th class="text-center"><a href="{{ $slink('kuota') }}" class="th-sort">Kuota {!! $arrow('kuota') !!}</a></th>
+                    <th class="text-center"><a href="{{ $slink('peserta') }}" class="th-sort">Anak Magang {!! $arrow('peserta') !!}</a></th>
+                    <th><a href="{{ $slink('periode') }}" class="th-sort">Periode {!! $arrow('periode') !!}</a></th>
+                    <th class="text-center"><a href="{{ $slink('status') }}" class="th-sort">Status {!! $arrow('status') !!}</a></th>
+                    <th class="text-center" width="16%">Aksi</th>
+                </tr></thead>
                 <tbody>
+                    @php $palette = ['#7c1316','#1d4ed8','#15803d','#b45309','#7e22ce','#0e7490','#be123c','#4d7c0f','#0f766e','#9333ea']; @endphp
                     @forelse($bookings as $b)
-                    <tr>
-                        <td class="fw-semibold">{{ optional($b->mou)->nama_instansi ?? optional($b->mou)->nama_universitas ?? '-' }}</td>
+                    @php
+                        $isImpor = \Illuminate\Support\Str::contains((string)$b->keterangan, '[IMPOR-MAPPING]');
+                        $ketBersih = trim(str_replace('[IMPOR-MAPPING]', '', (string)$b->keterangan));
+                        $rclr = $palette[($b->ruangan_id ?? 0) % count($palette)];
+                        $pr = $b->prodi ?: $b->jenjang;
+                        if ($b->jenjang && $b->prodi && stripos($b->prodi, $b->jenjang) !== 0) $pr = $b->jenjang.' '.$b->prodi;
+                        $m = optional($b->tanggal_mulai); $s = optional($b->tanggal_selesai); $tdy = now()->startOfDay();
+                        $fase = (!$m || !$s) ? null : ($s->lt($tdy) ? ['Selesai','selesai'] : ($m->gt($tdy) ? ['Akan Datang','akan'] : ['Berjalan','berjalan']));
+                    @endphp
+                    <tr class="b-row s-{{ $b->status }}">
                         <td>
-                            <span class="ruang-name">{{ optional($b->ruangan)->nm_ruangan ?? '-' }}</span>
-                            @php
-                                $pr = $b->prodi ?: $b->jenjang;
-                                if ($b->jenjang && $b->prodi && stripos($b->prodi, $b->jenjang) !== 0) $pr = $b->jenjang.' '.$b->prodi;
-                            @endphp
+                            <div class="inst-name">{{ optional($b->mou)->nama_instansi ?? optional($b->mou)->nama_universitas ?? '-' }}</div>
+                            @if($isImpor)<span class="imp-badge mt-1" title="Dari impor mapping manual">IMPOR</span>@endif
+                        </td>
+                        <td>
+                            <span class="room-chip"><span class="room-dot" style="background:{{ $rclr }};"></span>{{ optional($b->ruangan)->nm_ruangan ?? '-' }}</span>
                             @if($pr || $b->semester)
                                 <div><span class="prodi-tag">{{ $pr ?: '-' }}{{ $b->semester ? ' · smt '.$b->semester : '' }}</span></div>
                             @endif
                         </td>
-                        <td class="text-center fw-bold">{{ $b->jumlah_peserta }}</td>
+                        <td class="text-center"><span class="num-badge">{{ $b->jumlah_peserta }}</span></td>
                         <td class="text-center">
                             @if($b->pesertas->count())
-                                <button class="btn btn-sm btn-outline-dark rounded-pill" data-bs-toggle="collapse" data-bs-target="#peserta-{{ $b->id }}"><i class="bi bi-people me-1"></i>{{ $b->pesertas->count() }} lihat</button>
+                                <button class="peek-btn" data-bs-toggle="collapse" data-bs-target="#peserta-{{ $b->id }}"><i class="bi bi-people me-1"></i>{{ $b->pesertas->count() }}</button>
                             @else
-                                <span class="text-muted small">0</span>
+                                <span class="num-badge num-soft">0</span>
                             @endif
                         </td>
-                        <td class="small">{{ optional($b->tanggal_mulai)->format('d/m/Y') }} - {{ optional($b->tanggal_selesai)->format('d/m/Y') }}
-                            @if($b->keterangan)<div class="text-muted" style="font-size:.72rem;">{{ \Illuminate\Support\Str::limit($b->keterangan, 60) }}</div>@endif
+                        <td class="text-nowrap">
+                            <div class="small fw-semibold text-dark"><i class="bi bi-calendar3 me-1 text-muted"></i>{{ $m->format('d/m/Y') ?? '-' }} – {{ $s->format('d/m/Y') ?? '-' }}</div>
+                            @if($fase)<span class="fase fase-{{ $fase[1] }} mt-1">{{ $fase[0] }}</span>@endif
+                            @if($ketBersih)<div class="text-muted" style="font-size:.7rem;">{{ \Illuminate\Support\Str::limit($ketBersih, 50) }}</div>@endif
                         </td>
                         <td class="text-center"><span class="pill b-{{ $b->status }}">{{ ['pending'=>'Menunggu','approved'=>'Disetujui','rejected'=>'Ditolak'][$b->status] ?? $b->status }}</span>
-                            @if($b->status!=='pending' && $b->catatan_admin)<div class="text-muted mt-1" style="font-size:.68rem;">{{ $b->catatan_admin }}</div>@endif
+                            @if($b->status==='rejected' && $b->catatan_admin)<div class="text-muted mt-1" style="font-size:.68rem;">{{ $b->catatan_admin }}</div>@endif
                         </td>
                         <td class="text-center">
                           <div class="act-wrap">
