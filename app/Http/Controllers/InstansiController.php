@@ -536,6 +536,7 @@ class InstansiController extends Controller
                     'id'       => $b->id,
                     'instansi' => $namaInstansi,
                     'ruangan'  => $namaRuangan,
+                    'rc'       => $palette[($b->ruangan_id ?? 0) % count($palette)],
                     'peserta'  => $b->jumlah_peserta,
                     'status'   => $b->status,
                     'fase'     => $fase,
@@ -638,6 +639,7 @@ class InstansiController extends Controller
                 }
                 $seen[$mh->id] = true;
                 $out[$b->id][] = [
+                    'id'      => $mh->id,
                     'nama'    => $mh->nm_mahasiswa,
                     'prodi'   => $mh->prodi,
                     'status'  => $mh->status,

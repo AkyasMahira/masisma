@@ -77,30 +77,35 @@
     .imp { display:inline-block; background:#eef2ff; color:#4338ca; font-size:.56rem; font-weight:800; padding:1px 5px; border-radius:4px; vertical-align:middle; margin-left:4px; }
     .pend { display:inline-block; background:#fef3c7; color:#b45309; font-size:.56rem; font-weight:800; padding:1px 5px; border-radius:4px; vertical-align:middle; margin-left:4px; }
 
-    /* ===== Panel per ruangan ===== */
-    .rm-hint { font-size:.72rem; color:#94a3b8; margin-bottom:8px; }
+    /* ===== Panel navigasi: Ruangan > Universitas > Prodi > Mahasiswa ===== */
     .rm-scroll { max-height:640px; overflow:auto; padding-right:4px; }
-    .rm-scroll::-webkit-scrollbar, .rm-body::-webkit-scrollbar { width:7px; }
-    .rm-scroll::-webkit-scrollbar-thumb, .rm-body::-webkit-scrollbar-thumb { background:#dfe3e8; border-radius:10px; }
-    .rm-card { border:1px solid #eef2f7; border-radius:12px; overflow:hidden; background:#fff; margin-bottom:8px; }
-    .rm-card summary { list-style:none; cursor:pointer; display:flex; align-items:center; gap:10px; padding:10px 12px; border-left:4px solid var(--rc); user-select:none; }
-    .rm-card summary::-webkit-details-marker { display:none; }
-    .rm-card summary:hover { background:#fcfbfb; }
-    .rm-card[open] summary { border-bottom:1px solid #f1f5f9; background:#fcfbfb; }
-    .rm-card[open] summary .bi-chevron-down { transform:rotate(180deg); }
-    .rm-dot { width:11px; height:11px; border-radius:4px; background:var(--rc); flex-shrink:0; }
-    .rm-name { font-weight:700; color:#1f2937; font-size:.84rem; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .rm-count { background:var(--maroon-subtle); color:var(--maroon); font-weight:800; font-size:.66rem; padding:2px 9px; border-radius:20px; }
-    .rm-body { padding:4px 6px 6px; max-height:300px; overflow:auto; }
-    .rm-line { display:flex; align-items:center; gap:10px; padding:8px 8px; border-radius:9px; cursor:pointer; transition:background .1s; }
-    .rm-line + .rm-line { border-top:1px solid #f4f6f8; }
-    .rm-line:hover { background:var(--maroon-subtle); }
-    .rm-line .st { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-    .rm-line .tx { flex:1; min-width:0; }
-    .rm-line .tx b { display:block; color:#1f2937; font-size:.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .rm-line .tx small { display:block; color:#94a3b8; font-size:.7rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .rm-line .q { text-align:right; white-space:nowrap; font-weight:800; color:var(--maroon); font-size:.85rem; line-height:1.1; }
-    .rm-line .q span { display:block; font-size:.6rem; color:#94a3b8; font-weight:700; }
+    .rm-scroll::-webkit-scrollbar { width:7px; }
+    .rm-scroll::-webkit-scrollbar-thumb { background:#dfe3e8; border-radius:10px; }
+    .nv-crumb { display:flex; flex-wrap:wrap; align-items:center; gap:4px; font-size:.74rem; margin-bottom:8px; min-height:22px; }
+    .nv-crumb a { color:var(--maroon); font-weight:700; text-decoration:none; cursor:pointer; padding:2px 8px; border-radius:20px; background:var(--maroon-subtle); max-width:170px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .nv-crumb a:hover { background:#f6dfe1; }
+    .nv-crumb span.cur { color:#334155; font-weight:700; padding:2px 4px; max-width:190px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .nv-crumb i { color:#cbd5e1; font-size:.65rem; }
+    .nv-search { position:relative; margin-bottom:8px; }
+    .nv-search i { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:.8rem; }
+    .nv-search input { width:100%; border:1.5px solid #e2e8f0; border-radius:10px; padding:6px 10px 6px 30px; font-size:.8rem; outline:none; }
+    .nv-search input:focus { border-color:var(--maroon); }
+    .nv-item { display:flex; align-items:center; gap:10px; padding:10px 10px; border:1px solid #eef2f7; border-radius:11px; margin-bottom:6px; cursor:pointer; background:#fff; transition:border-color .12s, background .12s, transform .12s; text-decoration:none; color:inherit; }
+    .nv-item:hover { border-color:#e3c3c6; background:#fffafa; transform:translateX(2px); color:inherit; }
+    .nv-ic { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:800; font-size:.74rem; }
+    .nv-tx { flex:1; min-width:0; }
+    .nv-tx b { display:block; color:#1f2937; font-size:.83rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .nv-tx small { display:block; color:#94a3b8; font-size:.7rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .nv-n { text-align:right; white-space:nowrap; line-height:1.1; }
+    .nv-n b { color:var(--maroon); font-weight:800; font-size:.9rem; }
+    .nv-n span { display:block; font-size:.6rem; color:#94a3b8; font-weight:700; }
+    .nv-go { color:#cbd5e1; font-size:.8rem; }
+    .nv-sec { font-size:.66rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:.4px; margin:12px 2px 6px; }
+    .nv-empty { background:#f8fafc; border:1px dashed #e2e8f0; border-radius:11px; padding:14px; text-align:center; color:#94a3b8; font-size:.78rem; }
+    .nv-bk { display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid #eef2f7; border-radius:10px; margin-bottom:5px; cursor:pointer; font-size:.76rem; }
+    .nv-bk:hover { background:var(--maroon-subtle); border-color:#ecd3d5; }
+    .nv-bk .per { flex:1; color:#475569; font-weight:600; }
+    .nv-bk .o { color:var(--maroon); font-weight:800; }
 
     /* ===== Modal ===== */
     .md-head { background:linear-gradient(135deg,#7c1316,#5f0f12); color:#fff; padding:18px 22px; }
@@ -246,40 +251,15 @@
 
     {{-- PANEL PER RUANGAN --}}
     @if(count($perRuangan))
-    @php $pal = ['#7c1316','#1d4ed8','#15803d','#b45309','#7e22ce','#0e7490','#be123c','#4d7c0f','#0f766e','#9333ea']; @endphp
     <div class="col-xl-4 col-lg-5">
     <div class="bk-card h-100">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <div class="fw-bold text-dark"><i class="bi bi-door-open me-2" style="color:var(--maroon);"></i>Per Ruangan</div>
-            <span class="text-muted small">{{ count($perRuangan) }} ruangan</span>
+        <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <div class="fw-bold text-dark text-truncate"><i class="bi bi-diagram-3 me-2" style="color:var(--maroon);"></i><span id="nv-title">Per Ruangan</span></div>
+            <span class="text-muted small text-nowrap" id="nv-count"></span>
         </div>
-        <div class="rm-hint"><i class="bi bi-hand-index me-1"></i>Klik ruangan untuk memfilter kalender · klik booking untuk detail.</div>
-        <div class="rm-scroll">
-            @foreach($perRuangan as $nmRuangan => $list)
-                @php $rc = $pal[((int) optional(reset($list))->ruangan_id) % count($pal)]; @endphp
-                <details class="rm-card" data-room="{{ $nmRuangan }}" data-color="{{ $rc }}" style="--rc: {{ $rc }};">
-                    <summary>
-                        <span class="rm-dot"></span>
-                        <span class="rm-name">{{ $nmRuangan }}</span>
-                        <span class="rm-count">{{ count($list) }}</span>
-                        <i class="bi bi-chevron-down text-muted small"></i>
-                    </summary>
-                    <div class="rm-body">
-                        @foreach($list as $b)
-                        @php $lbl = \App\Http\Controllers\InstansiController::prodiLabel($b); @endphp
-                        <div class="rm-line" data-id="{{ $b->id }}">
-                            <span class="st" style="background:{{ $b->status==='pending' ? '#f59e0b' : '#16a34a' }};"></span>
-                            <span class="tx">
-                                <b>{{ optional($b->mou)->nama_instansi ?? optional($b->mou)->nama_universitas ?? '-' }}</b>
-                                <small>{{ $lbl ? $lbl.' · ' : '' }}{{ optional($b->tanggal_mulai)->format('d M') }} – {{ optional($b->tanggal_selesai)->format('d M y') }}</small>
-                            </span>
-                            <span class="q">{{ $b->jumlah_peserta }}<span>org</span></span>
-                        </div>
-                        @endforeach
-                    </div>
-                </details>
-            @endforeach
-        </div>
+        <div class="nv-crumb" id="nv-crumb"></div>
+        <div class="nv-search"><i class="bi bi-search"></i><input type="search" id="nv-q" placeholder="Cari di daftar ini..."></div>
+        <div class="rm-scroll" id="nv-body"></div>
     </div>
     </div>
     @endif
@@ -345,6 +325,7 @@
         if (!el) return;
         var ALL = {!! json_encode($events) !!};
         var EDIT_URL = @json(route('admin.booking.edit', '__ID__'));
+        var MHS_URL = @json(route('mahasiswa.show', '__ID__'));
         var BY_ID = {};
         ALL.forEach(function (e) { BY_ID[e.extendedProps.id] = e; });
         var activeRoom = null, mode = 'month';
@@ -396,7 +377,8 @@
             var m = p.mahasiswa || [];
             document.getElementById('md-mc').innerText = m.length;
             document.getElementById('md-mhs').innerHTML = m.length ? m.map(function (x) {
-                return '<div class="mh-row"><div class="mh-av">' + esc(initials(x.nama)) + '</div><div class="mh-tx"><b>' + esc(x.nama) + '</b><small>'
+                var nm = x.id ? '<a href="' + MHS_URL.replace('__ID__', x.id) + '" target="_blank" rel="noopener" style="color:#1f2937;text-decoration:none;">' + esc(x.nama) + ' <i class="bi bi-box-arrow-up-right" style="font-size:.65rem;color:#94a3b8;"></i></a>' : esc(x.nama);
+                return '<div class="mh-row"><div class="mh-av">' + esc(initials(x.nama)) + '</div><div class="mh-tx"><b>' + nm + '</b><small>'
                     + esc(x.prodi || '-') + (x.mulai ? ' · ' + esc(x.mulai) + ' – ' + esc(x.selesai) : '') + '</small></div>' + stBadge(x.status) + '</div>';
             }).join('') : '<div class="md-empty"><i class="bi bi-person-dash me-1"></i>Belum ada mahasiswa dari instansi ini yang tercatat di ruangan ini pada periode tersebut.</div>';
 
@@ -551,24 +533,153 @@
             cal.refetchEvents();
             setMode(mode);
         }
-        var cards = document.querySelectorAll('.rm-card');
-        cards.forEach(function (d) {
-            d.addEventListener('toggle', function () {
-                if (d.open) {
-                    cards.forEach(function (o) { if (o !== d) o.open = false; });
-                    setRoom(d.dataset.room, d.dataset.color);
-                } else if (activeRoom === d.dataset.room) {
-                    setRoom(null);
+
+        // ===== Navigasi bertingkat: Ruangan > Universitas > Prodi > Mahasiswa =====
+        var nvBody = document.getElementById('nv-body');
+        if (nvBody) {
+            var path = [];   // [ruangan, universitas, prodi]
+            var PRODI_KOSONG = '(Prodi tidak diisi)';
+            var LEVEL = ['Per Ruangan', 'Universitas', 'Program Studi', 'Mahasiswa'];
+
+            function groupBy(list, fn) {
+                var g = {};
+                list.forEach(function (e) { var k = fn(e); (g[k] = g[k] || []).push(e); });
+                return g;
+            }
+            function inPath(e) {
+                var p = e.extendedProps;
+                if (path[0] !== undefined && p.ruangan !== path[0]) return false;
+                if (path[1] !== undefined && p.instansi !== path[1]) return false;
+                if (path[2] !== undefined && (p.prodi || PRODI_KOSONG) !== path[2]) return false;
+                return true;
+            }
+            function stats(list) {
+                var o = 0, ids = {};
+                list.forEach(function (e) {
+                    o += (+e.extendedProps.peserta || 0);
+                    (e.extendedProps.mahasiswa || []).forEach(function (m) { ids[m.id || m.nama] = 1; });
+                });
+                return { b: list.length, o: o, m: Object.keys(ids).length };
+            }
+            function itemHtml(idx, icon, iconStyle, title, sub, nb, nl) {
+                return '<div class="nv-item" data-i="' + idx + '"><div class="nv-ic" style="' + iconStyle + '">' + icon + '</div>'
+                    + '<div class="nv-tx"><b>' + esc(title) + '</b><small>' + esc(sub) + '</small></div>'
+                    + '<div class="nv-n"><b>' + esc(nb) + '</b><span>' + esc(nl) + '</span></div><i class="bi bi-chevron-right nv-go"></i></div>';
+            }
+            function renderCrumb() {
+                var c = document.getElementById('nv-crumb'), h = '';
+                if (!path.length) { c.innerHTML = '<span class="text-muted">Klik ruangan → universitas → prodi → mahasiswa</span>'; return; }
+                h += '<a data-lv="0">Semua ruangan</a>';
+                path.forEach(function (p, i) {
+                    h += '<i class="bi bi-chevron-right"></i>';
+                    h += (i === path.length - 1) ? '<span class="cur">' + esc(p) + '</span>' : '<a data-lv="' + (i + 1) + '">' + esc(p) + '</a>';
+                });
+                c.innerHTML = h;
+            }
+            function go(newPath) {
+                var roomBefore = path[0];
+                path = newPath;
+                document.getElementById('nv-q').value = '';
+                if (path[0] !== roomBefore) {
+                    var col = '#7c1316';
+                    if (path[0]) { var f = ALL.filter(function (e) { return e.extendedProps.ruangan === path[0]; })[0]; if (f) col = f.extendedProps.rc || f.color; }
+                    setRoom(path[0] || null, col);
                 }
+                renderNav();
+                nvBody.scrollTop = 0;
+            }
+            var current = [];
+            function renderNav() {
+                renderCrumb();
+                document.getElementById('nv-title').innerText = LEVEL[path.length];
+                var q = (document.getElementById('nv-q').value || '').toLowerCase().trim();
+                var list = ALL.filter(inPath), html = '';
+                current = [];
+
+                if (path.length < 3) {
+                    var keyFn = [
+                        function (e) { return e.extendedProps.ruangan; },
+                        function (e) { return e.extendedProps.instansi; },
+                        function (e) { return e.extendedProps.prodi || PRODI_KOSONG; }
+                    ][path.length];
+                    var g = groupBy(list, keyFn);
+                    var keys = Object.keys(g).sort(function (a, b) {
+                        if (path.length === 1) return g[b].length - g[a].length || a.localeCompare(b);
+                        return a.localeCompare(b);
+                    });
+                    if (q) keys = keys.filter(function (k) { return k.toLowerCase().indexOf(q) >= 0; });
+                    document.getElementById('nv-count').innerText = keys.length + ' ' + ['ruangan', 'instansi', 'prodi'][path.length];
+                    keys.forEach(function (k, i) {
+                        var s = stats(g[k]), e0 = g[k][0].extendedProps, icon, st, sub;
+                        if (path.length === 0) {
+                            var nu = Object.keys(groupBy(g[k], function (e) { return e.extendedProps.instansi; })).length;
+                            icon = '<i class="bi bi-door-open"></i>'; st = 'background:' + (e0.rc || '#7c1316') + '1a;color:' + (e0.rc || '#7c1316');
+                            sub = nu + ' instansi · ' + s.b + ' booking · ' + s.m + ' mhs tercatat';
+                        } else if (path.length === 1) {
+                            var np = Object.keys(groupBy(g[k], function (e) { return e.extendedProps.prodi || PRODI_KOSONG; })).length;
+                            icon = esc(initials(k)); st = 'background:#eef2ff;color:#4338ca';
+                            sub = np + ' prodi · ' + s.b + ' booking · ' + s.m + ' mhs tercatat';
+                        } else {
+                            icon = '<i class="bi bi-mortarboard"></i>'; st = 'background:#ecfdf5;color:#047857';
+                            var per = g[k].map(function (e) { return fmt(e.start); });
+                            sub = s.b + ' booking · mulai ' + per.slice(0, 2).join(', ') + (per.length > 2 ? '…' : '') + ' · ' + s.m + ' mhs';
+                        }
+                        current.push(k);
+                        html += itemHtml(i, icon, st, k, sub, s.o, 'org');
+                    });
+                    if (!keys.length) html = '<div class="nv-empty">Tidak ada data.</div>';
+                } else {
+                    // Tingkat mahasiswa
+                    var seen = {}, mhs = [];
+                    list.forEach(function (e) {
+                        (e.extendedProps.mahasiswa || []).forEach(function (m) {
+                            var k = m.id || m.nama;
+                            if (!seen[k]) { seen[k] = 1; mhs.push(m); }
+                        });
+                    });
+                    mhs.sort(function (a, b) { return String(a.nama).localeCompare(String(b.nama)); });
+                    if (q) mhs = mhs.filter(function (m) { return String(m.nama).toLowerCase().indexOf(q) >= 0; });
+                    document.getElementById('nv-count').innerText = mhs.length + ' mahasiswa';
+                    if (mhs.length) {
+                        mhs.forEach(function (m) {
+                            var href = m.id ? MHS_URL.replace('__ID__', m.id) : null;
+                            var st = { aktif: 'Aktif', nonaktif: 'Nonaktif' }[m.status] || (m.status || '-');
+                            html += (href ? '<a class="nv-item" href="' + href + '" target="_blank" rel="noopener">' : '<div class="nv-item">')
+                                + '<div class="nv-ic" style="background:var(--maroon-subtle);color:var(--maroon);border-radius:50%">' + esc(initials(m.nama)) + '</div>'
+                                + '<div class="nv-tx"><b>' + esc(m.nama) + '</b><small>' + esc((m.prodi || '-') + (m.mulai ? ' · ' + m.mulai + ' – ' + m.selesai : '')) + '</small></div>'
+                                + '<span class="mh-st ' + esc(m.status) + '">' + esc(st) + '</span>'
+                                + (href ? '<i class="bi bi-box-arrow-up-right nv-go"></i></a>' : '</div>');
+                        });
+                    } else {
+                        html += '<div class="nv-empty"><i class="bi bi-person-dash me-1"></i>Belum ada mahasiswa dari instansi ini yang tercatat di ruangan ini.</div>';
+                    }
+                    html += '<div class="nv-sec">Booking (' + list.length + ')</div>';
+                    list.slice().sort(function (a, b) { return a.start < b.start ? -1 : 1; }).forEach(function (e) {
+                        var p = e.extendedProps;
+                        html += '<div class="nv-bk" data-id="' + esc(p.id) + '"><i class="bi bi-calendar3 text-muted"></i><span class="per">'
+                            + fmt(e.start) + ' – ' + (e.end ? fmt(key(new Date(parse(e.end).getTime() - 864e5))) : '-')
+                            + ' <span class="fase fase-' + esc((p.fase || '').split(' ')[0]) + '">' + esc(p.fase || '') + '</span></span><span class="o">' + esc(p.peserta) + ' org</span></div>';
+                    });
+                }
+                nvBody.innerHTML = html;
+            }
+
+            nvBody.addEventListener('click', function (ev) {
+                var bk = ev.target.closest('.nv-bk');
+                if (bk) { showDetailId(bk.getAttribute('data-id')); return; }
+                var it = ev.target.closest('.nv-item[data-i]');
+                if (it) { var k = current[+it.getAttribute('data-i')]; if (k !== undefined) go(path.concat([k])); }
             });
-        });
-        document.querySelectorAll('.rm-line').forEach(function (l) {
-            l.addEventListener('click', function () { showDetailId(l.getAttribute('data-id')); });
-        });
-        document.getElementById('rf-clear').addEventListener('click', function () {
-            cards.forEach(function (o) { o.open = false; });
-            setRoom(null);
-        });
+            document.getElementById('nv-crumb').addEventListener('click', function (ev) {
+                var a = ev.target.closest('a[data-lv]');
+                if (a) go(path.slice(0, +a.getAttribute('data-lv')));
+            });
+            document.getElementById('nv-q').addEventListener('input', renderNav);
+            document.getElementById('rf-clear').addEventListener('click', function () { go([]); });
+            renderNav();
+        } else {
+            document.getElementById('rf-clear').addEventListener('click', function () { setRoom(null); });
+        }
     });
 </script>
 @endsection
