@@ -207,6 +207,17 @@ class KegiatanPesertaController extends Controller
         return view('admin.cari_sertifikat', compact('q', 'hasil'));
     }
 
+    /** Edit nama peserta langsung dari halaman Cari Sertifikat. */
+    public function updateNamaPeserta(Request $request, $id)
+    {
+        $request->validate(['nama_lengkap_gelar' => 'required|string|max:255']);
+        $p = KegiatanPeserta::findOrFail($id);
+        $p->update(['nama_lengkap_gelar' => trim($request->nama_lengkap_gelar)]);
+
+        return redirect()->route('admin.cari_sertifikat', ['q' => $request->q])
+            ->with('success', 'Nama peserta berhasil diperbarui.');
+    }
+
     // ==========================================
     // SET INSTANSI SEMUA PESERTA -> RSUD SLG (in-house training)
     // ==========================================

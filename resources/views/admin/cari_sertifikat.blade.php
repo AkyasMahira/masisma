@@ -27,6 +27,10 @@
         @endif
     </div>
 
+    @if(session('success'))
+        <div class="alert alert-success border-0 shadow-sm"><i class="bi bi-check-circle me-1"></i>{{ session('success') }}</div>
+    @endif
+
     <form method="GET" action="{{ route('admin.cari_sertifikat') }}" class="cs-card mb-3">
         <div class="row g-2 align-items-end">
             <div class="col-md-10">
@@ -58,7 +62,14 @@
                         @foreach($hasil as $i => $p)
                         <tr>
                             <td class="ps-3 text-muted">{{ $i + 1 }}</td>
-                            <td class="fw-semibold">{{ $p->nama_lengkap_gelar }}</td>
+                            <td>
+                                <form action="{{ route('admin.cari_sertifikat.nama', $p->id) }}" method="POST" class="d-flex gap-1">
+                                    @csrf
+                                    <input type="hidden" name="q" value="{{ $q }}">
+                                    <input type="text" name="nama_lengkap_gelar" value="{{ $p->nama_lengkap_gelar }}" class="form-control form-control-sm filter-input" style="min-width:180px;" required>
+                                    <button type="submit" class="btn btn-sm btn-outline-dark" title="Simpan nama"><i class="bi bi-check-lg"></i></button>
+                                </form>
+                            </td>
                             <td class="small">{{ optional($p->kegiatan)->nama_kegiatan ?? '-' }}</td>
                             <td class="small text-nowrap">{{ optional(optional($p->kegiatan)->tanggal_mulai) ? \Carbon\Carbon::parse($p->kegiatan->tanggal_mulai)->format('d/m/Y') : '-' }}</td>
                             <td class="link-cell"><a href="{{ $p->link_sertifikat }}" target="_blank" class="js-link">{{ $p->link_sertifikat }}</a></td>

@@ -200,6 +200,7 @@ Route::middleware(['auth', 'admin.kasir'])->prefix('admin/invoices')->name('admi
 Route::middleware(['auth', 'admin'])->group(function () {
     // Cari sertifikat peserta lintas kegiatan
     Route::get('/admin/cari-sertifikat', [\App\Http\Controllers\KegiatanPesertaController::class, 'cariSertifikat'])->name('admin.cari_sertifikat');
+    Route::post('/admin/cari-sertifikat/{id}/nama', [\App\Http\Controllers\KegiatanPesertaController::class, 'updateNamaPeserta'])->name('admin.cari_sertifikat.nama');
 
     // Galeri (admin kelola; publik di /galeri)
     Route::prefix('admin/galeri')->name('admin.galeri.')->group(function () {
