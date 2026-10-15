@@ -559,7 +559,7 @@ if ($lastAbsen && $lastAbsen->type === 'masuk') {
         
 //         return $t;
 //     }
-private function getShiftTimes($shift, $refDate, $roomId) {
+public function getShiftTimes($shift, $refDate, $roomId) {
         $d = $refDate->copy()->startOfDay();
         $t = ['start' => null, 'end' => null];
 

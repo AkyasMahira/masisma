@@ -178,7 +178,9 @@ class DispensasiController extends Controller
                 ->where('type', 'masuk')
                 ->exists();
 
-            if (!$sudahMasuk) {
+            // Hanya buat absen bayangan bila SEKARANG memang di dalam jam shift
+            // (mis. shift malam: pengajuan pagi hari tidak boleh membuat "sedang kerja").
+            if (!$sudahMasuk && $this->sedangDalamJamShift($mahasiswa, Carbon::now())) {
                 Absensi::create([
                     'mahasiswa_id' => $mahasiswa->id,
                     'jam_masuk' => now(), 
@@ -191,6 +193,37 @@ class DispensasiController extends Controller
         }
 
         return redirect()->route('mahasiswa.dispensasi.index')->with('success', 'Pengajuan berhasil dikirim!');
+    }
+
+    /**
+     * Apakah $now berada di jendela shift (mulai -30 menit s/d selesai) untuk
+     * jadwal hari ini, atau shift kemarin yang lintas hari (shift malam).
+     */
+    private function sedangDalamJamShift(Mahasiswa $mahasiswa, Carbon $now)
+    {
+        $absensi = app(AbsensiController::class);
+        foreach ([$now->copy()->subDay(), $now->copy()] as $tgl) {
+            $tanggal = $tgl->toDateString();
+            $seq = \App\Models\RoomSequence::where('mahasiswa_id', $mahasiswa->id)
+                ->where('start_date', '<=', $tanggal)->where('end_date', '>=', $tanggal)
+                ->with('ruangan')->first();
+            if (!$seq || !$seq->ruangan) continue;
+
+            if ($seq->ruangan->kategori === 'shift') {
+                $jadwal = \App\Models\ShiftSchedule::where('mahasiswa_id', $mahasiswa->id)->where('tanggal', $tanggal)->first();
+                if (!$jadwal || strtolower($jadwal->shift_type) === 'libur') continue;
+                $shift = $jadwal->shift_type;
+            } else {
+                $day = $tgl->dayOfWeekIso;
+                if ($day > 5) continue;
+                $shift = $day == 5 ? 'Jumat' : 'Reguler';
+            }
+
+            $t = $absensi->getShiftTimes($shift, $tgl, $seq->ruangan->id);
+            if (empty($t['start']) || empty($t['end'])) continue;
+            if ($now->gte($t['start']->copy()->subMinutes(30)) && $now->lte($t['end'])) return true;
+        }
+        return false;
     }
 
     public function downloadTemplate()
