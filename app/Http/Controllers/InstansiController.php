@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BookingRuangan;
 use App\Models\BookingPeserta;
 use App\Models\Ruangan;
+use App\Models\Mou;
 use App\Models\User;
 use App\Models\Mahasiswa;
 use App\Models\OrientasiResult;
@@ -323,16 +324,38 @@ class InstansiController extends Controller
 
     public function adminIndex(Request $request)
     {
+        $q        = trim((string) $request->get('q', ''));
+        $fRuangan = $request->get('ruangan');
+        $fJenjang = $request->get('jenjang');
+        $fStart   = $request->get('start');
+        $fEnd     = $request->get('end');
+
         $query = BookingRuangan::with(['mou', 'ruangan', 'pesertas'])->orderBy('created_at', 'desc');
 
-        if ($request->filled('status')) {
+        if ($request->filled('status') && in_array($request->status, ['pending', 'approved', 'rejected'], true)) {
             $query->where('status', $request->status);
+        }
+        if ($fRuangan) $query->where('ruangan_id', $fRuangan);
+        if ($fJenjang) $query->where('jenjang', $fJenjang);
+        if ($fStart)   $query->whereDate('tanggal_selesai', '>=', $fStart);
+        if ($fEnd)     $query->whereDate('tanggal_mulai', '<=', $fEnd);
+        if ($q !== '') {
+            $query->where(function ($w) use ($q) {
+                $w->where('prodi', 'like', "%{$q}%")
+                  ->orWhereHas('mou', function ($m) use ($q) {
+                      $m->where('nama_instansi', 'like', "%{$q}%")->orWhere('nama_universitas', 'like', "%{$q}%");
+                  });
+            });
         }
 
         $bookings = $query->paginate(15)->withQueryString();
         $jmlPending = BookingRuangan::where('status', 'pending')->count();
 
-        return view('admin.booking.index', compact('bookings', 'jmlPending'));
+        $ruanganOptions = Ruangan::orderBy('nm_ruangan')->pluck('nm_ruangan', 'id');
+        $jenjangOptions = BookingRuangan::whereNotNull('jenjang')->where('jenjang', '!=', '')
+            ->distinct()->orderBy('jenjang')->pluck('jenjang');
+
+        return view('admin.booking.index', compact('bookings', 'jmlPending', 'ruanganOptions', 'jenjangOptions'));
     }
 
     public function adminApprove(Request $request, $id)
@@ -426,51 +449,98 @@ class InstansiController extends Controller
     /**
      * Kalender booking ruangan (sisi admin) + rekap per ruangan.
      */
-    public function adminKalender()
+    public function adminKalender(Request $request)
     {
-        $bookings = BookingRuangan::with(['mou', 'ruangan', 'pesertas'])
-            ->where('status', '!=', 'rejected')
-            ->orderBy('tanggal_mulai')
-            ->get();
+        // ===== Filter =====
+        $fRuangan  = $request->get('ruangan');
+        $fMou      = $request->get('instansi');
+        $fJenjang  = $request->get('jenjang');
+        $fStatus   = $request->get('status');          // pending | approved | selesai | berjalan | akan
+        $fStart    = $request->get('start');
+        $fEnd      = $request->get('end');
+        $q         = trim((string) $request->get('q', ''));
 
-        // Palet warna per ruangan (stabil berdasarkan id)
-        $palette = ['#7c1316', '#1d4ed8', '#15803d', '#b45309', '#7e22ce', '#0e7490', '#be123c', '#4d7c0f'];
+        $query = BookingRuangan::with(['mou', 'ruangan', 'pesertas'])
+            ->where('status', '!=', 'rejected');
+
+        if ($fRuangan) $query->where('ruangan_id', $fRuangan);
+        if ($fMou)     $query->where('mou_id', $fMou);
+        if ($fJenjang) $query->where('jenjang', $fJenjang);
+        if (in_array($fStatus, ['pending', 'approved'], true)) $query->where('status', $fStatus);
+        if ($fStart)   $query->whereDate('tanggal_selesai', '>=', $fStart);
+        if ($fEnd)     $query->whereDate('tanggal_mulai', '<=', $fEnd);
+        if ($q !== '') {
+            $query->where(function ($w) use ($q) {
+                $w->where('prodi', 'like', "%{$q}%")
+                  ->orWhereHas('mou', function ($m) use ($q) {
+                      $m->where('nama_instansi', 'like', "%{$q}%")->orWhere('nama_universitas', 'like', "%{$q}%");
+                  });
+            });
+        }
+
+        $bookings = $query->orderBy('tanggal_mulai')->get();
+
+        // Filter turunan (selesai/berjalan/akan) berbasis tanggal
+        $today = now()->startOfDay();
+        if (in_array($fStatus, ['selesai', 'berjalan', 'akan'], true)) {
+            $bookings = $bookings->filter(function ($b) use ($today, $fStatus) {
+                $m = optional($b->tanggal_mulai); $s = optional($b->tanggal_selesai);
+                if (!$m || !$s) return false;
+                if ($fStatus === 'selesai')  return $s->lt($today);
+                if ($fStatus === 'berjalan') return $m->lte($today) && $s->gte($today);
+                if ($fStatus === 'akan')     return $m->gt($today);
+                return true;
+            })->values();
+        }
+
+        $palette = ['#7c1316', '#1d4ed8', '#15803d', '#b45309', '#7e22ce', '#0e7490', '#be123c', '#4d7c0f', '#0f766e', '#9333ea'];
 
         $events = [];
         $perRuangan = [];
-
         foreach ($bookings as $b) {
             $namaRuangan = optional($b->ruangan)->nm_ruangan ?? 'Tanpa Ruangan';
             $namaInstansi = optional($b->mou)->nama_instansi ?? optional($b->mou)->nama_universitas ?? 'Instansi';
-            $warna = $palette[($b->ruangan_id ?? 0) % count($palette)];
+            $m = optional($b->tanggal_mulai); $s = optional($b->tanggal_selesai);
+            $fase = (!$m || !$s) ? '-' : ($s->lt($today) ? 'Selesai' : ($m->gt($today) ? 'Akan Datang' : 'Berjalan'));
+            $warna = $b->status === 'pending' ? '#94a3b8' : $palette[($b->ruangan_id ?? 0) % count($palette)];
 
             $events[] = [
                 'title' => $namaInstansi . ' (' . $b->jumlah_peserta . ' org) · ' . $namaRuangan,
-                'start' => optional($b->tanggal_mulai)->format('Y-m-d'),
-                // FullCalendar: end bersifat eksklusif, +1 hari agar tanggal selesai ikut terwarnai
-                'end'   => optional($b->tanggal_selesai)->copy()->addDay()->format('Y-m-d'),
-                'color' => $b->status === 'pending' ? '#94a3b8' : $warna,
+                'start' => $m ? $m->format('Y-m-d') : null,
+                'end'   => $s ? $s->copy()->addDay()->format('Y-m-d') : null,
+                'color' => $warna,
                 'extendedProps' => [
                     'instansi' => $namaInstansi,
                     'ruangan'  => $namaRuangan,
                     'peserta'  => $b->jumlah_peserta,
                     'status'   => $b->status,
-                    'periode'  => optional($b->tanggal_mulai)->format('d/m/Y') . ' - ' . optional($b->tanggal_selesai)->format('d/m/Y'),
+                    'fase'     => $fase,
+                    'periode'  => ($m ? $m->format('d/m/Y') : '-') . ' - ' . ($s ? $s->format('d/m/Y') : '-'),
                     'prodi'    => trim(($b->jenjang ? $b->jenjang . ' ' : '') . ($b->prodi ?? '')) . ($b->semester ? ' · smt ' . $b->semester : ''),
                     'pesertaList' => $b->pesertas->map(function ($p) {
                         return ['nama' => $p->nama, 'nim' => $p->nim, 'prodi' => $p->prodi, 'status' => $p->status];
                     })->values(),
                 ],
             ];
-
             $perRuangan[$namaRuangan][] = $b;
         }
-
         ksort($perRuangan);
+
+        // Opsi filter
+        $ruanganOptions  = Ruangan::orderBy('nm_ruangan')->pluck('nm_ruangan', 'id');
+        $instansiOptions = Mou::orderBy('nama_universitas')->get()
+            ->mapWithKeys(function ($m) { return [$m->id => ($m->nama_instansi ?: $m->nama_universitas)]; });
+        $jenjangOptions  = BookingRuangan::whereNotNull('jenjang')->where('jenjang', '!=', '')
+            ->distinct()->orderBy('jenjang')->pluck('jenjang');
 
         return view('admin.booking.kalender', [
             'events'     => $events,
             'perRuangan' => $perRuangan,
+            'ruanganOptions'  => $ruanganOptions,
+            'instansiOptions' => $instansiOptions,
+            'jenjangOptions'  => $jenjangOptions,
+            'f' => compact('fRuangan', 'fMou', 'fJenjang', 'fStatus', 'fStart', 'fEnd', 'q'),
+            'total' => count($events),
         ]);
     }
 

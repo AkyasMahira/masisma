@@ -71,14 +71,53 @@
 
     <div class="table-card">
         <div class="p-3 border-bottom">
-            <form method="GET" class="d-flex gap-2 align-items-center" style="max-width:300px;">
-                <span class="small fw-semibold text-muted"><i class="bi bi-funnel me-1"></i>Filter:</span>
-                <select name="status" class="form-select form-select-sm filter-sel" onchange="this.form.submit()">
-                    <option value="">Semua status</option>
-                    <option value="pending" {{ request('status')==='pending'?'selected':'' }}>Menunggu</option>
-                    <option value="approved" {{ request('status')==='approved'?'selected':'' }}>Disetujui</option>
-                    <option value="rejected" {{ request('status')==='rejected'?'selected':'' }}>Ditolak</option>
-                </select>
+            <form method="GET" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="small fw-semibold text-muted mb-1">Cari (instansi/prodi)</label>
+                    <input type="text" name="q" value="{{ request('q') }}" class="form-control form-control-sm filter-sel" placeholder="Nama instansi / prodi...">
+                </div>
+                <div class="col-md-3">
+                    <label class="small fw-semibold text-muted mb-1">Ruangan</label>
+                    <select name="ruangan" class="form-select form-select-sm filter-sel">
+                        <option value="">Semua Ruangan</option>
+                        @foreach($ruanganOptions as $id => $nm)
+                            <option value="{{ $id }}" {{ (string)request('ruangan')===(string)$id?'selected':'' }}>{{ $nm }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="small fw-semibold text-muted mb-1">Jenjang</label>
+                    <select name="jenjang" class="form-select form-select-sm filter-sel">
+                        <option value="">Semua</option>
+                        @foreach($jenjangOptions as $j)
+                            <option value="{{ $j }}" {{ request('jenjang')===$j?'selected':'' }}>{{ $j }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="small fw-semibold text-muted mb-1">Status</label>
+                    <select name="status" class="form-select form-select-sm filter-sel">
+                        <option value="">Semua</option>
+                        <option value="pending" {{ request('status')==='pending'?'selected':'' }}>Menunggu</option>
+                        <option value="approved" {{ request('status')==='approved'?'selected':'' }}>Disetujui</option>
+                        <option value="rejected" {{ request('status')==='rejected'?'selected':'' }}>Ditolak</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-1">
+                    <label class="small fw-semibold text-muted mb-1">Dari</label>
+                    <input type="date" name="start" value="{{ request('start') }}" class="form-control form-control-sm filter-sel">
+                </div>
+                <div class="col-6 col-md-1">
+                    <label class="small fw-semibold text-muted mb-1">Sampai</label>
+                    <input type="date" name="end" value="{{ request('end') }}" class="form-control form-control-sm filter-sel">
+                </div>
+                <div class="col-md-12 d-flex gap-2 mt-1">
+                    <button type="submit" class="btn btn-sm text-white fw-semibold" style="background:#7c1316;"><i class="bi bi-funnel me-1"></i>Terapkan</button>
+                    @if(request('q')||request('ruangan')||request('jenjang')||request('status')||request('start')||request('end'))
+                        <a href="{{ route('admin.booking.index') }}" class="btn btn-sm btn-light border">Reset</a>
+                    @endif
+                    <a href="{{ route('admin.booking.kalender') }}" class="btn btn-sm btn-outline-dark ms-auto"><i class="bi bi-calendar-week me-1"></i>Lihat Kalender</a>
+                </div>
             </form>
         </div>
         <div class="table-responsive">
