@@ -317,6 +317,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
         Route::delete('/{kegiatan_id}/peserta/{id}', [KegiatanPesertaController::class, 'destroy'])->name('peserta.destroy');
         Route::post('/{kegiatan_id}/peserta/import', [KegiatanPesertaController::class, 'import'])->name('peserta.import');
+        // Set instansi semua peserta kegiatan ini jadi RSUD SLG (untuk in-house training)
+        Route::post('/{kegiatan_id}/peserta/set-instansi-rsud', [KegiatanPesertaController::class, 'setInstansiRsud'])->name('peserta.set_instansi_rsud');
         Route::post('/{kegiatan_id}/toggle-absen', [KegiatanPesertaController::class, 'toggleAbsen'])->name('toggle_absen');
         Route::put('/{kegiatan_id}/peserta/{id}', [KegiatanPesertaController::class, 'update'])->name('peserta.update');
         Route::get('/{kegiatan_id}/peserta-export', [KegiatanPesertaController::class, 'export'])->name('peserta.export');

@@ -185,6 +185,22 @@ class KegiatanPesertaController extends Controller
     }
 
     // ==========================================
+    // SET INSTANSI SEMUA PESERTA -> RSUD SLG (in-house training)
+    // ==========================================
+    public function setInstansiRsud($kegiatan_id)
+    {
+        $kegiatan = Kegiatan::findOrFail($kegiatan_id);
+
+        // Pastikan ada MasterInstansi "RSUD Simpang Lima Gumul"
+        $rsud = MasterInstansi::firstOrCreate(['nama_instansi' => 'RSUD Simpang Lima Gumul']);
+
+        $jml = KegiatanPeserta::where('kegiatan_id', $kegiatan->id)
+            ->update(['instansi_id' => $rsud->id]);
+
+        return back()->with('success', "Instansi {$jml} peserta diubah menjadi RSUD Simpang Lima Gumul.");
+    }
+
+    // ==========================================
     // FUNGSI IMPORT EXCEL (Ditingkatkan)
     // ==========================================
     public function import(Request $request, $kegiatan_id)

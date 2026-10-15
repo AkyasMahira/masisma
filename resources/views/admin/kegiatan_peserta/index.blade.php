@@ -181,6 +181,14 @@
                         </div>
 
                         <button class="btn-theme" data-bs-toggle="modal" data-bs-target="#addModal"><i class="bi bi-plus-lg"></i> <span class="d-none d-sm-inline">Tambah Peserta</span></button>
+
+                        <form action="{{ route('admin.kegiatan.peserta.set_instansi_rsud', $kegiatan->id) }}" method="POST" class="d-inline"
+                              onsubmit="return confirm('Ubah instansi SEMUA peserta kegiatan ini menjadi RSUD Simpang Lima Gumul?');">
+                            @csrf
+                            <button type="submit" class="btn-theme" style="background:#0f766e;" title="Jadikan instansi semua peserta = RSUD SLG">
+                                <i class="bi bi-hospital"></i> <span class="d-none d-sm-inline">Instansi → RSUD</span>
+                            </button>
+                        </form>
                     </div>
                 </div>
 
@@ -234,7 +242,11 @@
                                         <div class="small text-muted fw-medium"><i class="bi bi-envelope me-1"></i>{{ $p->email_plataran_sehat ?? '-' }}</div>
                                     </td>
                                     <td>
-                                        <div class="fw-bold text-dark" style="font-size: 0.9rem;"><i class="bi bi-building me-1 text-muted"></i> {{ $p->instansi->nama_instansi ?? 'Internal RS' }}</div>
+                                        @php
+                                            $isInternalKeg = (optional($kegiatan)->jenis_kegiatan === 'internal') || (stripos($p->profesi ?? '', 'karyawan') !== false);
+                                            $asalP = $isInternalKeg ? 'RSUD Simpang Lima Gumul' : ($p->instansi->nama_instansi ?? 'Internal RS');
+                                        @endphp
+                                        <div class="fw-bold text-dark" style="font-size: 0.9rem;"><i class="bi bi-building me-1 text-muted"></i> {{ $asalP }}</div>
                                         <div class="small text-muted mt-1 fw-medium"><i class="bi bi-person-badge me-1"></i> {{ $p->jabatan ?? $p->profesi ?? '-' }}</div>
                                     </td>
                                     
