@@ -71,6 +71,11 @@ Route::post('/chatbot', [PublicController::class, 'chatbot'])->name('chatbot.ask
 Route::get('/evaluasi', [\App\Http\Controllers\EvaluasiController::class, 'publicForm'])->name('evaluasi.public.form');
 Route::get('/evaluasi/terima-kasih', [\App\Http\Controllers\EvaluasiController::class, 'terimaKasih'])->name('evaluasi.public.terimakasih');
 Route::post('/evaluasi', [\App\Http\Controllers\EvaluasiController::class, 'publicStore'])->name('evaluasi.public.store');
+// Evaluasi per pelatihan & per penelitian (link bertoken, tanpa login)
+Route::get('/evaluasi/pelatihan/{kegiatan}/{token}', [\App\Http\Controllers\EvaluasiController::class, 'formPelatihan'])->name('evaluasi.pelatihan.form');
+Route::post('/evaluasi/pelatihan/{kegiatan}/{token}', [\App\Http\Controllers\EvaluasiController::class, 'storePelatihan'])->name('evaluasi.pelatihan.store');
+Route::get('/evaluasi/penelitian/{pra}/{token}', [\App\Http\Controllers\EvaluasiController::class, 'formPenelitian'])->name('evaluasi.penelitian.form');
+Route::post('/evaluasi/penelitian/{pra}/{token}', [\App\Http\Controllers\EvaluasiController::class, 'storePenelitian'])->name('evaluasi.penelitian.store');
 Route::get('/forgot-password', [AuthController::class, 'showLinkRequestForm'])->name('password.request');
 Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
@@ -293,6 +298,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/', [\App\Http\Controllers\MasterEvaluasiController::class, 'index'])->name('index');
         Route::get('/create', [\App\Http\Controllers\MasterEvaluasiController::class, 'create'])->name('create');
         Route::post('/', [\App\Http\Controllers\MasterEvaluasiController::class, 'store'])->name('store');
+        Route::post('/salin-default/{kegiatan}', [\App\Http\Controllers\MasterEvaluasiController::class, 'salinDefault'])->name('salin_default');
+        Route::post('/pakai-default/{kegiatan}', [\App\Http\Controllers\MasterEvaluasiController::class, 'pakaiDefault'])->name('pakai_default');
         Route::get('/{id}/edit', [\App\Http\Controllers\MasterEvaluasiController::class, 'edit'])->name('edit');
         Route::put('/{id}', [\App\Http\Controllers\MasterEvaluasiController::class, 'update'])->name('update');
         Route::delete('/{id}', [\App\Http\Controllers\MasterEvaluasiController::class, 'destroy'])->name('destroy');

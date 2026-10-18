@@ -19,12 +19,15 @@
     <div class="form-card">
         <div class="card-header-custom">
             <h5 class="mb-0 fw-bold"><i class="bi bi-plus-circle me-2"></i>Tambah Unsur Evaluasi</h5>
+            <div class="small mt-1" style="opacity:.85;">Jenis: <b>{{ \App\Models\MasterEvaluasi::JENIS[$jenis] }}</b>@if($kegiatan) · Khusus pelatihan: <b>{{ $kegiatan->nama_kegiatan }}</b>@elseif($jenis === 'pelatihan') · Pertanyaan default (semua pelatihan)@endif</div>
         </div>
         <form action="{{ route('admin.master_evaluasi.store') }}" method="POST" class="p-4">
             @csrf
+            <input type="hidden" name="jenis" value="{{ $jenis }}">
+            @if($kegiatan)<input type="hidden" name="kegiatan_id" value="{{ $kegiatan->id }}">@endif
             @include('admin.master_evaluasi._form', ['unsur' => null])
             <div class="d-flex justify-content-end gap-2 mt-4">
-                <a href="{{ route('admin.master_evaluasi.index') }}" class="btn-light-custom">Batal</a>
+                <a href="{{ route('admin.master_evaluasi.index', array_filter(['jenis' => $jenis, 'kegiatan_id' => optional($kegiatan)->id])) }}" class="btn-light-custom">Batal</a>
                 <button type="submit" class="btn-maroon"><i class="bi bi-check-lg me-1"></i> Simpan</button>
             </div>
         </form>

@@ -3,7 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evaluasi & Kepuasan Layanan Diklat - RSUD Simpang Lima Gumul</title>
+    @php
+        $jenisForm = $jenis ?? 'pelatihan';
+        $judulForm = ['pelatihan' => 'Evaluasi Pelatihan', 'pendidikan' => 'Evaluasi Layanan Pendidikan', 'penelitian' => 'Evaluasi Layanan Penelitian'][$jenisForm] ?? 'Evaluasi Layanan';
+        $descForm = [
+            'pelatihan' => 'Sampaikan penilaian, kritik, dan saran Anda terhadap penyelenggaraan pelatihan RSUD Simpang Lima Gumul.',
+            'pendidikan' => 'Sampaikan penilaian Anda terhadap layanan praktik/magang (pendidikan) di RSUD Simpang Lima Gumul.',
+            'penelitian' => 'Sampaikan penilaian Anda terhadap layanan izin dan pelaksanaan penelitian di RSUD Simpang Lima Gumul.',
+        ][$jenisForm] ?? '';
+    @endphp
+    <title>{{ $judulForm }} - RSUD Simpang Lima Gumul</title>
     <link rel="icon" type="image/png" href="{{ asset('icon.png') }}">
 
     {{-- FONTS & ICONS --}}
@@ -58,8 +67,14 @@
 
         <div class="header-card animate__animated animate__fadeInDown">
             <div class="header-inner">
-                <h1 class="form-title"><i class="fas fa-clipboard-check mr-2"></i>Evaluasi Layanan Diklat</h1>
-                <p class="form-desc">Sampaikan penilaian, kritik, dan saran Anda terhadap penyelenggaraan diklat RSUD Simpang Lima Gumul. Masukan Anda membantu kami meningkatkan mutu pelayanan.</p>
+                <h1 class="form-title"><i class="fas fa-clipboard-check mr-2"></i>{{ $judulForm }}</h1>
+                <p class="form-desc">{{ $descForm }} Masukan Anda membantu kami meningkatkan mutu pelayanan.</p>
+                @if(!empty($konteks))
+                    <div style="margin-top:16px;background:var(--primary-light);border-radius:12px;padding:12px 16px;">
+                        <div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--primary-color);">{{ $konteks['label'] }}</div>
+                        <div style="font-weight:700;font-size:15px;color:var(--text-dark);">{{ $konteks['nilai'] }}</div>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -97,10 +112,12 @@
                         <label class="field-label">No. HP / Email</label>
                         <input type="text" name="kontak" class="form-control-ultra" value="{{ old('kontak') }}" placeholder="Kontak (opsional)">
                     </div>
+                    @if(empty($konteks))
                     <div class="col-md-6 mb-3">
-                        <label class="field-label">Nama Kegiatan / Diklat</label>
-                        <input type="text" name="nama_kegiatan" class="form-control-ultra" value="{{ old('nama_kegiatan', $prefill['nama_kegiatan'] ?? '') }}" placeholder="Diklat yang diikuti">
+                        <label class="field-label">Nama Pelatihan</label>
+                        <input type="text" name="nama_kegiatan" class="form-control-ultra" value="{{ old('nama_kegiatan', $prefill['nama_kegiatan'] ?? '') }}" placeholder="Pelatihan yang diikuti">
                     </div>
+                    @endif
                     <div class="col-md-4 mb-3 mb-md-0">
                         <label class="field-label">Jenis Kelamin</label>
                         <select name="jenis_kelamin" class="form-control-ultra">

@@ -430,6 +430,17 @@
                 </a>
             </div>
 
+            @if($presentasi->praPenelitian)
+                <div class="mt-4 mx-auto" style="max-width:520px;background:rgba(255,255,255,.12);border-radius:14px;padding:14px 16px;">
+                    <div class="fw-bold mb-1"><i class="bi bi-clipboard2-check me-1"></i> Bantu kami meningkatkan layanan</div>
+                    <div class="small text-white-50 mb-2">Isi evaluasi layanan penelitian (±2 menit). Link ini juga bisa dibagikan ke anggota tim.</div>
+                    <a href="{{ route('evaluasi.penelitian.form', [$presentasi->praPenelitian->id, \App\Models\Evaluasi::token('penelitian', $presentasi->praPenelitian->id)]) }}"
+                       target="_blank" class="btn btn-light btn-sm fw-bold text-maroon">
+                        <i class="bi bi-pencil-square me-1"></i> Isi Evaluasi Penelitian
+                    </a>
+                </div>
+            @endif
+
             <div class="mt-4 small text-white-50 fst-italic">
                 <i class="bi bi-info-circle me-1"></i> Sertifikat di-generate secara otomatis dengan data terbaru.
             </div>

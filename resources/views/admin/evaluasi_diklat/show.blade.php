@@ -17,7 +17,7 @@
 </style>
 
 <div class="container-fluid py-3">
-    <a href="{{ route('admin.evaluasi.index') }}" class="btn-outline-custom mb-3 d-inline-block"><i class="bi bi-arrow-left me-1"></i> Kembali</a>
+    <a href="{{ route('admin.evaluasi.index', ['jenis' => $evaluasi->jenis]) }}" class="btn-outline-custom mb-3 d-inline-block"><i class="bi bi-arrow-left me-1"></i> Kembali</a>
 
     @php $labels = [1=>'Tidak Baik',2=>'Kurang Baik',3=>'Baik',4=>'Sangat Baik']; @endphp
 
@@ -31,7 +31,14 @@
                 <div class="info-item"><div class="lbl">Jenis Kelamin</div><div class="val">{{ $evaluasi->jenis_kelamin === 'L' ? 'Laki-laki' : ($evaluasi->jenis_kelamin === 'P' ? 'Perempuan' : '-') }}</div></div>
                 <div class="info-item"><div class="lbl">Pendidikan</div><div class="val">{{ $evaluasi->pendidikan ?: '-' }}</div></div>
                 <div class="info-item"><div class="lbl">Umur</div><div class="val">{{ $evaluasi->umur ?: '-' }}</div></div>
-                <div class="info-item"><div class="lbl">Kegiatan / Diklat</div><div class="val">{{ $evaluasi->nama_kegiatan ?: '-' }}</div></div>
+                <div class="info-item"><div class="lbl">Jenis Evaluasi</div><div class="val">{{ \App\Models\MasterEvaluasi::JENIS[$evaluasi->jenis] ?? $evaluasi->jenis }}</div></div>
+                @if($evaluasi->jenis === 'pelatihan')
+                <div class="info-item"><div class="lbl">Pelatihan</div><div class="val">{{ optional($evaluasi->kegiatan)->nama_kegiatan ?: ($evaluasi->nama_kegiatan ?: '-') }}</div></div>
+                @elseif($evaluasi->jenis === 'pendidikan')
+                <div class="info-item"><div class="lbl">Kampus</div><div class="val">{{ optional($evaluasi->mou)->nama_instansi ?: '-' }}</div></div>
+                @else
+                <div class="info-item"><div class="lbl">Penelitian</div><div class="val">{{ optional($evaluasi->praPenelitian)->judul ?: '-' }}</div></div>
+                @endif
                 <div class="info-item"><div class="lbl">IKM Responden</div><div class="val"><span class="nilai-pill">{{ $evaluasi->nilai_ikm !== null ? number_format($evaluasi->nilai_ikm,2) : '-' }}</span></div></div>
                 <div class="info-item border-0"><div class="lbl">Tanggal Mengisi</div><div class="val">{{ optional($evaluasi->created_at)->format('d M Y H:i') }}</div></div>
             </div>

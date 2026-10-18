@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Laporan IKM Diklat</title>
+    <title>Laporan IKM {{ $judulJenis ?? 'Diklat' }}</title>
     <style>
         * { font-family: DejaVu Sans, sans-serif; }
         body { color:#222; font-size:11px; }
@@ -26,7 +26,8 @@
 <body>
     <div class="head">
         <h1>LAPORAN INDEKS KEPUASAN MASYARAKAT (IKM)</h1>
-        <p>Pelayanan Diklat &mdash; RSUD Simpang Lima Gumul Kabupaten Kediri</p>
+        <p>Pelayanan {{ $judulJenis ?? 'Diklat' }} &mdash; RSUD Simpang Lima Gumul Kabupaten Kediri</p>
+        <p><b>{{ $labelFilter ?? 'Keseluruhan' }}</b></p>
         <p>Dicetak: {{ now()->format('d F Y H:i') }}</p>
     </div>
 
@@ -83,6 +84,18 @@
             @endif
         </tbody>
     </table>
+
+    @if(!empty($grup) && count($grup) > 1)
+    <h3>IKM per {{ ['pelatihan' => 'Pelatihan', 'pendidikan' => 'Kampus / Instansi', 'penelitian' => 'Penelitian'][$jenis] ?? 'Kelompok' }}</h3>
+    <table class="data">
+        <thead><tr><th style="width:5%;">No</th><th>Nama</th><th style="width:13%;">Responden</th><th style="width:13%;">IKM</th><th style="width:9%;">Mutu</th></tr></thead>
+        <tbody>
+            @foreach($grup as $i => $g)
+            <tr><td class="c">{{ $i + 1 }}</td><td>{{ $g['nama'] }}</td><td class="c">{{ $g['responden'] }}</td><td class="c">{{ $g['ikm'] !== null ? number_format($g['ikm'], 2) : '-' }}</td><td class="c">{{ $g['mutu'] }}</td></tr>
+            @endforeach
+        </tbody>
+    </table>
+    @endif
 
     <h3>Keterangan Mutu</h3>
     <table class="data">

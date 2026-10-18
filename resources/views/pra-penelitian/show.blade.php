@@ -211,6 +211,19 @@
         </div>
     </div>
 
+    @php $linkEvalPenelitian = route('evaluasi.penelitian.form', [$praPenelitian->id, \App\Models\Evaluasi::token('penelitian', $praPenelitian->id)]); @endphp
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-3 p-3" style="background:#fff;border:1px solid #eef2f7;border-radius:14px;">
+        <i class="bi bi-clipboard2-check" style="color:#7c1316;font-size:1.2rem;"></i>
+        <div class="flex-fill small" style="min-width:220px;">
+            <b>Link evaluasi layanan penelitian</b>
+            <div class="text-muted text-break">{{ $linkEvalPenelitian }}</div>
+        </div>
+        <a href="{{ $linkEvalPenelitian }}" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bi bi-box-arrow-up-right me-1"></i>Buka</a>
+        @if(auth()->user()->role === 'admin')
+            <a href="{{ route('admin.evaluasi.index', ['jenis' => 'penelitian', 'pra_penelitian_id' => $praPenelitian->id]) }}" class="btn btn-sm text-white" style="background:#7c1316;"><i class="bi bi-bar-chart me-1"></i>Hasil &amp; IKM</a>
+        @endif
+    </div>
+
     <div class="row animate-up" style="animation-delay: 0.1s;">
 
         {{-- KOLOM KIRI: Informasi Utama & Dosen --}}
