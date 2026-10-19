@@ -249,8 +249,8 @@
                                                 <div style="font-size: 0.85rem;">{{ $p->instansi->nama_instansi ?? 'Internal RS' }}</div>
                                                 <div class="small text-muted">{{ $p->ruangan->nama_ruangan ?? '-' }}</div>
                                             </td>
-                                            <td><span class="badge bg-light text-dark border">{{ $waktuMasuk }}</span></td>
-                                            <td><span class="badge bg-light text-dark border">{{ $waktuPulang }}</span></td>
+                                            <td><span class="badge bg-light text-dark border">{!! $waktuMasuk !!}</span></td>
+                                            <td><span class="badge bg-light text-dark border">{!! $waktuPulang !!}</span></td>
                                             <td class="text-center">{!! $statusBadge !!}</td>
                                             <td class="text-center">
                                                 <div class="d-flex justify-content-center align-items-center gap-2">
