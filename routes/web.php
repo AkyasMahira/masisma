@@ -80,9 +80,10 @@ Route::get('/forgot-password', [AuthController::class, 'showLinkRequestForm'])->
 Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
-Route::get('/cek-data-pelatihan', [PelatihanController::class, 'publicIndex'])->name('public.pelatihan.index');
-Route::get('/input-data-pelatihan/{pelatihan}/edit', [PelatihanController::class, 'publicEdit'])->name('public.pelatihan.edit');
-Route::put('/input-data-pelatihan/{pelatihan}', [PelatihanController::class, 'publicUpdate'])->name('public.pelatihan.update');
+// Halaman cek/input data pelatihan versi lama (tabel lokal) sudah diganti Database SDM via API -> dialihkan ke beranda
+Route::redirect('/cek-data-pelatihan', '/')->name('public.pelatihan.index');
+Route::redirect('/input-data-pelatihan/{pelatihan}/edit', '/')->name('public.pelatihan.edit');
+Route::redirect('/input-data-pelatihan/{pelatihan}', '/')->name('public.pelatihan.update');
 Route::get('/mou-publik', [MouController::class, 'publicIndex'])->name('mou.public_index');
 Route::get('/input-data-mou/create', [MouController::class, 'publicCreate'])->name('public.mou.create');
 Route::post('/input-data-mou', [MouController::class, 'publicStore'])->name('public.mou.store');
@@ -153,7 +154,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dispensasi', [DispensasiController::class, 'index'])->name('dispensasi.index');
         Route::get('/dispensasi/create', [DispensasiController::class, 'create'])->name('dispensasi.create');
         Route::post('/dispensasi', [DispensasiController::class, 'store'])->name('dispensasi.store');
-        Route::get('/dispensasi/{id}', [DispensasiController::class, 'show'])->name('dispensasi.show');
     });
     Route::middleware(['pra'])->prefix('pra-penelitian')->name('pra-penelitian.')->group(function () {
         Route::get('/create', [PraPenelitianController::class, 'create'])->name('create');
@@ -437,7 +437,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
         Route::get('/', [MahasiswaController::class, 'index'])->name('index');
         Route::post('/import-excel', [MahasiswaController::class, 'importExcel'])->name('import_excel');
-        Route::get('/export', [MahasiswaController::class, 'export'])->name('export');
+        Route::get('/export', [MahasiswaController::class, 'exportData'])->name('export');
         Route::get('/links', [MahasiswaController::class, 'copyLinks'])->name('links');
         Route::get('/{id}/sertifikat/summary', [MahasiswaController::class, 'showSertifikatSummary'])->name('sertifikat.summary');
         Route::get('/{mahasiswa}', [MahasiswaController::class, 'show'])->name('show');
@@ -463,7 +463,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/', [RuanganController::class, 'index'])->name('index');
         Route::get('/create', [RuanganController::class, 'create'])->name('create');
         Route::post('/', [RuanganController::class, 'store'])->name('store');
-        Route::get('/{ruangan}', [RuanganController::class, 'show'])->name('show');
         Route::get('/{ruangan}/edit', [RuanganController::class, 'edit'])->name('edit');
         Route::put('/{ruangan}', [RuanganController::class, 'update'])->name('update');
         Route::delete('/{ruangan}', [RuanganController::class, 'destroy'])->name('destroy');
@@ -496,7 +495,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/create', [MouController::class, 'create'])->name('create');
         Route::post('/', [MouController::class, 'store'])->name('store');
         Route::post('/import', [MouController::class, 'importExcel'])->name('import_excel');
-        Route::get('/{mou}', [MouController::class, 'show'])->name('show');
         Route::get('/{mou}/edit', [MouController::class, 'edit'])->name('edit');
         Route::put('/{mou}', [MouController::class, 'update'])->name('update');
         Route::delete('/{mou}', [MouController::class, 'destroy'])->name('destroy');

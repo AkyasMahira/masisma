@@ -276,7 +276,9 @@
                     <div class="info-content">
                         <span class="info-label">Tanggal Pelaksanaan</span>
                         <span class="info-value">
-                            @if(isset($data->kegiatan->tanggal_mulai) && isset($data->kegiatan->tanggal_selesai))
+                            @if(isset($data->kegiatan) && $data->kegiatan instanceof \App\Models\Kegiatan && !empty($data->kegiatan->hari_libur))
+                                {{ $data->kegiatan->teksTanggalPelaksanaan() }}
+                            @elseif(isset($data->kegiatan->tanggal_mulai) && isset($data->kegiatan->tanggal_selesai))
                                 {{ \Carbon\Carbon::parse($data->kegiatan->tanggal_mulai)->isoFormat('D MMMM Y') }}
                                 @if($data->kegiatan->tanggal_mulai != $data->kegiatan->tanggal_selesai)
                                     <span class="text-muted mx-1" style="font-weight: 400; font-size: 0.8rem;">s/d</span> 

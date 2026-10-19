@@ -129,6 +129,7 @@
                                 <label class="form-label-custom">Tanggal & Jam Selesai <span class="text-danger">*</span></label>
                                 <input type="datetime-local" name="tanggal_selesai" class="form-control" value="{{ old('tanggal_selesai') }}" required>
                             </div>
+                            @include('admin.kegiatan._hari_libur', ['awal' => old('hari_libur', [])])
                             <div class="col-md-6">
                                 <label class="form-label-custom">Lokasi / Platform <span class="text-danger">*</span></label>
                                 <input type="text" name="platform" class="form-control" placeholder="Cth: Zoom Meeting / Ruang Rapat Lt 2" value="{{ old('platform') }}" required>

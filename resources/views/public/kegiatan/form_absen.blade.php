@@ -189,6 +189,11 @@
                     $judulTutup = "Sesi Berakhir";
                     $pesanTutup = "Batas waktu pengisian presensi telah habis (maksimal 1 jam setelah event berakhir).";
                     $iconTutup = "bi-calendar-x-fill"; 
+                } elseif ($kegiatan->isHariLibur($sekarang)) {$isOpen = false;
+                    $nextSesi = $kegiatan->sesiBerikutnya($sekarang);
+                    $judulTutup = "Tidak Ada Sesi Hari Ini";
+                    $pesanTutup = "Hari ini tidak ada sesi pelatihan." . ($nextSesi ? " Sesi berikutnya: " . \Carbon\Carbon::parse($nextSesi)->isoFormat('dddd, D MMMM YYYY') . "." : "");
+                    $iconTutup = "bi-calendar2-x-fill";
                 } else {
                     $isOpen = true;
                 }

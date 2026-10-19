@@ -38,7 +38,10 @@
         $tglBerlakuAkhir = $tglSelesai->copy()->addYears(3)->subDay();
 
         // Format Teks Rentang Tanggal Pelaksanaan
-        if($tglMulai->isSameDay($tglSelesai)) {
+        if(!empty($peserta->kegiatan->hari_libur)) {
+            // Pelatihan dengan hari tidak berurutan, mis. "19 - 20 & 23 - 24 Oktober 2026"
+            $teksTanggal = $peserta->kegiatan->teksTanggalPelaksanaan();
+        } elseif($tglMulai->isSameDay($tglSelesai)) {
             $teksTanggal = $tglMulai->isoFormat('D MMMM YYYY');
         } else {
             if($tglMulai->format('m Y') == $tglSelesai->format('m Y')) {

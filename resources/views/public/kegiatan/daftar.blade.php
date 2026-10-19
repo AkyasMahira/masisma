@@ -232,7 +232,9 @@
                                 <div class="info-label">Jadwal Pelaksanaan</div>
                                 <div class="info-value">
                                     <i class="bi bi-calendar-range"></i> 
-                                    @if(\Carbon\Carbon::parse($kegiatan->tanggal_mulai)->format('Y-m-d') == \Carbon\Carbon::parse($kegiatan->tanggal_selesai)->format('Y-m-d'))
+                                    @if(!empty($kegiatan->hari_libur))
+                                        {{ $kegiatan->teksTanggalPelaksanaan() }}
+                                    @elseif(\Carbon\Carbon::parse($kegiatan->tanggal_mulai)->format('Y-m-d') == \Carbon\Carbon::parse($kegiatan->tanggal_selesai)->format('Y-m-d'))
                                         {{ \Carbon\Carbon::parse($kegiatan->tanggal_mulai)->translatedFormat('d F Y') }}
                                     @else
                                         {{ \Carbon\Carbon::parse($kegiatan->tanggal_mulai)->translatedFormat('d F Y') }} <span class="fw-normal text-muted mx-1">s/d</span> {{ \Carbon\Carbon::parse($kegiatan->tanggal_selesai)->translatedFormat('d F Y') }}

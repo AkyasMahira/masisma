@@ -136,6 +136,7 @@
                                     </td>
                                     <td>
                                         <div class="small fw-bold text-dark mb-1"><i class="bi bi-calendar-event text-danger me-1"></i> {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d M Y, H:i') }}</div>
+                                        @if(!empty($item->hari_libur))<div class="small text-danger mb-1" title="Pelatihan dengan hari tidak berurutan"><i class="bi bi-calendar2-week me-1"></i>{{ $item->teksTanggalPelaksanaan() }}</div>@endif
                                         <div class="small text-muted"><i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ $item->platform }}</div>
                                     </td>
                                     
@@ -226,6 +227,9 @@
                                     <ul class="list-unstyled small text-muted mb-0">
                                         <li class="mb-2"><i class="bi bi-calendar-check text-danger me-2"></i> <strong>Mulai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d F Y, H:i') }}</li>
                                         <li class="mb-2"><i class="bi bi-calendar-x text-danger me-2"></i> <strong>Selesai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d F Y, H:i') }}</li>
+                                        @if(!empty($item->hari_libur))
+                                        <li class="mb-2"><i class="bi bi-calendar2-week text-danger me-2"></i> <strong>Hari sesi:</strong> {{ $item->teksTanggalPelaksanaan() }} <span class="text-muted small">(tanpa sesi: {{ collect($item->hari_libur)->map(function ($d) { return \Carbon\Carbon::parse($d)->isoFormat('D MMM'); })->implode(', ') }})</span></li>
+                                        @endif
                                         <li class="mb-2"><i class="bi bi-geo-alt-fill text-danger me-2"></i> <strong>Lokasi:</strong> {{ $item->platform }}</li>
                                         <li class="mb-2"><i class="bi bi-clock-fill text-danger me-2"></i> <strong>Total JPL:</strong> {{ $item->jpl ?? '-' }} JPL</li>
                                         <li><i class="bi bi-person-lines-fill text-danger me-2"></i> <strong>Sistem Absen:</strong> {{ $item->tipe_absen == 'masuk_keluar' ? 'Datang & Pulang (2x)' : 'Hanya Datang (1x)' }}</li>

@@ -35,6 +35,8 @@ class KegiatanController extends Controller
             'platform' => 'required|string|max:255',
             'tipe_absen' => 'required|in:masuk_saja,masuk_keluar',
             'warna_tema' => 'nullable|string|max:7',
+            'hari_libur' => 'nullable|array',
+            'hari_libur.*' => 'date',
         ]);
 
         DB::transaction(function () use ($request, $kegiatan) {
@@ -53,6 +55,7 @@ class KegiatanController extends Controller
                 'platform' => $request->platform,
                 'tipe_absen' => $request->tipe_absen,
                 'warna_tema' => $request->warna_tema ?? '#7c1316',
+                'hari_libur' => $this->hariLiburDari($request),
             ]);
 
             // 2. Update Relasi Tujuan
@@ -80,6 +83,21 @@ class KegiatanController extends Controller
         });
 
         return redirect()->route('admin.kegiatan.index')->with('success', 'Data Kegiatan berhasil diperbarui.');
+    }
+
+    /**
+     * Hari tanpa sesi (Y-m-d) dari form, hanya yang berada di dalam rentang & bukan hari pertama/terakhir.
+     * null bila tidak ada (pelatihan berurutan seperti biasa).
+     */
+    private function hariLiburDari(Request $request)
+    {
+        $mulai = Carbon::parse($request->tanggal_mulai)->toDateString();
+        $selesai = Carbon::parse($request->tanggal_selesai)->toDateString();
+        $hari = collect((array) $request->input('hari_libur', []))
+            ->map(function ($d) { return Carbon::parse($d)->toDateString(); })
+            ->filter(function ($d) use ($mulai, $selesai) { return $d > $mulai && $d < $selesai; })
+            ->unique()->sort()->values()->all();
+        return $hari ?: null;
     }
 
     public function create()
@@ -118,6 +136,8 @@ class KegiatanController extends Controller
             'tipe_absen' => 'required|in:masuk_saja,masuk_keluar',
             'jpl' => 'nullable|integer|min:1', 
             'warna_tema' => 'nullable|string|max:7',
+            'hari_libur' => 'nullable|array',
+            'hari_libur.*' => 'date',
         ]);
 
         DB::transaction(function () use ($request) {
@@ -136,6 +156,7 @@ class KegiatanController extends Controller
                 'tipe_absen' => $request->tipe_absen,
                 'jpl' => $request->jpl,
                 'warna_tema' => $request->warna_tema ?? '#7c1316',
+                'hari_libur' => $this->hariLiburDari($request),
                 'token_absensi' => Str::uuid()->toString(),
             ]);
 
@@ -318,6 +339,11 @@ public function submitAbsen(Request $request, $token)
             }
             if ($sekarang->greaterThan($batas_pulang)) {
                 return redirect()->back()->with('error', 'Mohon maaf, batas waktu absensi keseluruhan telah berakhir.');
+            }
+            // Hari tanpa sesi di tengah rentang pelatihan
+            if ($kegiatan->isHariLibur($sekarang)) {
+                $next = $kegiatan->sesiBerikutnya($sekarang);
+                return redirect()->back()->with('error', 'Hari ini tidak ada sesi pelatihan.' . ($next ? ' Sesi berikutnya: ' . \Carbon\Carbon::parse($next)->isoFormat('dddd, D MMMM YYYY') . '.' : ''));
             }
         }
 
