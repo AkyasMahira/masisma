@@ -91,70 +91,9 @@
 
     <!-- Wadah Pilihan (Datalist) -->
     <datalist id="prodi-list">
-        <option value="S1 FISIKA">
-        <option value="S2 FARMASI">
-        <option value="S1 ILMU EKONOMI">
-        <option value="SMK REKAYASA PERANGKAT LUNAK">
-        <option value="SMK TEKNIK KOMPUTER JARINGAN">
-        <option value="SMK MULTIMEDIA">
-        <option value="S1 TEKNIK INFORMATIKA">
-        <option value="S1 SISTEM INFORMASI">
-        <option value="S1 ILMU KOMPUTER">
-        <option value="D3 TEKNIK ELEKTROMEDIK">
-        <option value="D4 TEKNIK ELEKTROMEDIK">
-        <option value="S1 TEKNIK ELEKTRO">
-        <option value="S1 TEKNIK LINGKUNGAN">
-        <option value="S2 KEBIDANAN">
-        <option value="SMK ASISTEN KEPERAWATAN">
-        <option value="D3 KEPERAWATAN">
-        <option value="D4 KEPERAWATAN">
-        <option value="S1 KEPERAWATAN">
-        <option value="PROFESI NERS">
-        <option value="S2 KEPERAWATAN">
-        <option value="S2 MAGISTER MANAJEMEN">
-        <option value="D3 KEBIDANAN">
-        <option value="D4 KEBIDANAN">
-        <option value="S1 KEBIDANAN">
-        <option value="PROFESI BIDAN">
-        <option value="D4 REKAM MEDIK">
-        <option value="D3 REKAM MEDIK">
-        <option value="SMK FARMASI">
-        <option value="D3 FARMASI">
-        <option value="S1 FARMASI">
-        <option value="PROFESI APOTEKER">
-        <option value="S1 KESELAMATAN DAN KESEHATAN KERJA (K3)">
-        <option value="D4 KESELAMATAN DAN KESEHATAN KERJA (K3)">
-        <option value="S1 KEDOKTERAN UMUM">
-        <option value="PROFESI DOKTER (KOAS)">
-        <option value="S1 KEDOKTERAN GIGI">
-        <option value="PROFESI DOKTER GIGI">
-        <option value="PPDS (SPESIALIS)">
-        <option value="S1 TEKNOLOGI LABORATORIUM MEDIK">
-        <option value="D4 TEKNOLOGI LABORATORIUM MEDIK">
-        <option value="D3 ANALIS KESEHATAN (TLM)">
-        <option value="D4 ANALIS KESEHATAN (TLM)">
-        <option value="D3 RADIOLOGI">
-        <option value="D4 RADIOLOGI">
-        <option value="D3 FISIOTERAPI">
-        <option value="S1 FISIOTERAPI">
-        <option value="PROFESI FISIOTERAPI">
-        <option value="D3 GIZI">
-        <option value="S1 GIZI">
-        <option value="PROFESI DIETISIEN">
-        <option value="D3 REKAM MEDIS & INFORMASI KESEHATAN">
-        <option value="D4 REKAM MEDIS & INFORMASI KESEHATAN">
-        <option value="D3 KESEHATAN LINGKUNGAN (SANITASI)">
-        <option value="S1 KESEHATAN MASYARAKAT">
-        <option value="D4 PROMOSI KESEHATAN">
-        <option value="SMK OTOMATISASI TATA KELOLA PERKANTORAN (OTKP)">
-        <option value="SMK AKUNTANSI">
-        <option value="D3 AKUNTANSI">
-        <option value="S1 AKUNTANSI">
-        <option value="S1 MANAJEMEN">
-        <option value="S1 HUKUM">
-        <option value="S1 PSIKOLOGI">
-        <option value="S1 ADMINISTRASI PUBLIK">
-        <option value="S1 ADMINISTRASI RUMAH SAKIT">
+        @foreach(\App\Models\MasterProdi::aktif()->orderBy('nama_prodi')->pluck('nama_prodi') as $np)
+            <option value="{{ $np }}">
+        @endforeach
     </datalist>
 </div>
                  <div class="col-md-3">
