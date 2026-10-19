@@ -62,7 +62,12 @@ class EvaluasiController extends Controller
         $unsur = MasterEvaluasi::untukForm('pelatihan', $kegiatan->id);
         $this->validasi($request, $unsur);
         $this->simpan($request, $unsur, ['jenis' => 'pelatihan', 'kegiatan_id' => $kegiatan->id, 'nama_kegiatan' => $kegiatan->nama_kegiatan]);
-        return redirect()->route('evaluasi.public.terimakasih');
+        // Di akhir: lanjutkan ke evaluasi narasumber bila pelatihan punya narasumber (fasilitator)
+        $redir = redirect()->route('evaluasi.public.terimakasih');
+        if ($kegiatan->fasilitator()->exists()) {
+            $redir->with('lanjut_narasumber', EvaluasiNarasumberController::link($kegiatan));
+        }
+        return $redir;
     }
 
     public function formPenelitian($praId, $token)

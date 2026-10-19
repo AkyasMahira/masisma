@@ -13,7 +13,7 @@ class MasterEvaluasi extends Model
         'aktif' => 'boolean',
     ];
 
-    const JENIS = ['pelatihan' => 'Pelatihan', 'pendidikan' => 'Pendidikan', 'penelitian' => 'Penelitian'];
+    const JENIS = ['pelatihan' => 'Pelatihan', 'pendidikan' => 'Pendidikan', 'penelitian' => 'Penelitian', 'narasumber' => 'Narasumber'];
 
     public function jawaban()
     {

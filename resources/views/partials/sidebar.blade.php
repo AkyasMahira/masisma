@@ -141,7 +141,8 @@
                                          request()->is('admin/linktree*') ||
                                          request()->is('admin/galeri*') ||
                                          request()->is('admin/cari-sertifikat*') ||
-                                         $evJenis === 'pelatihan';
+                                         $evJenis === 'pelatihan' || $evJenis === 'narasumber' ||
+                                         request()->is('admin/evaluasi-narasumber*');
                 @endphp
                 <div class="nav-item-dropdown animate-item">
                     <a class="nav-link {{ $isPelatihanActive ? 'active-parent' : '' }}" data-bs-toggle="collapse" href="#menuPelatihan">
@@ -175,6 +176,7 @@
                         <a class="nav-link {{ request()->is('admin/cari-sertifikat*') ? 'active' : '' }}" href="{{ route('admin.cari_sertifikat') }}">Cari Sertifikat</a>
                         <a class="nav-link {{ $evJenis === 'pelatihan' && !request()->is('admin/master-evaluasi*') ? 'active' : '' }}" href="{{ route('admin.evaluasi.index', ['jenis' => 'pelatihan']) }}">Evaluasi Pelatihan (IKM)</a>
                         <a class="nav-link {{ $evJenis === 'pelatihan' && request()->is('admin/master-evaluasi*') ? 'active' : '' }}" href="{{ route('admin.master_evaluasi.index', ['jenis' => 'pelatihan']) }}">Master Evaluasi Pelatihan</a>
+                        <a class="nav-link {{ request()->is('admin/evaluasi-narasumber*') || $evJenis === 'narasumber' ? 'active' : '' }}" href="{{ route('admin.evaluasi_narasumber.index') }}">Evaluasi Narasumber</a>
                     </div>
                 </div>
          {{-- Penelitian --}}

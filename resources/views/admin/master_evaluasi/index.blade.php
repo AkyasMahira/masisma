@@ -37,14 +37,18 @@
             <p>Pertanyaan evaluasi per jenis layanan. Pelatihan memakai pertanyaan default, kecuali pelatihan yang punya pertanyaan khusus.</p>
         </div>
         <div class="d-flex gap-2 flex-wrap">
-            <a href="{{ route('admin.evaluasi.index', array_filter(['jenis' => $jenis, 'kegiatan_id' => optional($kegiatan)->id])) }}" class="btn-ghost-h"><i class="bi bi-clipboard2-data me-1"></i> Hasil &amp; IKM</a>
+            @if($jenis === 'narasumber')
+                <a href="{{ route('admin.evaluasi_narasumber.index') }}" class="btn-ghost-h"><i class="bi bi-clipboard2-data me-1"></i> Hasil Evaluasi Narasumber</a>
+            @else
+                <a href="{{ route('admin.evaluasi.index', array_filter(['jenis' => $jenis, 'kegiatan_id' => optional($kegiatan)->id])) }}" class="btn-ghost-h"><i class="bi bi-clipboard2-data me-1"></i> Hasil &amp; IKM</a>
+            @endif
             <a href="{{ route('admin.master_evaluasi.create', array_filter(['jenis' => $jenis, 'kegiatan_id' => optional($kegiatan)->id])) }}" class="btn-light-h"><i class="bi bi-plus-lg me-1"></i> Tambah Pertanyaan</a>
         </div>
     </div>
 
     <div class="tabs-j">
         @foreach(\App\Models\MasterEvaluasi::JENIS as $k => $lbl)
-            <a href="{{ route('admin.master_evaluasi.index', ['jenis' => $k]) }}" class="{{ $jenis === $k ? 'on' : '' }}"><i class="bi {{ ['pelatihan' => 'bi-easel2', 'pendidikan' => 'bi-mortarboard', 'penelitian' => 'bi-journal-text'][$k] }}"></i> {{ $lbl }}</a>
+            <a href="{{ route('admin.master_evaluasi.index', ['jenis' => $k]) }}" class="{{ $jenis === $k ? 'on' : '' }}"><i class="bi {{ ['pelatihan' => 'bi-easel2', 'pendidikan' => 'bi-mortarboard', 'penelitian' => 'bi-journal-text', 'narasumber' => 'bi-person-video3'][$k] ?? 'bi-list' }}"></i> {{ $lbl }}</a>
         @endforeach
     </div>
 

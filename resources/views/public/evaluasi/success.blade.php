@@ -24,7 +24,16 @@
         <div class="ic"><i class="fas fa-check"></i></div>
         <h1>Terima Kasih!</h1>
         <p>Evaluasi Anda telah kami terima. Masukan Anda sangat berarti untuk meningkatkan kualitas layanan diklat RSUD Simpang Lima Gumul.</p>
+        @if(session('lanjut_narasumber'))
+            <div style="background:#fcebeb;border-radius:14px;padding:16px 18px;margin:16px 0 4px;text-align:left;">
+                <div style="font-weight:700;color:#7c1316;margin-bottom:4px;"><i class="fas fa-chalkboard-teacher mr-1"></i> Satu langkah lagi: evaluasi narasumber</div>
+                <div style="font-size:13.5px;color:#475569;margin-bottom:10px;">Bantu kami menilai para narasumber pelatihan ini (±3 menit).</div>
+                <a href="{{ session('lanjut_narasumber') }}" class="btn-home" style="margin-top:0;"><i class="fas fa-arrow-right mr-2"></i> Isi Evaluasi Narasumber</a>
+            </div>
+            <a href="{{ route('landing') }}" style="display:inline-block;margin-top:10px;color:#64748b;font-size:13px;">Lewati, kembali ke beranda</a>
+        @else
         <a href="{{ route('landing') }}" class="btn-home"><i class="fas fa-home mr-2"></i> Kembali ke Beranda</a>
+        @endif
     </div>
 </body>
 </html>

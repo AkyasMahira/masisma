@@ -185,6 +185,7 @@
                                 @php $link = route('evaluasi.pelatihan.form', [$g['id'], $g['token']]); @endphp
                                 <button type="button" class="ic-btn" title="Salin link form evaluasi" onclick="salinLink('{{ $link }}', this)"><i class="bi bi-link-45deg"></i></button>
                                 <a href="{{ route('admin.master_evaluasi.index', ['jenis' => 'pelatihan', 'kegiatan_id' => $g['id']]) }}" class="ic-btn" title="Pertanyaan khusus pelatihan ini"><i class="bi bi-sliders"></i></a>
+                                <a href="{{ route('admin.evaluasi_narasumber.index', ['kegiatan_id' => $g['id']]) }}" class="ic-btn" title="Evaluasi narasumber pelatihan ini"><i class="bi bi-person-video3"></i></a>
                             @elseif($jenis === 'penelitian' && $g['id'])
                                 @php $link = route('evaluasi.penelitian.form', [$g['id'], $g['token']]); @endphp
                                 <button type="button" class="ic-btn" title="Salin link form evaluasi" onclick="salinLink('{{ $link }}', this)"><i class="bi bi-link-45deg"></i></button>

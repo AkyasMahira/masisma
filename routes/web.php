@@ -76,6 +76,9 @@ Route::get('/evaluasi/pelatihan/{kegiatan}/{token}', [\App\Http\Controllers\Eval
 Route::post('/evaluasi/pelatihan/{kegiatan}/{token}', [\App\Http\Controllers\EvaluasiController::class, 'storePelatihan'])->name('evaluasi.pelatihan.store');
 Route::get('/evaluasi/penelitian/{pra}/{token}', [\App\Http\Controllers\EvaluasiController::class, 'formPenelitian'])->name('evaluasi.penelitian.form');
 Route::post('/evaluasi/penelitian/{pra}/{token}', [\App\Http\Controllers\EvaluasiController::class, 'storePenelitian'])->name('evaluasi.penelitian.store');
+// Evaluasi narasumber (fasilitator) per pelatihan
+Route::get('/evaluasi/narasumber/{kegiatan}/{token}', [\App\Http\Controllers\EvaluasiNarasumberController::class, 'form'])->name('evaluasi.narasumber.form');
+Route::post('/evaluasi/narasumber/{kegiatan}/{token}', [\App\Http\Controllers\EvaluasiNarasumberController::class, 'store'])->name('evaluasi.narasumber.store');
 Route::get('/forgot-password', [AuthController::class, 'showLinkRequestForm'])->name('password.request');
 Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
@@ -283,6 +286,12 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/export/pdf', [\App\Http\Controllers\EvaluasiController::class, 'exportPdf'])->name('export.pdf');
         Route::get('/{id}', [\App\Http\Controllers\EvaluasiController::class, 'show'])->name('show');
         Route::delete('/{id}', [\App\Http\Controllers\EvaluasiController::class, 'destroy'])->name('destroy');
+    });
+    Route::prefix('admin/evaluasi-narasumber')->name('admin.evaluasi_narasumber.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\EvaluasiNarasumberController::class, 'index'])->name('index');
+        Route::get('/{kegiatan}/pdf', [\App\Http\Controllers\EvaluasiNarasumberController::class, 'exportPdf'])->name('pdf');
+        Route::get('/{kegiatan}/csv', [\App\Http\Controllers\EvaluasiNarasumberController::class, 'exportCsv'])->name('csv');
+        Route::delete('/{id}', [\App\Http\Controllers\EvaluasiNarasumberController::class, 'destroy'])->name('destroy');
     });
 
     Route::prefix('admin/master-prodi')->name('admin.master_prodi.')->group(function () {
