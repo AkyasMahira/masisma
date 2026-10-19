@@ -384,7 +384,7 @@
                                     if ($item->status == 'Aktif' || $item->status == 'Approved') {
                                         $statusClass = 'bg-success';
                                     }
-                                    if ($item->status == 'Batal' || $item->status == 'Ditolak') {
+                                    if ($item->status == 'Batal' || $item->status == 'Ditolak' || $item->status == 'Rejected') {
                                         $statusClass = 'bg-danger';
                                     }
                                     if ($item->status == 'Pending') {

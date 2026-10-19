@@ -313,6 +313,31 @@ public function index(Request $request)
     }
 
     /**
+     * REJECT: Menolak formulir pra penelitian (Khusus Admin) -> status Rejected.
+     */
+    public function rejectForm($id)
+    {
+        $penelitian = PraPenelitian::findOrFail($id);
+        $penelitian->update(['status' => 'Rejected']);
+
+        return back()->with('success', 'Formulir Pra Penelitian ditolak dan dikembalikan ke pengaju.');
+    }
+
+    /**
+     * BATAL: Membatalkan pengajuan yang masih Pending (Khusus Admin) -> status Batal.
+     */
+    public function batal($id)
+    {
+        $penelitian = PraPenelitian::findOrFail($id);
+        if ($penelitian->status !== 'Pending') {
+            return back()->with('error', 'Hanya pengajuan berstatus Pending yang bisa dibatalkan (status sekarang: ' . $penelitian->status . ').');
+        }
+        $penelitian->update(['status' => 'Batal']);
+
+        return back()->with('success', 'Penelitian "' . \Illuminate\Support\Str::limit($penelitian->judul, 60) . '" dibatalkan.');
+    }
+
+    /**
      * UPDATE JENIS MAHASISWA: Khusus admin untuk melabeli Internal/Eksternal.
      */
     public function updateJenisMahasiswa(Request $request, $id)
