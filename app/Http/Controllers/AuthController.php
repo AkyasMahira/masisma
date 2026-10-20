@@ -35,6 +35,15 @@ public function sendResetLinkEmail(Request $request)
 {
     $request->validate(['email' => 'required|email']);
 
+    // Akun portal instansi (@sindikat.com) bukan kotak surat sungguhan -> permintaan diteruskan ke admin Diklat
+    $akunInstansi = \App\Models\User::where('email', trim($request->email))->where('role', 'instansi')->first();
+    if ($akunInstansi || \Illuminate\Support\Str::endsWith(strtolower(trim($request->email)), '@' . \App\Support\AkunInstansi::DOMAIN)) {
+        if ($akunInstansi) {
+            $akunInstansi->forceFill(['reset_diminta_at' => now()])->save();
+        }
+        return back()->with('status', 'Permintaan reset password sudah diteruskan ke admin Diklat RSUD SLG. Password baru akan dikirim ke PIC instansi Anda. Bila mendesak, hubungi admin Diklat.');
+    }
+
     $status = Password::sendResetLink($request->only('email'));
 
     return $status === Password::RESET_LINK_SENT

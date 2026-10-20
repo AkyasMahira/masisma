@@ -15,10 +15,10 @@ class MouController extends Controller
 {
     /**
      * Buat akun portal untuk instansi mitra dari sebuah MOU.
-     * Username berformat email sintetis (login berbasis email), password digenerate
-     * dan ditampilkan sekali ke admin untuk diserahkan ke instansi.
+     * Username <jenis>.<nama>@sindikat.com (bisa diubah admin), password mudah dibaca.
+     * Password disimpan hash (login) + terenkripsi (agar admin bisa melihatnya lagi).
      */
-    public function buatAkun(Mou $mou)
+    public function buatAkun(Request $request, Mou $mou)
     {
         // Cegah duplikasi: satu MOU satu akun instansi
         $existing = User::where('mou_id', $mou->id)->where('role', 'instansi')->first();
@@ -27,38 +27,30 @@ class MouController extends Controller
         }
 
         $namaInstansi = $mou->nama_instansi ?: $mou->nama_universitas ?: 'instansi';
-
-        // Username = slug nama instansi + domain sintetis, dijamin unik
-        $base = Str::slug($namaInstansi);
-        if ($base === '') $base = 'instansi';
-        $username = $base . '@mitra.rsudslg.id';
-        $i = 1;
-        while (User::where('email', $username)->exists()) {
-            $username = $base . $i . '@mitra.rsudslg.id';
-            $i++;
-        }
-
-        $password = Str::random(10);
+        $lokal = \App\Support\AkunInstansi::bersihkan($request->input('username')) ?: \App\Support\AkunInstansi::saranUsername($namaInstansi);
+        $username = \App\Support\AkunInstansi::emailUnik($lokal);
+        $password = \App\Support\AkunInstansi::passwordBaru();
 
         User::create([
-            'name'        => $namaInstansi,
-            'email'       => $username,
-            'password'    => Hash::make($password),
-            'role'        => 'instansi',
-            'mou_id'      => $mou->id,
-            'is_approved' => true,
+            'name'            => $namaInstansi,
+            'email'           => $username,
+            'password'        => Hash::make($password),
+            'password_tampil' => \App\Support\AkunInstansi::enkripsi($password),
+            'role'            => 'instansi',
+            'mou_id'          => $mou->id,
+            'is_approved'     => true,
         ]);
 
-        // Tampilkan kredensial sekali (tidak disimpan sebagai plaintext)
         return back()->with('akun_instansi', [
             'nama'     => $namaInstansi,
             'username' => $username,
             'password' => $password,
-        ])->with('success', 'Akun instansi berhasil dibuat. Catat kredensial di bawah — password hanya ditampilkan sekali.');
+            'judul'    => 'Akun Instansi Dibuat',
+        ])->with('success', 'Akun instansi berhasil dibuat.');
     }
 
     /**
-     * Reset password akun instansi (password baru digenerate & ditampilkan sekali).
+     * Reset password akun instansi (password baru mudah dibaca, bisa dilihat lagi di admin).
      */
     public function resetAkun(Mou $mou)
     {
@@ -67,14 +59,20 @@ class MouController extends Controller
             return back()->with('error', 'MOU ini belum punya akun instansi.');
         }
 
-        $password = Str::random(10);
-        $akun->update(['password' => Hash::make($password)]);
+        $password = \App\Support\AkunInstansi::passwordBaru();
+        $akun->forceFill([
+            'password'         => Hash::make($password),
+            'password_tampil'  => \App\Support\AkunInstansi::enkripsi($password),
+            'reset_diminta_at' => null,
+            'remember_token'   => null,
+        ])->save();
 
         return back()->with('akun_instansi', [
             'nama'     => $mou->nama_instansi ?: $mou->nama_universitas,
             'username' => $akun->email,
             'password' => $password,
-        ])->with('success', 'Password akun instansi berhasil direset. Catat kredensial baru di bawah.');
+            'judul'    => 'Password Akun Direset',
+        ])->with('success', 'Password akun instansi berhasil direset.');
     }
 
     /**

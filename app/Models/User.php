@@ -23,12 +23,15 @@ class User extends Authenticatable
         'mou_id',
         'device_id',
         'is_approved',
-        'program_studi'
+        'program_studi',
+        'password_tampil',
+        'reset_diminta_at'
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'password_tampil',
     ];
 
     public function mou()

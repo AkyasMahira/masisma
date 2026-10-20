@@ -161,14 +161,35 @@
 
 
 @if(session('akun_instansi'))
-    @php $ak = session('akun_instansi'); @endphp
+    @php $ak = session('akun_instansi'); $pesanAk = "Akun portal Sindikat RSUD SLG untuk " . $ak['nama'] . "\nLogin: " . url('/login') . "\nUsername: " . $ak['username'] . "\nPassword: " . $ak['password']; @endphp
     <div class="alert alert-success border-0 shadow-sm" style="border-left:5px solid #15803d !important; border-radius:10px;">
-        <h6 class="fw-bold mb-2"><i class="bi bi-check-circle me-1"></i> Akun Instansi Dibuat — {{ $ak['nama'] }}</h6>
-        <div class="small mb-2 text-muted">Serahkan kredensial ini ke instansi. <strong>Password hanya ditampilkan sekali.</strong></div>
-        <div class="d-flex flex-wrap gap-4">
+        <h6 class="fw-bold mb-2"><i class="bi bi-check-circle me-1"></i> {{ $ak['judul'] ?? 'Akun Instansi' }} — {{ $ak['nama'] }}</h6>
+        <div class="d-flex flex-wrap gap-4 align-items-end">
             <div><span class="text-muted small d-block">Username (login)</span><code style="font-size:.95rem;">{{ $ak['username'] }}</code></div>
             <div><span class="text-muted small d-block">Password</span><code style="font-size:.95rem;">{{ $ak['password'] }}</code></div>
+            <button type="button" class="btn btn-sm btn-success" data-pesan="{{ $pesanAk }}" onclick="salinPesanAkun(this)"><i class="bi bi-clipboard me-1"></i>Salin pesan untuk PIC</button>
         </div>
+        <div class="small text-muted mt-2">Kredensial ini juga bisa dilihat lagi kapan saja di kolom <b>Akun Portal</b>.</div>
+    </div>
+@endif
+
+@php
+    $mintaReset = \App\Models\User::where('role', 'instansi')->whereNotNull('reset_diminta_at')->with('mou')->orderByDesc('reset_diminta_at')->get();
+@endphp
+@if($mintaReset->count())
+    <div class="alert border-0 shadow-sm" style="background:#fffbeb;border-left:5px solid #f59e0b !important;border-radius:10px;">
+        <h6 class="fw-bold mb-2" style="color:#92400e;"><i class="bi bi-key me-1"></i> {{ $mintaReset->count() }} instansi meminta reset password</h6>
+        @foreach($mintaReset as $mr)
+            <div class="d-flex flex-wrap align-items-center gap-2 small mb-1">
+                <b>{{ optional($mr->mou)->nama_instansi ?: $mr->name }}</b> <code>{{ $mr->email }}</code>
+                <span class="text-muted">· {{ \Carbon\Carbon::parse($mr->reset_diminta_at)->diffForHumans() }}</span>
+                @if($mr->mou_id)
+                <form action="{{ route('mou.reset_akun', $mr->mou_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Buat password baru untuk {{ $mr->email }}?');">
+                    @csrf<button class="btn btn-sm btn-warning py-0 px-2 fw-semibold"><i class="bi bi-arrow-repeat me-1"></i>Reset sekarang</button>
+                </form>
+                @endif
+            </div>
+        @endforeach
     </div>
 @endif
 
@@ -307,6 +328,7 @@
                         <th>Durasi</th>
                         <th>Dokumen</th>
                         <th style="min-width: 200px;">Rencana Kerja Sama</th>
+                        <th style="min-width: 230px;">Akun Portal</th>
                         <th class="text-center" width="10%">Aksi</th>
                     </tr>
                 </thead>
@@ -421,23 +443,47 @@
         {{ \Illuminate\Support\Str::limit(($mou->rencana_kerja_sama ?? ''), 80) }}
     </div>
 </td>
-                            <td class="text-center">
+                            <td>
                                 @if($mou->akun)
-                                    <span class="action-btn" style="color:#15803d;" title="Akun aktif: {{ $mou->akun->email }}"><i class="bi bi-person-check-fill"></i></span>
-                                    <form action="{{ route('mou.reset_akun', $mou->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Reset password akun instansi {{ $mou->akun->email }}? Password lama tidak berlaku lagi.');">
-                                        @csrf
-                                        <button type="submit" class="action-btn" style="color:#b45309;" title="Reset Password Akun"><i class="bi bi-key-fill"></i></button>
-                                    </form>
-                                    <form action="{{ route('mou.hapus_akun', $mou->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus akun instansi ini? Instansi tidak bisa login lagi.');">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="action-btn" style="color:#be123c;" title="Hapus Akun Instansi"><i class="bi bi-person-dash-fill"></i></button>
-                                    </form>
+                                    @php
+                                        $pw = \App\Support\AkunInstansi::passwordTampil($mou->akun);
+                                        $pesan = "Akun portal Sindikat RSUD SLG untuk " . ($mou->nama_instansi ?: $mou->nama_universitas) . "\nLogin: " . url('/login') . "\nUsername: " . $mou->akun->email . ($pw ? "\nPassword: " . $pw : '');
+                                    @endphp
+                                    <div class="small text-nowrap"><i class="bi bi-person-badge text-muted me-1"></i><code>{{ $mou->akun->email }}</code></div>
+                                    <div class="small text-nowrap mt-1 d-flex align-items-center gap-1">
+                                        <i class="bi bi-key text-muted me-1"></i>
+                                        @if($pw)
+                                            <code class="pw-mask" data-pw="{{ $pw }}">••••••••</code>
+                                            <button type="button" class="btn btn-link btn-sm p-0 text-secondary" title="Tampilkan / sembunyikan" onclick="togglePw(this)"><i class="bi bi-eye"></i></button>
+                                        @else
+                                            <span class="text-muted fst-italic">tidak tersimpan — reset untuk melihat</span>
+                                        @endif
+                                    </div>
+                                    @if($mou->akun->reset_diminta_at)
+                                        <span class="badge bg-warning text-dark mt-1"><i class="bi bi-exclamation-circle me-1"></i>Minta reset</span>
+                                    @endif
+                                    <div class="mt-1 d-flex gap-1">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" data-pesan="{{ $pesan }}" onclick="salinPesanAkun(this)" title="Salin pesan berisi kredensial untuk PIC"><i class="bi bi-clipboard"></i></button>
+                                        <form action="{{ route('mou.reset_akun', $mou->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Buat password baru untuk {{ $mou->akun->email }}? Password lama tidak berlaku lagi.');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-outline-warning py-0 px-2" title="Reset password"><i class="bi bi-arrow-repeat"></i></button>
+                                        </form>
+                                        <form action="{{ route('mou.hapus_akun', $mou->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus akun instansi ini? Instansi tidak bisa login lagi.');">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" title="Hapus akun"><i class="bi bi-person-dash"></i></button>
+                                        </form>
+                                    </div>
                                 @else
-                                    <form action="{{ route('mou.buat_akun', $mou->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Buatkan akun portal untuk instansi ini?');">
+                                    @php $saranU = \App\Support\AkunInstansi::saranUsername($mou->nama_instansi ?: $mou->nama_universitas); @endphp
+                                    <form action="{{ route('mou.buat_akun', $mou->id) }}" method="POST" class="d-inline" onsubmit="return mintaUsername(this);">
                                         @csrf
-                                        <button type="submit" class="action-btn" style="color:#7c1316;" title="Buat Akun Instansi"><i class="bi bi-person-plus-fill"></i></button>
+                                        <input type="hidden" name="username" value="{{ $saranU }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" style="color:#7c1316;border-color:#e8b4b9;"><i class="bi bi-person-plus me-1"></i>Buat akun</button>
                                     </form>
+                                    <div class="small text-muted mt-1">Saran: {{ $saranU }}@sindikat.com</div>
                                 @endif
+                            </td>
+                            <td class="text-center">
                                 <a href="{{ route('mou.edit', $mou->id) }}" class="action-btn" title="Edit">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
@@ -452,7 +498,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-5">
+                            <td colspan="9" class="text-center py-5">
                                 <div class="d-flex flex-column align-items-center">
                                     <i class="bi bi-folder-x display-4 text-muted mb-3" style="opacity: 0.5;"></i>
                                     <h5 class="text-muted fw-bold">Tidak ada data ditemukan</h5>
@@ -755,4 +801,27 @@
             });
         });
     </script>
+<script>
+    function togglePw(btn) {
+        var c = btn.parentNode.querySelector('.pw-mask'), i = btn.querySelector('i');
+        var tampil = c.textContent.indexOf('•') === -1;
+        c.textContent = tampil ? '••••••••' : c.getAttribute('data-pw');
+        i.className = tampil ? 'bi bi-eye' : 'bi bi-eye-slash';
+    }
+    function salinPesanAkun(btn) {
+        var t = btn.getAttribute('data-pesan');
+        var ok = function () { var i = btn.querySelector('i'); var c = i.className; i.className = 'bi bi-check2'; setTimeout(function () { i.className = c; }, 1500); };
+        if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(t).then(ok, function () { prompt('Salin pesan:', t); }); }
+        else { prompt('Salin pesan:', t); }
+    }
+    function mintaUsername(form) {
+        var inp = form.querySelector('[name=username]');
+        var u = prompt('Username akun instansi (tanpa @sindikat.com). Huruf kecil, angka, titik atau strip:', inp.value);
+        if (u === null) return false;
+        u = u.trim().toLowerCase().replace(/@.*$/, '');
+        if (!u) { alert('Username tidak boleh kosong.'); return false; }
+        inp.value = u;
+        return true;
+    }
+</script>
 @endsection
