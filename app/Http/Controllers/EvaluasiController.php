@@ -245,6 +245,8 @@ class EvaluasiController extends Controller
         $grupKol = ['pelatihan' => 'kegiatan_id', 'pendidikan' => 'mou_id', 'penelitian' => 'pra_penelitian_id'][$jenis];
         $rq = $request->duplicate($request->except(['kegiatan_id', 'mou_id', 'pra_penelitian_id', 'page']));
         $grup = $this->rekapGrup($this->query($rq, $jenis), $grupKol, $jenis);
+        // Tren IKM per bulan (semua tanggapan jenis ini, mengikuti filter periode)
+        $tren = $this->trenBulanan($this->query($rq, $jenis));
 
         // Opsi filter
         $tahunList = Evaluasi::where('jenis', $jenis)->selectRaw('YEAR(created_at) as y')->distinct()->orderByDesc('y')->pluck('y');
@@ -261,7 +263,7 @@ class EvaluasiController extends Controller
         }
 
         $labelFilter = $this->labelFilter($request);
-        return view('admin.evaluasi_diklat.index', compact('jenis', 'ikm', 'evaluasi', 'grup', 'tahunList', 'opsi', 'labelFilter'));
+        return view('admin.evaluasi_diklat.index', compact('jenis', 'ikm', 'evaluasi', 'grup', 'tren', 'tahunList', 'opsi', 'labelFilter'));
     }
 
     public function show($id)
@@ -370,6 +372,26 @@ class EvaluasiController extends Controller
             'nilai' => $nilai, 'mutu' => $this->mutu($nilai), 'kategori' => $this->kategori($nilai),
             'total_responden' => $totalResponden, 'jumlah_unsur' => $jumlahUnsur, 'per_unsur' => $perUnsur,
         ];
+    }
+
+    /** IKM per bulan: rata-rata NRR unsur x 25 untuk tiap bulan (Y-m). */
+    private function trenBulanan($query)
+    {
+        $ids = (clone $query)->select('evaluasis.id');
+        $rows = EvaluasiJawaban::query()
+            ->join('evaluasis as e', 'e.id', '=', 'evaluasi_jawaban.evaluasi_id')
+            ->join('master_evaluasi as m', 'm.id', '=', 'evaluasi_jawaban.master_evaluasi_id')
+            ->where('m.tipe', 'rating')->whereNotNull('evaluasi_jawaban.nilai')
+            ->whereIn('evaluasi_jawaban.evaluasi_id', $ids->getQuery())
+            ->groupBy(DB::raw("DATE_FORMAT(e.created_at, '%Y-%m')"), 'm.id')
+            ->selectRaw("DATE_FORMAT(e.created_at, '%Y-%m') as bln, m.id as uid, AVG(evaluasi_jawaban.nilai) as rata")
+            ->get()->groupBy('bln');
+        $resp = (clone $query)->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as bln, COUNT(*) as n")->groupBy(DB::raw("DATE_FORMAT(created_at, '%Y-%m')"))->pluck('n', 'bln');
+        $out = [];
+        foreach ($rows->keys()->sort()->values() as $bln) {
+            $out[] = ['bulan' => $bln, 'ikm' => round($rows[$bln]->avg('rata') * 25, 2), 'responden' => (int) ($resp[$bln] ?? 0)];
+        }
+        return $out;
     }
 
     /** Rekap IKM per grup (kegiatan / kampus / penelitian). */
