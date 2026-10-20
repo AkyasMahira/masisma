@@ -155,6 +155,84 @@
         </div>
     </div>
 
+    {{-- GRAFIK (Evaluasi Penyelenggaraan / IKM pelatihan) --}}
+    @php
+        $gChart = collect($grup)->filter(function ($g) { return $g['id'] && $g['ikm'] !== null; })->values();
+    @endphp
+    @if($jenis === 'pelatihan' && $gChart->count())
+    @php
+        $mutuHex = ['A' => '#15803d', 'B' => '#1d4ed8', 'C' => '#d97706', 'D' => '#dc2626'];
+        $bar = $gChart->sortByDesc('ikm')->values();
+        $line = $gChart->sortBy(function ($g) { return ($g['tanggal'] ?: '9999') . $g['nama']; })->values();
+        $barData = [
+            'labels' => $bar->map(function ($g) { return \Illuminate\Support\Str::limit($g['nama'], 55); })->all(),
+            'full'   => $bar->pluck('nama')->all(),
+            'nilai'  => $bar->pluck('ikm')->all(),
+            'resp'   => $bar->pluck('responden')->all(),
+            'warna'  => $bar->map(function ($g) use ($mutuHex) { return $mutuHex[$g['mutu']] ?? '#94a3b8'; })->all(),
+        ];
+        $lineData = [
+            'labels' => $line->map(function ($g) { return $g['tanggal'] ? \Carbon\Carbon::parse($g['tanggal'])->isoFormat('D MMM YY') : '-'; })->all(),
+            'full'   => $line->pluck('nama')->all(),
+            'nilai'  => $line->pluck('ikm')->all(),
+            'resp'   => $line->pluck('responden')->all(),
+        ];
+    @endphp
+    <div class="row g-3 mb-3">
+        <div class="col-xl-6">
+            <div class="card-x p-3 h-100">
+                <div class="sec-h mb-1"><i class="bi bi-bar-chart-line" style="color:var(--maroon);"></i>IKM per pelatihan</div>
+                <div class="small text-muted mb-2">Diurutkan dari nilai tertinggi · warna = mutu (A hijau, B biru, C oranye, D merah)</div>
+                <div style="position:relative;height:{{ max(220, $bar->count() * 30 + 60) }}px;"><canvas id="chartBar"></canvas></div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card-x p-3 h-100">
+                <div class="sec-h mb-1"><i class="bi bi-graph-up" style="color:var(--maroon);"></i>Tren IKM seluruh pelatihan</div>
+                <div class="small text-muted mb-2">Urut tanggal pelatihan · garis putus-putus = batas mutu A (88,31), B (76,61), C (65,00)</div>
+                <div style="position:relative;height:340px;"><canvas id="chartLine"></canvas></div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script>
+        (function () {
+            if (!window.Chart) return;
+            var B = @json($barData), L = @json($lineData);
+            Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+            Chart.defaults.color = '#64748b';
+            new Chart(document.getElementById('chartBar'), {
+                type: 'bar',
+                data: { labels: B.labels, datasets: [{ data: B.nilai, backgroundColor: B.warna, borderRadius: 6, barThickness: 18 }] },
+                options: {
+                    indexAxis: 'y', maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { callbacks: {
+                        title: function (it) { return B.full[it[0].dataIndex]; },
+                        label: function (it) { return 'IKM ' + it.parsed.x.toFixed(2) + ' · ' + B.resp[it.dataIndex] + ' responden'; } } } },
+                    scales: { x: { min: Math.max(0, Math.floor(Math.min.apply(null, B.nilai) / 10) * 10 - 10), max: 100, grid: { color: '#f1f5f9' } },
+                              y: { grid: { display: false }, ticks: { font: { size: 11 } } } }
+                }
+            });
+            var ref = function (v, warna) { return { data: L.labels.map(function () { return v; }), borderColor: warna, borderWidth: 1, borderDash: [5, 5], pointRadius: 0, fill: false, label: '' }; };
+            new Chart(document.getElementById('chartLine'), {
+                type: 'line',
+                data: { labels: L.labels, datasets: [
+                    { label: 'IKM', data: L.nilai, borderColor: '#7c1316', backgroundColor: 'rgba(124,19,22,.08)', fill: true, tension: .3, pointRadius: 4, pointHoverRadius: 6, pointBackgroundColor: '#7c1316' },
+                    ref(88.31, '#15803d'), ref(76.61, '#1d4ed8'), ref(65, '#d97706')
+                ] },
+                options: {
+                    maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { display: false }, tooltip: { filter: function (it) { return it.datasetIndex === 0; }, callbacks: {
+                        title: function (it) { return L.full[it[0].dataIndex] + ' (' + L.labels[it[0].dataIndex] + ')'; },
+                        label: function (it) { return 'IKM ' + it.parsed.y.toFixed(2) + ' · ' + L.resp[it.dataIndex] + ' responden'; } } } },
+                    scales: { y: { min: Math.max(0, Math.floor(Math.min.apply(null, L.nilai.concat([65])) / 10) * 10 - 5), max: 100, grid: { color: '#f1f5f9' } },
+                              x: { grid: { display: false }, ticks: { maxRotation: 50, autoSkip: true } } }
+                }
+            });
+        })();
+    </script>
+    @endif
+
     {{-- REKAP PER GRUP --}}
     <div class="card-x mb-3">
         <div class="p-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">

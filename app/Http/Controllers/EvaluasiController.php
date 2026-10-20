@@ -388,7 +388,11 @@ class EvaluasiController extends Controller
 
         $nama = [];
         $gids = $jml->keys()->filter()->all();
-        if ($jenis === 'pelatihan')  $nama = Kegiatan::whereIn('id', $gids)->pluck('nama_kegiatan', 'id')->all();
+        $tgl = [];
+        if ($jenis === 'pelatihan') {
+            $nama = Kegiatan::whereIn('id', $gids)->pluck('nama_kegiatan', 'id')->all();
+            $tgl = Kegiatan::whereIn('id', $gids)->pluck('tanggal_mulai', 'id')->all();
+        }
         if ($jenis === 'pendidikan') $nama = Mou::whereIn('id', $gids)->get()->mapWithKeys(function ($m) { return [$m->id => ($m->nama_instansi ?: $m->nama_universitas)]; })->all();
         if ($jenis === 'penelitian') $nama = PraPenelitian::whereIn('id', $gids)->pluck('judul', 'id')->all();
 
@@ -401,6 +405,7 @@ class EvaluasiController extends Controller
                 'nama' => $gid ? ($nama[$gid] ?? '(data terhapus #' . $gid . ')') : ($jenis === 'pelatihan' ? '(Tanpa pelatihan — form umum)' : '(Tidak tercatat)'),
                 'responden' => (int) $j->n, 'ikm' => $ikm, 'mutu' => $ikm !== null ? $this->mutu($ikm) : '-',
                 'terakhir' => $j->terakhir,
+                'tanggal' => ($gid && isset($tgl[$gid])) ? substr((string) $tgl[$gid], 0, 10) : null,
                 'token' => ($gid && $jenis !== 'pendidikan') ? Evaluasi::token($jenis, $gid) : null,
             ];
         }
