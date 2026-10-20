@@ -76,6 +76,16 @@
     #calOccup .fc-col-header-cell-cushion { color:#64748b; font-weight:700; font-size:.66rem; text-transform:uppercase; }
     #calOccup .fc-daygrid-day-number { color:#475569; font-weight:600; font-size:.72rem; }
     #calOccup .fc-daygrid-event { border:none; border-radius:5px; padding:1px 5px; font-size:.64rem; font-weight:600; cursor:pointer; }
+    #calOccup .fc-daygrid-day-frame { min-height:64px; }
+    #calOccup .fc-day-other .day-badge { opacity:.4; }
+    .day-badge { margin:2px 4px 4px; border-radius:7px; padding:4px 6px; cursor:pointer; line-height:1.15; font-size:.62rem; font-weight:700; transition:transform .1s, box-shadow .1s; }
+    .day-badge:hover { transform:translateY(-1px); box-shadow:0 3px 10px rgba(124,19,22,.16); }
+    .day-badge b { font-size:.86rem; font-weight:800; }
+    .day-badge .sub { display:block; font-weight:600; opacity:.85; }
+    .h1 { background:#fdf5f5; color:#9b2a30; } .h2 { background:#fbe4e6; color:#8a1d22; } .h3 { background:#f6cdd0; color:#7c1316; }
+    .h4 { background:#eda9ae; color:#5f0f12; } .h5 { background:#d65c66; color:#fff; }
+    .s-ok { background:#dcfce7; color:#15803d; } .s-warn { background:#fef3c7; color:#b45309; } .s-full { background:#fee2e2; color:#b91c1c; }
+    @media (max-width:576px) { .day-badge .sub { display:none; } .day-badge { margin:2px; padding:3px 2px; text-align:center; } }
     #calOccup .fc-daygrid-more-link { font-size:.64rem; font-weight:700; color:var(--maroon); }
     .cal-note { font-size:.74rem; color:#64748b; margin-bottom:8px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
     .cal-chip { display:inline-flex; align-items:center; gap:6px; background:var(--maroon-subtle); color:var(--maroon); font-weight:700; border-radius:20px; padding:2px 10px; }
@@ -391,6 +401,41 @@
                 + msg;
         }
 
+        // ===== Ringkasan per hari (sama seperti kalender booking admin) =====
+        var PER = {}, MAXB = 1, MINB = Infinity;
+        OCC.forEach(function (o) {
+            var d = parse(o.s), e = parse(o.e), g = 0;
+            while (d <= e && g++ < 800) {
+                var k = ymd(d);
+                if (!PER[k]) PER[k] = { b: 0, o: 0, r: {} };
+                PER[k].b++; PER[k].o += o.n; PER[k].r[o.r] = (PER[k].r[o.r] || 0) + o.n;
+                d.setDate(d.getDate() + 1);
+            }
+        });
+        Object.keys(PER).forEach(function (k) { if (PER[k].b > MAXB) MAXB = PER[k].b; if (PER[k].b < MINB) MINB = PER[k].b; });
+        function level(b) { if (MAXB <= MINB) return 3; return Math.max(1, Math.min(5, 1 + Math.floor((b - MINB) / (MAXB - MINB + 1) * 5))); }
+
+        function paintCell(b) {
+            var d = b.getAttribute('data-d'), info = PER[d], rid = fR.value;
+            if (rid) {
+                var kap = ROOMS[rid] ? ROOMS[rid].kuota : 0;
+                var used = info && info.r[+rid] ? info.r[+rid] : 0, sisa = Math.max(0, kap - used);
+                b.className = 'day-badge ' + (sisa <= 0 ? 's-full' : (sisa <= Math.max(1, kap * 0.25) ? 's-warn' : 's-ok'));
+                b.title = (ROOMS[rid] ? ROOMS[rid].nama : '') + ': terisi ' + used + ' dari ' + kap + ' — klik untuk rincian';
+                b.innerHTML = sisa <= 0 ? '<b>Penuh</b><span class="sub">' + used + '/' + kap + '</span>'
+                                        : '<b>' + sisa + '</b> sisa<span class="sub">terisi ' + used + '/' + kap + '</span>';
+            } else if (info) {
+                b.className = 'day-badge h' + level(info.b);
+                b.title = info.b + ' booking aktif · ' + info.o + ' orang — klik untuk rincian per ruangan';
+                b.innerHTML = '<b>' + info.b + '</b> booking<span class="sub">' + info.o + ' orang</span>';
+            } else {
+                b.className = 'day-badge s-ok';
+                b.title = 'Belum ada booking — klik untuk rincian';
+                b.innerHTML = '<span class="sub">kosong</span>';
+            }
+        }
+        function paintAll() { document.querySelectorAll('#calOccup .day-badge').forEach(paintCell); }
+
         // ===== Kalender =====
         var cal = null;
         var el = $('calOccup');
@@ -401,9 +446,21 @@
                 height: 'auto',
                 headerToolbar: { left: 'prev,next', center: 'title', right: 'today' },
                 buttonText: { today: 'Hari ini' },
-                dayMaxEvents: 3,
+                dayMaxEvents: 2,
                 displayEventTime: false,
                 selectable: true,
+                dayCellDidMount: function (arg) {
+                    var frame = arg.el.querySelector('.fc-daygrid-day-frame') || arg.el;
+                    var b = document.createElement('div');
+                    b.className = 'day-badge';
+                    var top = frame.querySelector('.fc-daygrid-day-top');
+                    if (top && top.nextSibling) frame.insertBefore(b, top.nextSibling); else frame.appendChild(b);
+                    var d = ymd(arg.date);
+                    b.setAttribute('data-d', d);
+                    b.addEventListener('mousedown', function (ev) { ev.stopPropagation(); });
+                    b.addEventListener('click', function (ev) { ev.stopPropagation(); openAvail(d, d); });
+                    paintCell(b);
+                },
                 select: function (info) {
                     var en = new Date(info.end.getTime() - 864e5);
                     openAvail(info.startStr, ymd(en));
@@ -411,7 +468,8 @@
                 },
                 events: function (info, ok) {
                     var rid = fR.value;
-                    var list = rid ? EVENTS.filter(function (e) { return e.extendedProps.rid === +rid; }) : EVENTS.slice();
+                    var list = rid ? EVENTS.filter(function (e) { return e.extendedProps.rid === +rid; })
+                                   : EVENTS.filter(function (e) { return e.extendedProps.mine; });
                     if (fM.value && fS.value && fS.value >= fM.value) {
                         list.push({ start: fM.value, end: addDay(fS.value), display: 'background', color: '#e8a3a9' });
                     }
@@ -519,8 +577,9 @@
             var rid = fR.value;
             $('calNote').innerHTML = rid
                 ? 'Jadwal ruangan: <span class="cal-chip"><i class="bi bi-door-open"></i>' + esc(ROOMS[rid] ? ROOMS[rid].nama : '') + '</span>'
-                : 'Menampilkan semua ruangan. Klik tanggal atau seret rentang untuk cek ketersediaan.';
+                : 'Kotak = jumlah booking per hari (makin gelap makin padat). Pilih ruangan untuk melihat sisa kuotanya. Klik tanggal / seret rentang untuk rincian.';
             cal.refetchEvents();
+            paintAll();
             if (jump && fM.value) cal.gotoDate(fM.value);
         }
 
