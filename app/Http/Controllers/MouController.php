@@ -76,6 +76,32 @@ class MouController extends Controller
     }
 
     /**
+     * Tarik data akun portal instansi (JSON untuk dibuat Excel di halaman MOU).
+     * Berisi semua MOU: yang punya akun (username, password bila tersimpan) & yang belum.
+     */
+    public function exportAkun()
+    {
+        abort_unless(auth()->check() && auth()->user()->role === 'admin', 403);
+
+        $akun = User::where('role', 'instansi')->get()->keyBy('mou_id');
+        $rows = Mou::orderBy('nama_universitas')->get()->map(function ($m) use ($akun) {
+            $u = $akun->get($m->id);
+            return [
+                'instansi' => $m->nama_instansi ?: $m->nama_universitas,
+                'username' => $u ? $u->email : '',
+                'password' => $u ? (\App\Support\AkunInstansi::passwordTampil($u) ?: '(tidak tersimpan, reset dulu)') : '',
+                'status'   => !$u ? 'Belum ada akun' : ($u->reset_diminta_at ? 'Minta reset password' : 'Aktif'),
+                'pic'      => $m->nama_pic_instansi,
+                'hp_pic'   => $m->nomor_kontak_pic,
+                'dibuat'   => $u ? optional($u->created_at)->format('Y-m-d') : '',
+            ];
+        })->sortBy(function ($r) { return ($r['username'] === '' ? '1' : '0') . mb_strtolower((string) $r['instansi']); })->values();
+
+        return response()->json(['login' => url('/login'), 'data' => $rows])
+            ->header('Cache-Control', 'no-store, private');
+    }
+
+    /**
      * Hapus akun instansi (bisa dibuat ulang lewat "Buat Akun").
      */
     public function hapusAkun(Mou $mou)

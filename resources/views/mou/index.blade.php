@@ -251,6 +251,9 @@
                     <a class="dropdown-item py-2" href="javascript:void(0)" onclick="exportMOU(); closeTools();">
                         <i class="bi bi-file-earmark-excel text-success me-2"></i> Export Excel
                     </a>
+                    <a class="dropdown-item py-2" href="javascript:void(0)" onclick="exportAkunInstansi(); closeTools();">
+                        <i class="bi bi-person-lines-fill text-danger me-2"></i> Tarik Data Akun Instansi
+                    </a>
                     <a class="dropdown-item py-2" href="javascript:void(0)" onclick="downloadTemplateMOU(); closeTools();">
                         <i class="bi bi-download text-primary me-2"></i> Template
                     </a>
@@ -822,6 +825,26 @@
         if (!u) { alert('Username tidak boleh kosong.'); return false; }
         inp.value = u;
         return true;
+    }
+</script>
+<script>
+    function exportAkunInstansi() {
+        if (typeof XLSX === 'undefined') { alert('Library Excel belum termuat, coba muat ulang halaman.'); return; }
+        fetch(@json(route('mou.export_akun')), { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+            .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then(function (res) {
+                var head = ['No', 'Nama Instansi', 'Username (login)', 'Password', 'Status Akun', 'Nama PIC', 'No. HP PIC', 'Akun Dibuat'];
+                var rows = res.data.map(function (d, i) { return [i + 1, d.instansi, d.username, d.password, d.status, d.pic || '', d.hp_pic || '', d.dibuat]; });
+                var aoa = [['DATA AKUN PORTAL INSTANSI — SINDIKAT RSUD SIMPANG LIMA GUMUL'], ['Halaman login: ' + res.login], ['Ditarik: ' + new Date().toLocaleString('id-ID')], [], head].concat(rows);
+                var ws = XLSX.utils.aoa_to_sheet(aoa);
+                ws['!cols'] = [{ wch: 5 }, { wch: 48 }, { wch: 36 }, { wch: 18 }, { wch: 22 }, { wch: 28 }, { wch: 18 }, { wch: 13 }];
+                ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }];
+                ws['!autofilter'] = { ref: 'A5:H' + (5 + rows.length) };
+                var wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Akun Instansi');
+                XLSX.writeFile(wb, 'Akun_Instansi_' + new Date().toISOString().split('T')[0] + '.xlsx');
+            })
+            .catch(function (e) { alert('Gagal menarik data akun instansi (' + e.message + ').'); });
     }
 </script>
 @endsection

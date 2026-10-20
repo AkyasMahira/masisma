@@ -500,6 +500,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     });
 
     Route::prefix('mou')->name('mou.')->group(function () {
+        Route::get('/akun-instansi/export', [MouController::class, 'exportAkun'])->name('export_akun');
         Route::get('/', [MouController::class, 'index'])->name('index');
         Route::get('/create', [MouController::class, 'create'])->name('create');
         Route::post('/', [MouController::class, 'store'])->name('store');
