@@ -287,6 +287,12 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/{id}', [\App\Http\Controllers\EvaluasiController::class, 'show'])->name('show');
         Route::delete('/{id}', [\App\Http\Controllers\EvaluasiController::class, 'destroy'])->name('destroy');
     });
+    // Absensi manual oleh admin (atur jam masuk/pulang, banyak mahasiswa sekaligus)
+    Route::prefix('admin/absensi-manual')->name('admin.absen_manual.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\AbsenManualController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\AbsenManualController::class, 'store'])->name('store');
+        Route::delete('/{mahasiswa}', [\App\Http\Controllers\AbsenManualController::class, 'destroy'])->name('destroy');
+    });
     Route::prefix('admin/evaluasi-narasumber')->name('admin.evaluasi_narasumber.')->group(function () {
         Route::get('/', [\App\Http\Controllers\EvaluasiNarasumberController::class, 'index'])->name('index');
         Route::get('/{kegiatan}/pdf', [\App\Http\Controllers\EvaluasiNarasumberController::class, 'exportPdf'])->name('pdf');

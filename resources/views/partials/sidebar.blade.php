@@ -103,7 +103,7 @@
                     $isPendidikanActive = request()->is('mahasiswa*') || request()->is('ruangan*') ||
                                           request()->is('room_sequences*') || request()->is('room_schedules*') ||
                                           request()->is('absensi*') || request()->is('admin.dispensasi*') ||
-                                          request()->is('admin/master-prodi*') || request()->is('admin/evaluasi-institusi*') ||
+                                          request()->is('admin/master-prodi*') || request()->is('admin/evaluasi-institusi*') || request()->is('admin/absensi-manual*') ||
                                           $evJenis === 'pendidikan' ||
                                           request()->is('admin/laporan-penilaian*');
                 @endphp
@@ -119,6 +119,7 @@
                         <a class="nav-link {{ request()->is('admin/master-prodi*') ? 'active' : '' }}" href="{{ route('admin.master_prodi.index') }}"><span class="sidebar-text">Program Studi</span></a>
                         <a class="nav-link {{ request()->is('admin.dispensasi*') ? 'active' : '' }}" href="{{ route('admin.dispensasi.index') }}"><span class="sidebar-text">Dispensasi</span></a>
                         <a class="nav-link {{ request()->is('absensi*') ? 'active' : '' }}" href="{{ route('absensi.index') }}"><span class="sidebar-text">Riwayat Absensi</span></a>
+                        <a class="nav-link {{ request()->is('admin/absensi-manual*') ? 'active' : '' }}" href="{{ route('admin.absen_manual.index') }}"><span class="sidebar-text">Absensi Manual</span></a>
                         <a class="nav-link {{ request()->is('admin/laporan-penilaian*') ? 'active' : '' }}" href="{{ route('admin.laporan_penilaian') }}"><span class="sidebar-text">Laporan Penilaian</span></a>
                         <a class="nav-link {{ request()->is('admin/setup-penilaian*') ? 'active' : '' }}" href="{{ route('admin.setup_penilaian') }}"><span class="sidebar-text">Setup Penilaian</span></a>
                         <a class="nav-link {{ request()->is('admin/evaluasi-institusi*') ? 'active' : '' }}" href="{{ route('admin.evaluasi_institusi') }}"><span class="sidebar-text">Evaluasi Institusi</span></a>
