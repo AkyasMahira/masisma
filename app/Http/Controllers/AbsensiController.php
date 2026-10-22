@@ -26,6 +26,73 @@ class AbsensiController extends Controller
     * absen masuk lagi di hari berikutnya. Diberi kelonggaran shift malam untuk
     * checkout pagi hari sampai jam 10. Sesi hangus TIDAK dapat kredit (jadi Alfa).
     */
+   /**
+    * Jadwal (shift & jam) mahasiswa untuk hari ini, atau null bila libur / tidak ada jadwal.
+    * @return array|null ['shift' => string, 'room_id' => int, 'start' => Carbon, 'end' => Carbon]
+    */
+   private function jadwalHariIni(Mahasiswa $mahasiswa, Carbon $now)
+   {
+       $today = $now->toDateString();
+       $seq = RoomSequence::where('mahasiswa_id', $mahasiswa->id)
+           ->where('start_date', '<=', $today)->where('end_date', '>=', $today)
+           ->with('ruangan')->first();
+       if (!$seq || !$seq->ruangan) return null;
+
+       if ($seq->ruangan->kategori === 'shift') {
+           $jadwal = ShiftSchedule::where('mahasiswa_id', $mahasiswa->id)->where('tanggal', $today)->first();
+           if (!$jadwal || strtolower($jadwal->shift_type) === 'libur') return null;
+           $shift = $jadwal->shift_type;
+       } else {
+           $day = $now->dayOfWeekIso;
+           if ($day > 5) return null;
+           $shift = $day == 5 ? 'Jumat' : 'Reguler';
+       }
+
+       $t = $this->getShiftTimes($shift, $now, $seq->ruangan->id);
+       if (empty($t['start']) || empty($t['end'])) return null;
+       return ['shift' => $shift, 'room_id' => $seq->ruangan->id, 'start' => $t['start'], 'end' => $t['end']];
+   }
+
+   /** Ada dispensasi terlambat hari ini yang masih menunggu ACC & belum ada absen masuk hari ini. */
+   private function dispenTerlambatPending(Mahasiswa $mahasiswa, Carbon $now)
+   {
+       $today = $now->toDateString();
+       $pending = Dispensasi::where('mahasiswa_id', $mahasiswa->id)
+           ->where('kategori', 'terlambat')->where('status', 'pending')
+           ->whereDate('tanggal_mulai', '<=', $today)->whereDate('tanggal_selesai', '>=', $today)
+           ->exists();
+       if (!$pending) return false;
+       return !Absensi::where('mahasiswa_id', $mahasiswa->id)->where('type', 'masuk')
+           ->whereDate('created_at', $today)->exists();
+   }
+
+   /**
+    * Buat absen masuk sementara "Dispen Terlambat (Pending)" (jam masuk = mulai shift) bila
+    * dispensasi terlambat hari ini belum di-ACC dan shift sudah dimulai. Saat ACC, jam masuk
+    * & pasangan absen pulangnya disesuaikan oleh DispensasiController.
+    */
+   /** Jadwal hari ini bila absen masuk sementara (dispensasi terlambat pending) boleh dibuat, selain itu null. */
+   private function jadwalMasukSementara(Mahasiswa $mahasiswa, Carbon $now)
+   {
+       if (!$this->dispenTerlambatPending($mahasiswa, $now)) return null;
+       $j = $this->jadwalHariIni($mahasiswa, $now);
+       if (!$j || $now->lt($j['start']) || $now->gt($j['end']->copy()->addHours(12))) return null;
+       return $j;
+   }
+
+   private function masukSementaraDispen(Mahasiswa $mahasiswa, Carbon $now)
+   {
+       $j = $this->jadwalMasukSementara($mahasiswa, $now);
+       if (!$j) return null;
+
+       return Absensi::create([
+           'mahasiswa_id' => $mahasiswa->id,
+           'jam_masuk' => $j['start'],
+           'type' => 'masuk',
+           'keterangan' => 'Dispen Terlambat (Pending)',
+       ]);
+   }
+
    private function sesiHangus($jamMasukStr, Carbon $now = null)
    {
        if (!$jamMasukStr) return false;
@@ -146,6 +213,9 @@ class AbsensiController extends Controller
                 }
             }
 
+            // Dispensasi terlambat menunggu ACC -> tombol dipakai untuk absen pulang
+            $data['dispenPending'] = !$data['absenHariIni'] && $this->jadwalMasukSementara($mahasiswa, $now) !== null;
+
             // Load Riwayat
             $data['riwayat'] = Absensi::where('mahasiswa_id', $mahasiswa->id)
                 ->orderBy('created_at', 'desc')->limit(10)->get();
@@ -216,6 +286,18 @@ if ($lastAbsen && $lastAbsen->type === 'masuk') {
     }
 }
 
+// Dispensasi terlambat hari ini masih menunggu ACC & belum ada absen masuk:
+// buat absen masuk sementara (jam mulai shift) supaya tetap bisa absen pulang.
+$dariDispenPending = false;
+if (!$isCheckout) {
+    $sementara = $this->masukSementaraDispen($mahasiswa, $now);
+    if ($sementara) {
+        $lastAbsen = $sementara;
+        $isCheckout = true;
+        $dariDispenPending = true;
+    }
+}
+
         // =====================================================================
         // SKENARIO KELUAR (PULANG)
         // =====================================================================
@@ -260,7 +342,10 @@ if ($lastAbsen && $lastAbsen->type === 'masuk') {
             $cekPulang = $this->validateStrictExit($shiftSaatMasuk, $jamMasuk, $now, $roomId);
             
             if (!$cekPulang['status']) {
-                return back()->with('error', $cekPulang['message']); 
+                if ($dariDispenPending) {
+                    return back()->with('success', 'Absen masuk sementara tercatat (dispensasi terlambat menunggu ACC). ' . $cekPulang['message']);
+                }
+                return back()->with('error', $cekPulang['message']);
             }
 
             // 5. VALIDASI LOKASI
@@ -284,7 +369,9 @@ if ($lastAbsen && $lastAbsen->type === 'masuk') {
                 'location_accuracy' => $request->acc,
             ]);
 
-            return back()->with('success', 'Absen PULANG Berhasil.');
+            return back()->with('success', $dariDispenPending
+                ? 'Absen PULANG Berhasil. Jam masuk menunggu ACC dispensasi terlambat.'
+                : 'Absen PULANG Berhasil.');
         }
 
         // =====================================================================

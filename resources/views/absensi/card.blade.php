@@ -336,7 +336,14 @@
                             $btnState = ($absenHariIni && $absenHariIni->type === 'masuk') ? 'keluar' : 'masuk'; 
                         @endphp
 
-                        @if($btnState == 'keluar')
+                        @if($btnState == 'masuk' && !empty($dispenPending))
+                            <div style="background:#FFFBEB; border:1px solid #FDE68A; color:#92400E; border-radius:12px; padding:10px 12px; font-size:.8rem; margin-bottom:10px;">
+                                <i class="bi bi-hourglass-split"></i> Dispensasi terlambat hari ini <b>menunggu ACC</b>. Anda tetap bisa absen pulang setelah jam shift selesai.
+                            </div>
+                            <button type="submit" class="btn-swipe grad-red" id="btn-submit" disabled>
+                                <i class="bi bi-box-arrow-right fs-4"></i> Checkout Pulang
+                            </button>
+                        @elseif($btnState == 'keluar')
                             <button type="submit" class="btn-swipe grad-red" id="btn-submit" disabled>
                                 <i class="bi bi-box-arrow-right fs-4"></i> Checkout Pulang
                             </button>
