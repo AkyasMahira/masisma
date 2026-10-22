@@ -52,6 +52,13 @@
         .materi-item .accordion-button:not(.collapsed) { background: var(--custom-maroon-light); color: var(--custom-maroon); }
         .materi-item .accordion-button:focus { box-shadow: 0 0 0 4px var(--custom-maroon-light); }
         .materi-no { width: 28px; height: 28px; border-radius: 8px; background: var(--custom-maroon); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; flex-shrink: 0; }
+        /* Skala penilaian */
+        .skala-chip { display: flex; gap: 8px; align-items: center; font-size: .8rem; font-weight: 600; color: var(--text-dark); padding: 6px 10px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 5px; }
+        .skala-chip b { min-width: 22px; height: 22px; border-radius: 6px; background: var(--custom-maroon); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: .75rem; }
+        .skala-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+        .skala-row .form-control { padding: 8px 10px; font-size: .85rem; }
+        .skala-row .sk-nilai { width: 64px; flex-shrink: 0; text-align: center; font-weight: 700; }
+        .skala-row .sk-label { flex: 1; min-width: 0; }
         .materi-section-title { font-size: 0.8rem; font-weight: 800; color: var(--text-dark); text-transform: uppercase; letter-spacing: 0.5px; margin: 24px 0 12px; padding-top: 20px; border-top: 1px dashed var(--border-color); }
     </style>
 
@@ -92,11 +99,46 @@
                                 @csrf
                                 <div class="mb-3">
                                     <label class="form-label-custom">Jenis Penilaian</label>
-                                    <select name="jenis_penilaian" class="form-select @error('jenis_penilaian') is-invalid @enderror">
-                                        <option value="centang" {{ old('jenis_penilaian', $setting->jenis_penilaian) == 'centang' ? 'selected' : '' }}>Centang (Kompeten / Tidak)</option>
-                                        <option value="skor" {{ old('jenis_penilaian', $setting->jenis_penilaian) == 'skor' ? 'selected' : '' }}>Skor Angka (0, 1, 2)</option>
+                                    @php
+                                        $jenisNow = old('jenis_penilaian', $setting->jenis_penilaian);
+                                        $skalaRows = old('skala', ($setting->jenis_penilaian === 'custom' && $setting->skala_json)
+                                            ? $setting->opsiSkala()
+                                            : \App\Models\KegiatanPenilaianSetting::PRESET['skor']);
+                                    @endphp
+                                    <select name="jenis_penilaian" id="jenisPenilaian" class="form-select @error('jenis_penilaian') is-invalid @enderror">
+                                        <option value="centang" {{ $jenisNow == 'centang' ? 'selected' : '' }}>Centang (Kompeten / Tidak)</option>
+                                        <option value="skor" {{ $jenisNow == 'skor' ? 'selected' : '' }}>Skor Angka (0, 1, 2)</option>
+                                        <option value="custom" {{ $jenisNow == 'custom' ? 'selected' : '' }}>Skala Custom (atur sendiri)</option>
                                     </select>
                                     @error('jenis_penilaian')
+                                        <div class="text-danger small mt-1">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div id="skalaPreset" class="skala-preview mb-3" style="{{ $jenisNow == 'custom' ? 'display:none' : '' }}">
+                                    @foreach(['centang', 'skor'] as $pk)
+                                        <div data-preset="{{ $pk }}" style="{{ $jenisNow == $pk ? '' : 'display:none' }}">
+                                            @foreach(\App\Models\KegiatanPenilaianSetting::PRESET[$pk] as $o)
+                                                <div class="skala-chip"><b>{{ $o['nilai'] }}</b> {{ $o['label'] }}</div>
+                                            @endforeach
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                <div id="skalaCustom" class="mb-3" style="{{ $jenisNow == 'custom' ? '' : 'display:none' }}">
+                                    <label class="form-label-custom">Pilihan Skor <span class="text-lowercase fw-semibold">(nilai &amp; keterangan)</span></label>
+                                    <div id="skalaRows">
+                                        @foreach(array_values($skalaRows) as $i => $o)
+                                            <div class="skala-row">
+                                                <input type="number" step="0.5" min="0" max="99" name="skala[{{ $i }}][nilai]" class="form-control sk-nilai" value="{{ \App\Models\KegiatanPenilaianSetting::fmt($o['nilai']) }}" placeholder="0" {{ $jenisNow == 'custom' ? '' : 'disabled' }} required>
+                                                <input type="text" maxlength="60" name="skala[{{ $i }}][label]" class="form-control sk-label" value="{{ $o['label'] }}" placeholder="Keterangan" {{ $jenisNow == 'custom' ? '' : 'disabled' }} required>
+                                                <button type="button" class="btn-remove-row sk-del" title="Hapus pilihan"><i class="bi bi-x-lg"></i></button>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <button type="button" id="skalaAdd" class="btn-outline-theme w-100 justify-content-center mt-1" style="padding:8px 12px;font-size:.8rem;"><i class="bi bi-plus-lg"></i> Tambah Pilihan</button>
+                                    <div class="small text-muted mt-2" id="skalaInfo"></div>
+                                    @error('skala')
                                         <div class="text-danger small mt-1">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -374,4 +416,55 @@
             </div>
         </div>
     </div>
+
+    <script>
+        (function () {
+            var sel = document.getElementById('jenisPenilaian');
+            var boxCustom = document.getElementById('skalaCustom');
+            var boxPreset = document.getElementById('skalaPreset');
+            var rows = document.getElementById('skalaRows');
+            var info = document.getElementById('skalaInfo');
+            if (!sel || !rows) return;
+
+            function renumber() {
+                var list = rows.querySelectorAll('.skala-row');
+                list.forEach(function (r, i) {
+                    r.querySelector('.sk-nilai').name = 'skala[' + i + '][nilai]';
+                    r.querySelector('.sk-label').name = 'skala[' + i + '][label]';
+                    r.querySelector('.sk-del').disabled = list.length <= 2;
+                    r.querySelector('.sk-del').style.opacity = list.length <= 2 ? .4 : 1;
+                });
+                document.getElementById('skalaAdd').style.display = list.length >= 10 ? 'none' : '';
+                var vals = Array.prototype.map.call(rows.querySelectorAll('.sk-nilai'), function (x) { return parseFloat(x.value); })
+                    .filter(function (v) { return !isNaN(v); });
+                info.innerHTML = list.length + ' pilihan' + (vals.length ? ' &middot; nilai maksimal per item <b>' + Math.max.apply(null, vals) + '</b>' : '');
+            }
+
+            function sync() {
+                var custom = sel.value === 'custom';
+                boxCustom.style.display = custom ? '' : 'none';
+                boxPreset.style.display = custom ? 'none' : '';
+                boxPreset.querySelectorAll('[data-preset]').forEach(function (d) { d.style.display = d.dataset.preset === sel.value ? '' : 'none'; });
+                rows.querySelectorAll('input').forEach(function (i) { i.disabled = !custom; });
+            }
+
+            document.getElementById('skalaAdd').addEventListener('click', function () {
+                var last = rows.querySelector('.skala-row:last-child');
+                var baru = last.cloneNode(true);
+                var lastVal = parseFloat(last.querySelector('.sk-nilai').value);
+                baru.querySelector('.sk-nilai').value = isNaN(lastVal) ? '' : lastVal + 1;
+                baru.querySelector('.sk-label').value = '';
+                rows.appendChild(baru);
+                renumber();
+                baru.querySelector('.sk-label').focus();
+            });
+            rows.addEventListener('click', function (e) {
+                var b = e.target.closest('.sk-del');
+                if (b && rows.querySelectorAll('.skala-row').length > 2) { b.closest('.skala-row').remove(); renumber(); }
+            });
+            rows.addEventListener('input', renumber);
+            sel.addEventListener('change', sync);
+            sync(); renumber();
+        })();
+    </script>
 @endsection

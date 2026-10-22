@@ -153,7 +153,8 @@ class RekapPenilaianController extends Controller
     public function cetakPdf($kegiatan_id, $peserta_id, $materi_id)
     {
         $kegiatan = Kegiatan::findOrFail($kegiatan_id);
-        $setting = $kegiatan->penilaianSetting;
+        $setting = $kegiatan->penilaianSetting
+            ?: new \App\Models\KegiatanPenilaianSetting(['jenis_penilaian' => 'centang', 'batas_lulus_persen' => 80]);
         $peserta = KegiatanPeserta::with(['instansi'])->where('kegiatan_id', $kegiatan_id)->findOrFail($peserta_id);
         $materi = KegiatanMateri::where('kegiatan_id', $kegiatan_id)->findOrFail($materi_id);
 

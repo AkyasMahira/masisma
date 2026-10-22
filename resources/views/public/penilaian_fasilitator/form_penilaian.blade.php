@@ -89,6 +89,10 @@
                 </p>
             </div>
 
+            @if($errors->any())
+                <div class="alert alert-danger border-0 rounded-4 mb-4"><i class="bi bi-exclamation-triangle-fill me-2"></i>{{ $errors->first() }}</div>
+            @endif
+
             <form action="{{ route('fasilitator.penilaian.submit', [$fasilitator->token_fasilitator, $materi->id, $peserta->id]) }}" method="POST">
                 @csrf
                 
@@ -96,8 +100,17 @@
                 <div class="form-card">
                     <div class="p-4 border-bottom bg-white d-flex flex-wrap gap-2 justify-content-between align-items-center">
                         <h5 class="fw-bold mb-0"><i class="bi bi-card-checklist me-2 text-muted"></i> Form Observasi</h5>
-                        <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-bold">Mode: {{ ucfirst($setting->jenis_penilaian) }}</span>
+                        <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-bold">Mode: {{ $setting->labelFormat() }}</span>
                     </div>
+                    @php $opsiSkala = $setting->opsiSkala(); @endphp
+                    @if($setting->jenis_penilaian != 'centang')
+                        <div class="px-4 py-3 border-bottom d-flex flex-wrap gap-2 small" style="background:#fffbfb;">
+                            <span class="fw-bold text-muted me-1">Keterangan skor:</span>
+                            @foreach($opsiSkala as $o)
+                                <span class="badge rounded-pill border text-dark bg-white fw-semibold px-3 py-2"><b style="color:var(--sindikat-maroon)">{{ \App\Models\KegiatanPenilaianSetting::fmt($o['nilai']) }}</b> = {{ $o['label'] }}</span>
+                            @endforeach
+                        </div>
+                    @endif
                     
                     <div class="table-responsive">
                         <table class="table table-custom table-hover">
@@ -138,12 +151,15 @@
                                                     </div>
                                                 </div>
                                             @else
+                                                {{-- Pilihan skor mengikuti skala di Setting Penilaian; default = skor tertinggi --}}
+                                                @php
+                                                    $cocok = $nilaiSaatIni !== null && in_array((float) $nilaiSaatIni, $setting->nilaiSah(), false);
+                                                @endphp
                                                 <select name="nilai[{{ $item->id }}]" class="form-select shadow-sm input-nilai" required>
-                                                    <option value="" disabled>-- Pilih Skor --</option>
-                                                    <option value="0" {{ $nilaiSaatIni === 0.00 ? 'selected' : '' }}>0 - Tidak Dilakukan</option>
-                                                    <option value="1" {{ $nilaiSaatIni === 1.00 ? 'selected' : '' }}>1 - Kurang Tepat</option>
-                                                    <!-- Nilai otomatis full 2 jika data null -->
-                                                    <option value="2" {{ ($nilaiSaatIni === 2.00 || $nilaiSaatIni === null) ? 'selected' : '' }}>2 - Tepat & Sempurna</option>
+                                                    <option value="" disabled {{ $nilaiSaatIni !== null && !$cocok ? 'selected' : '' }}>-- Pilih Skor --</option>
+                                                    @foreach(array_reverse($opsiSkala) as $oi => $o)
+                                                        <option value="{{ \App\Models\KegiatanPenilaianSetting::fmt($o['nilai']) }}" {{ ($cocok && abs($nilaiSaatIni - $o['nilai']) < 0.001) || ($nilaiSaatIni === null && $oi === 0) ? 'selected' : '' }}>{{ \App\Models\KegiatanPenilaianSetting::fmt($o['nilai']) }} - {{ $o['label'] }}</option>
+                                                    @endforeach
                                                 </select>
                                             @endif
                                         </td>
@@ -206,9 +222,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const convertedScoreEl = document.getElementById('converted-score');
 
     // Menentukan nilai maksimum per item berdasarkan jenis penilaian
-    // Mode centang max = 1, Mode dropdown max = 2
+    // = skor tertinggi pada skala yang dipakai (centang 1, skor 2, custom sesuai setting)
     const jenisPenilaian = "{{ $setting->jenis_penilaian }}";
-    const maxPerItem = jenisPenilaian === 'centang' ? 1 : 2;
+    const maxPerItem = {{ $setting->nilaiMaksPerItem() + 0 }};
     
     // Menghitung total skor maksimal keseluruhan
     const jumlahItem = {{ $items->count() }};

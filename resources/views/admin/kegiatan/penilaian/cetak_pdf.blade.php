@@ -245,23 +245,20 @@
                     <th rowspan="2" class="col-no">No</th>
                     <th rowspan="2" class="col-aspek">Aspek Observasi</th>
                     
-                    @if($setting->jenis_penilaian == 'centang')
-                        <th colspan="2">Penilaian</th>
-                    @else
-                        <th colspan="3">Penilaian</th>
-                    @endif
+                    @php
+                        $opsiSkala = $setting->opsiSkala();
+                        $nOpsi = count($opsiSkala);
+                        $lebarOpsi = $nOpsi == 2 ? 17 : max(6, (int) round(36 / $nOpsi));
+                        $spanTgl = (int) ceil(($nOpsi + 1) / 2);
+                    @endphp
+                    <th colspan="{{ $nOpsi }}">Penilaian</th>
                     
                     <th rowspan="2" class="col-catatan">Catatan</th>
                 </tr>
                 <tr>
-                    @if($setting->jenis_penilaian == 'centang')
-                        <th class="col-penilaian" style="width: 17%">Tidak Kompeten</th>
-                        <th class="col-penilaian" style="width: 17%">Kompeten</th>
-                    @else
-                        <th class="col-penilaian" style="width: 12%">Tidak Dilakukan<br>(0)</th>
-                        <th class="col-penilaian" style="width: 12%">Kurang Tepat<br>(1)</th>
-                        <th class="col-penilaian" style="width: 12%">Tepat Sempurna<br>(2)</th>
-                    @endif
+                    @foreach($opsiSkala as $o)
+                        <th class="col-penilaian" style="width: {{ $lebarOpsi }}%">{{ $o['label'] }}@if($setting->jenis_penilaian != 'centang')<br>({{ \App\Models\KegiatanPenilaianSetting::fmt($o['nilai']) }})@endif</th>
+                    @endforeach
                 </tr>
             </thead>
             <tbody>
@@ -271,14 +268,9 @@
                         <td class="col-no">{{ $i + 1 }}</td>
                         <td>{{ $item->aspek_tindakan }}</td>
                         
-                        @if($setting->jenis_penilaian == 'centang')
-                            <td class="check-mark">{{ $nilai === 0.00 ? '✓' : '' }}</td>
-                            <td class="check-mark">{{ $nilai === 1.00 ? '✓' : '' }}</td>
-                        @else
-                            <td class="check-mark">{{ $nilai === 0.00 ? '✓' : '' }}</td>
-                            <td class="check-mark">{{ $nilai === 1.00 ? '✓' : '' }}</td>
-                            <td class="check-mark">{{ $nilai === 2.00 ? '✓' : '' }}</td>
-                        @endif
+                        @foreach($opsiSkala as $o)
+                            <td class="check-mark">{{ $nilai !== null && abs($nilai - $o['nilai']) < 0.001 ? '✓' : '' }}</td>
+                        @endforeach
                         
                         <td></td>
                     </tr>
@@ -288,7 +280,7 @@
                     <td colspan="2">
                         TOTAL (&ge; {{ $setting->batas_lulus_persen ?? 80 }}% Kompeten)
                     </td>
-                    <td colspan="{{ $setting->jenis_penilaian == 'centang' ? '3' : '4' }}" style="text-align: center; font-style: italic;">
+                    <td colspan="{{ $nOpsi + 1 }}" style="text-align: center; font-style: italic;">
                         Total = {{ $persenSkill }}%
                     </td>
                 </tr>
@@ -303,12 +295,12 @@
                             <span class="box-check">{{ $statusLulus == 'Kompeten' ? '✓' : '' }}</span> Kompeten
                         </div>
                     </td>
-                    <td colspan="{{ $setting->jenis_penilaian == 'centang' ? '2' : '2' }}" style="padding: 10px; vertical-align: top;">
+                    <td colspan="{{ $spanTgl }}" style="padding: 10px; vertical-align: top;">
                         <div style="font-weight: bold; margin-bottom: 15px;">Tanggal Ujian:</div>
                         <div style="font-weight: bold;">Tanggal Penilaian:</div>
                         <div>{{ $ttd ? \Carbon\Carbon::parse($ttd->waktu_ttd)->translatedFormat('d F Y') : '-' }}</div>
                     </td>
-                    <td colspan="{{ $setting->jenis_penilaian == 'centang' ? '1' : '2' }}" style="padding: 10px; vertical-align: top; text-align: center;">
+                    <td colspan="{{ $nOpsi + 1 - $spanTgl }}" style="padding: 10px; vertical-align: top; text-align: center;">
                         <div style="font-weight: bold;">Paraf Instruktur/Nama:</div>
                         
                         <!-- TAMPILKAN QR CODE DARI API -->

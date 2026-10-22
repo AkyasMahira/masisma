@@ -120,6 +120,18 @@ $items = $materi->items()->get()->sortBy('urutan')->values();
             'tanda_tangan' => 'required|string',
         ]);
 
+        // Nilai harus salah satu pilihan pada skala penilaian kegiatan
+        $nilaiSah = $setting->nilaiSah();
+        foreach ($request->nilai as $nilai) {
+            $ada = false;
+            foreach ($nilaiSah as $v) {
+                if (abs((float) $nilai - $v) < 0.001) { $ada = true; break; }
+            }
+            if (!$ada) {
+                return back()->withInput()->withErrors(['nilai' => 'Ada nilai yang tidak sesuai skala penilaian. Muat ulang halaman lalu isi kembali.']);
+            }
+        }
+
         // Hanya item milik materi ini yang boleh disimpan
         $idItemValid = $materi->items()->pluck('id')->map(function ($id) {
             return (int) $id;
@@ -131,7 +143,7 @@ $items = $materi->items()->get()->sortBy('urutan')->values();
                     continue;
                 }
 
-                $nilaiAman = max(0, min((float) $nilai, $setting->nilaiMaksPerItem()));
+                $nilaiAman = round((float) $nilai, 1);
 
                 NilaiSkill::updateOrCreate(
                     [

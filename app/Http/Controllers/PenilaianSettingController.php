@@ -38,19 +38,55 @@ class PenilaianSettingController extends Controller
     public function storeSetting(Request $request, $kegiatan_id)
     {
         $request->validate([
-            'jenis_penilaian' => 'required|in:centang,skor',
+            'jenis_penilaian' => 'required|in:centang,skor,custom',
             'batas_lulus_persen' => 'required|numeric|min:1|max:100',
+            'skala' => 'required_if:jenis_penilaian,custom|array|min:2|max:10',
+            'skala.*.nilai' => 'required_if:jenis_penilaian,custom|numeric|min:0|max:99',
+            'skala.*.label' => 'required_if:jenis_penilaian,custom|string|max:60',
+        ], [
+            'skala.required_if' => 'Skala custom minimal berisi 2 pilihan.',
+            'skala.min' => 'Skala custom minimal berisi 2 pilihan.',
+            'skala.max' => 'Skala custom maksimal 10 pilihan.',
+            'skala.*.nilai.required_if' => 'Setiap pilihan skala wajib diisi nilainya.',
+            'skala.*.nilai.numeric' => 'Nilai skala harus berupa angka.',
+            'skala.*.nilai.max' => 'Nilai skala maksimal 99.',
+            'skala.*.label.required_if' => 'Setiap pilihan skala wajib diberi keterangan.',
         ]);
 
-        KegiatanPenilaianSetting::updateOrCreate(
-            ['kegiatan_id' => $kegiatan_id],
-            [
-                'jenis_penilaian' => $request->jenis_penilaian,
-                'batas_lulus_persen' => $request->batas_lulus_persen,
-            ]
-        );
+        $skala = null;
+        if ($request->jenis_penilaian === 'custom') {
+            $skala = [];
+            foreach (array_values($request->skala) as $row) {
+                $skala[] = ['nilai' => round((float) $row['nilai'], 1), 'label' => trim($row['label'])];
+            }
+            $nilaiList = array_column($skala, 'nilai');
+            if (count(array_unique(array_map('strval', $nilaiList))) !== count($nilaiList)) {
+                return back()->withInput()->withErrors(['skala' => 'Nilai pada skala custom tidak boleh ada yang sama.']);
+            }
+            if (max($nilaiList) <= 0) {
+                return back()->withInput()->withErrors(['skala' => 'Minimal satu pilihan harus bernilai lebih dari 0.']);
+            }
+            usort($skala, function ($a, $b) { return $a['nilai'] <=> $b['nilai']; });
+        }
 
-        return redirect()->back()->with('success', 'Format penilaian berhasil disimpan.');
+        $setting = KegiatanPenilaianSetting::firstOrNew(['kegiatan_id' => $kegiatan_id]);
+        $nilaiLama = $setting->exists ? $setting->nilaiSah() : [];
+
+        $setting->jenis_penilaian = $request->jenis_penilaian;
+        $setting->skala_json = $skala;
+        $setting->batas_lulus_persen = $request->batas_lulus_persen;
+        $setting->save();
+
+        $pesan = 'Format penilaian berhasil disimpan.';
+        if ($nilaiLama && $nilaiLama != $setting->nilaiSah()) {
+            $sudahDinilai = \App\Models\NilaiSkill::whereIn('item_penilaian_id',
+                ItemPenilaianSkill::where('kegiatan_id', $kegiatan_id)->pluck('id'))->count();
+            if ($sudahDinilai) {
+                $pesan .= ' Catatan: sudah ada ' . $sudahDinilai . ' nilai yang diinput dengan skala lama — persentase kelulusan dihitung ulang memakai nilai maksimum skala baru, jadi minta fasilitator meninjau ulang bila perlu.';
+            }
+        }
+
+        return redirect()->back()->with('success', $pesan);
     }
 
 public function storeMateri(Request $request, $kegiatan_id)
