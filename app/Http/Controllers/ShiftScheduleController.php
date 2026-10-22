@@ -162,10 +162,12 @@ class ShiftScheduleController extends Controller
             'end_date'   => 'required|date|after_or_equal:start_date',
         ]);
 
+        $lama = $sequence->replicate();
         $sequence->update([
             'start_date' => $data['start_date'],
             'end_date'   => $data['end_date'],
         ]);
+        ShiftSchedule::bersihkanSetelahUbahPeriode($lama, $sequence);
 
         return redirect()->route('shift_schedule.manage', $sequence->id)
             ->with('success', 'Rentang tanggal berhasil diperbarui. Silakan atur shift untuk tanggal baru bila ada.');

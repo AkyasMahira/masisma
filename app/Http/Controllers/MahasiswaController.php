@@ -177,7 +177,7 @@ class MahasiswaController extends Controller
             'sequences.*.end_date'   => 'required|date|after_or_equal:sequences.*.start_date',
             'shifts.*.tanggal'       => 'required|date',
             // FIX: Ubah validasi menjadi string agar menerima nama shift custom dari database
-            'shifts.*.shift_type'    => 'required|string', 
+            'shifts.*.shift_type'    => 'nullable|string', 
             'shifts.*.ruangan_id'    => 'required|exists:ruangans,id',
         ]);
 
@@ -201,6 +201,7 @@ class MahasiswaController extends Controller
 
             if ($request->has('shifts')) {
                 foreach ($request->shifts as $shift) {
+                    if (empty($shift['shift_type'])) continue; // belum diisi
                     $mahasiswa->shiftSchedules()->create([
                         'tanggal'    => $shift['tanggal'],
                         'shift_type' => $shift['shift_type'],

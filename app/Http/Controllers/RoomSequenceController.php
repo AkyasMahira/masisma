@@ -233,7 +233,9 @@ class RoomSequenceController extends Controller
             return back()->withErrors(['start_date' => 'Gagal! Tanggal bentrok dengan jadwal lain.'])->withInput();
         }
 
+        $lama = $sequence->replicate();
         $sequence->update($request->all());
+        \App\Models\ShiftSchedule::bersihkanSetelahUbahPeriode($lama, $sequence);
         $roomSyncService->syncRooms();
 
         return redirect()->route('room_sequences.index')->with('success', 'Jadwal diperbarui.');
@@ -256,6 +258,8 @@ class RoomSequenceController extends Controller
             if ($sequence->mahasiswa_id !== $mahasiswa->id) abort(403);
         }
 
+        // Shift harian di periode ini ikut dihapus agar tidak "nyangkut" ke periode baru
+        \App\Models\ShiftSchedule::hapusDalamPeriode($sequence);
         $sequence->delete();
         $roomSyncService->syncRooms();
 
