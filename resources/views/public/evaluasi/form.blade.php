@@ -48,9 +48,11 @@
         .unsur-q { font-weight: 600; font-size: 14.5px; margin-bottom: 14px; color: var(--text-dark); }
         .unsur-q .kode { color: var(--primary-color); font-weight: 700; margin-right: 4px; }
         .rating { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .rating input { position: absolute; opacity: 0; }
-        .rating label { cursor: pointer; text-align: center; border: 1px solid #cbd5e0; border-radius: 12px; padding: 12px 6px; font-size: 12.5px; font-weight: 600; color: var(--text-muted); transition: 0.2s; line-height: 1.25; background:#fff; }
-        .rating label .n { display: block; font-size: 20px; font-weight: 700; margin-bottom: 2px; }
+        .rating > div { position: relative; display: flex; }
+        .rating input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+        .rating label { flex: 1; margin: 0; min-height: 76px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; text-align: center; border: 1.5px solid #cbd5e0; border-radius: 12px; padding: 10px 6px; font-size: 12.5px; font-weight: 600; color: var(--text-muted); transition: 0.2s; line-height: 1.25; background:#fff; }
+        .rating label .n { display: block; font-size: 20px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+        .rating input:focus-visible + label { box-shadow: 0 0 0 3px rgba(124,19,22,.2); }
         .rating label:hover { border-color: var(--primary-color); background: var(--primary-light); }
         .rating input:checked + label { background: var(--primary-color); color: #fff; border-color: var(--primary-color); box-shadow: 0 4px 12px rgba(124,19,22,.25); }
 
@@ -164,7 +166,7 @@
             @foreach ($unsur as $u)
                 <div class="unsur-card">
                     <div class="unsur-q">
-                        @if($u->kode)<span class="kode">{{ $u->kode }}.</span>@endif {{ $u->pertanyaan }}
+                        {{ $u->pertanyaan }}
                     </div>
                     @if ($u->tipe === 'rating')
                         <div class="rating">
