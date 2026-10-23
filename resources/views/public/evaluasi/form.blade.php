@@ -59,6 +59,13 @@
 
         .alert-ultra { background:#fef2f2; border:1px solid #fee2e2; border-left:5px solid var(--primary-color); border-radius:12px; padding:16px 20px; margin-bottom:20px; }
         @media (max-width: 520px){ .rating { grid-template-columns: repeat(2, 1fr); } .header-inner { padding: 22px; } }
+        .resp-toggle { margin-bottom: 24px; }
+        .resp-toggle summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; padding: 14px 18px; border: 1px dashed #cbd5e1; border-radius: 14px; background: #fff; color: #334155; user-select: none; }
+        .resp-toggle summary::-webkit-details-marker { display: none; }
+        .resp-toggle summary .opt { font-size: 12px; font-weight: 500; color: #94a3b8; }
+        .resp-toggle summary .chev { margin-left: auto; font-size: 12px; color: #94a3b8; transition: transform .2s; }
+        .resp-toggle[open] summary { margin-bottom: 12px; border-style: solid; }
+        .resp-toggle[open] summary .chev { transform: rotate(180deg); }
     </style>
 </head>
 <body>
@@ -96,8 +103,14 @@
         <form action="{{ $actionUrl ?? route('evaluasi.public.store') }}" method="POST">
             @csrf
 
-            {{-- Identitas responden --}}
+            {{-- Identitas responden (pelatihan: disembunyikan, klik untuk mengisi) --}}
+            @php $respLipat = ($jenis ?? '') === 'pelatihan' && !empty($konteks); @endphp
+            @if($respLipat)
+            <details class="resp-toggle" {{ old('instansi') || old('kontak') || old('jenis_kelamin') || old('pendidikan') || old('umur') ? 'open' : '' }}>
+                <summary><i class="fas fa-user"></i> Data Responden <span class="opt">opsional — klik bila ingin mengisi</span><i class="fas fa-chevron-down chev"></i></summary>
+            @else
             <div class="section-title"><i class="fas fa-user"></i> Data Responden <span class="ml-2" style="font-size:12px;font-weight:500;color:var(--text-muted);">(opsional / boleh anonim)</span></div>
+            @endif
             <div class="input-card">
                 <div class="form-row">
                     {{-- Evaluasi pelatihan anonim: tanpa kolom nama --}}
@@ -139,6 +152,9 @@
                     </div>
                 </div>
             </div>
+            @if($respLipat)
+            </details>
+            @endif
 
             {{-- Penilaian unsur --}}
             <div class="section-title"><i class="fas fa-star-half-alt"></i> Penilaian Unsur Pelayanan</div>
