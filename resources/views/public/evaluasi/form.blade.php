@@ -100,10 +100,13 @@
             <div class="section-title"><i class="fas fa-user"></i> Data Responden <span class="ml-2" style="font-size:12px;font-weight:500;color:var(--text-muted);">(opsional / boleh anonim)</span></div>
             <div class="input-card">
                 <div class="form-row">
+                    {{-- Evaluasi pelatihan anonim: tanpa kolom nama --}}
+                    @if(($jenis ?? '') !== 'pelatihan')
                     <div class="col-md-6 mb-3">
                         <label class="field-label">Nama</label>
                         <input type="text" name="nama" class="form-control-ultra" value="{{ old('nama', $prefill['nama'] ?? '') }}" placeholder="Nama Anda">
                     </div>
+                    @endif
                     <div class="col-md-6 mb-3">
                         <label class="field-label">Instansi / Asal</label>
                         <input type="text" name="instansi" class="form-control-ultra" value="{{ old('instansi', $prefill['instansi'] ?? '') }}" placeholder="Instansi / unit kerja">
