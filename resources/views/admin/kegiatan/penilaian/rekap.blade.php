@@ -74,6 +74,14 @@
         .table-custom tbody tr.row-rank-1 > td:first-child { border-left: 5px solid #f59e0b; }
         .table-custom tbody tr.row-rank-2 > td:first-child { border-left: 5px solid #94a3b8; }
         .table-custom tbody tr.row-rank-3 > td:first-child { border-left: 5px solid #c2410c; }
+        .rank-btn { border: none; cursor: pointer; transition: transform .15s; }
+        .rank-btn:hover { transform: scale(1.08); }
+        button.rank-num { background: #f1f5f9; border-radius: 50px; padding: 4px 10px; }
+        button.rank-num:hover { background: var(--custom-maroon-light); color: var(--custom-maroon); }
+        .rk-table td { padding: 7px 10px; font-size: .88rem; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+        .rk-table tr.rk-sum td { font-weight: 800; background: #f8fafc; }
+        .rk-head { display: flex; align-items: center; gap: 14px; }
+        .rk-big { width: 58px; height: 58px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 900; flex-shrink: 0; background: #f1f5f9; color: #334155; }
         .rank-num { font-weight: 700; color: var(--text-muted); }
         .rank-label { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
         .rank-1-txt { color: #b45309; } .rank-2-txt { color: #475569; } .rank-3-txt { color: #c2410c; }
@@ -145,19 +153,47 @@
             return $row;
         });
 
-        // PERINGKAT: seluruh peserta yang sudah punya nilai, urut Nilai Akhir tertinggi;
-        // bila sama -> Rata-rata Skill -> Teori. Semua sama = peringkat sama (1, 1, 3, ...).
-        $kunci = function ($r) { return [(float) $r['nilai_akhir'], (float) $r['rata_rata_skill'], (float) $r['nilai_teori']]; };
+        // PERINGKAT UNIK (1, 2, 3, ... tanpa kembar) dari seluruh peserta yang sudah punya nilai.
+        // Urutan: Nilai Akhir -> Rata-rata Skill -> Nilai Teori -> jumlah materi selesai -> nama (abjad).
+        $kunci = function ($r) {
+            $selesai = collect($r['per_materi'])->where('lengkap', true)->count();
+            return [(float) $r['nilai_akhir'], (float) $r['rata_rata_skill'], (float) $r['nilai_teori'], $selesai];
+        };
         $urut = $rekap->filter(function ($r) { return $r['ada_nilai']; })->all();
-        uasort($urut, function ($a, $b) use ($kunci) { return $kunci($b) <=> $kunci($a); });
-        $peringkat = []; $prev = null; $posisi = 0; $rankNow = 0;
-        foreach ($urut as $k => $r) {
-            $posisi++;
-            if ($prev === null || $kunci($r) != $prev) $rankNow = $posisi;
-            $prev = $kunci($r);
-            $peringkat[$k] = $rankNow;
+        uasort($urut, function ($a, $b) use ($kunci) {
+            $c = $kunci($b) <=> $kunci($a);
+            return $c !== 0 ? $c : strnatcasecmp($a['nama'], $b['nama']);
+        });
+        $peringkat = []; $posisi = 0;
+        foreach ($urut as $k => $r) { $peringkat[$k] = ++$posisi; }
+        $jumlahDiperingkat = $posisi;
+        $hitungKembar = collect($urut)->countBy(function ($r) { return (string) $r['nilai_akhir']; });
+        $rekap = $rekap->map(function ($r, $k) use ($peringkat, $hitungKembar) {
+            $r['peringkat'] = $peringkat[$k] ?? null;
+            $r['kembar'] = $r['peringkat'] ? max(0, ($hitungKembar[(string) $r['nilai_akhir']] ?? 1) - 1) : 0;
+            return $r;
+        });
+
+        // Data rincian peringkat (modal saat peringkat diklik)
+        $detailPeringkat = [];
+        foreach ($rekap as $r) {
+            if (empty($r['peringkat'])) continue;
+            $materiRinci = [];
+            foreach ($materiDinilai as $m) {
+                $pm = $r['per_materi'][$m->id] ?? null;
+                $materiRinci[] = [
+                    'nama' => $m->nama_materi,
+                    'persen' => ($pm && $pm['terisi'] > 0) ? (float) $pm['persen'] : null,
+                    'lengkap' => $pm ? (bool) $pm['lengkap'] : false,
+                ];
+            }
+            $detailPeringkat[$r['id']] = [
+                'nama' => $r['nama'], 'instansi' => $r['instansi'], 'peringkat' => $r['peringkat'],
+                'teori' => $r['nilai_teori'], 'materi' => $materiRinci,
+                'total' => $r['total_skill'], 'rata' => $r['rata_rata_skill'], 'akhir' => $r['nilai_akhir'],
+                'final' => $r['final'], 'status' => $r['status_kelulusan'], 'kembar' => $r['kembar'],
+            ];
         }
-        $rekap = $rekap->map(function ($r, $k) use ($peringkat) { $r['peringkat'] = $peringkat[$k] ?? null; return $r; });
 
         // Filter nama / instansi / status (setelah peringkat dihitung)
         if (request('search')) {
@@ -383,9 +419,9 @@
                                 <td class="text-center text-muted fw-bold">{{ $i + 1 }}</td>
                                 <td class="text-center">
                                     @if(!empty($row['peringkat']) && $row['peringkat'] <= 3)
-                                        <span class="rank-medal rank-{{ $row['peringkat'] }}" title="Juara {{ $row['peringkat'] }}"><i class="bi bi-trophy-fill"></i> {{ $row['peringkat'] }}</span>
+                                        <button type="button" class="rank-btn rank-medal rank-{{ $row['peringkat'] }}" data-rank="{{ $row['id'] }}" title="Lihat rincian peringkat"><i class="bi bi-trophy-fill"></i> {{ $row['peringkat'] }}</button>
                                     @elseif(!empty($row['peringkat']))
-                                        <span class="rank-num">#{{ $row['peringkat'] }}</span>
+                                        <button type="button" class="rank-btn rank-num" data-rank="{{ $row['id'] }}" title="Lihat rincian peringkat">#{{ $row['peringkat'] }}</button>
                                     @else
                                         <span class="text-muted opacity-50">-</span>
                                     @endif
@@ -479,7 +515,69 @@
         </div>
     </div>
 
+    {{-- Modal rincian peringkat --}}
+    <div class="modal fade" id="modalPeringkat" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" style="border-radius:18px;">
+                <div class="modal-header">
+                    <div class="rk-head">
+                        <div class="rk-big" id="rkBig">1</div>
+                        <div>
+                            <div class="fw-bold text-dark" id="rkNama"></div>
+                            <div class="small text-muted" id="rkInstansi"></div>
+                            <div class="small fw-bold mt-1" id="rkPosisi"></div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="w-100 rk-table"><tbody id="rkBody"></tbody></table>
+                    <div class="small text-muted mt-3" id="rkCatatan"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        const detailPeringkat = @json($detailPeringkat);
+        const jumlahDiperingkat = {{ $jumlahDiperingkat }};
+        const pakaiPosttest = {{ $pakaiPosttest ? 'true' : 'false' }};
+        const fmt = v => (v === null || v === undefined) ? '-' : (Math.round(v * 100) / 100);
+        const esc = t => String(t).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+
+        document.addEventListener('click', function (e) {
+            const b = e.target.closest('[data-rank]');
+            if (!b) return;
+            const d = detailPeringkat[b.dataset.rank];
+            if (!d) return;
+            const big = document.getElementById('rkBig');
+            big.textContent = d.peringkat;
+            big.className = 'rk-big' + (d.peringkat <= 3 ? ' rank-' + d.peringkat : '');
+            document.getElementById('rkNama').textContent = d.nama;
+            document.getElementById('rkInstansi').textContent = d.instansi;
+            document.getElementById('rkPosisi').innerHTML = (d.peringkat <= 3 ? '<i class="bi bi-trophy-fill"></i> Juara ' + d.peringkat + ' &middot; ' : '')
+                + 'Peringkat ' + d.peringkat + ' dari ' + jumlahDiperingkat + ' peserta';
+
+            let h = '';
+            if (pakaiPosttest) h += '<tr><td>Nilai Teori (Post-Test)</td><td class="text-end fw-bold">' + (d.teori === null ? '<span class="text-danger">belum ada (0)</span>' : fmt(d.teori)) + '</td></tr>';
+            h += '<tr><td colspan="2" class="text-muted fw-bold pt-3" style="font-size:.75rem;text-transform:uppercase;">Nilai Skill per Materi</td></tr>';
+            d.materi.forEach(m => {
+                const v = m.persen === null ? '<span class="text-danger">belum dinilai (0)</span>' : fmt(m.persen) + '%' + (m.lengkap ? '' : ' <span class="text-warning small">(belum lengkap)</span>');
+                h += '<tr><td>' + esc(m.nama) + '</td><td class="text-end fw-bold" style="white-space:nowrap;">' + v + '</td></tr>';
+            });
+            h += '<tr class="rk-sum"><td>Total Skill</td><td class="text-end">' + fmt(d.total) + '</td></tr>';
+            h += '<tr class="rk-sum"><td>Rata-rata Skill <span class="fw-normal text-muted">(' + fmt(d.total) + ' / ' + d.materi.length + ' materi)</span></td><td class="text-end">' + fmt(d.rata) + '%</td></tr>';
+            h += '<tr class="rk-sum"><td>Nilai Akhir ' + (pakaiPosttest ? '<span class="fw-normal text-muted">((' + fmt(d.teori || 0) + ' + ' + fmt(d.rata) + ') / 2)</span>' : '<span class="fw-normal text-muted">(= Rata-rata Skill)</span>') + '</td><td class="text-end" style="color:var(--custom-maroon);font-size:1.05rem;">' + fmt(d.akhir) + '%</td></tr>';
+            document.getElementById('rkBody').innerHTML = h;
+
+            let cat = 'Status: <b>' + esc(d.status) + '</b>.';
+            if (!d.final) cat += ' Nilai ini <b>sementara</b> karena masih ada nilai yang belum diinput (dihitung 0).';
+            if (d.kembar > 0) cat += ' Ada ' + d.kembar + ' peserta lain dengan Nilai Akhir sama; urutan ditentukan Rata-rata Skill, lalu Nilai Teori, jumlah materi selesai, kemudian nama (abjad).';
+            document.getElementById('rkCatatan').innerHTML = cat;
+
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('modalPeringkat')).show();
+        });
+
         const exportHeader = @json($newExportHeader);
         const exportRows = @json($newExportRows);
 
