@@ -133,11 +133,11 @@
                                 </td>
                                 
                                 <td class="text-center">
-                                    <input form="form-nilai-{{ $p->id }}" type="number" name="nilai_pretest" class="form-control input-nilai shadow-sm" value="{{ optional($p->nilaiTeori)->nilai_pretest }}" min="0" max="100" placeholder="Belum">
+                                    <input form="form-nilai-{{ $p->id }}" type="number" step="0.01" inputmode="decimal" name="nilai_pretest" step="0.01" inputmode="decimal" class="form-control input-nilai shadow-sm" value="{{ optional($p->nilaiTeori)->nilai_pretest }}" min="0" max="100" placeholder="Belum">
                                 </td>
                                 
                                 <td class="text-center">
-                                    <input form="form-nilai-{{ $p->id }}" type="number" name="nilai_posttest" class="form-control input-nilai shadow-sm" value="{{ optional($p->nilaiTeori)->nilai_posttest }}" min="0" max="100" placeholder="Belum">
+                                    <input form="form-nilai-{{ $p->id }}" type="number" step="0.01" inputmode="decimal" name="nilai_posttest" step="0.01" inputmode="decimal" class="form-control input-nilai shadow-sm" value="{{ optional($p->nilaiTeori)->nilai_posttest }}" min="0" max="100" placeholder="Belum">
                                 </td>
                                 
                                 <td>

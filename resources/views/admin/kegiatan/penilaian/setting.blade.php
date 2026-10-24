@@ -147,7 +147,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label-custom">Batas Lulus Rata-rata (%)</label>
-                                    <input type="number" name="batas_lulus_persen" class="form-control @error('batas_lulus_persen') is-invalid @enderror" value="{{ old('batas_lulus_persen', $setting->batas_lulus_persen) }}" min="1" max="100">
+                                    <input type="number" step="0.01" name="batas_lulus_persen" class="form-control @error('batas_lulus_persen') is-invalid @enderror" value="{{ old('batas_lulus_persen', $setting->batas_lulus_persen) }}" min="1" max="100">
                                     @error('batas_lulus_persen')
                                         <div class="text-danger small mt-1">{{ $message }}</div>
                                     @enderror
