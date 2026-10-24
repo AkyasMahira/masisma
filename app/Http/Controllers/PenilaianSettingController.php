@@ -75,6 +75,9 @@ class PenilaianSettingController extends Controller
         $setting->jenis_penilaian = $request->jenis_penilaian;
         $setting->skala_json = $skala;
         $setting->batas_lulus_persen = $request->batas_lulus_persen;
+        if ($request->has('pakai_posttest')) {
+            $setting->pakai_posttest = $request->boolean('pakai_posttest');
+        }
         $setting->save();
 
         $pesan = 'Format penilaian berhasil disimpan.';

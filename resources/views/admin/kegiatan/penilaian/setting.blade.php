@@ -59,6 +59,9 @@
         .skala-row .form-control { padding: 8px 10px; font-size: .85rem; }
         .skala-row .sk-nilai { width: 64px; flex-shrink: 0; text-align: center; font-weight: 700; }
         .skala-row .sk-label { flex: 1; min-width: 0; }
+        .posttest-box { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 12px; }
+        .posttest-box .form-check-input { width: 2.4em; height: 1.25em; cursor: pointer; }
+        .posttest-box .form-check-input:checked { background-color: var(--custom-maroon); border-color: var(--custom-maroon); }
         .materi-section-title { font-size: 0.8rem; font-weight: 800; color: var(--text-dark); text-transform: uppercase; letter-spacing: 0.5px; margin: 24px 0 12px; padding-top: 20px; border-top: 1px dashed var(--border-color); }
     </style>
 
@@ -148,6 +151,14 @@
                                     @error('batas_lulus_persen')
                                         <div class="text-danger small mt-1">{{ $message }}</div>
                                     @enderror
+                                </div>
+                                <div class="mb-3 posttest-box">
+                                    <input type="hidden" name="pakai_posttest" value="0">
+                                    <label class="form-check form-switch m-0 d-flex align-items-center gap-2">
+                                        <input class="form-check-input m-0" type="checkbox" name="pakai_posttest" value="1" id="pakaiPosttest" {{ old('pakai_posttest', $setting->pakai_posttest ?? true) ? 'checked' : '' }}>
+                                        <span class="fw-bold" style="font-size:.85rem;">Pakai nilai Post-Test</span>
+                                    </label>
+                                    <div class="small text-muted mt-1" id="rumusPosttest"></div>
                                 </div>
                                 <button type="submit" class="btn-theme w-100"><i class="bi bi-check-lg me-1"></i> Simpan Format</button>
                             </form>
@@ -465,6 +476,10 @@
             rows.addEventListener('input', renumber);
             sel.addEventListener('change', sync);
             sync(); renumber();
+
+            var pt = document.getElementById('pakaiPosttest'), rumus = document.getElementById('rumusPosttest');
+            function syncPt() { rumus.textContent = 'Nilai akhir rekap = ' + (pt.checked ? '(Post-Test + Rata-rata Skill) / 2' : 'Rata-rata Skill saja'); }
+            pt.addEventListener('change', syncPt); syncPt();
         })();
     </script>
 @endsection
