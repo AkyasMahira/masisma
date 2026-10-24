@@ -72,9 +72,16 @@ class KegiatanPesertaController extends Controller
         ]);
         
         $peserta = KegiatanPeserta::findOrFail($id);
-        
+
+        // Instansi: pilih dari master, atau ketik instansi baru (dibuat di master bila belum ada)
+        $instansiId = $request->filled('instansi_id') ? (int) $request->instansi_id : null;
+        if ($request->filled('instansi_baru')) {
+            $instansiId = MasterInstansi::firstOrCreate(['nama_instansi' => trim($request->instansi_baru)])->id;
+        }
+
         // Update seluruh field baru dari form edit Modal LG
         $peserta->update([
+            'instansi_id' => $instansiId,
             'nama_lengkap_gelar' => $request->nama_lengkap_gelar,
             'nik' => $request->nik,
             'tempat_lahir' => $request->tempat_lahir,

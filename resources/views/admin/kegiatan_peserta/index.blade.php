@@ -528,18 +528,31 @@
                                 </div>
                             </div>
 
-                            @if($kegiatan->jenis_kegiatan == 'eksternal')
                                 <div class="card border-0 shadow-sm rounded-4">
                                     <div class="card-body p-4">
-                                        <h6 class="fw-bold border-bottom pb-3 mb-4 text-dark"><i class="bi bi-building-fill text-danger me-2"></i>Data Instansi (Eksternal)</h6>
+                                        <h6 class="fw-bold border-bottom pb-3 mb-4 text-dark"><i class="bi bi-building-fill text-danger me-2"></i>Data Instansi{{ $kegiatan->jenis_kegiatan == 'eksternal' ? ' (Eksternal)' : '' }}</h6>
                                         <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="filter-label">Instansi Asal</label>
+                                                <select name="instansi_id" class="form-select choices-edit-instansi">
+                                                    <option value="">— Tanpa instansi —</option>
+                                                    @foreach($instansi as $i)
+                                                        <option value="{{ $i->id }}" {{ (int) $p->instansi_id === (int) $i->id ? 'selected' : '' }}>{{ $i->nama_instansi }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="filter-label">Atau Instansi Baru <span class="text-muted fw-normal text-lowercase">(isi bila tidak ada di daftar)</span></label>
+                                                <input type="text" name="instansi_baru" class="form-control" placeholder="Nama instansi baru">
+                                            </div>
+                            @if($kegiatan->jenis_kegiatan == 'eksternal')
                                             <div class="col-md-6"><label class="filter-label">Email Instansi / PJ</label><input type="email" name="email_pj" class="form-control" value="{{ $p->email_pj }}"></div>
                                             <div class="col-md-6"><label class="filter-label">No HP PJ</label><input type="text" name="no_hp_pj" class="form-control" value="{{ $p->no_hp_pj }}"></div>
                                             <div class="col-md-12"><label class="filter-label">Alamat Instansi</label><textarea name="alamat_instansi" rows="2" class="form-control">{{ $p->alamat_instansi }}</textarea></div>
+                            @endif
                                         </div>
                                     </div>
                                 </div>
-                            @endif
 
                         </div>
                         <div class="modal-footer bg-white border-top">
@@ -712,6 +725,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             new Choices(document.getElementById('choices_instansi'), { searchEnabled: true, itemSelectText: '' });
             new Choices(document.getElementById('choices_ruangan'), { searchEnabled: true, itemSelectText: '' });
+            document.querySelectorAll('.choices-edit-instansi').forEach(el => new Choices(el, { searchEnabled: true, itemSelectText: '', shouldSort: false, searchResultLimit: 30 }));
 
             // Delete Swal
             document.querySelectorAll('.btn-delete-swal').forEach(button => {
