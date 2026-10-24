@@ -82,6 +82,9 @@
         .rk-table tr.rk-sum td { font-weight: 800; background: #f8fafc; }
         .rk-head { display: flex; align-items: center; gap: 14px; }
         .rk-big { width: 58px; height: 58px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 900; flex-shrink: 0; background: #f1f5f9; color: #334155; }
+        .rk-big.rank-1 { background: linear-gradient(135deg,#fde68a,#f59e0b); color: #78350f; }
+        .rk-big.rank-2 { background: linear-gradient(135deg,#f1f5f9,#94a3b8); color: #1e293b; }
+        .rk-big.rank-3 { background: linear-gradient(135deg,#fed7aa,#c2410c); color: #fff; }
         .rank-num { font-weight: 700; color: var(--text-muted); }
         .rank-label { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
         .rank-1-txt { color: #b45309; } .rank-2-txt { color: #475569; } .rank-3-txt { color: #c2410c; }
