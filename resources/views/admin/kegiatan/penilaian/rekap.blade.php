@@ -67,6 +67,13 @@
         .rank-1 { background: linear-gradient(135deg,#fde68a,#f59e0b); color: #78350f; box-shadow: 0 3px 10px rgba(245,158,11,.35); }
         .rank-2 { background: linear-gradient(135deg,#f1f5f9,#94a3b8); color: #1e293b; box-shadow: 0 3px 10px rgba(100,116,139,.3); }
         .rank-3 { background: linear-gradient(135deg,#fed7aa,#c2410c); color: #fff; box-shadow: 0 3px 10px rgba(194,65,12,.3); }
+        .table-custom tbody tr[class*="row-rank-"] > td { --bs-table-accent-bg: transparent; --bs-table-bg: transparent; }
+        .table-custom tbody tr.row-rank-1 > td { background-color: #fef3c7 !important; }
+        .table-custom tbody tr.row-rank-2 > td { background-color: #eef2f6 !important; }
+        .table-custom tbody tr.row-rank-3 > td { background-color: #ffedd5 !important; }
+        .table-custom tbody tr.row-rank-1 > td:first-child { border-left: 5px solid #f59e0b; }
+        .table-custom tbody tr.row-rank-2 > td:first-child { border-left: 5px solid #94a3b8; }
+        .table-custom tbody tr.row-rank-3 > td:first-child { border-left: 5px solid #c2410c; }
         .rank-num { font-weight: 700; color: var(--text-muted); }
         .rank-label { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
         .rank-1-txt { color: #b45309; } .rank-2-txt { color: #475569; } .rank-3-txt { color: #c2410c; }
@@ -100,8 +107,10 @@
                         $semuaSelesai = false;
                     }
                 }
+                $row['total_skill'] = round($totalPersenSkill, 2);
                 $row['rata_rata_skill'] = round($totalPersenSkill / $jumlahMateri, 2);
             } else {
+                $row['total_skill'] = 0;
                 $row['rata_rata_skill'] = 0;
             }
 
@@ -113,11 +122,15 @@
                 $semuaSelesai = false; // Jika belum ada nilai Teori/Post-Test, status jadi Belum Selesai
             }
 
-            // Hitung Nilai Akhir
+            // Hitung Nilai Akhir = (Rata-rata Skill + Teori) / 2 (atau Skill saja bila saklar Post-Test OFF).
+            // Selalu dihitung (nilai yang belum ada = 0) agar peringkat sementara tetap terlihat.
+            $row['nilai_teori'] = $nilaiTeori;
+            $row['nilai_akhir'] = $pakaiPosttest
+                ? round(((float) $nilaiTeori + $row['rata_rata_skill']) / 2, 2)
+                : $row['rata_rata_skill'];
+            $row['final'] = $semuaSelesai;
+            $row['ada_nilai'] = $row['total_skill'] > 0 || $nilaiTeori !== null;
             if ($semuaSelesai) {
-                $row['nilai_akhir'] = $pakaiPosttest
-                    ? round(($nilaiTeori + $row['rata_rata_skill']) / 2, 2)
-                    : $row['rata_rata_skill'];
                 
                 // LULUS JIKA Nilai Akhir >= Batas Lulus (85)
                 if ($row['nilai_akhir'] >= $batas) {
@@ -126,20 +139,22 @@
                     $row['status_kelulusan'] = 'Tidak Lulus';
                 }
             } else {
-                $row['nilai_akhir'] = 0;
                 $row['status_kelulusan'] = 'Belum Selesai Dinilai';
             }
 
             return $row;
         });
 
-        // PERINGKAT: dari seluruh peserta yang sudah selesai dinilai, urut Nilai Akhir tertinggi.
-        // Nilai sama = peringkat sama (1, 1, 3, ...).
+        // PERINGKAT: seluruh peserta yang sudah punya nilai, urut Nilai Akhir tertinggi;
+        // bila sama -> Rata-rata Skill -> Teori. Semua sama = peringkat sama (1, 1, 3, ...).
+        $kunci = function ($r) { return [(float) $r['nilai_akhir'], (float) $r['rata_rata_skill'], (float) $r['nilai_teori']]; };
+        $urut = $rekap->filter(function ($r) { return $r['ada_nilai']; })->all();
+        uasort($urut, function ($a, $b) use ($kunci) { return $kunci($b) <=> $kunci($a); });
         $peringkat = []; $prev = null; $posisi = 0; $rankNow = 0;
-        foreach ($rekap->filter(function ($r) { return $r['status_kelulusan'] !== 'Belum Selesai Dinilai'; })->sortByDesc('nilai_akhir') as $k => $r) {
+        foreach ($urut as $k => $r) {
             $posisi++;
-            if ($prev === null || (float) $r['nilai_akhir'] < $prev) $rankNow = $posisi;
-            $prev = (float) $r['nilai_akhir'];
+            if ($prev === null || $kunci($r) != $prev) $rankNow = $posisi;
+            $prev = $kunci($r);
             $peringkat[$k] = $rankNow;
         }
         $rekap = $rekap->map(function ($r, $k) use ($peringkat) { $r['peringkat'] = $peringkat[$k] ?? null; return $r; });
@@ -158,7 +173,7 @@
         }
 
         // 3. FITUR SORTING (Mengurutkan berdasarkan Nilai Akhir)
-        $sort = request('sort', 'default');
+        $sort = request('sort', 'peringkat');
         if ($sort == 'peringkat') {
             $rekap = $rekap->sortBy(function ($r) { return $r['peringkat'] ?? PHP_INT_MAX; })->values();
         } elseif ($sort == 'rata_desc') {
@@ -176,7 +191,7 @@
         $totalLulus = $rekap->where('status_kelulusan', 'Lulus')->count();
         $totalTidakLulus = $rekap->where('status_kelulusan', 'Tidak Lulus')->count();
         $totalBelum = $rekap->where('status_kelulusan', 'Belum Selesai Dinilai')->count();
-        $jumlahKolom = ($pakaiPosttest ? 8 : 7) + $materiDinilai->count();
+        $jumlahKolom = ($pakaiPosttest ? 9 : 8) + $materiDinilai->count();
 
         // 5. REKONSTRUKSI DATA EXCEL (Agar Kolom Tabel dan Excel Presisi Sama)
         $newExportHeader = ['No', 'Peringkat', 'Nama Peserta', 'Instansi'];
@@ -184,6 +199,7 @@
         foreach($materiDinilai as $m) {
             $newExportHeader[] = $m->nama_materi;
         }
+        $newExportHeader[] = 'Total Skill';
         $newExportHeader[] = 'Rata-rata Skill';
         $newExportHeader[] = $pakaiPosttest ? 'Nilai Akhir (Teori+Skill)/2' : 'Nilai Akhir (Skill)';
         $newExportHeader[] = 'Status Kelulusan';
@@ -201,8 +217,9 @@
                 $pm = $row['per_materi'][$m->id] ?? null;
                 $rowData[] = ($pm && isset($pm['persen'])) ? $pm['persen'].'%' : '-';
             }
-            $rowData[] = $row['rata_rata_skill'] . '%';
-            $rowData[] = $row['nilai_akhir'] > 0 ? $row['nilai_akhir'] . '%' : '-';
+            $rowData[] = $row['total_skill'];
+            $rowData[] = $row['rata_rata_skill'];
+            $rowData[] = $row['ada_nilai'] ? $row['nilai_akhir'] . ($row['final'] ? '' : ' (sementara)') : '-';
             $rowData[] = $row['status_kelulusan'];
             $newExportRows[] = $rowData;
         }
@@ -325,7 +342,6 @@
                     <div class="col-xl-2 col-md-6">
                         <label class="filter-label">Urutkan Berdasarkan</label>
                         <select name="sort" class="form-select" onchange="this.form.submit()">
-                            <option value="default">Default</option>
                             <option value="peringkat" {{ request('sort') == 'peringkat' ? 'selected' : '' }}>Peringkat (Juara 1, 2, 3 ...)</option>
                             <option value="rata_desc" {{ request('sort') == 'rata_desc' ? 'selected' : '' }}>Nilai Akhir Tertinggi</option>
                             <option value="rata_asc" {{ request('sort') == 'rata_asc' ? 'selected' : '' }}>Nilai Akhir Terendah</option>
@@ -355,6 +371,7 @@
                                 @foreach($materiDinilai as $m)
                                     <th class="text-center th-materi">{{ $m->nama_materi }}<br><span class="fw-medium text-lowercase opacity-75">(% skill)</span></th>
                                 @endforeach
+                                <th class="text-center">Total<br><span class="fw-medium text-lowercase opacity-75">(Skill)</span></th>
                                 <th class="text-center">Rata-rata<br><span class="fw-medium text-lowercase opacity-75">(Skill)</span></th>
                                 <th class="text-center">Nilai Akhir<br><span class="fw-medium text-lowercase opacity-75">{{ $pakaiPosttest ? '(Teori+Skill) / 2' : '(Skill)' }}</span></th>
                                 <th class="text-center">Status Kelulusan</th>
@@ -362,7 +379,7 @@
                         </thead>
                         <tbody>
                             @forelse($rekap as $i => $row)
-                            <tr>
+                            <tr class="{{ !empty($row['peringkat']) && $row['peringkat'] <= 3 ? 'row-rank-' . $row['peringkat'] : '' }}">
                                 <td class="text-center text-muted fw-bold">{{ $i + 1 }}</td>
                                 <td class="text-center">
                                     @if(!empty($row['peringkat']) && $row['peringkat'] <= 3)
@@ -412,17 +429,26 @@
                                     </td>
                                 @endforeach
 
-                                {{-- Rata-Rata Skill --}}
+                                {{-- Total Skill (jumlah % semua materi) --}}
+                                <td class="text-center fw-bold text-dark">{{ $row['total_skill'] + 0 }}</td>
+
+                                {{-- Rata-Rata Skill = Total / jumlah materi --}}
                                 <td class="text-center">
-                                    <span class="badge bg-light text-dark border px-3 py-2 fs-6">{{ $row['rata_rata_skill'] }}%</span>
+                                    <span class="badge bg-light text-dark border px-3 py-2 fs-6" title="{{ $row['total_skill'] + 0 }} / {{ $materiDinilai->count() }} materi">{{ $row['rata_rata_skill'] }}%</span>
                                 </td>
 
-                                {{-- Nilai Akhir Final --}}
+                                {{-- Nilai Akhir --}}
                                 <td class="text-center">
-                                    @if($row['nilai_akhir'] > 0)
+                                    @if($row['ada_nilai'] && $row['final'])
                                         <span class="badge {{ ((float)$row['nilai_akhir'] >= $batas) ? 'bg-success' : 'bg-danger' }} px-3 py-2 fs-6">{{ $row['nilai_akhir'] }}%</span>
+                                    @elseif($row['ada_nilai'])
+                                        <span class="badge bg-light text-muted border px-3 py-2 fs-6" title="Sementara — masih ada nilai yang belum diinput">{{ $row['nilai_akhir'] }}%</span>
+                                        <div class="small text-muted fst-italic mt-1">sementara</div>
                                     @else
                                         <span class="text-muted opacity-50">-</span>
+                                    @endif
+                                    @if($pakaiPosttest && $row['ada_nilai'])
+                                        <div class="small text-muted mt-1" style="white-space:nowrap;">({{ $row['nilai_teori'] !== null ? $row['nilai_teori'] + 0 : 0 }} + {{ $row['rata_rata_skill'] }}) / 2</div>
                                     @endif
                                 </td>
 
