@@ -63,6 +63,13 @@
         .btn-pdf-mini { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: #fef1f2; color: var(--custom-maroon); border: 1px solid #fecaca; text-decoration: none !important; margin-left: 8px; font-size: 0.9rem; transition: 0.2s; }
         .btn-pdf-mini:hover { background: var(--custom-maroon); color: #fff; border-color: var(--custom-maroon); }
         
+        .rank-medal { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 50px; font-weight: 800; font-size: .85rem; white-space: nowrap; }
+        .rank-1 { background: linear-gradient(135deg,#fde68a,#f59e0b); color: #78350f; box-shadow: 0 3px 10px rgba(245,158,11,.35); }
+        .rank-2 { background: linear-gradient(135deg,#f1f5f9,#94a3b8); color: #1e293b; box-shadow: 0 3px 10px rgba(100,116,139,.3); }
+        .rank-3 { background: linear-gradient(135deg,#fed7aa,#c2410c); color: #fff; box-shadow: 0 3px 10px rgba(194,65,12,.3); }
+        .rank-num { font-weight: 700; color: var(--text-muted); }
+        .rank-label { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+        .rank-1-txt { color: #b45309; } .rank-2-txt { color: #475569; } .rank-3-txt { color: #c2410c; }
         .posttest-switch { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 8px 14px; }
         .posttest-switch .form-check-input { width: 2.4em; height: 1.25em; cursor: pointer; }
         .posttest-switch .form-check-input:checked { background-color: var(--custom-maroon); border-color: var(--custom-maroon); }
@@ -126,14 +133,35 @@
             return $row;
         });
 
-        // Filter status kelulusan (memakai status final di atas)
+        // PERINGKAT: dari seluruh peserta yang sudah selesai dinilai, urut Nilai Akhir tertinggi.
+        // Nilai sama = peringkat sama (1, 1, 3, ...).
+        $peringkat = []; $prev = null; $posisi = 0; $rankNow = 0;
+        foreach ($rekap->filter(function ($r) { return $r['status_kelulusan'] !== 'Belum Selesai Dinilai'; })->sortByDesc('nilai_akhir') as $k => $r) {
+            $posisi++;
+            if ($prev === null || (float) $r['nilai_akhir'] < $prev) $rankNow = $posisi;
+            $prev = (float) $r['nilai_akhir'];
+            $peringkat[$k] = $rankNow;
+        }
+        $rekap = $rekap->map(function ($r, $k) use ($peringkat) { $r['peringkat'] = $peringkat[$k] ?? null; return $r; });
+
+        // Filter nama / instansi / status (setelah peringkat dihitung)
+        if (request('search')) {
+            $cari = mb_strtolower(request('search'));
+            $rekap = $rekap->filter(function ($r) use ($cari) { return mb_strpos(mb_strtolower($r['nama']), $cari) !== false; });
+        }
+        if (request('instansi_id')) {
+            $rekap = $rekap->where('instansi_id', (int) request('instansi_id'));
+        }
+        $rekap = $rekap->values();
         if (request('status_kelulusan')) {
             $rekap = $rekap->where('status_kelulusan', request('status_kelulusan'))->values();
         }
 
         // 3. FITUR SORTING (Mengurutkan berdasarkan Nilai Akhir)
         $sort = request('sort', 'default');
-        if ($sort == 'rata_desc') {
+        if ($sort == 'peringkat') {
+            $rekap = $rekap->sortBy(function ($r) { return $r['peringkat'] ?? PHP_INT_MAX; })->values();
+        } elseif ($sort == 'rata_desc') {
             $rekap = $rekap->sortByDesc('nilai_akhir')->values();
         } elseif ($sort == 'rata_asc') {
             $rekap = $rekap->sortBy('nilai_akhir')->values();
@@ -148,10 +176,10 @@
         $totalLulus = $rekap->where('status_kelulusan', 'Lulus')->count();
         $totalTidakLulus = $rekap->where('status_kelulusan', 'Tidak Lulus')->count();
         $totalBelum = $rekap->where('status_kelulusan', 'Belum Selesai Dinilai')->count();
-        $jumlahKolom = ($pakaiPosttest ? 7 : 6) + $materiDinilai->count();
+        $jumlahKolom = ($pakaiPosttest ? 8 : 7) + $materiDinilai->count();
 
         // 5. REKONSTRUKSI DATA EXCEL (Agar Kolom Tabel dan Excel Presisi Sama)
-        $newExportHeader = ['No', 'Nama Peserta', 'Instansi'];
+        $newExportHeader = ['No', 'Peringkat', 'Nama Peserta', 'Instansi'];
         if ($pakaiPosttest) $newExportHeader[] = 'Nilai Teori (Post-Test)';
         foreach($materiDinilai as $m) {
             $newExportHeader[] = $m->nama_materi;
@@ -164,6 +192,7 @@
         foreach($rekap as $i => $row) {
             $rowData = [
                 $i + 1,
+                $row['peringkat'] ?? '-',
                 $row['nama'],
                 $row['instansi'],
             ];
@@ -297,6 +326,7 @@
                         <label class="filter-label">Urutkan Berdasarkan</label>
                         <select name="sort" class="form-select" onchange="this.form.submit()">
                             <option value="default">Default</option>
+                            <option value="peringkat" {{ request('sort') == 'peringkat' ? 'selected' : '' }}>Peringkat (Juara 1, 2, 3 ...)</option>
                             <option value="rata_desc" {{ request('sort') == 'rata_desc' ? 'selected' : '' }}>Nilai Akhir Tertinggi</option>
                             <option value="rata_asc" {{ request('sort') == 'rata_asc' ? 'selected' : '' }}>Nilai Akhir Terendah</option>
                             <option value="nama_asc" {{ request('sort') == 'nama_asc' ? 'selected' : '' }}>Nama (A - Z)</option>
@@ -316,6 +346,7 @@
                         <thead>
                             <tr>
                                 <th class="text-center" width="5%">No</th>
+                                <th class="text-center">Peringkat</th>
                                 <th>Nama Peserta</th>
                                 <th>Instansi</th>
                                 @if($pakaiPosttest)
@@ -333,8 +364,20 @@
                             @forelse($rekap as $i => $row)
                             <tr>
                                 <td class="text-center text-muted fw-bold">{{ $i + 1 }}</td>
+                                <td class="text-center">
+                                    @if(!empty($row['peringkat']) && $row['peringkat'] <= 3)
+                                        <span class="rank-medal rank-{{ $row['peringkat'] }}" title="Juara {{ $row['peringkat'] }}"><i class="bi bi-trophy-fill"></i> {{ $row['peringkat'] }}</span>
+                                    @elseif(!empty($row['peringkat']))
+                                        <span class="rank-num">#{{ $row['peringkat'] }}</span>
+                                    @else
+                                        <span class="text-muted opacity-50">-</span>
+                                    @endif
+                                </td>
                                 <td>
                                     <div class="fw-bold text-dark" style="font-size: 0.95rem;">{{ $row['nama'] }}</div>
+                                    @if(!empty($row['peringkat']) && $row['peringkat'] <= 3)
+                                        <div class="rank-label rank-{{ $row['peringkat'] }}-txt">Juara {{ $row['peringkat'] }}</div>
+                                    @endif
                                 </td>
                                 <td>
                                     <div class="text-muted small fw-semibold"><i class="bi bi-building me-1"></i> {{ $row['instansi'] }}</div>

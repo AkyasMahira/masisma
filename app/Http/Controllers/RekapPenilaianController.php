@@ -49,12 +49,7 @@ class RekapPenilaianController extends Controller
         $query = KegiatanPeserta::with(['instansi', 'nilaiTeori', 'nilaiSkill'])
             ->where('kegiatan_id', $kegiatan_id);
 
-        if ($request->search) {
-            $query->where('nama_lengkap_gelar', 'like', '%' . $request->search . '%');
-        }
-        if ($request->instansi_id) {
-            $query->where('instansi_id', $request->instansi_id);
-        }
+        // Filter nama / instansi dilakukan di view SETELAH peringkat dihitung dari seluruh peserta
         // status_kelulusan difilter setelah dihitung (lihat di bawah)
 
         $pesertaList = $query->orderBy('nama_lengkap_gelar', 'asc')->get();
@@ -107,6 +102,7 @@ class RekapPenilaianController extends Controller
                 'id' => $p->id,
                 'nama' => $p->nama_lengkap_gelar,
                 'instansi' => $p->instansi->nama_instansi ?? 'Internal RS',
+                'instansi_id' => $p->instansi_id,
                 'nilai_posttest' => $posttest,
                 'posttest_lulus' => $posttestLulus,
                 'per_materi' => $perMateri,
