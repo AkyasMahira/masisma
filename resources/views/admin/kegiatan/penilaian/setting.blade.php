@@ -160,6 +160,14 @@
                                     </label>
                                     <div class="small text-muted mt-1" id="rumusPosttest"></div>
                                 </div>
+                                <div class="mb-3 posttest-box">
+                                    <input type="hidden" name="sertifikat_halaman_2" value="0">
+                                    <label class="form-check form-switch m-0 d-flex align-items-center gap-2">
+                                        <input class="form-check-input m-0" type="checkbox" name="sertifikat_halaman_2" value="1" {{ old('sertifikat_halaman_2', $setting->sertifikat_halaman_2 ?? true) ? 'checked' : '' }}>
+                                        <span class="fw-bold" style="font-size:.85rem;">Sertifikat halaman 2</span>
+                                    </label>
+                                    <div class="small text-muted mt-1">Halaman belakang berisi tabel materi &amp; JP (materi yang "Msk Sertifikat").</div>
+                                </div>
                                 <button type="submit" class="btn-theme w-100"><i class="bi bi-check-lg me-1"></i> Simpan Format</button>
                             </form>
                         </div>

@@ -78,6 +78,9 @@ class PenilaianSettingController extends Controller
         if ($request->has('pakai_posttest')) {
             $setting->pakai_posttest = $request->boolean('pakai_posttest');
         }
+        if ($request->has('sertifikat_halaman_2')) {
+            $setting->sertifikat_halaman_2 = $request->boolean('sertifikat_halaman_2');
+        }
         $setting->save();
 
         $pesan = 'Format penilaian berhasil disimpan.';

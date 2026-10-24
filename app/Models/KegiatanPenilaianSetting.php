@@ -8,9 +8,9 @@ class KegiatanPenilaianSetting extends Model
 {
     protected $table = 'kegiatan_penilaian_settings';
 
-    protected $fillable = ['kegiatan_id', 'jenis_penilaian', 'skala_json', 'batas_lulus_persen', 'pakai_posttest'];
+    protected $fillable = ['kegiatan_id', 'jenis_penilaian', 'skala_json', 'batas_lulus_persen', 'pakai_posttest', 'sertifikat_halaman_2'];
 
-    protected $casts = ['skala_json' => 'array', 'pakai_posttest' => 'boolean'];
+    protected $casts = ['skala_json' => 'array', 'pakai_posttest' => 'boolean', 'sertifikat_halaman_2' => 'boolean'];
 
     const PRESET = [
         'centang' => [['nilai' => 0, 'label' => 'Tidak Kompeten'], ['nilai' => 1, 'label' => 'Kompeten']],

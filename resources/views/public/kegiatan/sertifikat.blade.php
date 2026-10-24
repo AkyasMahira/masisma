@@ -93,6 +93,7 @@
             margin-bottom: 20px;
             page-break-after: always;
         }
+        .cert-container:last-of-type { page-break-after: auto; }
 
         /* =========================================
            ORNAMEN SUDUT (MEMAKAI WARNA TEMA DINAMIS)
@@ -358,6 +359,8 @@
 
 
     <!-- ================= HALAMAN 2 (BELAKANG / TABEL MATERI) ================= -->
+    @php $setSert = $peserta->kegiatan->penilaianSetting; @endphp
+    @if(!$setSert || $setSert->sertifikat_halaman_2)
     <div class="cert-container">
         <div class="ornament-tl"></div>
         <div class="ornament-br"></div>
@@ -444,6 +447,7 @@
 
         </div>
     </div>
+    @endif
 
 </body>
 </html>

@@ -489,7 +489,8 @@
                         <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i> Edit Data Peserta</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
-                    <form action="{{ route('admin.kegiatan.peserta.update', [$kegiatan->id, $p->id]) }}" method="POST">
+                    {{-- form dibuat flex agar modal-body bisa di-scroll di dalam modal-dialog-scrollable --}}
+                    <form action="{{ route('admin.kegiatan.peserta.update', [$kegiatan->id, $p->id]) }}" method="POST" class="d-flex flex-column" style="min-height:0; overflow:hidden; flex:1 1 auto;">
                         @csrf @method('PUT')
                         <div class="modal-body p-4 bg-light">
                             
