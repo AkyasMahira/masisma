@@ -108,6 +108,10 @@ class RekapPenilaianController extends Controller
                 'per_materi' => $perMateri,
                 'rata_rata' => count($persenLengkap) ? round(array_sum($persenLengkap) / count($persenLengkap), 2) : null,
                 'status_kelulusan' => $status,
+                // Waktu nilai pertama kali diinput (created_at, tidak berubah walau nilai diedit)
+                'waktu_skill' => optional($p->nilaiSkill->max('created_at'))->format('Y-m-d H:i:s'),
+                'waktu_teori' => ($p->nilaiTeori && $p->nilaiTeori->nilai_posttest !== null)
+                    ? optional($p->nilaiTeori->created_at)->format('Y-m-d H:i:s') : null,
             ];
         });
 

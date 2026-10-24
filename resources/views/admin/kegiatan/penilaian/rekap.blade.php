@@ -157,7 +157,13 @@
         });
 
         // PERINGKAT UNIK (1, 2, 3, ... tanpa kembar) dari seluruh peserta yang sudah punya nilai.
-        // Urutan: Nilai Akhir -> Rata-rata Skill -> Nilai Teori -> jumlah materi selesai -> nama (abjad).
+        // Urutan: Nilai Akhir -> Rata-rata Skill -> Nilai Teori -> jumlah materi selesai
+        //         -> waktu input nilai (lebih dulu lengkap = lebih tinggi) -> nama (abjad).
+        $rekap = $rekap->map(function ($r) use ($pakaiPosttest) {
+            $w = array_filter([$r['waktu_skill'] ?? null, $pakaiPosttest ? ($r['waktu_teori'] ?? null) : null]);
+            $r['waktu_input'] = $w ? max($w) : null;
+            return $r;
+        });
         $kunci = function ($r) {
             $selesai = collect($r['per_materi'])->where('lengkap', true)->count();
             return [(float) $r['nilai_akhir'], (float) $r['rata_rata_skill'], (float) $r['nilai_teori'], $selesai];
@@ -165,7 +171,10 @@
         $urut = $rekap->filter(function ($r) { return $r['ada_nilai']; })->all();
         uasort($urut, function ($a, $b) use ($kunci) {
             $c = $kunci($b) <=> $kunci($a);
-            return $c !== 0 ? $c : strnatcasecmp($a['nama'], $b['nama']);
+            if ($c !== 0) return $c;
+            $wa = $a['waktu_input'] ?: '9999'; $wb = $b['waktu_input'] ?: '9999';
+            if ($wa !== $wb) return strcmp($wa, $wb);
+            return strnatcasecmp($a['nama'], $b['nama']);
         });
         $peringkat = []; $posisi = 0;
         foreach ($urut as $k => $r) { $peringkat[$k] = ++$posisi; }
@@ -195,6 +204,7 @@
                 'teori' => $r['nilai_teori'], 'materi' => $materiRinci,
                 'total' => $r['total_skill'], 'rata' => $r['rata_rata_skill'], 'akhir' => $r['nilai_akhir'],
                 'final' => $r['final'], 'status' => $r['status_kelulusan'], 'kembar' => $r['kembar'],
+                'waktu' => $r['waktu_input'] ? \Carbon\Carbon::parse($r['waktu_input'])->translatedFormat('d M Y, H:i:s') : null,
             ];
         }
 
@@ -575,7 +585,8 @@
 
             let cat = 'Status: <b>' + esc(d.status) + '</b>.';
             if (!d.final) cat += ' Nilai ini <b>sementara</b> karena masih ada nilai yang belum diinput (dihitung 0).';
-            if (d.kembar > 0) cat += ' Ada ' + d.kembar + ' peserta lain dengan Nilai Akhir sama; urutan ditentukan Rata-rata Skill, lalu Nilai Teori, jumlah materi selesai, kemudian nama (abjad).';
+            if (d.waktu) cat += '<br>Nilai terakhir diinput: <b>' + esc(d.waktu) + '</b>.';
+            if (d.kembar > 0) cat += '<br>Ada ' + d.kembar + ' peserta lain dengan Nilai Akhir sama; urutan ditentukan Rata-rata Skill, lalu Nilai Teori, jumlah materi selesai, kemudian <b>waktu input nilai</b> (lebih dulu lengkap = lebih tinggi), terakhir nama (abjad).';
             document.getElementById('rkCatatan').innerHTML = cat;
 
             bootstrap.Modal.getOrCreateInstance(document.getElementById('modalPeringkat')).show();
