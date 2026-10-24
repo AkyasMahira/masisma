@@ -115,10 +115,9 @@ class RekapPenilaianController extends Controller
             ];
         });
 
-        if ($request->status_kelulusan) {
-            $rekap = $rekap->where('status_kelulusan', $request->status_kelulusan);
-        }
+        // Filter status kelulusan dilakukan di view (status final dihitung di sana sesuai saklar Post-Test)
         $rekap = $rekap->values();
+        $pakaiPosttest = $setting ? (bool) $setting->pakai_posttest : true;
 
         // Data untuk tombol "Download Excel sesuai filter aktif" (SheetJS di sisi client)
         $exportHeader = ['No', 'Nama Peserta', 'Instansi', 'Post-Test'];
@@ -144,9 +143,25 @@ class RekapPenilaianController extends Controller
         $batasPosttest = self::BATAS_POSTTEST;
 
         return view('admin.kegiatan.penilaian.rekap', compact(
-            'kegiatan', 'setting', 'rekap', 'instansi', 'batasLulus', 'batasPosttest',
+            'kegiatan', 'setting', 'rekap', 'instansi', 'batasLulus', 'batasPosttest', 'pakaiPosttest',
             'materiList', 'exportHeader', 'exportRows'
         ));
+    }
+
+    // Saklar: Nilai Akhir pakai Post-Test ((Teori + Skill) / 2) atau Skill saja
+    public function setPosttest(Request $request, $kegiatan_id)
+    {
+        Kegiatan::findOrFail($kegiatan_id);
+        $setting = \App\Models\KegiatanPenilaianSetting::firstOrCreate(
+            ['kegiatan_id' => $kegiatan_id],
+            ['jenis_penilaian' => 'centang', 'batas_lulus_persen' => 80]
+        );
+        $setting->pakai_posttest = $request->boolean('pakai_posttest');
+        $setting->save();
+
+        return back()->with('success', $setting->pakai_posttest
+            ? 'Rekap kini memakai nilai Post-Test: Nilai Akhir = (Teori + Skill) / 2.'
+            : 'Rekap kini TANPA nilai Post-Test: Nilai Akhir = rata-rata nilai skill.');
     }
 
     // Lembar observasi PDF: satu peserta, satu materi

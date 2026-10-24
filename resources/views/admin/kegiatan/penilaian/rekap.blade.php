@@ -63,6 +63,10 @@
         .btn-pdf-mini { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: #fef1f2; color: var(--custom-maroon); border: 1px solid #fecaca; text-decoration: none !important; margin-left: 8px; font-size: 0.9rem; transition: 0.2s; }
         .btn-pdf-mini:hover { background: var(--custom-maroon); color: #fff; border-color: var(--custom-maroon); }
         
+        .posttest-switch { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 8px 14px; }
+        .posttest-switch .form-check-input { width: 2.4em; height: 1.25em; cursor: pointer; }
+        .posttest-switch .form-check-input:checked { background-color: var(--custom-maroon); border-color: var(--custom-maroon); }
+        .posttest-switch .rumus { font-size: .8rem; color: var(--text-muted); font-weight: 600; }
         .table-custom-wrapper { margin: -24px; margin-top: 0; border-top: 1px solid var(--border-color); }
     </style>
 
@@ -70,9 +74,10 @@
         // 1. FILTER MATERI: HANYA TAMPILKAN YANG BUTUH PENILAIAN (SKILL)
         $materiDinilai = collect($materiList)->where('butuh_penilaian', 1);
         $batas = (float) $batasLulus;
+        $pakaiPosttest = isset($pakaiPosttest) ? (bool) $pakaiPosttest : true;
 
-        // 2. KALKULASI RATA-RATA TEORI(POST-TEST) + SKILL / 2
-        $rekap = collect($rekap)->map(function($row) use ($materiDinilai, $batas) {
+        // 2. KALKULASI NILAI AKHIR: pakai Post-Test -> (Teori + Skill) / 2 ; tanpa Post-Test -> Skill saja
+        $rekap = collect($rekap)->map(function($row) use ($materiDinilai, $batas, $pakaiPosttest) {
             $totalPersenSkill = 0;
             $jumlahMateri = $materiDinilai->count();
             $semuaSelesai = true; 
@@ -97,13 +102,15 @@
             $nilaiTeori = null;
             if (isset($row['nilai_posttest']) && is_numeric($row['nilai_posttest'])) {
                 $nilaiTeori = (float)$row['nilai_posttest'];
-            } else {
+            } elseif ($pakaiPosttest) {
                 $semuaSelesai = false; // Jika belum ada nilai Teori/Post-Test, status jadi Belum Selesai
             }
 
-            // Hitung Nilai Akhir = (Teori + Skill) / 2
+            // Hitung Nilai Akhir
             if ($semuaSelesai) {
-                $row['nilai_akhir'] = round(($nilaiTeori + $row['rata_rata_skill']) / 2, 2);
+                $row['nilai_akhir'] = $pakaiPosttest
+                    ? round(($nilaiTeori + $row['rata_rata_skill']) / 2, 2)
+                    : $row['rata_rata_skill'];
                 
                 // LULUS JIKA Nilai Akhir >= Batas Lulus (85)
                 if ($row['nilai_akhir'] >= $batas) {
@@ -118,6 +125,11 @@
 
             return $row;
         });
+
+        // Filter status kelulusan (memakai status final di atas)
+        if (request('status_kelulusan')) {
+            $rekap = $rekap->where('status_kelulusan', request('status_kelulusan'))->values();
+        }
 
         // 3. FITUR SORTING (Mengurutkan berdasarkan Nilai Akhir)
         $sort = request('sort', 'default');
@@ -136,15 +148,16 @@
         $totalLulus = $rekap->where('status_kelulusan', 'Lulus')->count();
         $totalTidakLulus = $rekap->where('status_kelulusan', 'Tidak Lulus')->count();
         $totalBelum = $rekap->where('status_kelulusan', 'Belum Selesai Dinilai')->count();
-        $jumlahKolom = 7 + $materiDinilai->count();
+        $jumlahKolom = ($pakaiPosttest ? 7 : 6) + $materiDinilai->count();
 
         // 5. REKONSTRUKSI DATA EXCEL (Agar Kolom Tabel dan Excel Presisi Sama)
-        $newExportHeader = ['No', 'Nama Peserta', 'Instansi', 'Nilai Teori (Post-Test)'];
+        $newExportHeader = ['No', 'Nama Peserta', 'Instansi'];
+        if ($pakaiPosttest) $newExportHeader[] = 'Nilai Teori (Post-Test)';
         foreach($materiDinilai as $m) {
             $newExportHeader[] = $m->nama_materi;
         }
         $newExportHeader[] = 'Rata-rata Skill';
-        $newExportHeader[] = 'Nilai Akhir (Teori+Skill)/2';
+        $newExportHeader[] = $pakaiPosttest ? 'Nilai Akhir (Teori+Skill)/2' : 'Nilai Akhir (Skill)';
         $newExportHeader[] = 'Status Kelulusan';
 
         $newExportRows = [];
@@ -153,8 +166,8 @@
                 $i + 1,
                 $row['nama'],
                 $row['instansi'],
-                $row['nilai_posttest'] ?? '-'
             ];
+            if ($pakaiPosttest) $rowData[] = $row['nilai_posttest'] ?? '-';
             foreach($materiDinilai as $m) {
                 $pm = $row['per_materi'][$m->id] ?? null;
                 $rowData[] = ($pm && isset($pm['persen'])) ? $pm['persen'].'%' : '-';
@@ -176,6 +189,15 @@
                         <i class="bi bi-calendar-event"></i> {{ $kegiatan->nama_kegiatan }}
                         <span class="badge bg-light text-dark border px-2 py-1 ms-1">Batas Lulus Nilai Akhir: {{ $batasLulus }}%</span>
                     </p>
+                    <form method="POST" action="{{ route('admin.kegiatan.penilaian.rekap.posttest', $kegiatan->id) }}" class="posttest-switch mt-3">
+                        @csrf
+                        <input type="hidden" name="pakai_posttest" value="0">
+                        <label class="form-check form-switch m-0 d-flex align-items-center gap-2">
+                            <input class="form-check-input m-0" type="checkbox" name="pakai_posttest" value="1" {{ $pakaiPosttest ? 'checked' : '' }} onchange="this.form.submit()">
+                            <span class="fw-bold text-dark">Pakai nilai Post-Test</span>
+                        </label>
+                        <span class="rumus">Nilai Akhir = {{ $pakaiPosttest ? '(Teori Post-Test + Rata-rata Skill) / 2' : 'Rata-rata Skill saja' }}</span>
+                    </form>
                 </div>
                 <div class="d-flex gap-2 flex-wrap mt-3 mt-md-0">
                     <button type="button" id="btnExportExcel" onclick="exportRekapExcel()" class="btn-excel" {{ $totalPeserta ? '' : 'disabled' }}>
@@ -196,6 +218,10 @@
                         <a href="{{ route('admin.kegiatan.penilaian.setting', $kegiatan->id) }}" class="fw-bold" style="color: #b45309; text-decoration: underline;">Atur di Setting Penilaian</a>.</span>
                     </div>
                 </div>
+            @endif
+
+            @if(session('success'))
+                <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4"><i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}</div>
             @endif
 
             {{-- STAT CARDS --}}
@@ -292,12 +318,14 @@
                                 <th class="text-center" width="5%">No</th>
                                 <th>Nama Peserta</th>
                                 <th>Instansi</th>
+                                @if($pakaiPosttest)
                                 <th class="text-center">Teori<br><span class="fw-medium text-lowercase opacity-75">(Post-Test)</span></th>
+                                @endif
                                 @foreach($materiDinilai as $m)
                                     <th class="text-center th-materi">{{ $m->nama_materi }}<br><span class="fw-medium text-lowercase opacity-75">(% skill)</span></th>
                                 @endforeach
                                 <th class="text-center">Rata-rata<br><span class="fw-medium text-lowercase opacity-75">(Skill)</span></th>
-                                <th class="text-center">Nilai Akhir<br><span class="fw-medium text-lowercase opacity-75">(Teori+Skill) / 2</span></th>
+                                <th class="text-center">Nilai Akhir<br><span class="fw-medium text-lowercase opacity-75">{{ $pakaiPosttest ? '(Teori+Skill) / 2' : '(Skill)' }}</span></th>
                                 <th class="text-center">Status Kelulusan</th>
                             </tr>
                         </thead>
@@ -313,6 +341,7 @@
                                 </td>
                                 
                                 {{-- Nilai Teori (Post-Test) --}}
+                                @if($pakaiPosttest)
                                 <td class="text-center">
                                     @if(isset($row['nilai_posttest']) && is_numeric($row['nilai_posttest']))
                                         <span class="badge bg-light text-dark border px-3 py-2 fs-6">{{ $row['nilai_posttest'] + 0 }}</span>
@@ -320,6 +349,7 @@
                                         <span class="text-muted opacity-50">-</span>
                                     @endif
                                 </td>
+                                @endif
 
                                 {{-- Nilai Per Materi Skill --}}
                                 @foreach($materiDinilai as $m)

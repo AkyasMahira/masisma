@@ -382,6 +382,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
         // Rekap & kelulusan
         Route::get('/rekap', [RekapPenilaianController::class, 'index'])->name('rekap');
+        Route::post('/rekap/posttest', [RekapPenilaianController::class, 'setPosttest'])->name('rekap.posttest');
     });
 
     Route::get('/admin/sync-perpustakaan', [PresentasiController::class, 'apiLaporan'])->name('admin.sync.perpustakaan');
