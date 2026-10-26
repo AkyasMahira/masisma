@@ -377,7 +377,7 @@ public function downloadSertifikatAnggota($id, $namaAnggota)
     ])->setPaper('a4', 'landscape');
 
     // 4. Stream/Download (Ini akan men-generate PDF baru setiap kali klik)
-    return $pdf->stream('Sertifikat_' . str_replace(' ', '_', $nama_penerima) . '.pdf');
+    return $pdf->stream(\App\Support\NamaFile::aman('Sertifikat_' . str_replace(' ', '_', $nama_penerima) . '.pdf'));
 }
 
     /**
@@ -402,7 +402,7 @@ public function downloadSuratSelesaiAnggota($id, $namaAnggota)
     $pdf->setPaper('a4', 'portrait');
 
     // 4. Stream ke browser
-    return $pdf->stream('Surat_Keterangan_Selesai_' . str_replace(' ', '_', $nama_penerima) . '.pdf');
+    return $pdf->stream(\App\Support\NamaFile::aman('Surat_Keterangan_Selesai_' . str_replace(' ', '_', $nama_penerima) . '.pdf'));
 }
 
     /**

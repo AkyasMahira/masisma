@@ -1575,7 +1575,7 @@ public function dashboard()
     $pdf->setPaper('a4', 'landscape');
 
     $cleanName = preg_replace('/[^A-Za-z0-9\-]/', ' ', $mahasiswa->nm_mahasiswa);
-    return $pdf->stream('Sertifikat-' . trim($cleanName) . '.pdf');
+    return $pdf->stream(\App\Support\NamaFile::aman('Sertifikat-' . trim($cleanName) . '.pdf'));
 }
 
     // Helper (Private)

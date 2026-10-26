@@ -663,6 +663,6 @@ public function downloadSuratOtomatis(Pengajuan $pengajuan)
     $pdf = Pdf::loadView('admin.pdf.surat_selesai_data_awal', $data);
     
     // Nama file: Surat_Selesai_NamaMahasiswa.pdf
-    return $pdf->download('Surat_Selesai_' . str_replace(' ', '_', $pengajuan->user->name) . '.pdf');
+    return $pdf->download(\App\Support\NamaFile::aman('Surat_Selesai_' . str_replace(' ', '_', $pengajuan->user->name) . '.pdf'));
 }
 }

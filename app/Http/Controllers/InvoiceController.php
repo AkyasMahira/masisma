@@ -267,7 +267,7 @@ public function publicPrint($token)
             'invoice', 'terbilang', 'logoBase64', 'stempelBase64', 'signatureBase64'
         ));
         
-        return $pdf->stream('Invoice-' . $invoice->no_invoice . '.pdf');
+        return $pdf->stream(\App\Support\NamaFile::aman('Invoice-' . $invoice->no_invoice . '.pdf'));
     }
 
     /**

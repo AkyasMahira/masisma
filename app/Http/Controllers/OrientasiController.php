@@ -566,7 +566,7 @@ public function completeMaterial($id)
             'post_score' => $result->post_test_score
         ]);
 
-        return $pdf->stream('Sertifikat-Orientasi-'.$user->name.'.pdf');
+        return $pdf->stream(\App\Support\NamaFile::aman('Sertifikat-Orientasi-'.$user->name.'.pdf'));
     }
 
     public function sertifikat()
@@ -615,6 +615,6 @@ public function completeMaterial($id)
             'post_score' => $result->post_test_score,
         ]);
 
-        return $pdf->stream('Sertifikat-Orientasi-' . $user->name . '.pdf');
+        return $pdf->stream(\App\Support\NamaFile::aman('Sertifikat-Orientasi-' . $user->name . '.pdf'));
     }
 }

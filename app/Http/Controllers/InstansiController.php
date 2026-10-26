@@ -263,7 +263,7 @@ class InstansiController extends Controller
             'pre_score'  => $result->pre_test_score,
             'post_score' => $result->post_test_score,
         ]);
-        return $pdf->stream('Sertifikat-Orientasi-' . ($akun->name ?? $m->nm_mahasiswa) . '.pdf');
+        return $pdf->stream(\App\Support\NamaFile::aman('Sertifikat-Orientasi-' . ($akun->name ?? $m->nm_mahasiswa) . '.pdf'));
     }
 
     /* ======================= DAFTAR ANAK MAGANG (PESERTA) ======================= */
