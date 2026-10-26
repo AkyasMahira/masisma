@@ -177,6 +177,7 @@ class RoomSequenceController extends Controller
         if (auth()->user()->role !== 'admin') {
             // FIX MULTI-PERIODE: Gunakan latest()
             $mahasiswa = Mahasiswa::where('user_id', auth()->id())->latest()->first();
+            if (!$mahasiswa) abort(403, 'Hanya admin atau mahasiswa pemilik jadwal yang dapat mengubah periode ini.');
             
             // Cek Lock
             if ($mahasiswa->status === 'nonaktif' || $this->checkScheduleCompleteness($mahasiswa)['is_locked']) {
@@ -203,6 +204,7 @@ class RoomSequenceController extends Controller
         if (auth()->user()->role !== 'admin') {
             // FIX MULTI-PERIODE: Gunakan latest()
             $mahasiswa = Mahasiswa::where('user_id', auth()->id())->latest()->first();
+            if (!$mahasiswa) abort(403, 'Hanya admin atau mahasiswa pemilik jadwal yang dapat mengubah periode ini.');
             if ($mahasiswa->status === 'nonaktif' || $this->checkScheduleCompleteness($mahasiswa)['is_locked']) {
                 abort(403, 'Jadwal Terkunci.');
             }
@@ -250,6 +252,7 @@ class RoomSequenceController extends Controller
         if (auth()->user()->role !== 'admin') {
             // FIX MULTI-PERIODE: Gunakan latest()
             $mahasiswa = Mahasiswa::where('user_id', auth()->id())->latest()->first();
+            if (!$mahasiswa) abort(403, 'Hanya admin atau mahasiswa pemilik jadwal yang dapat mengubah periode ini.');
             
             // Cek Lock: Jika sudah penuh, tidak bisa hapus (Policy Strict)
             if ($mahasiswa->status === 'nonaktif' || $this->checkScheduleCompleteness($mahasiswa)['is_locked']) {
