@@ -1167,10 +1167,10 @@ public function generateSertifikatPublik(Request $request, $identifier)
     $fileName = 'Sertifikat-' . \Illuminate\Support\Str::slug($mahasiswa->nm_mahasiswa) . '-' . time() . '.pdf';
 
     if ($request->has('download')) {
-        return $pdf->download($fileName);
+        return $pdf->download(\App\Support\NamaFile::aman($fileName));
     }
 
-    return $pdf->stream($fileName)->withHeaders([
+    return $pdf->stream(\App\Support\NamaFile::aman($fileName))->withHeaders([
         'Cache-Control' => 'no-cache, no-store, must-revalidate',
         'Pragma' => 'no-cache',
         'Expires' => '0',
