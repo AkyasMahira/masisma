@@ -99,7 +99,7 @@ class AbsensiController extends Controller
        $now = $now ?: Carbon::now();
        try { $masuk = Carbon::parse($jamMasukStr); } catch (\Exception $e) { return false; }
        $bedaHari = $masuk->toDateString() !== $now->toDateString();
-       $elapsed  = $masuk->diffInHours($now);
+       $elapsed  = (int) $masuk->diffInHours($now, true);
        return $elapsed > 16 || ($bedaHari && $now->hour >= 10);
    }
 
@@ -356,7 +356,7 @@ if (!$isCheckout) {
             }
 
             // 6. SIMPAN
-            $durasi = $jamMasuk->diffInMinutes($now);
+            $durasi = (int) $jamMasuk->diffInMinutes($now, true);
             Absensi::create([
                 'mahasiswa_id' => $mahasiswa->id,
                 'jam_masuk' => $jamMasuk,
@@ -491,7 +491,7 @@ if (!$isCheckout) {
             'jam_masuk'    => $jamMasuk,
             'jam_keluar'   => $jamKeluar,
             'type'         => 'keluar',
-            'durasi_menit' => $jamMasuk->diffInMinutes($jamKeluar),
+            'durasi_menit' => (int) $jamMasuk->diffInMinutes($jamKeluar, true),
             'keterangan'   => 'Backdate Lupa Checkout (' . $shift . ')',
             // Catat di TANGGAL sesi yang lupa pulang, bukan tanggal hari ini (tanggal input/ACC)
             'created_at'   => $jamKeluar,
@@ -758,7 +758,7 @@ public function getShiftTimes($shift, $refDate, $roomId) {
         if ($now->lt($start->copy()->subMinutes(30))) return ['status'=>false, 'message'=>'Terlalu awal (Maksimal absen 30 menit sebelum shift).'];
         
         if ($now->gt($start->copy()->addMinutes(15))) {
-            $telat = $now->diffInMinutes($start);
+            $telat = (int) $now->diffInMinutes($start, true);
             return ['status'=>false, 'message'=>"Terlambat $telat menit. Batas 15 menit."];
         }
         return ['status'=>true];
@@ -787,7 +787,7 @@ public function getShiftTimes($shift, $refDate, $roomId) {
 
         // 3. Cek Waktu Pulang (Toleransi 0 menit)
         if ($now->lt($end)) {
-            $secondsLeft = $now->diffInSeconds($end);
+            $secondsLeft = (int) $now->diffInSeconds($end, true);
             // Jika kurang dari 60 detik (0 menit), boleh pulang.
             if ($secondsLeft > 60) {
                 $menit = ceil($secondsLeft / 60);

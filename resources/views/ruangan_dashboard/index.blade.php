@@ -235,7 +235,7 @@
                             @endif
 
                             @php
-                                $sisaHari = \Carbon\Carbon::now()->startOfDay()->diffInDays(\Carbon\Carbon::parse($mhs->tanggal_berakhir)->startOfDay(), false);
+                                $sisaHari = (int) \Carbon\Carbon::now()->startOfDay()->diffInDays(\Carbon\Carbon::parse($mhs->tanggal_berakhir)->startOfDay(), false);
                             @endphp
                             
                             @if($sisaHari < 0)

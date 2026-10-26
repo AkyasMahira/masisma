@@ -399,8 +399,8 @@ public function dispensasis()
                 // Checkout lewat tengah malam (shift malam): tandai +N hari biar jelas
                 $lintasHari = $cK->toDateString() > $cM->toDateString();
                 if ($lintasHari) {
-                    $selisihHari = \Carbon\Carbon::parse($cM->toDateString())
-                        ->diffInDays(\Carbon\Carbon::parse($cK->toDateString()));
+                    $selisihHari = (int) \Carbon\Carbon::parse($cM->toDateString())
+                        ->diffInDays(\Carbon\Carbon::parse($cK->toDateString()), true);
                     $jamK .= ' (+' . $selisihHari . ' hari)';
                 }
                 $events[] = ['title' => 'HADIR', 'start' => $date, 'color' => '#198754', 'extendedProps' => ['jam' => "$jamM - $jamK", 'ruang' => $lintasHari ? 'Hadir • Shift Malam' : 'Absen', 'type' => 'absen']];
@@ -468,7 +468,7 @@ public function dispensasis()
 
             if ($today->gt($endDate)) return 'Selesai';
 
-            $diff = $today->diffInDays($endDate);
+            $diff = (int) $today->diffInDays($endDate, true);
             return ($diff === 0) ? 'Hari Terakhir' : $diff . ' Hari';
         } catch (\Exception $e) {
             return '-';

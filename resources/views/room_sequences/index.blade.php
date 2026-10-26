@@ -143,7 +143,7 @@
 
                         <td class="text-center">
                             <span class="badge bg-info bg-opacity-10 text-info">
-                                {{ \Carbon\Carbon::parse($seq->start_date)->diffInDays(\Carbon\Carbon::parse($seq->end_date)) + 1 }} Hari
+                                {{ (int) \Carbon\Carbon::parse($seq->start_date)->diffInDays(\Carbon\Carbon::parse($seq->end_date), true) + 1 }} Hari
                             </span>
                         </td>
 

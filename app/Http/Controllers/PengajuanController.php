@@ -523,7 +523,7 @@ public function show(Pengajuan $pengajuan)
             if ($hasMasuk && $hasKeluar) {
                 $jamM = \Carbon\Carbon::parse($hasMasuk->jam_masuk)->format('H:i');
                 $jamK = \Carbon\Carbon::parse($hasKeluar->jam_keluar)->format('H:i');
-                $durasi = \Carbon\Carbon::parse($hasKeluar->jam_keluar)->diffInHours($hasMasuk->jam_masuk);
+                $durasi = (int) \Carbon\Carbon::parse($hasKeluar->jam_keluar)->diffInHours($hasMasuk->jam_masuk, true);
 
                 $events[] = [
                     'title' => 'HADIR',

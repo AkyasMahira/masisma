@@ -521,7 +521,7 @@ class DispensasiController extends Controller
                     $keluarBaru->jam_masuk = $waktuMasuk;
                     $keluarBaru->jam_keluar = $jamKeluar;
                     $keluarBaru->type = 'keluar'; 
-                    $keluarBaru->durasi_menit = $waktuMasuk->diffInMinutes($jamKeluar);
+                    $keluarBaru->durasi_menit = (int) $waktuMasuk->diffInMinutes($jamKeluar, true);
                     $keluarBaru->keterangan = "Dispen Pulang Disetujui (Shift $tipeShift)";
                     $keluarBaru->created_at = $jamKeluar;
                     $keluarBaru->updated_at = $jamKeluar;
@@ -559,7 +559,7 @@ class DispensasiController extends Controller
                 $keluarBaru->jam_masuk = $jamMasuk;
                 $keluarBaru->jam_keluar = $jamKeluar;
                 $keluarBaru->type = 'keluar';
-                $keluarBaru->durasi_menit = $jamMasuk->diffInMinutes($jamKeluar);
+                $keluarBaru->durasi_menit = (int) $jamMasuk->diffInMinutes($jamKeluar, true);
                 $keluarBaru->keterangan = 'Dispen Lupa Pulang Disetujui';
                 $keluarBaru->created_at = $jamKeluar;   // TANGGAL yang benar (hari lupa pulang), bukan tanggal ACC
                 $keluarBaru->updated_at = $jamKeluar;

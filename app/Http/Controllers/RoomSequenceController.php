@@ -284,7 +284,7 @@ class RoomSequenceController extends Controller
 
         $start = Carbon::parse($mahasiswa->tanggal_mulai);
         $end = Carbon::parse($mahasiswa->tanggal_berakhir);
-        $totalDaysNeeded = $start->diffInDays($end) + 1; // Total hari magang
+        $totalDaysNeeded = (int) $start->diffInDays($end, true) + 1; // Total hari magang
 
         // Ambil semua jadwal ruangan mahasiswa ini
         $sequences = RoomSequence::where('mahasiswa_id', $mahasiswa->id)->get();

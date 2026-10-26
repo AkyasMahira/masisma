@@ -151,13 +151,13 @@ class AbsenManualController extends Controller
                     $keluar->type = 'keluar';
                     $keluar->jam_masuk = $jamMasuk;
                     $keluar->jam_keluar = $jamPulang;
-                    $keluar->durasi_menit = $jamMasuk->diffInMinutes($jamPulang);
+                    $keluar->durasi_menit = (int) $jamMasuk->diffInMinutes($jamPulang, true);
                     $keluar->keterangan = $label;
                     $keluar->created_at = $jamPulang;
                     $keluar->updated_at = now();
                     $keluar->save();
                 } elseif ($keluar) {
-                    $keluar->durasi_menit = $jamMasuk->diffInMinutes(Carbon::parse($keluar->jam_keluar));
+                    $keluar->durasi_menit = (int) $jamMasuk->diffInMinutes(Carbon::parse($keluar->jam_keluar), true);
                     $keluar->save();
                 }
             });

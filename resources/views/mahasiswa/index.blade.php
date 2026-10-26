@@ -359,7 +359,7 @@
                                         if ($now->gt($endC)) {
                                             $sisaString = 'Selesai';
                                         } else {
-                                            $diff = $now->diffInDays($endC);
+                                            $diff = (int) $now->diffInDays($endC, true);
                                             $sisaString = ($diff === 0) ? 'Hari Terakhir' : ($diff + 1) . ' Hari';
                                         }
                                     }

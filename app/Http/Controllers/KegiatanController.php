@@ -404,7 +404,7 @@ public function submitAbsen(Request $request, $token)
                 }
 
                 $waktu_masuk = \Carbon\Carbon::parse($absensi->waktu_masuk);
-                if ($sekarang->diffInMinutes($waktu_masuk) < 5) {
+                if ((int) $sekarang->diffInMinutes($waktu_masuk, true) < 5) {
                     return redirect()->back()->with('error', 'Anda baru saja absen masuk! Harap tunggu beberapa menit sebelum absen pulang.');
                 }
 

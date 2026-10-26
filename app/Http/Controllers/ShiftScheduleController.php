@@ -49,7 +49,7 @@ class ShiftScheduleController extends Controller
         if ($user->role !== 'admin' && !$isKaru) {
             $start = \Carbon\Carbon::parse($sequence->start_date)->startOfDay();
             $end   = \Carbon\Carbon::parse($sequence->end_date)->startOfDay();
-            $totalDaysNeeded = $start->diffInDays($end) + 1;
+            $totalDaysNeeded = (int) $start->diffInDays($end, true) + 1;
 
             $filledCount = ShiftSchedule::where('mahasiswa_id', $sequence->mahasiswa_id)
                             ->whereBetween('tanggal', [$sequence->start_date, $sequence->end_date])
