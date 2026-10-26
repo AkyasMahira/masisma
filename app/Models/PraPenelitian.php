@@ -30,11 +30,10 @@ protected $fillable = [
 
 
 
-    protected $dates = [
-        'tanggal_mulai',
-        'tanggal_rencana_skripsi',
-        'created_at',
-        'updated_at',
+    // Laravel 10: $dates dihapus, diganti casts datetime
+    protected $casts = [
+        'tanggal_mulai' => 'datetime',
+        'tanggal_rencana_skripsi' => 'datetime',
     ];
 
     // Relasi ke User (Pendaftar)
