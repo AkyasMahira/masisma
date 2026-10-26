@@ -233,7 +233,7 @@
                         <label class="label-custom">1. Identitas Peserta <span class="text-danger">*</span></label>
                         <select name="kegiatan_peserta_id" id="peserta_id" required>
                             <option value="">Ketik untuk mencari nama Anda...</option>
-                            @foreach($daftarPeserta as$p)
+                            @foreach($daftarPeserta as $p)
                                 @php
                                     $isMasuk = in_array($p->id,$sudahAbsenMasuk ?? []) ? 1 : 0;
                                     $isPulang = in_array($p->id,$sudahAbsenPulang ?? []) ? 1 : 0;
