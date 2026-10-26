@@ -665,8 +665,9 @@ public function getShiftTimes($shift, $refDate, $roomId) {
             // Set jam keluar berdasarkan data di database
             $t['end'] = $d->copy()->setTimeFromTimeString($customShift->jam_keluar);
 
-            // Jika shift malam (lintas_hari = true), tambahkan 1 hari ke jam keluar
-            if ($customShift->lintas_hari) {
+            // Lintas hari ditentukan dari jamnya: jam keluar <= jam masuk (mis. 21:00 -> 07:00) = pulang besok.
+            // Centang lintas_hari tidak dipakai agar salah centang (mis. Pagi 07-14) tidak membuat pulang jadi besok.
+            if ($t['end']->lte($t['start'])) {
                 $t['end']->addDay();
             }
 

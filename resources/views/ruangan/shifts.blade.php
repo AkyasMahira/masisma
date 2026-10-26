@@ -45,11 +45,7 @@
                             </div>
 
                             <div class="mb-4">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" name="lintas_hari" id="lintasHari">
-                                    <label class="form-check-label small fw-bold text-dark" for="lintasHari">Shift Lintas Hari (Malam)</label>
-                                </div>
-                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Aktifkan ini HANYA JIKA jam keluar berada di keesokan harinya (contoh: Masuk 21:00, Keluar 07:00).</small>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;"><i class="bi bi-info-circle me-1"></i>Shift lintas hari (malam) terdeteksi <b>otomatis</b> bila jam keluar lebih awal dari jam masuk (contoh: Masuk 21:00, Keluar 07:00).</small>
                             </div>
 
                             <button type="submit" class="btn w-100 rounded-pill text-white fw-bold shadow-sm" style="background-color: #7c1316;">

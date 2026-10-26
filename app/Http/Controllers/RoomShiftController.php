@@ -49,8 +49,8 @@ class RoomShiftController extends Controller
             'nama_shift'  => $request->nama_shift,
             'jam_masuk'   => $request->jam_masuk,
             'jam_keluar'  => $request->jam_keluar,
-            // Jika checkbox dicentang, nilainya true. Jika tidak, false.
-            'lintas_hari' => $request->has('lintas_hari') ? true : false, 
+            // Otomatis dari jam: jam keluar <= jam masuk berarti pulang keesokan hari (shift malam)
+            'lintas_hari' => substr($request->jam_keluar, 0, 5) <= substr($request->jam_masuk, 0, 5), 
         ]);
 
         return back()->with('success', 'Jam Kerja/Shift berhasil ditambahkan!');
