@@ -1160,7 +1160,10 @@ public function exportData(Request $request)
         $query->where('nm_mahasiswa', 'like', '%' . $request->search . '%');
     }
     if ($request->univ_asal) {
-        $query->where('univ_asal', $request->univ_asal);
+        // univ_asal hanya accessor (dari MOU), bukan kolom
+        $query->whereHas('mou', function ($m) use ($request) {
+            $m->where('nama_universitas', $request->univ_asal)->orWhere('nama_instansi', $request->univ_asal);
+        });
     }
     if ($request->ruangan_id) {
         $query->where('ruangan_id', $request->ruangan_id);

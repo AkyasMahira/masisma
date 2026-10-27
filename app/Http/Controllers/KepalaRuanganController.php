@@ -463,8 +463,10 @@ class KepalaRuanganController extends Controller
         if ($prodi) $q->where('prodi', $prodi);
         if ($instansi) {
             $q->where(function ($w) use ($instansi) {
-                $w->where('univ_asal', $instansi)
-                  ->orWhereHas('mou', function ($m) use ($instansi) { $m->where('nama_universitas', $instansi); });
+                // univ_asal hanya accessor (dari MOU), bukan kolom -> filter langsung ke tabel MOU
+                $w->whereHas('mou', function ($m) use ($instansi) {
+                    $m->where('nama_universitas', $instansi)->orWhere('nama_instansi', $instansi);
+                });
             });
         }
         // Rentang: periode magang bersinggungan dengan [start, end]
