@@ -184,30 +184,54 @@ class MahasiswaController extends Controller
         \Illuminate\Support\Facades\DB::transaction(function () use ($mahasiswa, $request) {
             
             // A. UPDATE ROOM SEQUENCES (Jadwal Rolling)
+            // Lepas tautan shift -> periode dulu: FK shift_schedules.room_sequence_id ON DELETE CASCADE
+            // akan ikut menghapus shift bila periode dihapus.
+            \App\Models\ShiftSchedule::where('mahasiswa_id', $mahasiswa->id)->update(['room_sequence_id' => null]);
             $mahasiswa->roomSequences()->delete();
-            
-            if ($request->has('sequences')) {
-                foreach ($request->sequences as $seq) {
-                    $mahasiswa->roomSequences()->create([
-                        'ruangan_id' => $seq['ruangan_id'],
-                        'start_date' => $seq['start_date'],
-                        'end_date'   => $seq['end_date'],
-                    ]);
-                }
+
+            $periodeBaru = [];
+            foreach ((array) $request->input('sequences', []) as $seq) {
+                $periodeBaru[] = $mahasiswa->roomSequences()->create([
+                    'ruangan_id' => $seq['ruangan_id'],
+                    'start_date' => $seq['start_date'],
+                    'end_date'   => $seq['end_date'],
+                ]);
             }
 
-            // B. UPDATE SHIFT SCHEDULES (Jadwal Harian)
-            $mahasiswa->shiftSchedules()->delete();
+            // B. UPDATE SHIFT SCHEDULES (Jadwal Harian) — TANPA hapus massal:
+            //  - tanggal yang diisi: dibuat / diperbarui
+            //  - tanggal yang dikirim kosong: nilai lama dibiarkan (tidak dihapus)
+            //  - shift di luar semua periode baru: dihapus
+            foreach ((array) $request->input('shifts', []) as $shift) {
+                if (empty($shift['shift_type'])) continue;
+                $tgl = substr($shift['tanggal'], 0, 10);
+                $periode = collect($periodeBaru)->first(function ($p) use ($tgl) {
+                    return substr($p->start_date, 0, 10) <= $tgl && substr($p->end_date, 0, 10) >= $tgl;
+                });
+                \App\Models\ShiftSchedule::updateOrCreate(
+                    ['mahasiswa_id' => $mahasiswa->id, 'tanggal' => $tgl],
+                    ['shift_type' => $shift['shift_type'], 'ruangan_id' => $shift['ruangan_id'], 'room_sequence_id' => $periode ? $periode->id : null]
+                );
+            }
 
-            if ($request->has('shifts')) {
-                foreach ($request->shifts as $shift) {
-                    if (empty($shift['shift_type'])) continue; // belum diisi
-                    $mahasiswa->shiftSchedules()->create([
-                        'tanggal'    => $shift['tanggal'],
-                        'shift_type' => $shift['shift_type'],
-                        'ruangan_id' => $shift['ruangan_id'],
-                    ]);
-                }
+            $sisa = \App\Models\ShiftSchedule::where('mahasiswa_id', $mahasiswa->id);
+            if (empty($periodeBaru)) {
+                $sisa->delete();
+            } else {
+                $sisa->where(function ($w) use ($periodeBaru) {
+                    foreach ($periodeBaru as $p) {
+                        $w->whereNot(function ($x) use ($p) {
+                            $x->whereBetween('tanggal', [substr($p->start_date, 0, 10), substr($p->end_date, 0, 10)]);
+                        });
+                    }
+                })->delete();
+            }
+
+            // Tautkan kembali shift lama (yang tidak dikirim ulang) ke periodenya
+            foreach ($periodeBaru as $p) {
+                \App\Models\ShiftSchedule::where('mahasiswa_id', $mahasiswa->id)->whereNull('room_sequence_id')
+                    ->whereBetween('tanggal', [substr($p->start_date, 0, 10), substr($p->end_date, 0, 10)])
+                    ->update(['room_sequence_id' => $p->id]);
             }
         });
 
