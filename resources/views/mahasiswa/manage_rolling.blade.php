@@ -221,10 +221,10 @@
     const ruangans = @json($ruangans);
     let periodsData = @json($mahasiswa->roomSequences); 
     
-    let shiftsDB = {}; 
-    @foreach($mahasiswa->shiftSchedules as $s)
-        shiftsDB['{{ $s->tanggal }}'] = '{{ $s->shift_type }}';
-    @endforeach
+    // Pakai json_encode agar nama shift ber-tanda petik (mis. "Pagi ( Jum'at )") tidak berubah jadi &#039;
+    @php $shiftsMap = $mahasiswa->shiftSchedules->mapWithKeys(function ($s) { return [substr($s->tanggal, 0, 10) => $s->shift_type]; }); @endphp
+    let shiftsDB = @json($shiftsMap);
+    const escAttr = t => String(t).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     // ==========================================
     // 2. RENDER LOGIC
@@ -359,7 +359,7 @@
             selectedRoom.room_shifts.forEach(shift => {
                 let jamM = shift.jam_masuk.substring(0,5);
                 let jamK = shift.jam_keluar.substring(0,5);
-                optionsHtml += `<option value="${shift.nama_shift}" data-raw="${shift.nama_shift}">${shift.nama_shift} (${jamM} - ${jamK})</option>`;
+                optionsHtml += `<option value="${escAttr(shift.nama_shift)}" data-raw="${escAttr(shift.nama_shift)}">${escAttr(shift.nama_shift)} (${jamM} - ${jamK})</option>`;
             });
             optionsHtml += `<option value="Libur" data-raw="Libur">❌ Libur</option>`;
         } else {
@@ -394,7 +394,12 @@
             const val = shiftsDB[dateStr] || '';
 
             // Replace the selected attribute logic (using regex/DOM parser workaround)
-            let currentOptions = optionsHtml.replace(`data-raw="${val}"`, `data-raw="${val}" selected`);
+            let currentOptions = optionsHtml;
+            if (val && !optionsHtml.includes(`data-raw="${escAttr(val)}"`)) {
+                // Shift tersimpan tapi tidak ada di daftar ruangan (mis. sudah diganti) -> tetap tampil agar tidak terhapus saat disimpan
+                currentOptions += `<option value="${escAttr(val)}" data-raw="${escAttr(val)}">${escAttr(val)} (tersimpan)</option>`;
+            }
+            currentOptions = currentOptions.replace(`data-raw="${escAttr(val)}"`, `data-raw="${escAttr(val)}" selected`);
 
             const itemHtml = `
                 <div class="daily-card">
@@ -484,7 +489,7 @@
                     hiddenArea.innerHTML += `
                         <input type="hidden" name="shifts[${shiftCounter}][tanggal]" value="${date}">
                         <input type="hidden" name="shifts[${shiftCounter}][ruangan_id]" value="${roomId}">
-                        <input type="hidden" name="shifts[${shiftCounter}][shift_type]" value="${type}">
+                        <input type="hidden" name="shifts[${shiftCounter}][shift_type]" value="${escAttr(type)}">
                     `;
                     shiftCounter++;
                 });
