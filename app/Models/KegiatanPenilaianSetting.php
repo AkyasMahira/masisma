@@ -8,9 +8,9 @@ class KegiatanPenilaianSetting extends Model
 {
     protected $table = 'kegiatan_penilaian_settings';
 
-    protected $fillable = ['kegiatan_id', 'jenis_penilaian', 'skala_json', 'batas_lulus_persen', 'pakai_posttest', 'sertifikat_halaman_2'];
+    protected $fillable = ['kegiatan_id', 'jenis_penilaian', 'skala_json', 'batas_lulus_persen', 'pakai_posttest', 'sertifikat_halaman_2', 'masa_berlaku_tahun'];
 
-    protected $casts = ['skala_json' => 'array', 'pakai_posttest' => 'boolean', 'sertifikat_halaman_2' => 'boolean'];
+    protected $casts = ['skala_json' => 'array', 'pakai_posttest' => 'boolean', 'sertifikat_halaman_2' => 'boolean', 'masa_berlaku_tahun' => 'integer'];
 
     const PRESET = [
         'centang' => [['nilai' => 0, 'label' => 'Tidak Kompeten'], ['nilai' => 1, 'label' => 'Kompeten']],
@@ -56,6 +56,16 @@ class KegiatanPenilaianSetting extends Model
         $n = $this->nilaiSah();
         $rentang = $n ? (rtrim(rtrim(number_format(min($n), 1, '.', ''), '0'), '.') . '-' . rtrim(rtrim(number_format(max($n), 1, '.', ''), '0'), '.')) : '';
         return ($this->jenis_penilaian === 'custom' ? 'Custom ' : 'Skor ') . $rentang;
+    }
+
+    const TERBILANG = [1 => 'satu', 2 => 'dua', 3 => 'tiga', 4 => 'empat', 5 => 'lima', 6 => 'enam', 7 => 'tujuh', 8 => 'delapan', 9 => 'sembilan', 10 => 'sepuluh'];
+
+    /** Teks masa berlaku, mis. "3 (tiga) tahun"; null bila tidak dicantumkan (0). */
+    public function teksMasaBerlaku()
+    {
+        $n = (int) ($this->masa_berlaku_tahun ?? 3);
+        if ($n <= 0) return null;
+        return $n . (isset(self::TERBILANG[$n]) ? ' (' . self::TERBILANG[$n] . ')' : '') . ' tahun';
     }
 
     /** Format angka skor tanpa ".0" yang tidak perlu. */

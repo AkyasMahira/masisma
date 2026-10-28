@@ -40,6 +40,7 @@ class PenilaianSettingController extends Controller
         $request->validate([
             'jenis_penilaian' => 'required|in:centang,skor,custom',
             'batas_lulus_persen' => 'required|numeric|min:1|max:100',
+            'masa_berlaku_tahun' => 'nullable|integer|min:0|max:10',
             'skala' => 'required_if:jenis_penilaian,custom|array|min:2|max:10',
             'skala.*.nilai' => 'required_if:jenis_penilaian,custom|numeric|min:0|max:99',
             'skala.*.label' => 'required_if:jenis_penilaian,custom|string|max:60',
@@ -80,6 +81,9 @@ class PenilaianSettingController extends Controller
         }
         if ($request->has('sertifikat_halaman_2')) {
             $setting->sertifikat_halaman_2 = $request->boolean('sertifikat_halaman_2');
+        }
+        if ($request->filled('masa_berlaku_tahun') || $request->input('masa_berlaku_tahun') === '0') {
+            $setting->masa_berlaku_tahun = (int) $request->input('masa_berlaku_tahun');
         }
         $setting->save();
 

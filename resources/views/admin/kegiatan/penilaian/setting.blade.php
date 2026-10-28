@@ -168,6 +168,20 @@
                                     </label>
                                     <div class="small text-muted mt-1">Halaman belakang berisi tabel materi &amp; JP (materi yang "Msk Sertifikat").</div>
                                 </div>
+                                <div class="mb-3">
+                                    <label class="form-label-custom">Masa Berlaku Sertifikat</label>
+                                    @php $mb = (int) old('masa_berlaku_tahun', $setting->masa_berlaku_tahun ?? 3); @endphp
+                                    <select name="masa_berlaku_tahun" class="form-select @error('masa_berlaku_tahun') is-invalid @enderror">
+                                        @for($th = 1; $th <= 10; $th++)
+                                            <option value="{{ $th }}" {{ $mb === $th ? 'selected' : '' }}>{{ $th }} tahun{{ $th === 3 ? ' (standar)' : '' }}</option>
+                                        @endfor
+                                        <option value="0" {{ $mb === 0 ? 'selected' : '' }}>Tidak dicantumkan (seumur hidup)</option>
+                                    </select>
+                                    <div class="small text-muted mt-1">Dihitung sejak tanggal selesai pelatihan. Berlaku langsung untuk semua sertifikat pelatihan ini.</div>
+                                    @error('masa_berlaku_tahun')
+                                        <div class="text-danger small mt-1">{{ $message }}</div>
+                                    @enderror
+                                </div>
                                 <button type="submit" class="btn-theme w-100"><i class="bi bi-check-lg me-1"></i> Simpan Format</button>
                             </form>
                         </div>

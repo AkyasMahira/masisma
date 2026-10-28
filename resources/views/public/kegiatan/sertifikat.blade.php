@@ -34,8 +34,11 @@
         $tglMulai = \Carbon\Carbon::parse($peserta->kegiatan->tanggal_mulai);
         $tglSelesai = \Carbon\Carbon::parse($peserta->kegiatan->tanggal_selesai);
         
-        // Hitung masa berlaku (3 tahun dari tanggal selesai, dikurangi 1 hari)
-        $tglBerlakuAkhir = $tglSelesai->copy()->addYears(3)->subDay();
+        // Masa berlaku dari Setting Penilaian (default 3 tahun; 0 = tidak dicantumkan), dihitung dari tanggal selesai dikurangi 1 hari
+        $setMasa = $peserta->kegiatan->penilaianSetting;
+        $tahunBerlaku = $setMasa ? (int) ($setMasa->masa_berlaku_tahun ?? 3) : 3;
+        $teksBerlaku = $setMasa ? $setMasa->teksMasaBerlaku() : '3 (tiga) tahun';
+        $tglBerlakuAkhir = $tahunBerlaku > 0 ? $tglSelesai->copy()->addYears($tahunBerlaku)->subDay() : null;
 
         // Format Teks Rentang Tanggal Pelaksanaan
         if(!empty($peserta->kegiatan->hari_libur)) {
@@ -327,10 +330,12 @@
                     @endif
                     <br>
                     
-                    <!-- KETERANGAN MASA BERLAKU -->
+                    <!-- KETERANGAN MASA BERLAKU (tidak tampil bila diatur "tidak dicantumkan") -->
+                    @if($tglBerlakuAkhir)
                     <span class="text-berlaku">
-                        Sertifikat ini berlaku selama 3 (tiga) tahun terhitung sejak {{ $tglSelesai->isoFormat('D MMMM YYYY') }} s.d {{ $tglBerlakuAkhir->isoFormat('D MMMM YYYY') }}
+                        Sertifikat ini berlaku selama {{ $teksBerlaku }} terhitung sejak {{ $tglSelesai->isoFormat('D MMMM YYYY') }} s.d {{ $tglBerlakuAkhir->isoFormat('D MMMM YYYY') }}
                     </span>
+                    @endif
                 </div>
             </div>
 
