@@ -324,7 +324,22 @@
                             <option value="admin">Admin Sistem</option>
                             <option value="ruangan">Kepala Ruangan</option>
                             <option value="user">Mahasiswa</option>
+                            <option value="instansi">Instansi Mitra</option>
+                            <option value="kasir">Kasir</option>
                         </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Asal Kampus / Instansi</label>
+                        <select name="mou_id" id="edit_mou">
+                            <option value="">— Internal RS / tidak ada —</option>
+                            @foreach($instansis as $ins)
+                                <option value="{{ $ins->id }}">{{ $ins->nama_universitas ?? $ins->nama_instansi }}</option>
+                            @endforeach
+                        </select>
+                        <div class="form-check mt-2" id="wrap_sync_magang">
+                            <input class="form-check-input" type="checkbox" name="sync_magang" value="1" id="edit_sync_magang" checked>
+                            <label class="form-check-label small" for="edit_sync_magang">Terapkan juga ke data magang mahasiswa ini (rekap, presensi kampus, sertifikat)</label>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Program Studi</label>
@@ -355,6 +370,11 @@
         });
     });
 
+    let editMouChoices = null;
+    document.addEventListener('DOMContentLoaded', function () {
+        editMouChoices = new Choices(document.getElementById('edit_mou'), { searchEnabled: true, itemSelectText: '', shouldSort: false, searchResultLimit: 30, allowHTML: false });
+    });
+
     function openEditModal(user) {
         const modal = new bootstrap.Modal(document.getElementById('modalEdit'));
         
@@ -366,6 +386,8 @@
         document.getElementById('edit_email').value = user.email;
         document.getElementById('edit_role').value = user.role;
         document.getElementById('edit_prodi').value = user.program_studi || '';
+        if (editMouChoices) editMouChoices.setChoiceByValue(user.mou_id ? String(user.mou_id) : '');
+        document.getElementById('wrap_sync_magang').style.display = user.role === 'user' ? '' : 'none';
         
         modal.show();
     }

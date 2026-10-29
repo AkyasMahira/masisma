@@ -62,8 +62,9 @@ public function update(Request $request, $id)
     $request->validate([
         'name'          => 'required|string|max:255',
         'email'         => 'required|email|unique:users,email,'.$id,
-        'role'          => 'required|in:admin,ruangan,user',
+        'role'          => 'required|in:admin,ruangan,user,instansi,kasir',
         'program_studi' => 'nullable|string|max:255',
+        'mou_id'        => 'nullable|exists:mous,id',
     ], [
         'name.required'  => 'Nama wajib diisi.',
         'email.unique'   => 'Email sudah digunakan oleh pengguna lain.',
@@ -71,17 +72,30 @@ public function update(Request $request, $id)
     ]);
 
     try {
+        $mouLama = $user->mou_id;
+        $mouBaru = $request->filled('mou_id') ? (int) $request->mou_id : null;
+
         // 3. Eksekusi Update
         $user->update([
             'name'          => strtoupper($request->name), // Biar rapi pakai huruf besar
             'email'         => $request->email,
             'role'          => $request->role,
             'program_studi' => $request->program_studi,
-            // Jika ingin menambahkan mou_id juga bisa:
-            // 'mou_id'     => $request->mou_id, 
+            'mou_id'        => $mouBaru,
         ]);
 
-        return redirect()->back()->with('success', 'Informasi user ' . $user->name . ' berhasil diperbarui!');
+        // Asal kampus juga dipakai data magang (rekap, presensi kampus, sertifikat) -> ikut diperbarui bila dicentang
+        $pesan = 'Informasi user ' . $user->name . ' berhasil diperbarui!';
+        if ((int) $mouLama !== (int) $mouBaru && $request->boolean('sync_magang')) {
+            $n = \App\Models\Mahasiswa::where('user_id', $user->id)
+                ->where(function ($q) use ($mouLama) {
+                    $mouLama ? $q->where('mou_id', $mouLama)->orWhereNull('mou_id') : $q->whereNull('mou_id');
+                })
+                ->update(['mou_id' => $mouBaru]);
+            if ($n) $pesan .= ' Asal kampus pada ' . $n . ' data magang ikut diperbarui.';
+        }
+
+        return redirect()->back()->with('success', $pesan);
     } catch (\Exception $e) {
         return redirect()->back()->withErrors(['error' => 'Gagal memperbarui data: ' . $e->getMessage()]);
     }
