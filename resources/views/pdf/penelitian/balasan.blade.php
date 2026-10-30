@@ -42,8 +42,7 @@
         @if($pra->jenis_penelitian === 'Data Awal')
             <li>Data awal yang diperoleh hanya digunakan untuk penyusunan latar belakang dan proposal penelitian.</li>
         @elseif($pra->jenis_penelitian === 'Uji Validitas')
-            <li>Instrumen (kuesioner/lembar observasi) yang diujikan telah disetujui dosen pembimbing, dan responden uji validitas tidak termasuk sampel penelitian utama.</li>
-            <li>Menyampaikan rekapitulasi hasil uji validitas dan reliabilitas instrumen kepada Unit Diklat setelah kegiatan selesai.</li>
+            <li>Instrumen (kuesioner/lembar observasi) telah disetujui dosen pembimbing, responden uji tidak termasuk sampel penelitian utama, dan rekapitulasi hasil uji validitas &amp; reliabilitas diserahkan kepada Unit Diklat.</li>
         @else
             <li>Melampirkan surat kelaikan etik (<em>ethical clearance</em>) yang masih berlaku sebelum pengambilan data dimulai.</li>
             <li>Mempresentasikan hasil penelitian dan menyerahkan laporan akhir (softcopy) kepada Unit Diklat.</li>
