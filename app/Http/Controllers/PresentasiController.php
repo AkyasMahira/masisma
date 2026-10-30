@@ -137,6 +137,11 @@ public function adminIndex(Request $request)
                 'status_final' => 'selesai',
                 'surat_selesai' => $suratPath,
             ]);
+
+            // Tanpa unggahan manual -> Surat Keterangan Selesai dibuat otomatis (kop, nomor & QR verifikasi)
+            if (!$suratPath) {
+                $presentasi->update(['surat_selesai' => \App\Support\SuratPenelitianOtomatis::simpan($praPenelitian, 'selesai', $pengajuan)]);
+            }
             
             return redirect()->route('admin.pengajuan.index')->with('success', $praPenelitian->jenis_penelitian . ' Berhasil Diselesaikan!');
         }

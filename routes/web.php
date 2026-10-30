@@ -14,6 +14,7 @@ use App\Http\Controllers\KonsultasiController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\SuratBalasanController;
+use App\Http\Controllers\SuratPenelitianController;
 use App\Http\Controllers\RoomSequenceController;
 use App\Http\Controllers\MouController;
 use App\Http\Controllers\PengajuanController;
@@ -94,6 +95,8 @@ Route::get('/penilaian/{token}', [PresentasiController::class, 'formPenilaian'])
 Route::post('/penilaian/{token}', [PresentasiController::class, 'submitPenilaian'])->name('ci.submit-penilaian');
 Route::get('/presentasi/{id}/sertifikat/{nama_anggota}', [PresentasiController::class, 'downloadSertifikatAnggota'])->name('presentasi.download-sertifikat');
 Route::get('/presentasi/{id}/surat-selesai/{nama_anggota}', [PresentasiController::class, 'downloadSuratSelesaiAnggota'])->name('presentasi.download-surat-selesai');
+// Verifikasi keaslian surat penelitian (QR)
+Route::get('/surat/verifikasi/{kode}', [SuratPenelitianController::class, 'verifikasi'])->name('surat.verifikasi');
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
@@ -134,6 +137,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/pra', [PengajuanController::class, 'ajukanPra'])->name('pra');
         Route::post('/magang', [PengajuanController::class, 'ajukanMagang'])->name('magang');
         Route::post('/{pengajuan}/upload-bukti', [PengajuanController::class, 'uploadBuktiPembayaran'])->name('upload-bukti');
+        Route::get('/{pengajuan}/surat/{jenis}', [SuratPenelitianController::class, 'mahasiswa'])->name('surat')->whereIn('jenis', ['balasan', 'pengantar', 'selesai']);
         Route::delete('/{pengajuan}', [PengajuanController::class, 'destroy'])->name('destroy');
     });
     Route::prefix('/room_sequences')->name('room_sequences.')->group(function () {
@@ -446,6 +450,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::post('/bulk-action', [PengajuanController::class, 'bulkAction'])->name('bulk_action');
         Route::post('/{pengajuan}/update-ci2', [PengajuanController::class, 'updateCi2'])->name('update-ci2');
         Route::get('/{pengajuan}/download-surat-otomatis', [PengajuanController::class, 'downloadSuratOtomatis'])->name('download-surat-otomatis');
+        Route::get('/{pengajuan}/surat/{jenis}', [SuratPenelitianController::class, 'admin'])->name('surat')->whereIn('jenis', ['balasan', 'pengantar', 'selesai']);
         Route::post('/{pengajuan}/cancel', [PengajuanController::class, 'cancel'])->name('cancel');
     });
 

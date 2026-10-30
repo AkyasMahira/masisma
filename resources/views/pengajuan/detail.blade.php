@@ -431,7 +431,21 @@
                                             <small>Proses administrasi selesai.</small>
                                         </div>
                                     </div>
-                                    
+
+                                    {{-- SURAT PENGANTAR KE RUANGAN (otomatis) --}}
+                                    @if ($pengajuan->jenis === 'pra_penelitian' && $pengajuan->ruangan_id)
+                                        <a href="{{ route('pengajuan.surat', [$pengajuan->id, 'pengantar']) }}" class="file-card mb-4">
+                                            <div class="d-flex align-items-center">
+                                                <div class="file-icon"><i class="bi bi-envelope-paper-fill"></i></div>
+                                                <div>
+                                                    <div class="fw-bold text-dark small">Surat Pengantar ke Ruangan</div>
+                                                    <div class="text-xs text-muted">Bawa & serahkan ke Kepala Ruangan saat memulai kegiatan</div>
+                                                </div>
+                                            </div>
+                                            <i class="bi bi-download text-muted"></i>
+                                        </a>
+                                    @endif
+
                                     {{-- INFO CI --}}
                                     @if ($pengajuan->ci)
                                         <div class="card border-0 bg-white shadow-sm overflow-hidden animate-up" style="animation-delay: 0.3s;">

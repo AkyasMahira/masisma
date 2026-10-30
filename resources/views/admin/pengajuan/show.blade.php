@@ -39,6 +39,14 @@
             margin-bottom: 1.5rem;
         }
 
+        .surat-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 8px; }
+        .surat-row.siap { background: #f0fdf4; border-color: #bbf7d0; }
+        .surat-row.belum { background: #f8fafc; opacity: .8; }
+        .surat-ico { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.05rem; }
+        .surat-row.siap .surat-ico { background: #dcfce7; color: #15803d; }
+        .surat-row.belum .surat-ico { background: #e2e8f0; color: #64748b; }
+        .surat-row .min-w-0 { min-width: 0; }
+
         .info-header {
             padding: 1rem 1.5rem;
             border-bottom: 1px solid #f1f5f9;
@@ -350,6 +358,35 @@
                     </div>
                 </div>
             @endif
+            @if($pengajuan->jenis === 'pra_penelitian' && $praPenelitian)
+                @php
+                    $suratTersedia = \App\Support\SuratPenelitianOtomatis::tersedia($pengajuan, $praPenelitian);
+                    $suratTerdaftar = \App\Models\SuratPenelitian::where('pra_penelitian_id', $praPenelitian->id)->get()->keyBy('jenis_surat');
+                    $syaratSurat = ['balasan' => 'Setelah data diverifikasi (Tahap 1)', 'pengantar' => 'Setelah pembayaran & ruangan ditetapkan (Tahap 3)', 'selesai' => in_array($praPenelitian->jenis_penelitian, ['Data Awal', 'Uji Validitas']) ? 'Setelah kegiatan diakhiri (Tahap 4)' : 'Penelitian memakai surat selesai & sertifikat dari menu Presentasi'];
+                @endphp
+                <div class="info-card surat-otomatis">
+                    <div class="info-header research"><i class="bi bi-envelope-paper-fill"></i> Surat Otomatis</div>
+                    <div class="info-body">
+                        <p class="text-muted small mb-3">Kop, nomor surat, dan QR verifikasi dibuat otomatis. Nomor dibuat sekali lalu tetap.</p>
+                        @foreach(\App\Models\SuratPenelitian::JENIS as $jenisSurat => $infoSurat)
+                            @php $siap = !empty($suratTersedia[$jenisSurat]); $reg = $suratTerdaftar->get($jenisSurat); @endphp
+                            <div class="surat-row {{ $siap ? 'siap' : 'belum' }}">
+                                <div class="surat-ico"><i class="bi {{ $siap ? 'bi-file-earmark-check-fill' : 'bi-hourglass-split' }}"></i></div>
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="fw-bold text-dark small">{{ $infoSurat['judul'] }}</div>
+                                    <div class="text-muted" style="font-size:.72rem;">{{ $reg ? $reg->nomor_surat : ($siap ? 'Siap dibuat' : $syaratSurat[$jenisSurat]) }}</div>
+                                </div>
+                                @if($siap)
+                                    <div class="d-flex gap-1">
+                                        <a href="{{ route('admin.pengajuan.surat', [$pengajuan->id, $jenisSurat]) }}" target="_blank" class="btn btn-sm btn-light border" title="Lihat"><i class="bi bi-eye"></i></a>
+                                        <a href="{{ route('admin.pengajuan.surat', [$pengajuan->id, $jenisSurat]) }}?unduh=1" class="btn btn-sm btn-custom-maroon" title="Unduh"><i class="bi bi-download"></i></a>
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
         </div>
 
         {{-- KOLOM KANAN --}}
@@ -483,9 +520,10 @@
                                     @csrf
                                     <div class="row g-3">
                                         <div class="col-md-6">
-                                            <label class="form-label small fw-bold">Surat Balasan (PDF)</label>
+                                            <label class="form-label small fw-bold">Surat Balasan (PDF) <span class="text-muted fw-normal">— opsional</span></label>
                                             <input type="file" name="surat_balasan" class="form-control"
-                                                accept=".pdf" required>
+                                                accept=".pdf">
+                                            <div class="form-text" style="font-size:.72rem;"><i class="bi bi-magic me-1"></i>Kosongkan untuk memakai <a href="{{ route('admin.pengajuan.surat', [$pengajuan->id, 'balasan']) }}" target="_blank">surat balasan otomatis</a> (kop, nomor & QR).</div>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label small fw-bold">Invoice Tagihan (PDF)</label>
@@ -692,17 +730,12 @@
                                                 <input type="hidden" name="waktu_selesai" value="09:00">
                                                 <input type="hidden" name="tempat" value="Tanpa Presentasi ({{ $praPenelitian->jenis_penelitian }})">
                                                 <input type="hidden" name="keterangan_admin" value="Diselesaikan otomatis karena tipe {{ $praPenelitian->jenis_penelitian }}">
-                       @if($praPenelitian->jenis_penelitian === 'Data Awal')
-    <div class="mb-3">
-        <a href="{{ route('admin.pengajuan.download-surat-otomatis', $pengajuan->id) }}" class="btn btn-primary btn-sm w-100 mb-2">
-            <i class="bi bi-file-earmark-pdf-fill me-2"></i> Surat Selesai Data Awal
-        </a>
-        <p class="text-muted" style="font-size: 0.7rem;">*Surat akan terisi otomatis dengan data mahasiswa & judul penelitian.</p>
-    </div>
-@endif
+                                                <div class="alert alert-success border-0 small py-2 mb-3 text-start">
+                                                    <i class="bi bi-magic me-1"></i> <strong>Surat Keterangan Selesai {{ $praPenelitian->jenis_penelitian }}</strong> dibuat otomatis (kop, nomor & QR verifikasi) dan langsung dikirim ke mahasiswa saat tombol di bawah ditekan.
+                                                </div>
                                                 <div class="mb-3 text-start bg-white p-3 border rounded shadow-sm">
-                                                    <label class="form-label small fw-bold text-dark"><i class="bi bi-file-pdf text-danger me-1"></i> Upload Surat Selesai (PDF) <span class="text-danger">*</span></label>
-                                                    <input type="file" name="surat_selesai_manual" class="form-control form-control-sm" accept=".pdf" required>
+                                                    <label class="form-label small fw-bold text-dark"><i class="bi bi-file-pdf text-danger me-1"></i> Upload Surat Selesai (PDF) <span class="text-muted fw-normal">— opsional, bila ingin memakai surat sendiri</span></label>
+                                                    <input type="file" name="surat_selesai_manual" class="form-control form-control-sm" accept=".pdf">
                                                 </div>
 
                                                 <button type="submit" class="btn btn-success w-100 fw-bold shadow-sm" onclick="confirmSubmit(event, 'Akhiri & Kirim Surat?', 'Pengajuan akan diselesaikan dan surat akan dikirim ke mahasiswa.', 'success')">

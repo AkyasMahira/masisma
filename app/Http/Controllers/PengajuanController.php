@@ -340,11 +340,14 @@ public function adminIndex(Request $request)
         }
 
         $request->validate([
-            'surat_balasan' => 'required|file|mimes:pdf|max:2048',
+            'surat_balasan' => 'nullable|file|mimes:pdf|max:2048',
             'invoice' => 'required|file|mimes:pdf|max:2048',
         ]);
 
-        $suratPath = $request->file('surat_balasan')->store('surat_balasan', 'public');
+        // Surat balasan: pakai file unggahan bila ada; bila kosong dibuat otomatis (kop, nomor & QR verifikasi)
+        $suratPath = $request->hasFile('surat_balasan')
+            ? $request->file('surat_balasan')->store('surat_balasan', 'public')
+            : \App\Support\SuratPenelitianOtomatis::simpan($praPenelitian, 'balasan', $pengajuan);
         $invoicePath = $request->file('invoice')->store('invoice', 'public');
 
         $pengajuan->update([
@@ -371,7 +374,19 @@ public function adminIndex(Request $request)
         'ruangan_id'        => $request->ruangan_id,
     ]);
 
-    return back()->with('success', 'Pembayaran diverifikasi dan CI berhasil ditugaskan.');
+    // Surat pengantar ke ruangan dibuat otomatis begitu ruangan & CI ditetapkan
+    $pesan = 'Pembayaran diverifikasi dan CI berhasil ditugaskan.';
+    $pra = PraPenelitian::where('user_id', $pengajuan->user_id)->latest()->first();
+    if ($pengajuan->jenis === 'pra_penelitian' && $pra) {
+        try {
+            \App\Support\SuratPenelitianOtomatis::simpan($pra, 'pengantar', $pengajuan->fresh());
+            $pesan .= ' Surat pengantar ke ruangan sudah dibuat otomatis.';
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
+    return back()->with('success', $pesan);
 }
 public function updateCi2(Request $request, Pengajuan $pengajuan)
 {
