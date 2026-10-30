@@ -93,7 +93,8 @@
                 @endif
             </td>
             <td class="blok">
-                <p>{{ $kop['kota'] }}, {{ $surat->tanggal_surat->translatedFormat('d F Y') }}</p>
+                {{-- Surat bertanggal di kanan atas (balasan/pengantar) tidak perlu tanggal ulang di sini --}}
+                @if(!in_array($surat->jenis_surat, ['balasan', 'pengantar']))<p>{{ $kop['kota'] }}, {{ $surat->tanggal_surat->translatedFormat('d F Y') }}</p>@endif
                 @if(!empty($atasNama))<p>a.n. {{ config('surat.penandatangan.direktur.jabatan') }}</p>@endif
                 <p><strong>{{ $ttd['jabatan'] }},</strong></p>
                 <div class="qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=0&data={{ urlencode($urlVerif) }}" alt="QR Verifikasi"></div>

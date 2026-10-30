@@ -37,9 +37,8 @@
     <p>Dengan ketentuan sebagai berikut:</p>
     <ol class="ketentuan">
         <li>Menyelesaikan administrasi dan biaya {{ $kegiatan['singkat'] }} sesuai tagihan (invoice) yang diterbitkan Unit Diklat sebelum kegiatan dimulai.</li>
-        <li>Mematuhi tata tertib, standar prosedur operasional, serta peraturan yang berlaku di {{ $kop['singkat'] }}.</li>
+        <li>Mematuhi tata tertib dan prosedur yang berlaku di {{ $kop['singkat'] }}, serta didampingi pembimbing lapangan (Clinical Instructor) yang ditunjuk Unit Diklat.</li>
         <li>Menjaga kerahasiaan identitas dan data pasien; data hanya digunakan untuk kepentingan akademik sesuai judul di atas.</li>
-        <li>Pelaksanaan kegiatan didampingi oleh pembimbing lapangan (Clinical Instructor) yang ditunjuk oleh Unit Diklat.</li>
         @if($pra->jenis_penelitian === 'Data Awal')
             <li>Data awal yang diperoleh hanya digunakan untuk penyusunan latar belakang dan proposal penelitian.</li>
         @elseif($pra->jenis_penelitian === 'Uji Validitas')
