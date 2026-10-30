@@ -50,15 +50,14 @@
             <li>Melampirkan surat kelaikan etik (<em>ethical clearance</em>) yang masih berlaku sebelum pengambilan data dimulai.</li>
             <li>Mempresentasikan hasil penelitian dan menyerahkan laporan akhir (softcopy) kepada Unit Diklat.</li>
         @endif
-        <li>Setelah kegiatan selesai, peneliti akan mendapatkan surat keterangan selesai dari Unit Diklat.</li>
     </ol>
 
-    <p class="indent">Demikian surat balasan ini kami sampaikan. Atas perhatian dan kerja samanya kami ucapkan terima kasih.</p>
+    <p class="indent">Setelah kegiatan selesai, peneliti akan memperoleh surat keterangan selesai dari Unit Diklat. Demikian surat balasan ini kami sampaikan. Atas perhatian dan kerja samanya kami ucapkan terima kasih.</p>
 @endsection
 
 @section('tembusan')
     <p><u>Tembusan</u>:</p>
-    <p>1. Yth. Koordinator Unit Diklat {{ $kop['singkat'] }}</p>
+    <p>1. Yth. Koordinator Unit Diklat RSUD SLG</p>
     <p>2. Yth. Mahasiswa yang bersangkutan</p>
     <p>3. Arsip</p>
 @endsection

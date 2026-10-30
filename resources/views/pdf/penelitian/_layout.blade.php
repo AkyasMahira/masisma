@@ -51,7 +51,8 @@
         .ttd .qr { margin: 4px 0 3px; }
         .ttd .qr img { width: 76px; height: 76px; }
         .ttd .nama { font-weight: bold; text-decoration: underline; }
-        .tembusan { margin-top: 6px; font-size: 10pt; }
+        .tembusan-kiri { vertical-align: bottom !important; padding-right: 20px; }
+        .tembusan { font-size: 9.5pt; line-height: 1.3; }
         .tembusan p { margin: 0; text-align: left; }
 
         /* ===== FOOTER ===== */
@@ -86,7 +87,11 @@
     {{-- TANDA TANGAN --}}
     <table class="ttd">
         <tr>
-            <td></td>
+            <td class="tembusan-kiri">
+                @hasSection('tembusan')
+                    <div class="tembusan">@yield('tembusan')</div>
+                @endif
+            </td>
             <td class="blok">
                 <p>{{ $kop['kota'] }}, {{ $surat->tanggal_surat->translatedFormat('d F Y') }}</p>
                 @if(!empty($atasNama))<p>a.n. {{ config('surat.penandatangan.direktur.jabatan') }}</p>@endif
@@ -99,8 +104,5 @@
         </tr>
     </table>
 
-    @hasSection('tembusan')
-        <div class="tembusan">@yield('tembusan')</div>
-    @endif
 </body>
 </html>
