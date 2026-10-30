@@ -28,7 +28,6 @@
     @include('pdf.penelitian._data_peneliti', ['denganPembimbing' => true])
 
     <table class="data" style="margin-top:-6px">
-        <tr><td class="l">Jenis Kegiatan</td><td class="s">:</td><td class="v"><span class="badge-jenis">{{ $kegiatan['nama'] }}</span></td></tr>
         <tr><td class="l">Tempat</td><td class="s">:</td><td class="v">{{ $kop['singkat'] }}@if($ruangan) — Ruang {{ $ruangan }}@endif</td></tr>
         @if($pra->tanggal_mulai)
             <tr><td class="l">Rencana Mulai</td><td class="s">:</td><td class="v">{{ $pra->tanggal_mulai->translatedFormat('d F Y') }}</td></tr>

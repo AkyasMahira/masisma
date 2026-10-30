@@ -5,7 +5,7 @@
     <title>{{ $surat->judulSurat() }} - {{ $surat->nomor_surat }}</title>
     <style>
         @page { margin: 0.9cm 1.9cm 1.9cm 2.1cm; }
-        body { font-family: 'Times New Roman', Times, serif; font-size: 11.5pt; line-height: 1.32; color: #111; }
+        body { font-family: 'Times New Roman', Times, serif; font-size: 11pt; line-height: 1.27; color: #111; }
 
         /* ===== KOP ===== */
         .kop { width: 100%; border-collapse: collapse; }
@@ -49,7 +49,7 @@
         .ttd .blok { width: 270px; text-align: left; }
         .ttd .blok p { margin: 0; text-align: left; }
         .ttd .qr { margin: 4px 0 3px; }
-        .ttd .qr img { width: 76px; height: 76px; }
+        .ttd .qr img { width: 70px; height: 70px; }
         .ttd .nama { font-weight: bold; text-decoration: underline; }
         .tembusan-kiri { vertical-align: bottom !important; padding-right: 20px; }
         .tembusan { font-size: 9.5pt; line-height: 1.3; }
