@@ -98,7 +98,8 @@
         <tr>
             <td>
                 <p class="jab">Penguji I</p>
-                <span class="nama-ttd">{{ $penguji[0] ?? '..............................' }}</span>
+                <span class="nama-ttd">{{ $penguji[0] ?? '..............................' }}</span><br>
+                <span class="nip">Pembimbing Lapangan (CI)</span>
             </td>
             <td>
                 <p class="jab">{{ $kop['kota'] }}, {{ $surat->tanggal_surat->translatedFormat('d F Y') }}<br><strong>{{ $ttd['jabatan'] }}</strong></p>
@@ -108,7 +109,8 @@
             </td>
             <td>
                 <p class="jab">Penguji II</p>
-                <span class="nama-ttd">{{ $penguji[1] ?? '..............................' }}</span>
+                <span class="nama-ttd">{{ $penguji[1] ?? '..............................' }}</span><br>
+                <span class="nip">Pembimbing Lapangan (CI)</span>
             </td>
         </tr>
     </table>
