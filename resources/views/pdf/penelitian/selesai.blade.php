@@ -4,7 +4,7 @@
     <p class="judul">SURAT KETERANGAN SELESAI</p>
     <p class="nomor-judul">Nomor: {{ $surat->nomor_surat }}</p>
 
-    <p class="indent">Yang bertanda tangan di bawah ini, {{ $ttd['jabatan'] }} {{ $kop['singkat'] }}, dengan ini menerangkan bahwa:</p>
+    <p class="indent">Yang bertanda tangan di bawah ini, {{ $ttd['jabatan'] }}{{ stripos($ttd['jabatan'], 'RSUD') === false ? ' ' . $kop['singkat'] : ' Kabupaten Kediri' }}, dengan ini menerangkan bahwa:</p>
 
     @include('pdf.penelitian._data_peneliti', ['denganPembimbing' => true])
 

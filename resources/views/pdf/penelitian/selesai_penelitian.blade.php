@@ -28,7 +28,7 @@
     <p class="judul">SURAT KETERANGAN SELESAI PENELITIAN</p>
     <p class="nomor-judul">Nomor: {{ $surat->nomor_surat }}</p>
 
-    <p class="indent">Yang bertanda tangan di bawah ini, {{ $ttd['jabatan'] }} {{ $kop['singkat'] }}, dengan ini menerangkan bahwa:</p>
+    <p class="indent">Yang bertanda tangan di bawah ini, {{ $ttd['jabatan'] }}{{ stripos($ttd['jabatan'], 'RSUD') === false ? ' ' . $kop['singkat'] : ' Kabupaten Kediri' }}, dengan ini menerangkan bahwa:</p>
 
     <table class="data">
         <tr><td class="l">Nama</td><td class="s">:</td><td class="v"><strong>{{ $penerima ?: '-' }}</strong></td></tr>
