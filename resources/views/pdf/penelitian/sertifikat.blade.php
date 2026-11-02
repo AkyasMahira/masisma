@@ -31,31 +31,31 @@
         .watermark { position: fixed; top: 52mm; left: 103.5mm; width: 90mm; opacity: 0.045; }
 
         /* ===== ISI ===== */
-        .isi { position: fixed; top: 20mm; left: 26mm; width: 245mm; text-align: center; }
-        .kop img { width: 19mm; }
-        .kop .pemkab { font-size: 10.5pt; letter-spacing: 1.5px; margin: 2mm 0 0; color: #374151; }
-        .kop .rs { font-size: 13pt; font-weight: bold; color: #7c1316; letter-spacing: 1px; margin: 0.5mm 0 0; }
-        .judul { font-size: 40pt; font-weight: bold; color: #7c1316; letter-spacing: 9px; margin: 4mm 0 0; line-height: 1; }
-        .sub { font-size: 12pt; letter-spacing: 4px; color: #a16207; margin: 1.5mm 0 0; text-transform: uppercase; }
-        .nomor { font-size: 9.5pt; color: #6b7280; margin: 1.5mm 0 0; }
-        .diberikan { font-size: 11pt; letter-spacing: 2px; color: #4b5563; margin: 6mm 0 0; text-transform: uppercase; }
-        .nama { font-size: 27pt; font-weight: bold; font-style: italic; color: #111827; margin: 1.5mm 0 0; }
+        .isi { position: fixed; top: 18mm; left: 26mm; width: 245mm; text-align: center; }
+        .kop img { width: 14mm; }
+        .kop .pemkab { font-size: 10pt; letter-spacing: 1.5px; margin: 1mm 0 0; color: #374151; }
+        .kop .rs { font-size: 12pt; font-weight: bold; color: #7c1316; letter-spacing: 1px; margin: 0.5mm 0 0; }
+        .judul { font-size: 34pt; font-weight: bold; color: #7c1316; letter-spacing: 9px; margin: 2.5mm 0 0; line-height: 1; }
+        .sub { font-size: 11pt; letter-spacing: 4px; color: #a16207; margin: 1mm 0 0; text-transform: uppercase; }
+        .nomor { font-size: 9pt; color: #6b7280; margin: 1mm 0 0; }
+        .diberikan { font-size: 10.5pt; letter-spacing: 2px; color: #4b5563; margin: 4mm 0 0; text-transform: uppercase; }
+        .nama { font-size: 25pt; font-weight: bold; font-style: italic; color: #111827; margin: 1.5mm 0 0; }
         .garis-nama { width: 150mm; margin: 1mm auto 0; border-top: 0.6mm solid #c9a227; }
         .institusi { font-size: 11pt; color: #4b5563; margin: 1.5mm 0 0; }
-        .uraian { font-size: 12pt; margin: 4.5mm 18mm 0; line-height: 1.4; }
-        .judul-pnl { font-size: 12.5pt; font-weight: bold; font-style: italic; color: #7c1316; margin: 1.5mm 22mm 0; line-height: 1.3; }
-        .periode { font-size: 10.5pt; color: #4b5563; margin: 2mm 0 0; }
-        .predikat { display: inline-block; margin-top: 3.5mm; border: 0.5mm solid #c9a227; background: #fdf6e3; border-radius: 6mm; padding: 1.3mm 7mm; font-size: 11.5pt; }
+        .uraian { font-size: 11.5pt; margin: 3mm 18mm 0; line-height: 1.35; }
+        .judul-pnl { font-size: 12pt; font-weight: bold; font-style: italic; color: #7c1316; margin: 1mm 22mm 0; line-height: 1.3; }
+        .periode { font-size: 10pt; color: #4b5563; margin: 1.5mm 0 0; }
+        .predikat { display: inline-block; margin-top: 2.5mm; border: 0.5mm solid #c9a227; background: #fdf6e3; border-radius: 6mm; padding: 1.3mm 7mm; font-size: 11.5pt; }
         .predikat b { color: #7c1316; font-size: 13pt; }
 
         /* ===== TANDA TANGAN ===== */
-        .ttd { position: fixed; bottom: 21mm; left: 26mm; width: 245mm; border-collapse: collapse; }
+        .ttd { position: fixed; top: 147mm; left: 26mm; width: 245mm; border-collapse: collapse; }
         .ttd td { width: 33.3%; text-align: center; vertical-align: bottom; font-size: 10.5pt; padding: 0 4mm; }
-        .ttd .jab { font-size: 10pt; color: #374151; margin: 0 0 1mm; }
+        .ttd .jab { font-size: 9.5pt; color: #374151; margin: 0 0 1mm; line-height: 1.25; }
         .ttd .nama-ttd { font-weight: bold; border-top: 0.3mm solid #374151; display: inline-block; padding-top: 1mm; min-width: 52mm; }
-        .ttd .qr img { width: 21mm; height: 21mm; }
+        .ttd .qr img { width: 18mm; height: 18mm; }
         .ttd .nip { font-size: 9pt; color: #374151; }
-        .verif { position: fixed; bottom: 16.5mm; left: 0; width: 297mm; text-align: center; font-size: 7.5pt; color: #9ca3af; }
+        .verif { position: fixed; top: 190.5mm; left: 0; width: 297mm; text-align: center; font-size: 7.5pt; color: #9ca3af; }
     </style>
 </head>
 <body>
