@@ -121,15 +121,15 @@
                             <p class="small mb-0" id="note-terlambat-text">Dispensasi terlambat <b>HANYA</b> berlaku untuk absensi hari ini (<b>{{ \Carbon\Carbon::now()->isoFormat('D MMMM YYYY') }}</b>). Sistem mengunci tanggal otomatis.</p>
                         </div>
 
-                        {{-- Tanggal khusus Lupa Pulang (maks 2 hari ke belakang) --}}
+                        {{-- Tanggal khusus Lupa Pulang (maks BATAS_LUPA_PULANG_HARI hari ke belakang) --}}
                         <div class="row mb-3" id="wrap-tgl-lupa" style="display: none;">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small text-muted">Tanggal Lupa Absen Pulang</label>
                                 <input type="date" name="tanggal_mulai" id="tgl_lupa" class="form-control" disabled
-                                       min="{{ \Carbon\Carbon::now()->subDays(2)->toDateString() }}"
+                                       min="{{ \Carbon\Carbon::now()->subDays(\App\Models\Dispensasi::BATAS_LUPA_PULANG_HARI)->toDateString() }}"
                                        max="{{ \Carbon\Carbon::now()->toDateString() }}"
                                        value="{{ old('tanggal_mulai') }}">
-                                <small class="text-muted">Hanya bisa memilih maksimal 2 hari ke belakang.</small>
+                                <small class="text-muted">Hanya bisa memilih maksimal {{ \App\Models\Dispensasi::BATAS_LUPA_PULANG_HARI }} hari ke belakang.</small>
                             </div>
                         </div>
 
@@ -320,7 +320,7 @@
                         </button>
                         <button type="button" class="dsp-opt" style="--c:#f59e0b;--cb:#fef3e2" onclick="window.__pilihDispen('lupa_pulang')">
                             <span class="ic"><i class="bi bi-box-arrow-right"></i></span>
-                            <span class="tx"><b>Dispensasi Lupa Pulang</b><small>Lupa tap pulang — maksimal 2 hari lalu</small></span>
+                            <span class="tx"><b>Dispensasi Lupa Pulang</b><small>Lupa tap pulang — maksimal {{ \App\Models\Dispensasi::BATAS_LUPA_PULANG_HARI }} hari lalu</small></span>
                             <i class="bi bi-chevron-right chev"></i>
                         </button>
                         <button type="button" class="dsp-opt" style="--c:#0d6efd;--cb:#e7f0ff" onclick="window.__pilihDispen('biasa')">
@@ -406,11 +406,11 @@
                 if (ketLabel) ketLabel.innerText = 'Kronologi / Alasan Terlambat';
             } else {
                 document.getElementById('form-title').innerHTML = '<i class="bi bi-box-arrow-right me-2"></i> Pengajuan Dispensasi Lupa Pulang';
-                document.getElementById('form-subtitle').innerText = 'Untuk hari Anda lupa tap pulang (maks 2 hari lalu). Perlu validasi Karu/CI.';
+                document.getElementById('form-subtitle').innerText = 'Untuk hari Anda lupa tap pulang (maks {{ \App\Models\Dispensasi::BATAS_LUPA_PULANG_HARI }} hari lalu). Perlu validasi Karu/CI.';
                 wrapTglLupa.style.display = 'flex';
                 tglLupa.disabled = false; tglLupa.setAttribute('required', 'true');
                 alertEl.className = 'alert alert-warning shadow-sm border-0 mb-4';
-                noteEl.innerHTML = 'Lupa absen pulang dihitung <b>90%</b> bila disetujui. Pilih tanggal saat Anda lupa checkout (maksimal 2 hari ke belakang).';
+                noteEl.innerHTML = 'Lupa absen pulang dihitung <b>90%</b> bila disetujui. Pilih tanggal saat Anda lupa checkout (maksimal {{ \App\Models\Dispensasi::BATAS_LUPA_PULANG_HARI }} hari ke belakang).';
                 if (ketLabel) ketLabel.innerText = 'Kronologi / Alasan Lupa Absen Pulang';
             }
         }

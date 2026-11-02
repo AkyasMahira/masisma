@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Dispensasi extends Model
 {
+    /** Dispensasi lupa pulang / absen pulang susulan maksimal sekian hari ke belakang. */
+    const BATAS_LUPA_PULANG_HARI = 3;
+
     // Kita hapus 'use HasFactory' agar tidak error lagi
     
     protected $table = 'dispensasis';

@@ -38,8 +38,7 @@ class SuratPenelitianOtomatis
         return [
             'balasan'   => $pra->status === 'Approved',
             'pengantar' => $pengajuan->status_pembayaran === 'verified' && $pengajuan->ruangan_id,
-            'selesai'   => in_array($pra->jenis_penelitian, ['Data Awal', 'Uji Validitas'], true)
-                && $presentasi && $presentasi->status_final === 'selesai',
+            'selesai'   => $presentasi && $presentasi->status_final === 'selesai',
         ];
     }
 
@@ -67,14 +66,15 @@ class SuratPenelitianOtomatis
     }
 
     /** Data lengkap untuk view surat. */
-    public static function data(SuratPenelitian $surat, PraPenelitian $pra, ?Pengajuan $pengajuan = null)
+    public static function data(SuratPenelitian $surat, PraPenelitian $pra, ?Pengajuan $pengajuan = null, $namaPenerima = null)
     {
         $pra->loadMissing(['user', 'mou', 'anggotas']);
         if ($pengajuan) $pengajuan->loadMissing(['ci', 'ci2', 'dataRuangan']);
         $presentasi = $pengajuan ? \App\Models\Presentasi::where('pengajuan_id', $pengajuan->id)->first() : null;
         $mou = $pra->mou ?: optional($pra->user)->mou;
 
-        $ttdKey = $surat->jenis_surat === 'balasan' ? 'direktur' : 'diklat';
+        // Balasan izin & keterangan selesai PENELITIAN ditandatangani Direktur; lainnya Koordinator Diklat
+        $ttdKey = ($surat->jenis_surat === 'balasan' || ($surat->jenis_surat === 'selesai' && $pra->jenis_penelitian === 'Penelitian')) ? 'direktur' : 'diklat';
 
         return [
             'surat'      => $surat,
@@ -89,12 +89,21 @@ class SuratPenelitianOtomatis
             'ttd'        => config('surat.penandatangan.' . $ttdKey),
             'logo'       => 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('logors.png'))),
             'urlVerif'   => route('surat.verifikasi', $surat->kode_verifikasi),
+            'namaPenerima' => $namaPenerima,
         ];
     }
 
-    public static function pdf(SuratPenelitian $surat, PraPenelitian $pra, ?Pengajuan $pengajuan = null)
+    public static function view(SuratPenelitian $surat, PraPenelitian $pra)
     {
-        return Pdf::loadView('pdf.penelitian.' . $surat->jenis_surat, self::data($surat, $pra, $pengajuan))
+        if ($surat->jenis_surat === 'selesai' && $pra->jenis_penelitian === 'Penelitian') {
+            return 'pdf.penelitian.selesai_penelitian';   // dengan rincian nilai CI & nilai akhir
+        }
+        return 'pdf.penelitian.' . $surat->jenis_surat;
+    }
+
+    public static function pdf(SuratPenelitian $surat, PraPenelitian $pra, ?Pengajuan $pengajuan = null, $namaPenerima = null)
+    {
+        return Pdf::loadView(self::view($surat, $pra), self::data($surat, $pra, $pengajuan, $namaPenerima))
             ->setPaper('a4', 'portrait');
     }
 

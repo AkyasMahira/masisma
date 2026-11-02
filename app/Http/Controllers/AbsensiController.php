@@ -93,7 +93,7 @@ class AbsensiController extends Controller
        ]);
    }
 
-   private function sesiHangus($jamMasukStr, Carbon $now = null)
+   private function sesiHangus($jamMasukStr, ?Carbon $now = null)
    {
        if (!$jamMasukStr) return false;
        $now = $now ?: Carbon::now();
@@ -206,7 +206,7 @@ class AbsensiController extends Controller
                 // Sesi masuk yang belum checkout -> hangus bila sudah ganti hari / lewat window.
                 if ($this->sesiHangus($lastAbsen->jam_masuk, $now)) {
                     $data['absenHariIni'] = null;
-                    $data['error_state'] = 'Sesi sebelumnya hangus karena lupa absen pulang (dihitung Alfa). Silakan absen masuk untuk hari ini. Jika ingin dinilai, ajukan Dispensasi Lupa Pulang dari Dashboard Magang (maks 2 hari).';
+                    $data['error_state'] = 'Sesi sebelumnya hangus karena lupa absen pulang (dihitung Alfa). Silakan absen masuk untuk hari ini. Jika ingin dinilai, ajukan Dispensasi Lupa Pulang dari Dashboard Magang (maks ' . \App\Models\Dispensasi::BATAS_LUPA_PULANG_HARI . ' hari).';
                 } else {
                     $data['absenHariIni'] = $lastAbsen;
                     if($data['error_state']) $data['error_state'] = null;
@@ -437,7 +437,7 @@ if (!$isCheckout) {
     }
 
     /**
-     * Absen Pulang untuk sesi yang LUPA CHECKOUT (backdate maksimal 2 hari).
+     * Absen Pulang untuk sesi yang LUPA CHECKOUT (backdate maksimal Dispensasi::BATAS_LUPA_PULANG_HARI hari).
      * Jam pulang = jam selesai shift/jadwal pada tanggal masuk sesi tsb.
      */
     public function backdatePulang(Request $request, $token)
@@ -445,10 +445,10 @@ if (!$isCheckout) {
         $mahasiswa = Mahasiswa::where('share_token', $token)->first();
         if (!$mahasiswa) return back()->with('error', 'Data mahasiswa tidak ditemukan.');
 
-        $batasBawah = Carbon::today()->subDays(2)->startOfDay();   // 2 hari ke belakang
+        $batasBawah = Carbon::today()->subDays(\App\Models\Dispensasi::BATAS_LUPA_PULANG_HARI)->startOfDay();
         $batasAtas  = Carbon::today()->startOfDay();                // sebelum hari ini
 
-        // Cari sesi MASUK yang belum ada checkout (dalam 2 hari terakhir, bukan hari ini)
+        // Cari sesi MASUK yang belum ada checkout (dalam batas hari terakhir, bukan hari ini)
         $target = null;
         $masukRecs = Absensi::where('mahasiswa_id', $mahasiswa->id)
             ->where('type', 'masuk')
@@ -461,7 +461,7 @@ if (!$isCheckout) {
         }
 
         if (!$target) {
-            return back()->with('error', 'Tidak ada sesi masuk yang lupa checkout dalam 2 hari terakhir.');
+            return back()->with('error', 'Tidak ada sesi masuk yang lupa checkout dalam ' . \App\Models\Dispensasi::BATAS_LUPA_PULANG_HARI . ' hari terakhir.');
         }
 
         $jamMasuk = Carbon::parse($target->jam_masuk);

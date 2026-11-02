@@ -77,10 +77,10 @@ class DispensasiController extends Controller
             'keterangan' => 'required|string',
         ]);
 
-        // Dispensasi Lupa Pulang: tanggal wajib & maksimal 2 hari ke belakang (tidak boleh masa depan)
+        // Dispensasi Lupa Pulang: tanggal wajib & maksimal BATAS_LUPA_PULANG_HARI hari ke belakang (tidak boleh masa depan)
         if ($request->kategori === 'lupa_pulang') {
             $request->validate([
-                'tanggal_mulai' => 'required|date|after_or_equal:' . Carbon::now()->subDays(2)->toDateString()
+                'tanggal_mulai' => 'required|date|after_or_equal:' . Carbon::now()->subDays(\App\Models\Dispensasi::BATAS_LUPA_PULANG_HARI)->toDateString()
                                    . '|before_or_equal:' . Carbon::now()->toDateString(),
             ], [], ['tanggal_mulai' => 'Tanggal Lupa Pulang']);
         }
@@ -120,7 +120,7 @@ class DispensasiController extends Controller
         } else {
             // terlambat & lupa_pulang: butuh ruangan + otorisasi penyetuju (Karu/CI)
             if ($request->kategori === 'lupa_pulang') {
-                $tanggalMulai = $request->tanggal_mulai;              // tanggal lupa checkout (maks 2 hari lalu)
+                $tanggalMulai = $request->tanggal_mulai;              // tanggal lupa checkout (maks BATAS_LUPA_PULANG_HARI hari lalu)
             } else {
                 $tanggalMulai = $request->tanggal_mulai ?? Carbon::now()->toDateString(); // terlambat = hari ini
             }

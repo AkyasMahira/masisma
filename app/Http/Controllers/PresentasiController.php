@@ -398,13 +398,9 @@ public function downloadSuratSelesaiAnggota($id, $namaAnggota)
 
     // 2. Load view Surat Keterangan yang baru saja kita sesuaikan rincian nilainya
     // Pastikan file blade ada di: resources/views/pdf/surat-selesai.blade.php
-    $pdf = Pdf::loadView('pdf.surat-selesai', [
-        'presentasi'    => $presentasi,
-        'nama_penerima' => $nama_penerima
-    ]);
-
-    // 3. Set format kertas (Portrait A4 biasanya untuk surat resmi)
-    $pdf->setPaper('a4', 'portrait');
+    // Kop baru, nomor tetap & QR verifikasi (satu nomor per penelitian; nama penerima per anggota)
+    $surat = \App\Support\SuratPenelitianOtomatis::register($presentasi->praPenelitian, 'selesai', $presentasi->pengajuan);
+    $pdf = \App\Support\SuratPenelitianOtomatis::pdf($surat, $presentasi->praPenelitian, $presentasi->pengajuan, $nama_penerima);
 
     // 4. Stream ke browser
     return $pdf->stream(\App\Support\NamaFile::aman('Surat_Keterangan_Selesai_' . str_replace(' ', '_', $nama_penerima) . '.pdf'));
@@ -496,10 +492,8 @@ public function apiLaporan()
     {
         $userNama = $presentasi->user->name;
 
-        // Generate Surat Selesai
-        $pdfSurat = Pdf::loadView('pdf.surat-selesai', ['presentasi' => $presentasi, 'nama_penerima' => $userNama]);
-        $pathSurat = 'surat_selesai/surat_' . $presentasi->id . '_' . time() . '.pdf';
-        Storage::put('public/' . $pathSurat, $pdfSurat->output());
+        // Generate Surat Selesai (kop baru, nomor tetap & QR verifikasi)
+        $pathSurat = \App\Support\SuratPenelitianOtomatis::simpan($presentasi->praPenelitian, 'selesai', $presentasi->pengajuan);
 
         // Generate Sertifikat
         $pdfCert = Pdf::loadView('pdf.sertifikat-penelitian', ['presentasi' => $presentasi, 'nama_penerima' => $userNama])->setPaper('a4', 'landscape');
