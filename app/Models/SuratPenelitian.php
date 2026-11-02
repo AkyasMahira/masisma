@@ -19,6 +19,7 @@ class SuratPenelitian extends Model
         'balasan'   => ['kode' => 'SB-PNL',  'judul' => 'Surat Balasan Izin'],
         'pengantar' => ['kode' => 'SP-PNL',  'judul' => 'Surat Pengantar ke Ruangan'],
         'selesai'   => ['kode' => 'SKS-PNL', 'judul' => 'Surat Keterangan Selesai'],
+        'sertifikat' => ['kode' => 'SRT-PNL', 'judul' => 'Sertifikat Penelitian'],
     ];
 
     public function praPenelitian()

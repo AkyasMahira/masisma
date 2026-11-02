@@ -374,12 +374,9 @@ public function downloadSertifikatAnggota($id, $namaAnggota)
     // 2. Decode nama anggota dari URL
     $nama_penerima = urldecode($namaAnggota);
 
-    // 3. Load view sertifikat yang baru kita buat
-    // Pastikan file blade sertifikat ada di: resources/views/pdf/sertifikat-penelitian.blade.php
-    $pdf = Pdf::loadView('pdf.sertifikat-penelitian', [
-        'presentasi'    => $presentasi,
-        'nama_penerima' => $nama_penerima
-    ])->setPaper('a4', 'landscape');
+    // Desain baru: nomor sertifikat tetap & QR verifikasi (satu nomor per penelitian, nama per anggota)
+    $sertifikat = \App\Support\SuratPenelitianOtomatis::register($presentasi->praPenelitian, 'sertifikat', $presentasi->pengajuan);
+    $pdf = \App\Support\SuratPenelitianOtomatis::pdf($sertifikat, $presentasi->praPenelitian, $presentasi->pengajuan, $nama_penerima);
 
     // 4. Stream/Download (Ini akan men-generate PDF baru setiap kali klik)
     return $pdf->stream(\App\Support\NamaFile::aman('Sertifikat_' . str_replace(' ', '_', $nama_penerima) . '.pdf'));
@@ -490,15 +487,11 @@ public function apiLaporan()
      */
     private function generateSuratSelesai($presentasi)
     {
-        $userNama = $presentasi->user->name;
-
         // Generate Surat Selesai (kop baru, nomor tetap & QR verifikasi)
         $pathSurat = \App\Support\SuratPenelitianOtomatis::simpan($presentasi->praPenelitian, 'selesai', $presentasi->pengajuan);
 
         // Generate Sertifikat
-        $pdfCert = Pdf::loadView('pdf.sertifikat-penelitian', ['presentasi' => $presentasi, 'nama_penerima' => $userNama])->setPaper('a4', 'landscape');
-        $pathCert = 'sertifikat/cert_' . $presentasi->id . '_' . time() . '.pdf';
-        Storage::put('public/' . $pathCert, $pdfCert->output());
+        $pathCert = \App\Support\SuratPenelitianOtomatis::simpan($presentasi->praPenelitian, 'sertifikat', $presentasi->pengajuan);
 
         $presentasi->update([
             'surat_selesai' => $pathSurat,

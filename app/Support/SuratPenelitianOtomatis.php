@@ -39,6 +39,7 @@ class SuratPenelitianOtomatis
             'balasan'   => $pra->status === 'Approved',
             'pengantar' => $pengajuan->status_pembayaran === 'verified' && $pengajuan->ruangan_id,
             'selesai'   => $presentasi && $presentasi->status_final === 'selesai',
+            'sertifikat' => $pra->jenis_penelitian === 'Penelitian' && $presentasi && $presentasi->status_final === 'selesai',
         ];
     }
 
@@ -74,7 +75,7 @@ class SuratPenelitianOtomatis
         $mou = $pra->mou ?: optional($pra->user)->mou;
 
         // Balasan izin & keterangan selesai PENELITIAN ditandatangani Direktur; lainnya Koordinator Diklat
-        $ttdKey = ($surat->jenis_surat === 'balasan' || ($surat->jenis_surat === 'selesai' && $pra->jenis_penelitian === 'Penelitian')) ? 'direktur' : 'diklat';
+        $ttdKey = (in_array($surat->jenis_surat, ['balasan', 'sertifikat'], true) || ($surat->jenis_surat === 'selesai' && $pra->jenis_penelitian === 'Penelitian')) ? 'direktur' : 'diklat';
 
         return [
             'surat'      => $surat,
@@ -104,7 +105,7 @@ class SuratPenelitianOtomatis
     public static function pdf(SuratPenelitian $surat, PraPenelitian $pra, ?Pengajuan $pengajuan = null, $namaPenerima = null)
     {
         return Pdf::loadView(self::view($surat, $pra), self::data($surat, $pra, $pengajuan, $namaPenerima))
-            ->setPaper('a4', 'portrait');
+            ->setPaper('a4', $surat->jenis_surat === 'sertifikat' ? 'landscape' : 'portrait');
     }
 
     /** Buat (bila perlu) lalu simpan PDF ke storage publik; kembalikan path relatif. */

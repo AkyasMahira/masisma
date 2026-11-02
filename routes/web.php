@@ -137,7 +137,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/pra', [PengajuanController::class, 'ajukanPra'])->name('pra');
         Route::post('/magang', [PengajuanController::class, 'ajukanMagang'])->name('magang');
         Route::post('/{pengajuan}/upload-bukti', [PengajuanController::class, 'uploadBuktiPembayaran'])->name('upload-bukti');
-        Route::get('/{pengajuan}/surat/{jenis}', [SuratPenelitianController::class, 'mahasiswa'])->name('surat')->whereIn('jenis', ['balasan', 'pengantar', 'selesai']);
+        Route::get('/{pengajuan}/surat/{jenis}', [SuratPenelitianController::class, 'mahasiswa'])->name('surat')->whereIn('jenis', ['balasan', 'pengantar', 'selesai', 'sertifikat']);
         Route::delete('/{pengajuan}', [PengajuanController::class, 'destroy'])->name('destroy');
     });
     Route::prefix('/room_sequences')->name('room_sequences.')->group(function () {
@@ -450,7 +450,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::post('/bulk-action', [PengajuanController::class, 'bulkAction'])->name('bulk_action');
         Route::post('/{pengajuan}/update-ci2', [PengajuanController::class, 'updateCi2'])->name('update-ci2');
         Route::get('/{pengajuan}/download-surat-otomatis', [PengajuanController::class, 'downloadSuratOtomatis'])->name('download-surat-otomatis');
-        Route::get('/{pengajuan}/surat/{jenis}', [SuratPenelitianController::class, 'admin'])->name('surat')->whereIn('jenis', ['balasan', 'pengantar', 'selesai']);
+        Route::get('/{pengajuan}/surat/{jenis}', [SuratPenelitianController::class, 'admin'])->name('surat')->whereIn('jenis', ['balasan', 'pengantar', 'selesai', 'sertifikat']);
         Route::post('/{pengajuan}/cancel', [PengajuanController::class, 'cancel'])->name('cancel');
     });
 

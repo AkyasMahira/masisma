@@ -362,7 +362,7 @@
                 @php
                     $suratTersedia = \App\Support\SuratPenelitianOtomatis::tersedia($pengajuan, $praPenelitian);
                     $suratTerdaftar = \App\Models\SuratPenelitian::where('pra_penelitian_id', $praPenelitian->id)->get()->keyBy('jenis_surat');
-                    $syaratSurat = ['balasan' => 'Setelah data diverifikasi (Tahap 1)', 'pengantar' => 'Setelah pembayaran & ruangan ditetapkan (Tahap 3)', 'selesai' => in_array($praPenelitian->jenis_penelitian, ['Data Awal', 'Uji Validitas']) ? 'Setelah kegiatan diakhiri (Tahap 4)' : 'Setelah laporan akhir penelitian disetujui (Tahap 4)'];
+                    $syaratSurat = ['balasan' => 'Setelah data diverifikasi (Tahap 1)', 'pengantar' => 'Setelah pembayaran & ruangan ditetapkan (Tahap 3)', 'selesai' => in_array($praPenelitian->jenis_penelitian, ['Data Awal', 'Uji Validitas']) ? 'Setelah kegiatan diakhiri (Tahap 4)' : 'Setelah laporan akhir penelitian disetujui (Tahap 4)', 'sertifikat' => $praPenelitian->jenis_penelitian === 'Penelitian' ? 'Setelah laporan akhir penelitian disetujui (Tahap 4)' : 'Khusus jenis Penelitian'];
                 @endphp
                 <div class="info-card surat-otomatis">
                     <div class="info-header research"><i class="bi bi-envelope-paper-fill"></i> Surat Otomatis</div>
