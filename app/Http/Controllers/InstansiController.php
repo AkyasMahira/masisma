@@ -96,7 +96,7 @@ class InstansiController extends Controller
             $events[] = [
                 'title' => $title,
                 'start' => $b->tanggal_mulai->format('Y-m-d'),
-                'end'   => $b->tanggal_selesai->copy()->addDay()->format('Y-m-d'),
+                'end'   => $b->akhir_ruangan->copy()->addDay()->format('Y-m-d'),
                 'color' => $warna,
                 'textColor' => ($myMouId && !$mine) ? '#334155' : '#fff',
                 'extendedProps' => [
@@ -105,12 +105,13 @@ class InstansiController extends Controller
                     'status'  => $b->status,
                     'ruangan' => $namaRuangan,
                     'instansi'=> $myMouId && !$mine ? null : $namaInstansi,
-                    'periode' => $b->tanggal_mulai->format('d/m/Y') . ' - ' . $b->tanggal_selesai->format('d/m/Y'),
+                    'periode' => $b->tanggal_mulai->format('d/m/Y') . ' - ' . $b->tanggal_selesai->format('d/m/Y')
+                        . ($b->ruangan_selesai ? ' (ruangan s.d. ' . $b->ruangan_selesai->format('d/m/Y') . ')' : ''),
                     'jumlah'  => $b->jumlah_peserta,
                 ],
             ];
             if ($b->status === 'approved') {
-                $occ[] = ['r' => (int) $b->ruangan_id, 's' => $b->tanggal_mulai->format('Y-m-d'), 'e' => $b->tanggal_selesai->format('Y-m-d'), 'n' => (int) $b->jumlah_peserta, 'i' => $namaInstansi];
+                $occ[] = ['r' => (int) $b->ruangan_id, 's' => $b->tanggal_mulai->format('Y-m-d'), 'e' => $b->akhir_ruangan->format('Y-m-d'), 'n' => (int) $b->jumlah_peserta, 'i' => $namaInstansi];
             }
         }
 
@@ -144,12 +145,14 @@ class InstansiController extends Controller
         ]);
 
         $ruangan = Ruangan::findOrFail($data['ruangan_id']);
-        $sisa = $this->sisaKuota($ruangan, $data['tanggal_mulai'], $data['tanggal_selesai']);
+        // Instansi hanya memesan ruangan untuk MINGGU PERTAMA; rolling berikutnya diatur admin / karu / mahasiswa
+        $ruanganSelesai = BookingRuangan::akhirMingguPertama($data['tanggal_mulai'], $data['tanggal_selesai']);
+        $sisa = $this->sisaKuota($ruangan, $data['tanggal_mulai'], $ruanganSelesai);
 
         // Notifikasi PENUH: tolak jika permintaan melebihi sisa kuota
         if ($data['jumlah_peserta'] > $sisa) {
             return back()->withInput()->with('error',
-                "Ruangan {$ruangan->nm_ruangan} tidak cukup kuota untuk periode tersebut. Sisa kuota: {$sisa} orang. " .
+                "Ruangan {$ruangan->nm_ruangan} tidak cukup kuota untuk minggu pertama periode tersebut. Sisa kuota: {$sisa} orang. " .
                 ($sisa == 0 ? 'Ruangan PENUH — silakan pilih ruangan lain atau periode lain.' : ''));
         }
 
@@ -164,11 +167,120 @@ class InstansiController extends Controller
             'jumlah_peserta'  => $data['jumlah_peserta'],
             'tanggal_mulai'   => $data['tanggal_mulai'],
             'tanggal_selesai' => $data['tanggal_selesai'],
+            'ruangan_selesai' => $ruanganSelesai,
             'keterangan'      => $data['keterangan'] ?? null,
             'status'          => 'pending',
         ]);
 
         return redirect()->route('instansi.dashboard')->with('success', 'Permintaan booking ruangan terkirim. Menunggu persetujuan admin diklat.');
+    }
+
+    /* ======================= ABSENSI HARIAN ======================= */
+
+    /** Absensi harian mahasiswa instansi ini (per tanggal: ruangan, shift, jam masuk/pulang, status). */
+    public function absensiHarian(Request $request)
+    {
+        $user = $this->instansi();
+        $mou = $user->mou;
+        $today = Carbon::today();
+
+        $dari = $request->filled('dari') ? Carbon::parse($request->dari)->startOfDay() : $today->copy();
+        $sampai = $request->filled('sampai') ? Carbon::parse($request->sampai)->startOfDay() : $dari->copy();
+        if ($sampai->lt($dari)) { $tmp = $dari; $dari = $sampai; $sampai = $tmp; }
+        if ($dari->diffInDays($sampai, true) > 30) $sampai = $dari->copy()->addDays(30);   // maks 31 hari
+        $q = trim((string) $request->get('q', ''));
+        $fStatus = (string) $request->get('status', '');
+
+        // Mahasiswa instansi ini yang masa magangnya beririsan dengan rentang tanggal
+        $mhs = Mahasiswa::where('mou_id', $mou->id)
+            ->whereDate('tanggal_mulai', '<=', $sampai->toDateString())
+            ->whereDate('tanggal_berakhir', '>=', $dari->toDateString())
+            ->when($q !== '', function ($w) use ($q) {
+                $w->where(function ($x) use ($q) { $x->where('nm_mahasiswa', 'like', "%$q%")->orWhere('prodi', 'like', "%$q%"); });
+            })
+            ->with(['ruangan', 'roomSequences.ruangan'])
+            ->orderBy('nm_mahasiswa')
+            ->get();
+        $ids = $mhs->pluck('id');
+
+        $absensi = $ids->count() ? \App\Models\Absensi::whereIn('mahasiswa_id', $ids)
+            ->where('created_at', '>=', $dari->copy()->startOfDay())
+            ->where('created_at', '<=', $sampai->copy()->addDay()->endOfDay())   // pulang shift malam bisa esok hari
+            ->orderBy('id')->get() : collect();
+        $masukMap = [];   // [mhs][Y-m-d] => absensi masuk pertama
+        $keluarMap = [];  // [mhs][jam_masuk] => absensi keluar
+        foreach ($absensi as $a) {
+            if ($a->type === 'masuk') {
+                $tgl = Carbon::parse($a->created_at)->toDateString();
+                if (!isset($masukMap[$a->mahasiswa_id][$tgl])) $masukMap[$a->mahasiswa_id][$tgl] = $a;
+            } elseif ($a->type === 'keluar' && $a->jam_masuk) {
+                $keluarMap[$a->mahasiswa_id][Carbon::parse($a->jam_masuk)->format('Y-m-d H:i:s')] = $a;
+            }
+        }
+        $jadwal = $ids->count() ? \App\Models\ShiftSchedule::whereIn('mahasiswa_id', $ids)
+            ->whereBetween('tanggal', [$dari->toDateString(), $sampai->toDateString()])->get()
+            ->groupBy('mahasiswa_id')->map(function ($g) { return $g->keyBy(function ($s) { return substr($s->tanggal, 0, 10); }); }) : collect();
+        $dispen = $ids->count() ? \App\Models\Dispensasi::whereIn('mahasiswa_id', $ids)->where('status', 'approved')
+            ->whereDate('tanggal_mulai', '<=', $sampai->toDateString())->whereDate('tanggal_selesai', '>=', $dari->toDateString())
+            ->get()->groupBy('mahasiswa_id') : collect();
+
+        $label = ['biasa' => 'Izin / Sakit', 'terlambat' => 'Dispensasi Terlambat', 'lupa_pulang' => 'Dispensasi Lupa Pulang'];
+        $rows = [];
+        $hitung = [];
+        foreach (\Carbon\CarbonPeriod::create($dari, $sampai) as $tglC) {
+            $tgl = $tglC->toDateString();
+            foreach ($mhs as $m) {
+                if (!$m->tanggal_mulai || !$m->tanggal_berakhir) continue;
+                if ($tgl < Carbon::parse($m->tanggal_mulai)->toDateString() || $tgl > Carbon::parse($m->tanggal_berakhir)->toDateString()) continue;
+
+                $seq = $m->roomSequences->first(function ($s) use ($tgl) {
+                    return substr($s->start_date, 0, 10) <= $tgl && substr($s->end_date, 0, 10) >= $tgl;
+                });
+                $ruang = $seq ? $seq->ruangan : null;
+                $shift = optional(optional($jadwal->get($m->id))->get($tgl))->shift_type;
+                $masuk = $masukMap[$m->id][$tgl] ?? null;
+                $keluar = $masuk && $masuk->jam_masuk ? ($keluarMap[$m->id][Carbon::parse($masuk->jam_masuk)->format('Y-m-d H:i:s')] ?? null) : null;
+                $d = collect($dispen->get($m->id, []))->first(function ($x) use ($tgl) {
+                    return Carbon::parse($x->tanggal_mulai)->toDateString() <= $tgl && Carbon::parse($x->tanggal_selesai)->toDateString() >= $tgl;
+                });
+
+                $libur = strcasecmp((string) $shift, 'Libur') === 0
+                    || (!$shift && $ruang && $ruang->kategori !== 'shift' && $tglC->isWeekend() && !$m->weekend_aktif);
+
+                if ($masuk && $keluar)                     $status = 'hadir';
+                elseif ($masuk && $tgl === $today->toDateString()) $status = 'bertugas';
+                elseif ($masuk)                            $status = 'tanpa_pulang';
+                elseif ($d && $d->kategori === 'biasa')    $status = 'izin';
+                elseif ($libur)                            $status = 'libur';
+                elseif ($tglC->gt($today))                 $status = 'mendatang';
+                elseif ($tgl === $today->toDateString())   $status = 'belum_absen';
+                elseif (!$ruang)                           $status = 'belum_dijadwalkan';
+                else                                       $status = 'tidak_hadir';
+
+                $hitung[$status] = ($hitung[$status] ?? 0) + 1;
+                if ($fStatus !== '' && $fStatus !== $status) continue;
+
+                $ket = [];
+                if ($d) $ket[] = $label[$d->kategori] ?? 'Dispensasi';
+                if ($masuk && stripos((string) $masuk->keterangan, 'admin') !== false) $ket[] = 'Diinput admin';
+                if ($ruang && $ruang->kategori === 'shift' && !$shift && !$libur) $ket[] = 'Jadwal shift belum diisi';
+
+                $rows[] = [
+                    'tanggal' => $tglC->copy(),
+                    'nama'    => $m->nm_mahasiswa,
+                    'prodi'   => $m->prodi,
+                    'ruangan' => optional($ruang)->nm_ruangan ?: optional($m->ruangan)->nm_ruangan,
+                    'shift'   => $shift ?: ($ruang && $ruang->kategori !== 'shift' ? ($tglC->dayOfWeekIso == 5 ? 'Jumat' : 'Reguler') : null),
+                    'masuk'   => $masuk && $masuk->jam_masuk ? Carbon::parse($masuk->jam_masuk)->format('H:i') : null,
+                    'pulang'  => $keluar && $keluar->jam_keluar ? Carbon::parse($keluar->jam_keluar)->format('H:i') : null,
+                    'pulang_besok' => $keluar && $keluar->jam_keluar && Carbon::parse($keluar->jam_keluar)->toDateString() !== $tgl,
+                    'status'  => $status,
+                    'ket'     => implode(' · ', $ket),
+                ];
+            }
+        }
+
+        return view('instansi.absensi_harian', compact('mou', 'rows', 'hitung', 'dari', 'sampai', 'q', 'fStatus'));
     }
 
     /* ======================= REKAP & LAPORAN ======================= */
@@ -407,7 +519,7 @@ class InstansiController extends Controller
         $booking = BookingRuangan::with('ruangan')->findOrFail($id);
 
         // Re-cek kuota saat approve (kondisi bisa berubah sejak diajukan)
-        $sisa = $this->sisaKuota($booking->ruangan, $booking->tanggal_mulai, $booking->tanggal_selesai, $booking->id);
+        $sisa = $this->sisaKuota($booking->ruangan, $booking->tanggal_mulai, $booking->akhir_ruangan, $booking->id);
         if ($booking->jumlah_peserta > $sisa) {
             return back()->with('error',
                 "Tidak bisa menyetujui: sisa kuota {$booking->ruangan->nm_ruangan} tinggal {$sisa} orang untuk periode itu (diminta {$booking->jumlah_peserta}).");
@@ -617,7 +729,8 @@ class InstansiController extends Controller
             $events[] = [
                 'title' => $namaInstansi . ' (' . $b->jumlah_peserta . ' org) · ' . $namaRuangan,
                 'start' => $m ? $m->format('Y-m-d') : null,
-                'end'   => $s ? $s->copy()->addDay()->format('Y-m-d') : null,
+                // batang kalender = masa pemakaian ruangan (booking instansi: minggu pertama)
+                'end'   => $b->akhir_ruangan ? $b->akhir_ruangan->copy()->addDay()->format('Y-m-d') : null,
                 'color' => $warna,
                 'extendedProps' => [
                     'id'       => $b->id,
@@ -627,7 +740,8 @@ class InstansiController extends Controller
                     'peserta'  => $b->jumlah_peserta,
                     'status'   => $b->status,
                     'fase'     => $fase,
-                    'periode'  => ($m ? $m->format('d/m/Y') : '-') . ' - ' . ($s ? $s->format('d/m/Y') : '-'),
+                    'periode'  => ($m ? $m->format('d/m/Y') : '-') . ' - ' . ($s ? $s->format('d/m/Y') : '-')
+                        . ($b->ruangan_selesai ? ' · ruangan s.d. ' . $b->ruangan_selesai->format('d/m/Y') . ' (minggu pertama)' : ''),
                     'prodi'    => self::prodiLabel($b),
                     'impor'    => Str::contains((string) $b->keterangan, '[IMPOR-MAPPING]'),
                     'ket'      => trim(str_replace('[IMPOR-MAPPING]', '', (string) $b->keterangan)),
@@ -821,7 +935,7 @@ class InstansiController extends Controller
                     'mahasiswa_id' => $mahasiswa->id,
                     'ruangan_id'   => $booking->ruangan_id,
                     'start_date'   => $booking->tanggal_mulai,
-                    'end_date'     => $booking->tanggal_selesai,
+                    'end_date'     => $booking->akhir_ruangan,   // booking instansi: minggu pertama saja
                 ]);
             }
 
@@ -866,7 +980,7 @@ class InstansiController extends Controller
                 $q->where('id', '!=', $excludeId);
             })
             ->where('tanggal_mulai', '<=', $end)
-            ->where('tanggal_selesai', '>=', $start)
+            ->whereRaw('COALESCE(ruangan_selesai, tanggal_selesai) >= ?', [$start])
             ->sum('jumlah_peserta');
 
         return max(0, $kapasitas - (int) $terpakai);

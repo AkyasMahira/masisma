@@ -351,6 +351,10 @@
                     <i class="bi bi-calendar-plus"></i>
                     <span class="sidebar-text">Booking Ruangan</span>
                 </a>
+                <a class="nav-link animate-item {{ request()->is('instansi/absensi-harian') ? 'active' : '' }}" href="{{ route('instansi.absensi_harian') }}">
+                    <i class="bi bi-calendar-check"></i>
+                    <span class="sidebar-text">Absensi Harian</span>
+                </a>
                 <a class="nav-link animate-item {{ request()->is('instansi/rekap') ? 'active' : '' }}" href="{{ route('instansi.rekap') }}">
                     <i class="bi bi-clipboard2-data"></i>
                     <span class="sidebar-text">Rekap & Laporan</span>

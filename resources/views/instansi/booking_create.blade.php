@@ -175,15 +175,18 @@
                             <input type="number" name="jumlah_peserta" id="f-jumlah" class="form-control" min="1" value="{{ old('jumlah_peserta', 1) }}" required>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Tanggal Mulai <span class="req">*</span></label>
+                            <label class="form-label">{{ $isAdmin ? 'Tanggal Mulai' : 'Mulai Magang' }} <span class="req">*</span></label>
                             <input type="date" name="tanggal_mulai" id="f-mulai" class="form-control" value="{{ old('tanggal_mulai') }}" required>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Tanggal Selesai <span class="req">*</span></label>
+                            <label class="form-label">{{ $isAdmin ? 'Tanggal Selesai' : 'Selesai Magang' }} <span class="req">*</span></label>
                             <input type="date" name="tanggal_selesai" id="f-selesai" class="form-control" value="{{ old('tanggal_selesai') }}" required>
                         </div>
                     </div>
                     <span class="dur-chip" id="durChip" style="display:none;"><i class="bi bi-hourglass-split"></i><span></span></span>
+                    @unless($isAdmin)
+                        <div class="hint mt-2" id="hintMingguPertama"><i class="bi bi-info-circle me-1"></i>Ruangan yang dipilih dipesan untuk <b>minggu pertama</b> saja<span id="mpRange"></span>. Rolling ruangan minggu berikutnya diatur oleh admin, kepala ruangan, atau mahasiswa sendiri.</div>
+                    @endunless
                 </div>
 
                 <div class="step">
@@ -349,6 +352,14 @@
         function fmt(s) { return parse(s).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }); }
         function addDay(s) { var d = parse(s); d.setDate(d.getDate() + 1); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
 
+        // Booking instansi: ruangan hanya dipakai minggu pertama (7 hari) dari periode magang
+        function akhirRuangan(s, e) {
+            if (IS_ADMIN || !s || !e) return e;
+            var d = parse(s); d.setDate(d.getDate() + 6);
+            var r = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+            return r < e ? r : e;
+        }
+
         // Aturan sama dengan server: kapasitas - jumlah booking approved yang periodenya beririsan
         function hitung(rid, s, e) {
             var kap = ROOMS[rid] ? ROOMS[rid].kuota : 0, used = 0;
@@ -374,7 +385,9 @@
                 box.innerHTML = '<div class="q-msg q-bad"><i class="bi bi-x-circle"></i>Tanggal selesai harus setelah tanggal mulai.</div>';
                 return;
             }
-            var h = hitung(rid, s, e), kap = h.kap || 0;
+            var eR = akhirRuangan(s, e);
+            if ($('mpRange')) $('mpRange').innerHTML = ' (<b>' + fmt(s) + ' – ' + fmt(eR) + '</b>)';
+            var h = hitung(rid, s, eR), kap = h.kap || 0;
             var pUsed = kap ? Math.min(100, h.used / kap * 100) : 100;
             var pNew = kap ? Math.min(100 - pUsed, j / kap * 100) : 0;
             var over = j > h.sisa;
