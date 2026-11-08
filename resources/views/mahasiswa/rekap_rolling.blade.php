@@ -46,11 +46,11 @@
     <div class="card-soft mb-3">
         <form method="GET" class="p-3 row g-2 align-items-end">
             <input type="hidden" name="mode" value="{{ $mode }}">
-            <div class="col-12 col-md-3">
+            <div class="col-12 col-md-4">
                 <label class="form-label small fw-bold mb-1">Cari</label>
                 <input type="text" name="q" value="{{ $q }}" class="form-control form-control-sm" placeholder="Nama / prodi...">
             </div>
-            <div class="col-12 col-md-3">
+            <div class="col-12 col-md-5">
                 <label class="form-label small fw-bold mb-1">Universitas / Instansi</label>
                 <select name="mou_id" class="form-select form-select-sm">
                     <option value="">Semua</option>
@@ -59,7 +59,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-6 col-md-2">
+            <div class="col-12 col-md-3">
                 <label class="form-label small fw-bold mb-1">Ruangan</label>
                 <select name="ruangan_id" class="form-select form-select-sm">
                     <option value="">Semua</option>
@@ -68,7 +68,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-6 col-md-1">
+            <div class="col-12 col-md-3">
                 <label class="form-label small fw-bold mb-1">Status</label>
                 <select name="status" class="form-select form-select-sm">
                     <option value="aktif" @selected($status === 'aktif')>Aktif</option>
@@ -76,16 +76,16 @@
                     <option value="semua" @selected($status === 'semua')>Semua</option>
                 </select>
             </div>
-            <div class="col-6 col-md-1">
-                <label class="form-label small fw-bold mb-1">Dari</label>
+            <div class="col-6 col-md-3">
+                <label class="form-label small fw-bold mb-1">Masa magang dari</label>
                 <input type="date" name="dari" value="{{ request('dari') }}" class="form-control form-control-sm">
             </div>
-            <div class="col-6 col-md-1">
+            <div class="col-6 col-md-3">
                 <label class="form-label small fw-bold mb-1">Sampai</label>
                 <input type="date" name="sampai" value="{{ request('sampai') }}" class="form-control form-control-sm">
             </div>
-            <div class="col-12 col-md-1 d-grid">
-                <button class="btn btn-sm text-white" style="background:var(--maroon);"><i class="bi bi-search"></i> Filter</button>
+            <div class="col-12 col-md-3 d-grid">
+                <button class="btn btn-sm text-white" style="background:var(--maroon);"><i class="bi bi-search me-1"></i>Tampilkan</button>
             </div>
             <div class="col-12 d-flex flex-wrap justify-content-between align-items-center gap-2 mt-2">
                 <div class="view-tabs btn-group">
