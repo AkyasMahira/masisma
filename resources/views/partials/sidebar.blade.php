@@ -105,7 +105,7 @@
                                           request()->is('absensi*') || request()->is('admin.dispensasi*') ||
                                           request()->is('admin/master-prodi*') || request()->is('admin/evaluasi-institusi*') || request()->is('admin/absensi-manual*') ||
                                           $evJenis === 'pendidikan' ||
-                                          request()->is('admin/laporan-penilaian*');
+                                          request()->is('admin/laporan-penilaian*') || request()->is('rekap-rolling*');
                 @endphp
                 <div class="nav-item-dropdown animate-item">
                     <a class="nav-link {{ $isPendidikanActive ? 'active-parent' : '' }}" data-bs-toggle="collapse" href="#menuPendidikan" role="button">
@@ -115,6 +115,7 @@
                     </a>
                     <div class="collapse sub-menu {{ $isPendidikanActive ? 'show' : '' }}" id="menuPendidikan">
                         <a class="nav-link {{ request()->is('mahasiswa*') ? 'active' : '' }}" href="{{ route('mahasiswa.index') }}"><span class="sidebar-text">Mahasiswa</span></a>
+                        <a class="nav-link {{ request()->is('rekap-rolling*') ? 'active' : '' }}" href="{{ route('mahasiswa.rekap_rolling') }}"><span class="sidebar-text">Rekap Rolling Ruangan</span></a>
                         <a class="nav-link {{ request()->is('ruangan*') ? 'active' : '' }}" href="{{ route('ruangan.index') }}"><span class="sidebar-text">Ruangan</span></a>
                         <a class="nav-link {{ request()->is('admin/master-prodi*') ? 'active' : '' }}" href="{{ route('admin.master_prodi.index') }}"><span class="sidebar-text">Program Studi</span></a>
                         <a class="nav-link {{ request()->is('admin.dispensasi*') ? 'active' : '' }}" href="{{ route('admin.dispensasi.index') }}"><span class="sidebar-text">Dispensasi</span></a>

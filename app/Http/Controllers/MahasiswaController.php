@@ -1174,6 +1174,60 @@ private function storeSingleMahasiswa(Request $request)
 
         return back()->with('success', $pesan);
     }
+/** Rekap rolling ruangan per mahasiswa: ringkas (1 baris, ruangan digabung) atau rinci (1 baris per rolling). */
+public function rekapRolling(Request $request)
+{
+    $mode = $request->input('mode') === 'rinci' ? 'rinci' : 'ringkas';
+    $status = $request->input('status', 'aktif');
+    $q = trim((string) $request->input('q', ''));
+
+    $mahasiswas = Mahasiswa::with(['user.mou', 'mou', 'ruangan', 'roomSequences' => function ($s) {
+            $s->orderBy('start_date')->with('ruangan:id,nm_ruangan');
+        }])
+        ->when($status !== 'semua', fn ($w) => $w->where('status', $status))
+        ->when($q !== '', fn ($w) => $w->where(fn ($x) => $x->where('nm_mahasiswa', 'like', "%$q%")->orWhere('prodi', 'like', "%$q%")))
+        ->when($request->filled('mou_id'), fn ($w) => $w->where('mou_id', $request->mou_id))
+        ->when($request->filled('ruangan_id'), fn ($w) => $w->where(function ($x) use ($request) {
+            $x->where('ruangan_id', $request->ruangan_id)
+              ->orWhereHas('roomSequences', fn ($s) => $s->where('ruangan_id', $request->ruangan_id));
+        }))
+        // periode magang beririsan dengan rentang filter
+        ->when($request->filled('dari'), fn ($w) => $w->whereDate('tanggal_berakhir', '>=', $request->dari))
+        ->when($request->filled('sampai'), fn ($w) => $w->whereDate('tanggal_mulai', '<=', $request->sampai))
+        ->orderBy('nm_mahasiswa')
+        ->get();
+
+    $data = $mahasiswas->map(function ($m) {
+        $mou = optional($m->user)->mou ?? $m->mou;
+        $rolling = $m->roomSequences->map(fn ($s) => [
+            'ruangan' => optional($s->ruangan)->nm_ruangan ?? '-',
+            'mulai'   => $s->start_date ? Carbon::parse($s->start_date) : null,
+            'selesai' => $s->end_date ? Carbon::parse($s->end_date) : null,
+        ])->values();
+        // Belum ada rolling: pakai ruangan & periode di data mahasiswa
+        if ($rolling->isEmpty() && $m->ruangan) {
+            $rolling = collect([[
+                'ruangan' => $m->ruangan->nm_ruangan,
+                'mulai'   => $m->tanggal_mulai ? Carbon::parse($m->tanggal_mulai) : null,
+                'selesai' => $m->tanggal_berakhir ? Carbon::parse($m->tanggal_berakhir) : null,
+            ]]);
+        }
+        return [
+            'nama'    => $m->nm_mahasiswa,
+            'univ'    => $mou ? ($mou->nama_instansi ?: $mou->nama_universitas) : '-',
+            'prodi'   => $m->prodi ?: '-',
+            'mulai'   => $m->tanggal_mulai ? Carbon::parse($m->tanggal_mulai) : null,
+            'selesai' => $m->tanggal_berakhir ? Carbon::parse($m->tanggal_berakhir) : null,
+            'rolling' => $rolling,
+        ];
+    });
+
+    $mous = Mou::select('id', 'nama_instansi', 'nama_universitas')->orderBy('nama_instansi')->get();
+    $ruangans = Ruangan::select('id', 'nm_ruangan')->orderBy('nm_ruangan')->get();
+
+    return view('mahasiswa.rekap_rolling', compact('data', 'mode', 'status', 'q', 'mous', 'ruangans'));
+}
+
 public function exportData(Request $request)
 {
     // Gunakan query yang sama dengan index tapi tanpa paginate()

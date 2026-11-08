@@ -455,6 +455,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     });
 
     Route::get('/mahasiswa/export-data', [MahasiswaController::class, 'exportData'])->name('mahasiswa.export_all');
+    Route::get('/rekap-rolling', [MahasiswaController::class, 'rekapRolling'])->name('mahasiswa.rekap_rolling');
     Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
         Route::get('/', [MahasiswaController::class, 'index'])->name('index');
         Route::post('/import-excel', [MahasiswaController::class, 'importExcel'])->name('import_excel');
