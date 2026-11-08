@@ -7,12 +7,47 @@ use Illuminate\Http\Request;
 
 class MasterProdiController extends Controller
 {
-    public function index()
-    {
-        $prodis = MasterProdi::orderBy('kategori')->orderBy('nama_prodi')->get();
-        return view('admin.master_prodi.index', compact('prodis'));
-    }
+public function index(Request $request)
+{
+    $q        = trim((string) $request->query('q', ''));
+    $kategori = $request->query('kategori') ?: null;
+    $jenjang  = $request->query('jenjang') ?: null;
+    $status   = in_array($request->query('status'), ['0', '1'], true) ? $request->query('status') : null;
+    $perPage  = in_array((int) $request->query('per_page'), [10, 25, 50, 100], true)
+                    ? (int) $request->query('per_page') : 10;
 
+    $prodis = MasterProdi::query()
+        ->when($q !== '', function ($x) use ($q) {
+            $x->where(function ($w) use ($q) {
+                $w->where('nama_prodi', 'like', "%{$q}%")
+                  ->orWhere('kategori', 'like', "%{$q}%");
+            });
+        })
+        ->when($kategori, function ($x) use ($kategori) {
+            $x->where('kategori', $kategori);
+        })
+        ->when($jenjang, function ($x) use ($jenjang) {
+            $x->where('jenjang', $jenjang);
+        })
+        ->when($status !== null, function ($x) use ($status) {
+            $x->where('aktif', (int) $status);
+        })
+        ->orderBy('kategori')->orderBy('nama_prodi')
+        ->paginate($perPage)
+        ->appends($request->query());
+
+    $kategoris = MasterProdi::whereNotNull('kategori')->where('kategori', '!=', '')
+        ->distinct()->orderBy('kategori')->pluck('kategori');
+    $jenjangs = MasterProdi::whereNotNull('jenjang')->where('jenjang', '!=', '')
+        ->distinct()->orderBy('jenjang')->pluck('jenjang');
+
+    $stat = ['total' => MasterProdi::count(), 'aktif' => MasterProdi::where('aktif', 1)->count()];
+    $stat['nonaktif'] = $stat['total'] - $stat['aktif'];
+
+    return view('admin.master_prodi.index', compact(
+        'prodis', 'kategoris', 'jenjangs', 'stat', 'q', 'kategori', 'jenjang', 'status', 'perPage'
+    ));
+}
     public function create()
     {
         return view('admin.master_prodi.create');

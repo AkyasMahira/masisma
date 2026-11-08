@@ -58,12 +58,17 @@
                 
                 {{-- MoU --}}
                 <div class="nav-item-dropdown animate-item">
+                     <a class="nav-link {{ request()->is('admin/master-prodi*') ? 'active' : '' }}" href="{{ route('admin.master_prodi.index') }}">
+                        <i class="bi bi-buildings"></i>
+                        <span class="sidebar-text">Program Studi</span>
+                    </a>
+                </div>
+<div class="nav-item-dropdown animate-item">
                     <a class="nav-link {{ request()->is('mou') ? 'active' : '' }}" href="{{ route('mou.index') }}">
                         <i class="bi bi-file-earmark-text"></i>
                         <span class="sidebar-text">MOU</span>
                     </a>
                 </div>
-
                 {{-- Booking Ruangan Instansi --}}
                 <div class="nav-item-dropdown animate-item">
                     <a class="nav-link {{ request()->is('admin/booking*') ? 'active' : '' }}" href="{{ route('admin.booking.index') }}">
@@ -117,7 +122,7 @@
                         <a class="nav-link {{ request()->is('mahasiswa*') ? 'active' : '' }}" href="{{ route('mahasiswa.index') }}"><span class="sidebar-text">Mahasiswa</span></a>
                         <a class="nav-link {{ request()->is('rekap-rolling*') ? 'active' : '' }}" href="{{ route('mahasiswa.rekap_rolling') }}"><span class="sidebar-text">Rekap Rolling Ruangan</span></a>
                         <a class="nav-link {{ request()->is('ruangan*') ? 'active' : '' }}" href="{{ route('ruangan.index') }}"><span class="sidebar-text">Ruangan</span></a>
-                        <a class="nav-link {{ request()->is('admin/master-prodi*') ? 'active' : '' }}" href="{{ route('admin.master_prodi.index') }}"><span class="sidebar-text">Program Studi</span></a>
+                  
                         <a class="nav-link {{ request()->is('admin.dispensasi*') ? 'active' : '' }}" href="{{ route('admin.dispensasi.index') }}"><span class="sidebar-text">Dispensasi</span></a>
                         <a class="nav-link {{ request()->is('absensi*') ? 'active' : '' }}" href="{{ route('absensi.index') }}"><span class="sidebar-text">Riwayat Absensi</span></a>
                         <a class="nav-link {{ request()->is('admin/absensi-manual*') ? 'active' : '' }}" href="{{ route('admin.absen_manual.index') }}"><span class="sidebar-text">Absensi Manual</span></a>
