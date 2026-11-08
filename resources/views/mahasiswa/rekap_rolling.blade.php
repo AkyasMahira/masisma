@@ -73,7 +73,7 @@
             </div>
             <div class="col-12 col-md-3">
                 <label class="form-label small fw-bold mb-1">Status</label>
-                <select name="status" class="form-select form-select-sm">
+                <select name="status" id="fStatus" class="form-select form-select-sm">
                     <option value="aktif" @selected($status === 'aktif')>Aktif</option>
                     <option value="nonaktif" @selected($status === 'nonaktif')>Nonaktif</option>
                     <option value="semua" @selected($status === 'semua')>Semua</option>
@@ -81,11 +81,11 @@
             </div>
             <div class="col-6 col-md-3">
                 <label class="form-label small fw-bold mb-1">Masa magang dari</label>
-                <input type="date" name="dari" value="{{ request('dari') }}" class="form-control form-control-sm">
+                <input type="date" name="dari" value="{{ request('dari') }}" class="form-control form-control-sm f-tgl">
             </div>
             <div class="col-6 col-md-3">
                 <label class="form-label small fw-bold mb-1">Sampai</label>
-                <input type="date" name="sampai" value="{{ request('sampai') }}" class="form-control form-control-sm">
+                <input type="date" name="sampai" value="{{ request('sampai') }}" class="form-control form-control-sm f-tgl">
             </div>
             <div class="col-12 col-md-3 d-grid">
                 <button class="btn btn-sm text-white" style="background:var(--maroon);"><i class="bi bi-search me-1"></i>Tampilkan</button>
@@ -95,7 +95,7 @@
                     <a href="{{ request()->fullUrlWithQuery(['mode' => 'ringkas']) }}" class="btn btn-sm btn-outline-secondary {{ $mode === 'ringkas' ? 'active' : '' }}"><i class="bi bi-list me-1"></i>Per Mahasiswa</a>
                     <a href="{{ request()->fullUrlWithQuery(['mode' => 'rinci']) }}" class="btn btn-sm btn-outline-secondary {{ $mode === 'rinci' ? 'active' : '' }}"><i class="bi bi-list-ol me-1"></i>Per Rolling Ruangan</a>
                 </div>
-                <small class="text-muted">Filter Dari–Sampai: mahasiswa yang masa magangnya beririsan dengan rentang tersebut. Excel berisi 2 sheet (per mahasiswa & per rolling).</small>
+                <small class="text-muted">Filter masa magang: mahasiswa yang magangnya beririsan dengan rentang tersebut (status otomatis "Semua" agar yang sudah selesai ikut tampil). Excel berisi 2 sheet (per mahasiswa & per rolling).</small>
             </div>
         </form>
     </div>
@@ -165,6 +165,13 @@
 <script>
     var X_RINGKAS = @json($xRingkas);
     var X_RINCI = @json($xRinci);
+    // Isi tanggal -> status otomatis "Semua" (mahasiswa periode lama umumnya sudah nonaktif)
+    document.querySelectorAll('.f-tgl').forEach(function (el) {
+        el.addEventListener('change', function () {
+            var st = document.getElementById('fStatus');
+            if (el.value && st.value === 'aktif') st.value = 'semua';
+        });
+    });
     function sheet(rows) {
         var ws = XLSX.utils.aoa_to_sheet([['No', 'Nama', 'Universitas', 'Program Studi', 'Ruangan', 'Mulai', 'Selesai']].concat(rows));
         ws['!cols'] = [{wch: 5}, {wch: 30}, {wch: 30}, {wch: 24}, {wch: 40}, {wch: 18}, {wch: 18}];
