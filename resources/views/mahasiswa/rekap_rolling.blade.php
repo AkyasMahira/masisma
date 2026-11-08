@@ -14,8 +14,11 @@
         foreach ($d['rolling'] as $r) {
             $xRinci[] = [++$no, $d['nama'], $d['univ'], $d['prodi'], $r['ruangan'], $tgl($r['mulai']), $tgl($r['selesai'])];
         }
+        if ($d['rolling']->isEmpty()) {
+            $xRinci[] = [++$no, $d['nama'], $d['univ'], $d['prodi'], 'Belum ada rolling', $tgl($d['mulai']), $tgl($d['selesai'])];
+        }
     }
-    $jmlRolling = $no;
+    $jmlRolling = $data->sum(fn ($d) => $d['rolling']->count());
 @endphp
 <style>
     :root { --maroon:#7c1316; --maroon-subtle:#fcf0f1; }
