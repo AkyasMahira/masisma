@@ -424,6 +424,22 @@ a.fc-event, a.fc-event:hover {
             background: #7c1316; z-index: 2;
         }
 
+        /* Sertifikat terkunci: ruangan belum dinilai */
+        .nilai-kurang { margin-top: 6px; }
+        .nilai-kurang summary {
+            list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+            background: #fef3c7; color: #b45309; border-radius: 20px; padding: 2px 9px;
+            font-size: .68rem; font-weight: 700; white-space: nowrap;
+        }
+        .nilai-kurang summary::-webkit-details-marker { display: none; }
+        .nilai-kurang summary::after { content: '\F282'; font-family: 'bootstrap-icons'; font-size: .6rem; transition: transform .2s; }
+        .nilai-kurang[open] summary::after { transform: rotate(180deg); }
+        .nilai-kurang ul {
+            text-align: left; margin: 6px auto 0; padding: 6px 8px 6px 22px; max-width: 180px;
+            background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px;
+            font-size: .72rem; color: #78350f; line-height: 1.3;
+        }
+        .nilai-kurang li + li { margin-top: 3px; }
     </style>
 
     {{-- Alerts --}}
@@ -838,9 +854,14 @@ a.fc-event, a.fc-event:hover {
                                     <td class="text-center">
                                         @if($selesai && $belumDinilai->isNotEmpty())
                                             <button type="button" class="btn btn-sm btn-secondary rounded-pill" disabled><i class="bi bi-lock-fill me-1"></i>Unduh</button>
-                                            <div class="small text-danger mt-1 lh-sm" style="max-width:190px;margin:0 auto;">
-                                                Nilai belum diinput:<br><strong>{{ $belumDinilai->implode(', ') }}</strong>
-                                            </div>
+                                            <details class="nilai-kurang">
+                                                <summary><i class="bi bi-exclamation-circle-fill"></i> {{ $belumDinilai->count() }} ruangan belum dinilai</summary>
+                                                <ul>
+                                                    @foreach($belumDinilai as $nmRuang)
+                                                        <li>{{ $nmRuang }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </details>
                                         @elseif($selesai && $rs->share_token)
                                             <a href="{{ route('sertifikat.download', $rs->share_token) }}" target="_blank" class="btn btn-sm btn-success rounded-pill"><i class="bi bi-file-earmark-pdf-fill me-1"></i>Unduh</a>
                                         @elseif(!$selesai)
