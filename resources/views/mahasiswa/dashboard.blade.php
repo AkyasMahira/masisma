@@ -433,6 +433,12 @@ a.fc-event, a.fc-event:hover {
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
+    @if (session('error'))
+        <div class="alert alert-warning alert-dismissible fade show animate-up shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
 
     <div class="row g-4">
 
@@ -821,13 +827,21 @@ a.fc-event, a.fc-event:hover {
                         <thead class="bg-light"><tr><th class="ps-3">Periode</th><th>Instansi/Asal</th><th class="text-center">Status</th><th class="text-center">Sertifikat</th></tr></thead>
                         <tbody>
                             @foreach($riwayatSertifikat as $rs)
-                                @php $selesai = now()->gt(\Carbon\Carbon::parse($rs->tanggal_berakhir ?? now())); @endphp
+                                @php
+                                    $selesai = now()->gt(\Carbon\Carbon::parse($rs->tanggal_berakhir ?? now()));
+                                    $belumDinilai = $selesai ? $rs->ruanganBelumDinilai() : collect();
+                                @endphp
                                 <tr>
                                     <td class="ps-3 fw-semibold">{{ optional($rs->tanggal_mulai)->format('d/m/Y') }} - {{ optional($rs->tanggal_berakhir)->format('d/m/Y') }}</td>
                                     <td class="small text-muted">{{ optional($rs->mou)->nama_instansi ?? optional($rs->mou)->nama_universitas ?? ($rs->univ_asal ?? '-') }}</td>
                                     <td class="text-center"><span class="badge {{ $selesai ? 'bg-secondary' : 'bg-success' }} rounded-pill">{{ $selesai ? 'Selesai' : 'Berjalan' }}</span></td>
                                     <td class="text-center">
-                                        @if($selesai && $rs->share_token)
+                                        @if($selesai && $belumDinilai->isNotEmpty())
+                                            <button type="button" class="btn btn-sm btn-secondary rounded-pill" disabled><i class="bi bi-lock-fill me-1"></i>Unduh</button>
+                                            <div class="small text-danger mt-1 lh-sm" style="max-width:190px;margin:0 auto;">
+                                                Nilai belum diinput:<br><strong>{{ $belumDinilai->implode(', ') }}</strong>
+                                            </div>
+                                        @elseif($selesai && $rs->share_token)
                                             <a href="{{ route('sertifikat.download', $rs->share_token) }}" target="_blank" class="btn btn-sm btn-success rounded-pill"><i class="bi bi-file-earmark-pdf-fill me-1"></i>Unduh</a>
                                         @elseif(!$selesai)
                                             <span class="text-muted small">Belum selesai</span>

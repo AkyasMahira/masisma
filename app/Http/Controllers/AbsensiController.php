@@ -1059,6 +1059,15 @@ public function generateSertifikatPublik(Request $request, $identifier)
             ->with('error', 'Silakan isi evaluasi magang terlebih dahulu untuk mengunduh sertifikat.');
     }
 
+    // GATE: pemilik akun baru bisa unduh jika semua ruangan rolling periode ini sudah dinilai karu.
+    if (auth()->check() && (int) auth()->id() === (int) $mahasiswa->user_id) {
+        $belumDinilai = $mahasiswa->ruanganBelumDinilai();
+        if ($belumDinilai->isNotEmpty()) {
+            return redirect()->route('mahasiswa.dashboard')
+                ->with('error', 'Sertifikat belum bisa diunduh. Nilai dari ruangan berikut belum diinput: ' . $belumDinilai->implode(', ') . '.');
+        }
+    }
+
     // =========================================================================
     // 2. AMBIL STATISTIK DARI MODEL
     // =========================================================================

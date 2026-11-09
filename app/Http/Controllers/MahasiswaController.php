@@ -1570,7 +1570,7 @@ public function dashboard()
         $totalHadir = $totalHadirChart; 
 
         // Riwayat semua periode magang user ini (untuk unduh sertifikat multiple)
-        $riwayatSertifikat = \App\Models\Mahasiswa::where('user_id', $mahasiswa->user_id)
+        $riwayatSertifikat = \App\Models\Mahasiswa::with('roomSequences.ruangan')->where('user_id', $mahasiswa->user_id)
             ->orderBy('tanggal_mulai', 'desc')->get();
 
         // Riwayat sertifikat ORIENTASI user ini (bisa >1 gelombang)

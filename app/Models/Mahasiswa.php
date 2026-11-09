@@ -441,6 +441,21 @@ public function dispensasis()
         return round(min($percentage, 100), 1); 
     }
 
+    /**
+     * Ruangan rolling periode ini yang belum diinput nilainya oleh karu (nama ruangan).
+     * Data lama tanpa nilai per ruangan tetapi punya nilai_karu dianggap sudah lengkap.
+     */
+    public function ruanganBelumDinilai()
+    {
+        $nilai = is_string($this->nilai_ruangan_json) ? json_decode($this->nilai_ruangan_json, true) : ($this->nilai_ruangan_json ?? []);
+        if (!is_array($nilai)) $nilai = [];
+        if (empty($nilai) && $this->nilai_karu !== null && $this->nilai_karu !== '') return collect();
+
+        return $this->roomSequences->pluck('ruangan')->filter()->unique('id')
+            ->reject(fn ($r) => isset($nilai[$r->id]))
+            ->pluck('nm_ruangan')->values();
+    }
+
     // --- HELPER ATTRIBUTES ---
 
     public function getUnivAsalAttribute()
