@@ -521,6 +521,13 @@ public function resetEdit($id)
 
                 $today = now()->toDateString();
 
+                // Mahasiswa yang sama tapi tanggal mulai SETELAH periode aktifnya berakhir = periode baru (jangan ditimpa)
+                if ($mahasiswa && $this->periodeBaru($mahasiswa, $tanggalMulai)) {
+                    $this->buatPeriodeBaru($mahasiswa, $dataToSave);
+                    $processed++;
+                    continue;
+                }
+
                 if ($mahasiswa) {
                     // === UPDATE LOGIC (Cek Pindah Ruangan) ===
                     $oldRuanganId = $mahasiswa->ruangan_id;
@@ -929,6 +936,16 @@ private function storeSingleMahasiswa(Request $request)
             }
             unset($data['kompetensi']);
 
+            // F0. Tanggal digeser melewati akhir periode -> buat periode baru (periode lama & sertifikatnya tetap ada)
+            if ($this->periodeBaru($mahasiswa, $data['tanggal_mulai'] ?? null)) {
+                $baru = $this->buatPeriodeBaru($mahasiswa, $data);
+                $pesan = 'Periode baru ' . Carbon::parse($baru->tanggal_mulai)->format('d/m/Y') . ' – ' . Carbon::parse($baru->tanggal_berakhir)->format('d/m/Y')
+                    . ' dibuat sebagai data terpisah. Periode lama tetap tersimpan beserta absensi, nilai & sertifikatnya. Atur rolling periode baru di menu Rolling.';
+                return $user->role === 'admin'
+                    ? redirect()->route('mahasiswa.index')->with('success', $pesan)
+                    : redirect()->route('mahasiswa.dashboard')->with('success', $pesan);
+            }
+
             // F. UPDATE DATA UTAMA
             $mahasiswa->update($data);
 
@@ -946,6 +963,36 @@ private function storeSingleMahasiswa(Request $request)
             }
         });
     }
+    /** Tanggal mulai baru jatuh SETELAH periode lama berakhir -> ini periode baru, bukan edit periode lama. */
+    private function periodeBaru(Mahasiswa $lama, $tanggalMulaiBaru)
+    {
+        if (!$tanggalMulaiBaru || !$lama->tanggal_berakhir) return false;
+        try {
+            return Carbon::parse($tanggalMulaiBaru)->startOfDay()->gt(Carbon::parse($lama->tanggal_berakhir)->startOfDay());
+        } catch (\Throwable $e) {
+            return false;   // format tanggal tak dikenal: perlakukan seperti biasa
+        }
+    }
+
+    /**
+     * Buat record periode baru untuk akun yang sama (biodata disalin), periode lama tetap utuh & dinonaktifkan,
+     * agar rolling, absensi, nilai & sertifikat tiap periode tidak tergabung.
+     */
+    private function buatPeriodeBaru(Mahasiswa $lama, array $data)
+    {
+        $baru = $lama->replicate(['share_token', 'nilai_karu', 'nilai_ruangan_json', 'nilai_evaluasi', 'evaluasi_at', 'created_at', 'updated_at']);
+        $baru->fill($data);
+        $baru->status = 'aktif';
+        do {
+            $token = (string) Str::uuid();
+        } while (Mahasiswa::where('share_token', $token)->exists());
+        $baru->share_token = $token;
+        $baru->save();
+
+        $lama->update(['status' => 'nonaktif']);
+        return $baru;
+    }
+
     public function destroy($id)
     {
         return DB::transaction(function () use ($id) {
