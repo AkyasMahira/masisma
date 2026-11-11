@@ -101,9 +101,15 @@ class EvaluasiController extends Controller
 
     /* ============ EVALUASI PENDIDIKAN / MAGANG (syarat unduh sertifikat) ============ */
 
+    /** Periode magang milik user login: ?m=<id> (periode sertifikat yang diunduh), default periode terbaru. */
     private function mahasiswaLogin()
     {
-        return \App\Models\Mahasiswa::where('user_id', auth()->id())->latest()->first();
+        $q = \App\Models\Mahasiswa::where('user_id', auth()->id());
+        if (request()->filled('m')) {
+            $mhs = (clone $q)->whereKey((int) request('m'))->first();
+            if ($mhs) return $mhs;
+        }
+        return $q->latest()->first();
     }
 
     public function magangForm()
@@ -114,7 +120,7 @@ class EvaluasiController extends Controller
 
         return view('public.evaluasi.form', [
             'unsur'     => MasterEvaluasi::untukForm('pendidikan'),
-            'actionUrl' => route('evaluasi.magang.store'),
+            'actionUrl' => route('evaluasi.magang.store', ['m' => $mhs->id]),
             'jenis'     => 'pendidikan',
             'konteks'   => ['label' => 'Praktik / Magang', 'nilai' => optional($mhs->mou)->nama_instansi ?: 'Magang/PKL'],
             'prefill'   => ['nama' => $mhs->nm_mahasiswa, 'instansi' => optional($mhs->mou)->nama_instansi ?? $mhs->univ_asal],

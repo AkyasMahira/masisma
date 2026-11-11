@@ -1055,7 +1055,7 @@ public function generateSertifikatPublik(Request $request, $identifier)
     // GATE: pemilik akun wajib mengisi evaluasi magang dulu sebelum unduh sertifikat.
     // Admin / pihak lain (validasi via token) tidak terkena gate.
     if (auth()->check() && (int) auth()->id() === (int) $mahasiswa->user_id && empty($mahasiswa->evaluasi_at)) {
-        return redirect()->route('evaluasi.magang.form')
+        return redirect()->route('evaluasi.magang.form', ['m' => $mahasiswa->id])
             ->with('error', 'Silakan isi evaluasi magang terlebih dahulu untuk mengunduh sertifikat.');
     }
 
