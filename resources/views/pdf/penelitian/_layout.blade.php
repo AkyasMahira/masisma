@@ -13,7 +13,7 @@
         .kop .logo, .kop .imbang { width: 72px; }   /* kolom kanan kosong selebar logo -> teks kop tepat di tengah halaman */
         .kop .logo { text-align: left; }
         .kop .logo img { width: 70px; }
-        .kop .teks { text-align: center; }
+        .kop .teks, .kop .teks p { text-align: center; }   /* dompdf tidak mewariskan text-align dari td ke p */
         .kop .pemkab { font-size: 12.5pt; letter-spacing: .5px; margin: 0; }
         .kop .rs { font-size: 13pt; font-weight: bold; color: #7c1316; margin: 1px 0 0; white-space: nowrap; }
         .kop .unit { font-size: 10.5pt; font-weight: bold; margin: 0 0 2px; }
