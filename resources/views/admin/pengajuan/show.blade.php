@@ -408,7 +408,7 @@
                                                 <option value="{{ $opsi }}" @selected(in_array($opsi, $tujuanAwal, true))>{{ $opsi }}</option>
                                             @endforeach
                                         </select>
-                                        <div class="form-text" style="font-size:.7rem;">Bisa lebih dari satu (mis. data awal / sebar kuesioner di beberapa ruangan). Ketik lalu Enter untuk tujuan lain, mis. "Kepala Instalasi Rawat Inap". Kosongkan untuk otomatis sesuai ruangan pengajuan.</div>
+                                        <div class="form-text" style="font-size:.7rem;">Bisa beberapa ruangan. Tujuan lain: ketik lalu Enter. Kosongkan = otomatis.</div>
                                         <div class="text-end mt-2">
                                             <button class="btn btn-sm btn-custom-maroon"><i class="bi bi-check-lg me-1"></i>Simpan Tujuan</button>
                                         </div>
