@@ -10,11 +10,12 @@
         /* ===== KOP ===== */
         .kop { width: 100%; border-collapse: collapse; }
         .kop td { vertical-align: middle; }
-        .kop .logo { width: 84px; text-align: left; }
-        .kop .logo img { width: 78px; }
-        .kop .teks { text-align: center; padding-right: 84px; }   /* = lebar kolom logo, agar teks kop tepat di tengah halaman */
+        .kop .logo, .kop .imbang { width: 72px; }   /* kolom kanan kosong selebar logo -> teks kop tepat di tengah halaman */
+        .kop .logo { text-align: left; }
+        .kop .logo img { width: 70px; }
+        .kop .teks { text-align: center; }
         .kop .pemkab { font-size: 12.5pt; letter-spacing: .5px; margin: 0; }
-        .kop .rs { font-size: 14pt; font-weight: bold; color: #7c1316; margin: 1px 0 0; white-space: nowrap; }
+        .kop .rs { font-size: 13pt; font-weight: bold; color: #7c1316; margin: 1px 0 0; white-space: nowrap; }
         .kop .unit { font-size: 10.5pt; font-weight: bold; margin: 0 0 2px; }
         .kop .alamat { font-size: 8.5pt; margin: 0; color: #333; line-height: 1.25; text-align: center; }
         .garis-kop { border-top: 3px solid #7c1316; border-bottom: 1px solid #7c1316; height: 2px; margin: 6px 0 12px; }
@@ -81,6 +82,7 @@
                 <p class="alamat">Telp. {{ $kop['telp'] }} &middot; Fax. {{ $kop['fax'] }} &middot; Email: {{ $kop['email'] }}</p>
                 <p class="alamat">Laman: {{ $kop['web'] }}</p>
             </td>
+            <td class="imbang"></td>
         </tr>
     </table>
     <div class="garis-kop"></div>
