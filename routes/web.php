@@ -451,6 +451,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::post('/{pengajuan}/update-ci2', [PengajuanController::class, 'updateCi2'])->name('update-ci2');
         Route::get('/{pengajuan}/download-surat-otomatis', [PengajuanController::class, 'downloadSuratOtomatis'])->name('download-surat-otomatis');
         Route::get('/{pengajuan}/surat/{jenis}', [SuratPenelitianController::class, 'admin'])->name('surat')->whereIn('jenis', ['balasan', 'pengantar', 'selesai', 'sertifikat']);
+        Route::post('/{pengajuan}/surat-pengantar/tujuan', [SuratPenelitianController::class, 'tujuan'])->name('surat.tujuan');
         Route::post('/{pengajuan}/cancel', [PengajuanController::class, 'cancel'])->name('cancel');
     });
 

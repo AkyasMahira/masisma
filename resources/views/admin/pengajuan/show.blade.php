@@ -46,6 +46,12 @@
         .surat-row.siap .surat-ico { background: #dcfce7; color: #15803d; }
         .surat-row.belum .surat-ico { background: #e2e8f0; color: #64748b; }
         .surat-row .min-w-0 { min-width: 0; }
+        .tujuan-pengantar { margin: -4px 0 10px; padding: 8px 12px; border: 1px dashed #bbf7d0; border-radius: 12px; background: #fff; }
+        .tujuan-pengantar summary { list-style: none; cursor: pointer; font-size: .74rem; color: #64748b; line-height: 1.35; }
+        .tujuan-pengantar summary::-webkit-details-marker { display: none; }
+        .tujuan-pengantar summary .ubah { float: right; color: #7c1316; font-weight: 700; margin-left: 8px; }
+        .tujuan-pengantar[open] summary .ubah { display: none; }
+        .tujuan-pengantar .ts-control { font-size: .8rem; border-radius: 10px; }
 
         .info-header {
             padding: 1rem 1.5rem;
@@ -383,6 +389,32 @@
                                     </div>
                                 @endif
                             </div>
+                            @if($jenisSurat === 'pengantar' && $siap)
+                                @php
+                                    $tujuanTersimpan = $reg && !empty($reg->tujuan) ? $reg->tujuan : [];
+                                    $tujuanAwal = $tujuanTersimpan ?: ($pengajuan->dataRuangan ? ['Kepala Ruangan ' . $pengajuan->dataRuangan->nm_ruangan] : []);
+                                    $opsiTujuan = collect($ruangans)->sortBy('nm_ruangan')->map(fn ($r) => 'Kepala Ruangan ' . $r->nm_ruangan)->merge($tujuanAwal)->unique()->values();
+                                @endphp
+                                <details class="tujuan-pengantar" {{ session('success') && str_contains(session('success'), 'Tujuan surat') ? 'open' : '' }}>
+                                    <summary>
+                                        <i class="bi bi-send me-1"></i>Kepada:
+                                        <span class="text-dark">{{ $tujuanAwal ? implode(', ', $tujuanAwal) : 'belum diatur' }}</span>
+                                        <span class="ubah">Ubah</span>
+                                    </summary>
+                                    <form action="{{ route('admin.pengajuan.surat.tujuan', $pengajuan->id) }}" method="POST" class="mt-2">
+                                        @csrf
+                                        <select name="tujuan[]" id="tujuanPengantar" multiple placeholder="Pilih ruangan / ketik tujuan lain...">
+                                            @foreach($opsiTujuan as $opsi)
+                                                <option value="{{ $opsi }}" @selected(in_array($opsi, $tujuanAwal, true))>{{ $opsi }}</option>
+                                            @endforeach
+                                        </select>
+                                        <div class="form-text" style="font-size:.7rem;">Bisa lebih dari satu (mis. data awal / sebar kuesioner di beberapa ruangan). Ketik lalu Enter untuk tujuan lain, mis. "Kepala Instalasi Rawat Inap". Kosongkan untuk otomatis sesuai ruangan pengajuan.</div>
+                                        <div class="text-end mt-2">
+                                            <button class="btn btn-sm btn-custom-maroon"><i class="bi bi-check-lg me-1"></i>Simpan Tujuan</button>
+                                        </div>
+                                    </form>
+                                </details>
+                            @endif
                         @endforeach
                     </div>
                 </div>
@@ -804,6 +836,18 @@
         </div>
     </div>
 
+    @if($pengajuan->jenis === 'pra_penelitian')
+        <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var el = document.getElementById('tujuanPengantar');
+                if (el && window.TomSelect) {
+                    new TomSelect(el, { create: true, persist: false, plugins: ['remove_button'], maxItems: 15 });
+                }
+            });
+        </script>
+    @endif
     <script>
         function confirmSubmit(event, title, text, icon = 'warning') {
             event.preventDefault();

@@ -10,10 +10,10 @@ class SuratPenelitian extends Model
 
     protected $fillable = [
         'pra_penelitian_id', 'pengajuan_id', 'jenis_surat', 'tahun', 'nomor_urut',
-        'nomor_surat', 'tanggal_surat', 'kode_verifikasi', 'file_path',
+        'nomor_surat', 'tanggal_surat', 'kode_verifikasi', 'tujuan', 'file_path',
     ];
 
-    protected $casts = ['tanggal_surat' => 'date'];
+    protected $casts = ['tanggal_surat' => 'date', 'tujuan' => 'array'];
 
     const JENIS = [
         'balasan'   => ['kode' => 'SB-PNL',  'judul' => 'Surat Balasan Izin'],

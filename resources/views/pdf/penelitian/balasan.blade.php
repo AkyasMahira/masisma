@@ -36,25 +36,25 @@
 
     <p>Dengan ketentuan sebagai berikut:</p>
     <ol class="ketentuan">
-        <li>Menyelesaikan administrasi dan biaya {{ $kegiatan['singkat'] }} sesuai tagihan (invoice) yang diterbitkan Unit Diklat sebelum kegiatan dimulai.</li>
-        <li>Mematuhi tata tertib dan prosedur yang berlaku di {{ $kop['singkat'] }}, serta didampingi pembimbing lapangan (Clinical Instructor) yang ditunjuk Unit Diklat.</li>
+        <li>Menyelesaikan administrasi dan biaya {{ $kegiatan['singkat'] }} sesuai tagihan (invoice) yang diterbitkan Tim Diklat sebelum kegiatan dimulai.</li>
+        <li>Mematuhi tata tertib dan prosedur yang berlaku di {{ $kop['singkat'] }}, serta didampingi pembimbing lapangan (Clinical Instructor) yang ditunjuk Tim Diklat.</li>
         <li>Menjaga kerahasiaan identitas dan data pasien; data hanya digunakan untuk kepentingan akademik sesuai judul di atas.</li>
         @if($pra->jenis_penelitian === 'Data Awal')
             <li>Data awal yang diperoleh hanya digunakan untuk penyusunan latar belakang dan proposal penelitian.</li>
         @elseif($pra->jenis_penelitian === 'Uji Validitas')
-            <li>Instrumen (kuesioner/lembar observasi) telah disetujui dosen pembimbing, responden uji tidak termasuk sampel penelitian utama, dan rekapitulasi hasil uji validitas &amp; reliabilitas diserahkan kepada Unit Diklat.</li>
+            <li>Instrumen (kuesioner/lembar observasi) telah disetujui dosen pembimbing, responden uji tidak termasuk sampel penelitian utama, dan rekapitulasi hasil uji validitas &amp; reliabilitas diserahkan kepada Tim Diklat.</li>
         @else
             <li>Melampirkan surat kelaikan etik (<em>ethical clearance</em>) yang masih berlaku sebelum pengambilan data dimulai.</li>
-            <li>Mempresentasikan hasil penelitian dan menyerahkan laporan akhir (softcopy) kepada Unit Diklat.</li>
+            <li>Mempresentasikan hasil penelitian dan menyerahkan laporan akhir (softcopy) kepada Tim Diklat.</li>
         @endif
     </ol>
 
-    <p class="indent">Setelah kegiatan selesai, peneliti akan memperoleh surat keterangan selesai dari Unit Diklat. Demikian surat balasan ini kami sampaikan. Atas perhatian dan kerja samanya kami ucapkan terima kasih.</p>
+    <p class="indent">Setelah kegiatan selesai, peneliti akan memperoleh surat keterangan selesai dari Tim Diklat. Demikian surat balasan ini kami sampaikan. Atas perhatian dan kerja samanya kami ucapkan terima kasih.</p>
 @endsection
 
 @section('tembusan')
     <p><u>Tembusan</u>:</p>
-    <p>1. Yth. Koordinator Unit Diklat RSUD SLG</p>
+    <p>1. Yth. Koordinator Tim Diklat RSUD SLG</p>
     <p>2. Yth. Mahasiswa yang bersangkutan</p>
     <p>3. Arsip</p>
 @endsection

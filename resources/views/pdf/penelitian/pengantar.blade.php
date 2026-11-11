@@ -17,7 +17,16 @@
 
     <div class="tujuan">
         <p>Kepada</p>
-        <p>Yth. Kepala Ruangan {{ $ruangan ?: '..........' }}</p>
+        @if(count($tujuan) === 1)
+            <p>Yth. {{ $tujuan[0] }}</p>
+        @else
+            <p>Yth.</p>
+            <table class="daftar-tujuan">
+                @foreach($tujuan as $i => $t)
+                    <tr><td class="no">{{ $i + 1 }}.</td><td>{{ $t }}</td></tr>
+                @endforeach
+            </table>
+        @endif
         <p>{{ $kop['singkat'] }}</p>
         <p>di –</p>
         <p style="padding-left:28px">Tempat</p>

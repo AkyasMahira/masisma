@@ -152,7 +152,7 @@
     <div class="footer-container">
         <div class="ttd-wrapper">
             <p style="margin-bottom: 5px;">Kediri, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
-            <p style="margin: 0;"><strong>Koordinator Unit Diklat,</strong></p>
+            <p style="margin: 0;"><strong>Koordinator Tim Diklat,</strong></p>
             
             <div class="qr-code">
                 {{-- QR Code berisi verifikasi data --}}

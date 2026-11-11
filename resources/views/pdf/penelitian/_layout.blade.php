@@ -12,7 +12,7 @@
         .kop td { vertical-align: middle; }
         .kop .logo { width: 84px; text-align: left; }
         .kop .logo img { width: 78px; }
-        .kop .teks { text-align: center; padding-right: 40px; }
+        .kop .teks { text-align: center; padding-right: 84px; }   /* = lebar kolom logo, agar teks kop tepat di tengah halaman */
         .kop .pemkab { font-size: 12.5pt; letter-spacing: .5px; margin: 0; }
         .kop .rs { font-size: 14pt; font-weight: bold; color: #7c1316; margin: 1px 0 0; white-space: nowrap; }
         .kop .unit { font-size: 10.5pt; font-weight: bold; margin: 0 0 2px; }
@@ -27,6 +27,9 @@
         .tanggal-kanan { text-align: right; vertical-align: top; white-space: nowrap; }
         .tujuan { margin: 2px 0 10px; }
         .tujuan p { margin: 0; }
+        .daftar-tujuan { border-collapse: collapse; margin: 0 0 0 28px; }
+        .daftar-tujuan td { padding: 0; vertical-align: top; }
+        .daftar-tujuan .no { width: 18px; }
         .judul { text-align: center; margin: 4px 0 2px; font-size: 13pt; font-weight: bold; text-decoration: underline; letter-spacing: .5px; }
         .nomor-judul { text-align: center; margin: 0 0 16px; }
 

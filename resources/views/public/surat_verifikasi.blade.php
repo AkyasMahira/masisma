@@ -51,9 +51,9 @@
             </div>
         @else
             <div class="status bad"><div class="ico">!</div><div>Surat TIDAK DITEMUKAN. Kode verifikasi tidak terdaftar atau surat telah dibatalkan.</div></div>
-            <div class="rows"><p style="color:#64748b;font-size:14px">Pastikan QR Code dipindai dari surat asli. Hubungi Unit Diklat RSUD SLG bila ragu.</p></div>
+            <div class="rows"><p style="color:#64748b;font-size:14px">Pastikan QR Code dipindai dari surat asli. Hubungi Tim Diklat RSUD SLG bila ragu.</p></div>
         @endif
-        <div class="foot">Unit Pendidikan dan Pelatihan (Diklat) · {{ config('surat.instansi.telp') }} · {{ config('surat.instansi.email') }}</div>
+        <div class="foot">{{ config('surat.instansi.unit') }} · {{ config('surat.instansi.telp') }} · {{ config('surat.instansi.email') }}</div>
     </div>
 </body>
 </html>

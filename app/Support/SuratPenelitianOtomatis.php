@@ -86,12 +86,21 @@ class SuratPenelitianOtomatis
             'institusi'  => $mou ? ($mou->nama_instansi ?: $mou->nama_universitas) : '-',
             'mou'        => $mou,
             'ruangan'    => $pengajuan && $pengajuan->dataRuangan ? $pengajuan->dataRuangan->nm_ruangan : null,
+            'tujuan'     => self::tujuan($surat, $pengajuan),
             'kop'        => config('surat.instansi'),
             'ttd'        => config('surat.penandatangan.' . $ttdKey),
             'logo'       => 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('logors.png'))),
             'urlVerif'   => route('surat.verifikasi', $surat->kode_verifikasi),
             'namaPenerima' => $namaPenerima,
         ];
+    }
+
+    /** Daftar tujuan (Kepada): diatur admin, atau otomatis Kepala Ruangan dari pengajuan. */
+    public static function tujuan(SuratPenelitian $surat, ?Pengajuan $pengajuan = null)
+    {
+        if (!empty($surat->tujuan)) return array_values($surat->tujuan);
+        $ruang = $pengajuan && $pengajuan->dataRuangan ? $pengajuan->dataRuangan->nm_ruangan : null;
+        return [$ruang ? 'Kepala Ruangan ' . $ruang : 'Kepala Ruangan ..........'];
     }
 
     public static function view(SuratPenelitian $surat, PraPenelitian $pra)
