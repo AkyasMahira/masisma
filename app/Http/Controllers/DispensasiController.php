@@ -234,7 +234,7 @@ class DispensasiController extends Controller
                 'Malam' => [[21, 0], [7, 0], true],
                 'Siang' => [[14, 0], [21, 0], false],
                 'Pagi'  => [[7, 0], [14, 0], false],
-                'Jumat' => [[7, 0], [14, 30], false],
+                'Jumat' => [[7, 0], [11, 30], false],
             ];
             $m = $map[$shift] ?? [[7, 15], [15, 30], false];
             $start = $date->copy()->setTime($m[0][0], $m[0][1]);

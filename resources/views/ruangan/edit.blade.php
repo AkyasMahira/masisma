@@ -151,7 +151,7 @@
     <label class="form-label fw-bold">Kategori Jam Kerja</label>
     <select name="kategori" class="form-select">
         <option value="non_shift" {{ (old('kategori', $ruangan->kategori ?? '') == 'non_shift') ? 'selected' : '' }}>
-            Non-Shift (Senin-Kamis 07:15-15:30, Jumat 07:00-14:30)
+            Non-Shift (Senin-Kamis 07:15-15:30, Jumat 07:00-11:30)
         </option>
         <option value="shift" {{ (old('kategori', $ruangan->kategori ?? '') == 'shift') ? 'selected' : '' }}>
             Shift (Pagi, Siang, Malam - 24 Jam)

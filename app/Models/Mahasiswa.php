@@ -342,7 +342,7 @@ public function dispensasis()
                         continue;
                     }
                     $shiftName = ($dayOfWeek == 5) ? 'Jumat' : 'Reguler';
-                    $jam = ($dayOfWeek == 5) ? '07:00 - 14:30' : '07:15 - 15:30';
+                    $jam = ($dayOfWeek == 5) ? '07:00 - 11:30' : '07:15 - 15:30';
                     if (isset($customShifts[$shiftName])) {
                         $jam = \Carbon\Carbon::parse($customShifts[$shiftName]->jam_masuk)->format('H:i') . ' - ' .
                                \Carbon\Carbon::parse($customShifts[$shiftName]->jam_keluar)->format('H:i');

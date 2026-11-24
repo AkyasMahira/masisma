@@ -187,7 +187,7 @@ class AbsensiController extends Controller
                     $data['scheduleInfo'] = 'Regular (07:15 - 15:30)';
                 } elseif ($day == 5) { // Jumat
                     $data['todayShift'] = 'Jumat';
-                    $data['scheduleInfo'] = 'Jumat (07:00 - 14:30)';
+                    $data['scheduleInfo'] = 'Jumat (07:00 - 11:30)';
                 } else {
                     $data['error_state'] = 'Hari Libur.';
                     $data['scheduleInfo'] = 'Akhir Pekan';
@@ -721,7 +721,7 @@ public function getShiftTimes($shift, $refDate, $roomId) {
         }
         elseif ($shift === 'Jumat') { 
             $t['start'] = $d->copy()->setTime(7, 0); 
-            $t['end']   = $d->copy()->setTime(14, 00); 
+            $t['end']   = $d->copy()->setTime(11, 30); 
         }
         // 2. Shift Normal
         elseif ($shift === 'Pagi') { 
