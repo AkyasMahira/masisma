@@ -611,7 +611,8 @@ function initMap() {
     const AKURASI_MAKS = 200;
 
     const map = L.map('location-map', { zoomControl: false, dragging: false }).setView([RSUD_LAT, RSUD_LNG], 16);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
+    // Peta dasar OpenStreetMap (CARTO kini mewajibkan API key -> peta kosong "API KEY REQUIRED")
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
     L.circle([RSUD_LAT, RSUD_LNG], { radius: MAX_RADIUS, color: 'none', fillColor: '#10B981', fillOpacity: 0.15 }).addTo(map);
     
     const userMarker = L.marker([RSUD_LAT, RSUD_LNG]).addTo(map);
