@@ -154,6 +154,17 @@
             border-radius: 10px; font-size: 0.7rem; font-weight: 700;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 5px;
         }
+        .gps-help {
+            display: none; background: #FFFBEB; border: 1px solid #FDE68A; color: #78350F;
+            border-radius: 14px; padding: 12px 14px; font-size: .78rem; line-height: 1.45; margin-bottom: 12px;
+        }
+        .gps-help.show { display: block; }
+        .gps-help b.judul { display: block; font-size: .85rem; margin-bottom: 4px; color: #92400E; }
+        .gps-help ol { margin: 4px 0 8px; padding-left: 18px; }
+        .gps-help .btn-coba {
+            width: 100%; border: none; border-radius: 10px; padding: 8px; font-weight: 700; font-size: .8rem;
+            background: #F59E0B; color: #fff;
+        }
         .btn-swipe {
             width: 100%; border: none; padding: 16px; border-radius: 18px;
             font-size: 1rem; font-weight: 700; color: white; cursor: pointer;
@@ -322,6 +333,24 @@
                             <span class="spinner-border spinner-border-sm text-secondary" style="width:10px;height:10px;"></span>
                             <span style="margin-left:5px;">Cari GPS...</span>
                         </div>
+                    </div>
+
+                    {{-- Panduan bila GPS tidak akurat (mis. "Lokasi presisi" mati -> akurasi ±2 km) --}}
+                    <div class="gps-help" id="gps-help">
+                        <b class="judul"><i class="bi bi-exclamation-triangle-fill me-1"></i><span id="gps-help-judul">Lokasi HP belum akurat</span></b>
+                        <span id="gps-help-acc"></span> Absen butuh akurasi di bawah 200 m.
+                        <ol id="gps-help-android">
+                            <li>Nyalakan <b>Lokasi/GPS</b> HP (tarik panel atas, ikon Lokasi).</li>
+                            <li>Buka <b>Setelan → Lokasi</b>, aktifkan <b>Akurasi Lokasi Google / Lokasi presisi</b>.</li>
+                            <li>Di browser: ketuk ikon gembok di samping alamat web → <b>Izin → Lokasi</b> → aktifkan <b>Gunakan lokasi presisi</b>.</li>
+                            <li>Matikan mode hemat baterai, lalu keluar ke area terbuka/dekat jendela.</li>
+                        </ol>
+                        <ol id="gps-help-ios" style="display:none">
+                            <li>Buka <b>Pengaturan → Privasi &amp; Keamanan → Layanan Lokasi</b>, pastikan <b>aktif</b>.</li>
+                            <li>Pilih <b>Safari</b> (atau Chrome) → <b>Saat Menggunakan App</b>, lalu nyalakan <b>Lokasi Akurat</b>.</li>
+                            <li>Matikan Mode Daya Rendah, lalu keluar ke area terbuka/dekat jendela.</li>
+                        </ol>
+                        <button type="button" class="btn-coba" id="gps-coba-lagi"><i class="bi bi-arrow-clockwise me-1"></i>Coba Lagi</button>
                     </div>
 
                     {{-- Form Absen --}}
@@ -578,7 +607,8 @@ function initMap() {
 
     const RSUD_LAT = -7.82159559;
     const RSUD_LNG = 112.05786417;
-    const MAX_RADIUS = 350; 
+    const MAX_RADIUS = {{ \App\Http\Controllers\AbsensiController::RADIUS_ABSEN }};   // sama dengan validasi server
+    const AKURASI_MAKS = 200;
 
     const map = L.map('location-map', { zoomControl: false, dragging: false }).setView([RSUD_LAT, RSUD_LNG], 16);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
@@ -590,11 +620,33 @@ function initMap() {
 
     const geoOptions = {
         enableHighAccuracy: true,
-        timeout: 20000,           
-        maximumAge: 3000          
+        timeout: 20000,
+        maximumAge: 3000
     };
 
-    function success(pos) {
+    // Panduan GPS: muncul bila akurasi buruk terus (>=1 km langsung, atau >12 detik belum stabil)
+    const help = document.getElementById('gps-help');
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (help) {
+        document.getElementById('gps-help-android').style.display = isIOS ? 'none' : '';
+        document.getElementById('gps-help-ios').style.display = isIOS ? '' : 'none';
+    }
+    function tampilBantuan(judul, acc) {
+        if (!help) return;
+        document.getElementById('gps-help-judul').textContent = judul;
+        document.getElementById('gps-help-acc').textContent = acc ? `Akurasi saat ini ±${acc >= 1000 ? (acc / 1000).toFixed(1) + ' km' : acc + ' m'}.` : '';
+        help.classList.add('show');
+    }
+    let terbaik = null;      // posisi dengan akurasi terbaik selama pencarian
+    let watchId = null;
+    let timerBantuan = setTimeout(() => {
+        if (!terbaik || terbaik.coords.accuracy > AKURASI_MAKS) tampilBantuan('Sinyal GPS belum stabil', terbaik ? Math.round(terbaik.coords.accuracy) : null);
+    }, 12000);
+
+    function success(posBaru) {
+        // pakai bacaan paling akurat; bacaan baru yang lebih buruk tidak menimpa (kecuali yang lama sudah basi > 60 dtk)
+        if (!terbaik || posBaru.coords.accuracy <= terbaik.coords.accuracy || posBaru.timestamp - terbaik.timestamp > 60000) terbaik = posBaru;
+        const pos = terbaik;
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
         const acc = Math.round(pos.coords.accuracy);
@@ -605,11 +657,17 @@ function initMap() {
         document.getElementById('geo-acc').value = acc;
 
         userMarker.setLatLng([lat, lng]);
-        map.setView([lat, lng], 17);
+        map.setView([lat, lng], acc > 1000 ? 13 : 17);
 
-        if (acc > 200) { 
+        if (acc > AKURASI_MAKS) {
+            btn.disabled = true;
             statusTxt.innerHTML = `<span class="text-warning"><i class="bi bi-broadcast"></i> Mencari sinyal stabil (${acc}m)...</span>`;
-        } else if (distance <= MAX_RADIUS) {
+            if (acc >= 1000) tampilBantuan('Lokasi presisi HP belum aktif', acc);   // ciri lokasi perkiraan (±2 km)
+            return;
+        }
+        if (help) help.classList.remove('show');
+        clearTimeout(timerBantuan);
+        if (distance <= MAX_RADIUS) {
             statusTxt.innerHTML = `<span class="text-success"><i class="bi bi-geo-alt-fill"></i> Area Terdeteksi (${distance}m)</span>`;
             btn.disabled = false;
         } else {
@@ -627,12 +685,31 @@ function initMap() {
         if(err.code === 3) errMsg = "Gagal mengunci lokasi (Timeout).";
 
         statusTxt.innerHTML = `<span class="text-danger"><i class="bi bi-shield-x"></i> ${errMsg}</span>`;
-        btn.disabled = true;
+        if (!terbaik || terbaik.coords.accuracy > AKURASI_MAKS) {
+            btn.disabled = true;
+            tampilBantuan(err.code === 1 ? 'Izin lokasi ditolak' : 'GPS belum terkunci', null);
+        }
     }
 
+    function mulaiGps() {
+        if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+        navigator.geolocation.getCurrentPosition(success, error, { ...geoOptions, maximumAge: 0 });
+        watchId = navigator.geolocation.watchPosition(success, error, geoOptions);
+    }
+    const btnCoba = document.getElementById('gps-coba-lagi');
+    if (btnCoba) btnCoba.addEventListener('click', () => {
+        terbaik = null;
+        if (help) help.classList.remove('show');
+        statusTxt.innerHTML = `<span class="text-secondary"><i class="bi bi-arrow-clockwise"></i> Mencari ulang lokasi...</span>`;
+        clearTimeout(timerBantuan);
+        timerBantuan = setTimeout(() => {
+            if (!terbaik || terbaik.coords.accuracy > AKURASI_MAKS) tampilBantuan('Sinyal GPS belum stabil', terbaik ? Math.round(terbaik.coords.accuracy) : null);
+        }, 12000);
+        mulaiGps();
+    });
+
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(success, error, geoOptions);
-        navigator.geolocation.watchPosition(success, error, geoOptions);
+        mulaiGps();
     } else {
         statusTxt.innerHTML = `<span class="text-danger">Browser tidak mendukung GPS</span>`;
     }

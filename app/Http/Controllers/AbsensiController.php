@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\File;
 use Carbon\CarbonPeriod;
 class AbsensiController extends Controller
 {
+    // Radius absen (meter) dari titik pusat RSUD; dipakai server & tampilan peta kartu absen
+    const RADIUS_ABSEN = 300;
+
     // Koordinat Pusat RSUD SLG
     protected $rsudLat = -7.82159559;
     protected $rsudLng = 112.05786417;
@@ -269,8 +272,8 @@ if (!$request->filled('lat') || !$request->filled('lng')) {
     return back()->with('error', 'Gagal: Lokasi GPS tidak terdeteksi. Pastikan GPS aktif, izin lokasi diberikan, dan akses web menggunakan HTTPS.');
 }
 
-// Validasi ketat titik koordinat radius 300 meter
-if (!$this->isInRsudArea($request->lat, $request->lng, 300)) {
+// Validasi ketat titik koordinat dalam radius RADIUS_ABSEN
+if (!$this->isInRsudArea($request->lat, $request->lng, self::RADIUS_ABSEN)) {
     return back()->with('error', 'Gagal: Anda berada di luar jangkauan RSUD SLG. Silakan mendekat ke area rumah sakit.');
 }
         $now = Carbon::now();
@@ -350,7 +353,7 @@ if (!$isCheckout) {
 
             // 5. VALIDASI LOKASI
             if ($request->filled('lat') && $request->lat != null) {
-                if (!$this->isInRsudArea($request->lat, $request->lng, 300)) {
+                if (!$this->isInRsudArea($request->lat, $request->lng, self::RADIUS_ABSEN)) {
                     return back()->with('error', 'Gagal: Checkout harus di area RSUD.');
                 }
             }
@@ -419,7 +422,7 @@ if (!$isCheckout) {
         $cekMasuk = $this->validateStrictEntry($targetShift, $now, $sequence->ruangan->id);
         if (!$cekMasuk['status']) return back()->with('error', $cekMasuk['message']);
 
-        if ($request->filled('lat') && !$this->isInRsudArea($request->lat, $request->lng, 300)) {
+        if ($request->filled('lat') && !$this->isInRsudArea($request->lat, $request->lng, self::RADIUS_ABSEN)) {
             return back()->with('error', 'Gagal: Di luar jangkauan RSUD.');
         }
 
