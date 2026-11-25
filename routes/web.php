@@ -593,6 +593,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
     Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
     Route::put('/users/{id}/password', [UserController::class, 'gantiPassword'])->name('users.password');
+    Route::get('/admin/pengaturan-email', [\App\Http\Controllers\PengaturanEmailController::class, 'index'])->name('admin.pengaturan_email');
+    Route::put('/admin/pengaturan-email', [\App\Http\Controllers\PengaturanEmailController::class, 'update'])->name('admin.pengaturan_email.update')->middleware('throttle:10,1');
+    Route::post('/admin/pengaturan-email/tes', [\App\Http\Controllers\PengaturanEmailController::class, 'tes'])->name('admin.pengaturan_email.tes')->middleware('throttle:5,1');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('diklat')->name('diklat.')->group(function () {

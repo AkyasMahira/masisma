@@ -46,6 +46,11 @@
                     <span class="sidebar-text">Akun User</span>
                 </a>
 
+                <a class="nav-link animate-item {{ request()->is('admin/pengaturan-email*') ? 'active' : '' }}" href="{{ route('admin.pengaturan_email') }}">
+                    <i class="bi bi-envelope-at"></i>
+                    <span class="sidebar-text">Pengaturan Email</span>
+                </a>
+
                 <a class="nav-link animate-item {{ request()->is('admin/pengajuan*') ? 'active' : '' }}" href="{{ route('admin.pengajuan.index') }}">
                     <i class="bi bi-hourglass-split"></i>
                     <span class="sidebar-text">Pengajuan User</span>
