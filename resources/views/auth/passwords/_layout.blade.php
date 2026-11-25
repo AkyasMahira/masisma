@@ -58,7 +58,8 @@
         .ombak .o1 { animation: geser 15s linear infinite; }
         .ombak .o2 { opacity: .6; animation: geser 11s linear infinite reverse; }
         @keyframes geser { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-6%); } }
-        @keyframes muncul { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+        @keyframes muncul { from { transform: translateY(14px); } to { transform: none; } }
+        @media (prefers-reduced-motion: reduce) { .kartu, .ombak svg { animation: none; } }
         @media (max-width: 420px) { .kartu { padding: 24px 20px 20px; border-radius: 18px; } body { padding-top: 20px; } }
     </style>
 </head>
