@@ -123,6 +123,10 @@ Route::post('/absensi/{token}/register-device', [AbsensiController::class, 'regi
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Ganti password akun sendiri
+    Route::get('/akun/ganti-password', [AuthController::class, 'showGantiPassword'])->name('akun.password');
+    Route::put('/akun/ganti-password', [AuthController::class, 'gantiPassword'])->name('akun.password.update')->middleware('throttle:10,1');
+
     // Evaluasi magang (wajib sebelum unduh sertifikat)
     Route::get('/evaluasi-magang', [\App\Http\Controllers\EvaluasiController::class, 'magangForm'])->name('evaluasi.magang.form');
     Route::post('/evaluasi-magang', [\App\Http\Controllers\EvaluasiController::class, 'magangStore'])->name('evaluasi.magang.store');

@@ -379,6 +379,12 @@
 
     <div class="sidebar-footer">
         <div class="p-3 sidebar-user-profile">
+            @if (auth()->check() && auth()->user()->role !== 'instansi')
+                <a class="nav-link {{ request()->is('akun/ganti-password') ? 'active' : '' }}" href="{{ route('akun.password') }}">
+                    <i class="bi bi-key"></i>
+                    <span class="sidebar-text">Ganti Password</span>
+                </a>
+            @endif
             <a class="nav-link logout-link" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                 <i class="bi bi-box-arrow-right"></i>
                 <span class="sidebar-text">Logout</span>

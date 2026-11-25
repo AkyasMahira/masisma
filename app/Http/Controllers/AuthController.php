@@ -44,11 +44,51 @@ public function sendResetLinkEmail(Request $request)
         return back()->with('status', 'Permintaan reset password sudah diteruskan ke admin Diklat RSUD SLG. Password baru akan dikirim ke PIC instansi Anda. Bila mendesak, hubungi admin Diklat.');
     }
 
-    $status = Password::sendResetLink($request->only('email'));
+    try {
+        $status = Password::sendResetLink($request->only('email'));
+    } catch (\Throwable $e) {
+        // mis. SMTP Gmail menolak login -> jangan tampilkan halaman error 500
+        Log::error('Kirim link reset password gagal: ' . $e->getMessage());
+        return back()->withInput()->withErrors(['email' => 'Maaf, pengiriman email sedang gangguan. Silakan coba lagi nanti atau hubungi admin Diklat RSUD SLG untuk reset password.']);
+    }
 
-    return $status === Password::RESET_LINK_SENT
-        ? back()->with('status', 'Link reset password telah dikirim ke email Anda!')
-        : back()->withErrors(['email' => 'Email tidak ditemukan atau terjadi kesalahan.']);
+    if ($status === Password::RESET_LINK_SENT) {
+        return back()->with('status', 'Link reset password telah dikirim ke email Anda! Cek juga folder Spam.');
+    }
+    if ($status === Password::RESET_THROTTLED) {
+        return back()->withInput()->withErrors(['email' => 'Link reset baru saja dikirim. Tunggu 1 menit sebelum meminta lagi, dan cek folder Spam.']);
+    }
+    return back()->withInput()->withErrors(['email' => 'Email tidak terdaftar di Sindikat.']);
+}
+
+/** Halaman ganti password (akun yang sedang login). */
+public function showGantiPassword()
+{
+    return view('auth.ganti_password');
+}
+
+public function gantiPassword(Request $request)
+{
+    $request->validate([
+        'password_lama' => 'required',
+        'password' => 'required|min:6|confirmed|different:password_lama',
+    ], [
+        'password_lama.required' => 'Password lama wajib diisi.',
+        'password.required' => 'Password baru wajib diisi.',
+        'password.min' => 'Password baru minimal 6 karakter.',
+        'password.confirmed' => 'Konfirmasi password baru tidak sama.',
+        'password.different' => 'Password baru harus berbeda dari password lama.',
+    ]);
+
+    $user = $request->user();
+    if (!Hash::check($request->password_lama, $user->password)) {
+        return back()->withErrors(['password_lama' => 'Password lama salah.']);
+    }
+
+    $user->forceFill(['password' => Hash::make($request->password)])->setRememberToken(Str::random(60));
+    $user->save();
+
+    return back()->with('success', 'Password berhasil diganti. Gunakan password baru saat login berikutnya.');
 }
 
 /**

@@ -154,7 +154,7 @@
             @csrf
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
-                <input type="email" name="email" class="form-control" placeholder="Email terdaftar / username instansi" required autofocus>
+                <input type="email" name="email" class="form-control" placeholder="Email terdaftar / username instansi" value="{{ old('email') }}" required autofocus>
             </div>
                 <div class="small mt-2" style="opacity:.85;">Akun instansi mitra (<b>@sindikat.com</b>): permintaan reset diteruskan ke admin Diklat, password baru dikirim ke PIC instansi.</div>
 
