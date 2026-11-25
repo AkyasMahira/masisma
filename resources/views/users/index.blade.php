@@ -252,6 +252,14 @@
                                     <i class="bi bi-pencil-square"></i>
                                 </button>
 
+                                {{-- Tombol Ganti Password --}}
+                                @if($user->role !== 'instansi')
+                                <button type="button" class="btn btn-sm btn-light text-warning border" title="Ganti password"
+                                    onclick="openPasswordModal({{ $user->id }}, @js($user->name), @js($user->email))">
+                                    <i class="bi bi-key-fill"></i>
+                                </button>
+                                @endif
+
                                 {{-- Tombol Delete --}}
                                 <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline">
                                     @csrf @method('DELETE')
@@ -355,6 +363,41 @@
     </div>
 </div>
 
+{{-- MODAL GANTI PASSWORD --}}
+<div class="modal fade" id="modalPassword" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <form id="formPassword" method="POST" autocomplete="off">
+                @csrf
+                @method('PUT')
+                <div class="modal-header border-0 p-4 pb-0">
+                    <div>
+                        <h5 class="fw-bold text-maroon mb-1"><i class="bi bi-key-fill me-2"></i>Ganti Password</h5>
+                        <div class="small text-muted"><span id="pw_nama" class="fw-semibold text-dark"></span> &middot; <span id="pw_email"></span></div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <label class="form-label small fw-bold">Password baru</label>
+                    <div class="input-group mb-1">
+                        <input type="text" name="password_baru" id="pw_baru" class="form-control rounded-start-3" minlength="6" maxlength="64" required autocomplete="new-password">
+                        <button type="button" class="btn btn-outline-secondary" id="pw_acak" title="Buat password acak"><i class="bi bi-shuffle"></i> Acak</button>
+                        <button type="button" class="btn btn-outline-secondary rounded-end-3" id="pw_salin" title="Salin"><i class="bi bi-clipboard"></i></button>
+                    </div>
+                    <div class="form-text mb-3">Minimal 6 karakter. Password terlihat agar mudah disampaikan ke mahasiswa.</div>
+                    <label class="form-label small fw-bold">Ulangi password baru</label>
+                    <input type="text" name="password_baru_confirmation" id="pw_ulang" class="form-control rounded-3" minlength="6" maxlength="64" required autocomplete="new-password">
+                    <div class="alert alert-light border small mt-3 mb-0"><i class="bi bi-info-circle me-1"></i>Setelah disimpan, password lama tidak berlaku lagi. Minta mahasiswa menggantinya sendiri lewat menu <b>Ganti Password</b>.</div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-maroon rounded-pill px-4">Simpan Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Choices.js JS -->
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 <script>
@@ -391,5 +434,31 @@
         
         modal.show();
     }
+
+    function openPasswordModal(id, nama, email) {
+        document.getElementById('formPassword').action = `/users/${id}/password`;
+        document.getElementById('pw_nama').textContent = nama;
+        document.getElementById('pw_email').textContent = email;
+        document.getElementById('pw_baru').value = '';
+        document.getElementById('pw_ulang').value = '';
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalPassword')).show();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const baru = document.getElementById('pw_baru'), ulang = document.getElementById('pw_ulang');
+        document.getElementById('pw_acak').addEventListener('click', function () {
+            const huruf = 'abcdefghjkmnpqrstuvwxyz23456789';
+            const acak = new Uint32Array(8);
+            crypto.getRandomValues(acak);
+            const pw = Array.from(acak, n => huruf[n % huruf.length]).join('');
+            baru.value = pw; ulang.value = pw;
+        });
+        document.getElementById('pw_salin').addEventListener('click', function () {
+            if (baru.value && navigator.clipboard) navigator.clipboard.writeText(baru.value);
+        });
+        document.getElementById('formPassword').addEventListener('submit', function (e) {
+            if (baru.value !== ulang.value) { e.preventDefault(); alert('Konfirmasi password tidak sama.'); }
+        });
+    });
 </script>
 @endsection

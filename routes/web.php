@@ -592,6 +592,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/users/{id}/approve', [UserController::class, 'approve'])->name('users.approve');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
     Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
+    Route::put('/users/{id}/password', [UserController::class, 'gantiPassword'])->name('users.password');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('diklat')->name('diklat.')->group(function () {

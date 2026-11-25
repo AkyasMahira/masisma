@@ -101,6 +101,27 @@ public function update(Request $request, $id)
     }
 }
 
+    /** Admin mengganti password user (mis. mahasiswa lupa password). */
+    public function gantiPassword(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+        if ($user->role === 'instansi') {
+            return back()->withErrors(['error' => 'Password akun instansi diatur dari menu MoU / Instansi.']);
+        }
+        $request->validate([
+            'password_baru' => 'required|string|min:6|max:64|confirmed',
+        ], [
+            'password_baru.required' => 'Password baru wajib diisi.',
+            'password_baru.min' => 'Password baru minimal 6 karakter.',
+            'password_baru.confirmed' => 'Konfirmasi password tidak sama.',
+        ]);
+
+        $user->forceFill(['password' => Hash::make($request->password_baru)])->setRememberToken(\Illuminate\Support\Str::random(60));
+        $user->save();
+
+        return back()->with('success', 'Password ' . $user->name . ' berhasil diganti. Sampaikan password baru ke yang bersangkutan dan minta segera menggantinya lewat menu Ganti Password.');
+    }
+
     public function approve($id)
     {
         $user = User::findOrFail($id);
