@@ -137,7 +137,7 @@ a:hover { color: var(--sd-hover); }
    ===================================================================== */
 
 /* ---------- Judul halaman: kartu putih + garis maroon kiri ---------- */
-.content :is(.sd-header, .header-card, .page-header, .page-header-wrapper, .dashboard-header, .hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card) {
+.content :is(.sd-header, .header-card, .page-header, .page-header-wrapper, .dashboard-header, .hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .bk-head, .lp-head, .sp-head, .page-head, .kk-head, .kal-head, .disp-head, .cs-head, .g-head, .info-head) {
     background: #fff !important;
     color: var(--sd-teks) !important;
     border: 1px solid var(--sd-garis) !important;
@@ -148,25 +148,25 @@ a:hover { color: var(--sd-hover); }
     margin-bottom: 1.25rem !important;
     background-image: none !important;
 }
-.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card)::after,
-.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card)::before { display: none !important; }
-.content :is(.sd-header, .header-card, .page-header, .page-header-wrapper, .dashboard-header, .hero, .ikm-hero, .page-hero, .rolling-hero) :is(h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5):first-of-type {
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .bk-head, .lp-head, .sp-head, .page-head, .kk-head, .kal-head, .disp-head, .cs-head, .g-head, .info-head)::after,
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .bk-head, .lp-head, .sp-head, .page-head, .kk-head, .kal-head, .disp-head, .cs-head, .g-head, .info-head)::before { display: none !important; }
+.content :is(.sd-header, .header-card, .page-header, .page-header-wrapper, .dashboard-header, .hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .bk-head, .lp-head, .sp-head, .page-head, .kk-head, .kal-head, .disp-head, .cs-head, .g-head, .info-head) :is(h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5):first-of-type {
     font-size: 1.3rem !important; font-weight: 600 !important; color: var(--sd-teks) !important; margin-bottom: 4px;
 }
 /* teks putih bawaan hero gradasi -> warna teks biasa */
-.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .card-header-custom) :is(.text-white, .text-white-50, .text-light, h1, h2, h3, h4, h5, h6, p, small, span, div, label) { color: inherit; }
-.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .card-header-custom) :is(.text-white-50, p, small, .sub, .period) { color: var(--sd-redup) !important; opacity: 1 !important; }
-.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .card-header-custom) .text-white { color: var(--sd-teks) !important; }
-.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card) .bi:not(.btn .bi) { color: var(--sd-utama); }
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .bk-head, .lp-head, .sp-head, .page-head, .kk-head, .kal-head, .disp-head, .cs-head, .g-head, .info-head, .card-header-custom) :is(.text-white, .text-white-50, .text-light, h1, h2, h3, h4, h5, h6, p, small, span, div, label) { color: inherit; }
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .bk-head, .lp-head, .sp-head, .page-head, .kk-head, .kal-head, .disp-head, .cs-head, .g-head, .info-head, .card-header-custom) :is(.text-white-50, p, small, .sub, .period) { color: var(--sd-redup) !important; opacity: 1 !important; }
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .bk-head, .lp-head, .sp-head, .page-head, .kk-head, .kal-head, .disp-head, .cs-head, .g-head, .info-head, .card-header-custom) .text-white { color: var(--sd-teks) !important; }
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .bk-head, .lp-head, .sp-head, .page-head, .kk-head, .kal-head, .disp-head, .cs-head, .g-head, .info-head) .bi:not(.btn .bi) { color: var(--sd-utama); }
 /* tombol putih di hero gradasi -> tombol tema */
-.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card) :is(.btn-light, .btn-light-h, .btn-hero, .btn-ghost-w, .btn-outline-light) {
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .bk-head, .lp-head, .sp-head, .page-head, .kk-head, .kal-head, .disp-head, .cs-head, .g-head, .info-head) :is(.btn-light, .btn-light-h, .btn-ghost-h, .btn-hero, .btn-ghost-w, .btn-outline-light, .btn-white) {
     background: var(--sd-lembut) !important; color: var(--sd-utama) !important; border: 1px solid transparent !important; box-shadow: none !important;
 }
-.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card) :is(.btn-light, .btn-light-h, .btn-hero, .btn-ghost-w, .btn-outline-light):hover { background: var(--sd-utama) !important; color: #fff !important; }
-.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card) :is(.btn-light, .btn-light-h, .btn-hero, .btn-ghost-w, .btn-outline-light):hover .bi { color: #fff !important; }
-.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card) .btn-save-w { background: var(--sd-utama) !important; color: #fff !important; border: 0 !important; }
-.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card) .btn-save-w .bi { color: #fff !important; }
-.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card) :is(.wait-pill, .badge.bg-light, .period, .avatar) { background: var(--sd-lembut) !important; color: var(--sd-utama) !important; border-color: transparent !important; }
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .bk-head, .lp-head, .sp-head, .page-head, .kk-head, .kal-head, .disp-head, .cs-head, .g-head, .info-head) :is(.btn-light, .btn-light-h, .btn-ghost-h, .btn-hero, .btn-ghost-w, .btn-outline-light, .btn-white):hover { background: var(--sd-utama) !important; color: #fff !important; }
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .bk-head, .lp-head, .sp-head, .page-head, .kk-head, .kal-head, .disp-head, .cs-head, .g-head, .info-head) :is(.btn-light, .btn-light-h, .btn-ghost-h, .btn-hero, .btn-ghost-w, .btn-outline-light, .btn-white):hover .bi { color: #fff !important; }
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .bk-head, .lp-head, .sp-head, .page-head, .kk-head, .kal-head, .disp-head, .cs-head, .g-head, .info-head) .btn-save-w { background: var(--sd-utama) !important; color: #fff !important; border: 0 !important; }
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .bk-head, .lp-head, .sp-head, .page-head, .kk-head, .kal-head, .disp-head, .cs-head, .g-head, .info-head) .btn-save-w .bi { color: #fff !important; }
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .bk-head, .lp-head, .sp-head, .page-head, .kk-head, .kal-head, .disp-head, .cs-head, .g-head, .info-head) :is(.wait-pill, .badge.bg-light, .period, .avatar) { background: var(--sd-lembut) !important; color: var(--sd-utama) !important; border-color: transparent !important; }
 .content .ikm-hero :is(.ikm-score, .ikm-grade) { color: var(--sd-utama) !important; }
 
 /* ---------- Kepala kartu form (dulu maroon penuh) ---------- */
