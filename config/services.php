@@ -30,4 +30,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // Chatbot Sindi (dibaca lewat config karena server memakai config:cache -> env() di luar config bernilai null)
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+    ],
+
 ];
