@@ -195,3 +195,67 @@ a:hover { color: var(--sd-hover); }
 .content .welcome-card .welcome-title { font-size: 1.5rem !important; color: var(--sd-teks) !important; }
 .content .welcome-card .welcome-text { color: var(--sd-redup) !important; opacity: 1 !important; font-size: .95rem !important; margin-bottom: 1rem !important; }
 .content .welcome-card :is(.btn-light, .btn-outline-light, .btn-white) { background: var(--sd-utama) !important; color: #fff !important; border: 0 !important; }
+
+/* ---------- Tanpa garis bawah (Bootstrap 5 menggarisbawahi semua <a>) ---------- */
+a { text-decoration: none; }
+a:not([class]):hover, .form-text a:hover, .alert a:hover, p > a:not([class*="btn"]):hover { text-decoration: underline; text-underline-offset: 3px; }
+a[class*="btn"], a.nav-link, a.dropdown-item, a.list-group-item, a.badge, a.card, a.stat, a.page-link { text-decoration: none !important; }
+/* FullCalendar: angka tanggal & nama hari */
+.fc a, .fc a:hover, .fc .fc-col-header-cell-cushion, .fc .fc-daygrid-day-number, .fc .fc-list-day-text, .fc .fc-list-day-side-text { text-decoration: none !important; color: inherit; }
+.fc .fc-col-header-cell-cushion { color: #6b7280; font-weight: 600; font-size: .78rem; text-transform: uppercase; }
+.fc .fc-daygrid-day-number { color: var(--sd-teks); font-size: .82rem; }
+.fc .fc-day-today { background: var(--sd-lembut) !important; }
+.fc .fc-button-primary { background: var(--sd-utama); border-color: var(--sd-utama); }
+.fc .fc-button-primary:hover, .fc .fc-button-primary:not(:disabled).fc-button-active, .fc .fc-button-primary:not(:disabled):active { background: var(--sd-hover); border-color: var(--sd-hover); }
+.fc .fc-button-primary:disabled { background: var(--sd-utama); border-color: var(--sd-utama); opacity: .55; }
+
+/* =====================================================================
+   TAHAP 3 - kartu angka, filter, tombol aksi tabel
+   ===================================================================== */
+
+/* ---------- Kartu angka ringkasan ---------- */
+.content :is(.stat-card, .stat, .mini-stat, .stats-card, .stat-box, .info-card, .stat-item) {
+    border-radius: var(--sd-radius);
+    box-shadow: var(--sd-bayang);
+}
+.content :is(.stat-card, .mini-stat, .stats-card, .stat-box, .info-card, .stat-item):not([class*="gradient"]) { background: #fff; border: 1px solid var(--sd-garis); }
+/* kartu angka berwarna penuh -> putih, warna hanya di angka & ikon */
+.content .stat-card[class*="gradient"] {
+    background: #fff !important; background-image: none !important; color: var(--sd-teks) !important;
+    border: 1px solid var(--sd-garis) !important; border-left: 4px solid var(--sd-aksen, var(--sd-utama)) !important;
+}
+.content .stat-card[class*="gradient"] :is(small, .opacity-75, .stat-label) { color: var(--sd-redup) !important; opacity: 1 !important; }
+.content .stat-card[class*="gradient"] :is(h1, h2, h3, h4, .stat-value) { color: var(--sd-aksen, var(--sd-utama)) !important; }
+.content .stat-card[class*="gradient"] :is(.stat-icon, .stat-icon-bg) { color: var(--sd-aksen, var(--sd-utama)) !important; opacity: .12 !important; }
+.content .stat-card:is(.bg-gradient-blue, .bg-maroon-gradient, .bg-gradient-maroon) { --sd-aksen: #7c1316; }
+.content .stat-card:is(.bg-gradient-green, .bg-success-gradient) { --sd-aksen: #15803d; }
+.content .stat-card:is(.bg-gradient-orange, .bg-warning-gradient) { --sd-aksen: #b45309; }
+.content .stat-card:is(.bg-danger-gradient, .bg-gradient-red) { --sd-aksen: #dc2626; }
+
+/* ---------- Kotak filter ---------- */
+.content :is(.filter-card, .filter-section) {
+    background: #fff; border: 1px solid var(--sd-garis) !important; border-radius: var(--sd-radius) !important; box-shadow: var(--sd-bayang) !important; overflow: hidden;
+}
+.content .filter-header {
+    background: #fcf7f7 !important; color: var(--sd-utama) !important; font-weight: 600 !important; font-size: .9rem;
+    border-bottom: 1px solid var(--sd-garis) !important; padding: 12px 20px;
+}
+.content :is(.filter-label, .filter-section label, .filter-card label) {
+    font-size: .72rem !important; font-weight: 600 !important; color: #6b7280 !important; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px;
+}
+
+/* ---------- Tombol aksi kecil di tabel ---------- */
+.content :is(.action-btn, .btn-action, .btn-icon, .btn-circle, .icon-btn, .btn-action-sm, .btn-action-icon, .btn-soft) {
+    border-radius: 9px !important; box-shadow: none !important; transition: background .15s, color .15s;
+}
+.content :is(.action-btn, .btn-action, .btn-icon, .icon-btn, .btn-action-sm, .btn-action-icon):is(.btn-info, .btn-primary, .btn-outline-primary, .btn-light, .btn-outline-dark, .btn-secondary, .btn-outline-secondary, .btn-dark) {
+    background: var(--sd-lembut) !important; color: var(--sd-utama) !important; border: 1px solid transparent !important;
+}
+.content :is(.action-btn, .btn-action, .btn-icon, .icon-btn, .btn-action-sm, .btn-action-icon):is(.btn-warning, .btn-outline-warning) { background: #fef3c7 !important; color: #b45309 !important; border: 1px solid transparent !important; }
+.content :is(.action-btn, .btn-action, .btn-icon, .icon-btn, .btn-action-sm, .btn-action-icon):is(.btn-danger, .btn-outline-danger) { background: #fee2e2 !important; color: #dc2626 !important; border: 1px solid transparent !important; }
+.content :is(.action-btn, .btn-action, .btn-icon, .icon-btn, .btn-action-sm, .btn-action-icon):is(.btn-success, .btn-outline-success) { background: #dcfce7 !important; color: #15803d !important; border: 1px solid transparent !important; }
+.content :is(.action-btn, .btn-action, .btn-icon, .icon-btn, .btn-action-sm, .btn-action-icon):is(.btn-info, .btn-primary, .btn-outline-primary, .btn-light, .btn-outline-dark, .btn-secondary, .btn-outline-secondary, .btn-dark):hover { background: var(--sd-utama) !important; color: #fff !important; }
+.content :is(.action-btn, .btn-action, .btn-icon, .icon-btn, .btn-action-sm, .btn-action-icon):is(.btn-warning, .btn-outline-warning):hover { background: #b45309 !important; color: #fff !important; }
+.content :is(.action-btn, .btn-action, .btn-icon, .icon-btn, .btn-action-sm, .btn-action-icon):is(.btn-danger, .btn-outline-danger):hover { background: #dc2626 !important; color: #fff !important; }
+.content :is(.action-btn, .btn-action, .btn-icon, .icon-btn, .btn-action-sm, .btn-action-icon):is(.btn-success, .btn-outline-success):hover { background: #15803d !important; color: #fff !important; }
+.content :is(.action-btn, .btn-action, .btn-icon, .icon-btn, .btn-action-sm, .btn-action-icon):hover .bi { color: #fff !important; }
