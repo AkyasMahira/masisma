@@ -37,14 +37,14 @@
     .bl-room i { width:8px; height:8px; border-radius:2px; flex-shrink:0; }
     .bl-per { font-size:.76rem; color:#475569; white-space:nowrap; }
     .fase { display:inline-block; font-size:.6rem; font-weight:800; padding:1px 8px; border-radius:20px; letter-spacing:.3px; margin-top:3px; }
-    .fase-berjalan { background:#dcfce7; color:#15803d; } .fase-selesai { background:#eef2f7; color:#64748b; } .fase-akan { background:#dbeafe; color:#1d4ed8; }
+    .fase-berjalan { background:#dcfce7; color:#15803d; } .fase-selesai { background:#eef2f7; color:#64748b; } .fase-akan { background:#fcf0f1; color:#7c1316; }
     .bl-ppl { text-align:right; white-space:nowrap; }
     .bl-ppl b { font-size:1rem; color:var(--maroon); font-weight:800; }
     .bl-ppl small { display:block; font-size:.66rem; color:#94a3b8; font-weight:600; }
     .bl-ppl small.ok { color:#15803d; }
     .pill { padding:3px 11px; border-radius:20px; font-size:.7rem; font-weight:700; display:inline-block; white-space:nowrap; }
     .b-pending { background:#fef3c7; color:#b45309; } .b-approved { background:#dcfce7; color:#15803d; } .b-rejected { background:#fee2e2; color:#b91c1c; }
-    .imp { display:inline-block; background:#eef2ff; color:#4338ca; font-size:.56rem; font-weight:800; padding:1px 5px; border-radius:4px; vertical-align:middle; margin-left:5px; }
+    .imp { display:inline-block; background:#eef2ff; color:#7c1316; font-size:.56rem; font-weight:800; padding:1px 5px; border-radius:4px; vertical-align:middle; margin-left:5px; }
     .bl-aksi { display:flex; gap:5px; justify-content:flex-end; align-items:center; }
     .btn-acc { background:#16a34a; color:#fff; border:none; border-radius:9px; font-weight:700; font-size:.78rem; width:32px; height:32px; }
     .btn-acc:hover { background:#15803d; color:#fff; }
@@ -184,7 +184,7 @@
         </div>
 
         <div class="bl-list">
-            @php $palette = ['#7c1316','#1d4ed8','#15803d','#b45309','#7e22ce','#0e7490','#be123c','#4d7c0f','#0f766e','#9333ea']; @endphp
+            @php $palette = ['#7c1316','#7c1316','#15803d','#b45309','#7e22ce','#0e7490','#be123c','#4d7c0f','#0f766e','#a3191d']; @endphp
             @forelse($bookings as $b)
             @php
                 $isImpor = \Illuminate\Support\Str::contains((string)$b->keterangan, '[IMPOR-MAPPING]');

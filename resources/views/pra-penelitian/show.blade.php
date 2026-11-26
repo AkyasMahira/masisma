@@ -148,7 +148,7 @@
         .bg-pending { background-color: #fff7ed; color: #c2410c; }
         .bg-approved { background-color: #ecfdf5; color: #047857; }
         .bg-rejected { background-color: #fef2f2; color: #b91c1c; }
-        .bg-active { background-color: #eff6ff; color: #1d4ed8; }
+        .bg-active { background-color: #fcf0f1; color: #7c1316; }
 
         /* --- Buttons --- */
         .btn-edit-custom {

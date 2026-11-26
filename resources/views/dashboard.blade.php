@@ -42,7 +42,7 @@
         .stat-icon { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
         .stat-icon.primary { background-color: var(--custom-maroon-subtle); color: var(--custom-maroon); }
         .stat-icon.success { background-color: #dcfce7; color: #166534; }
-        .stat-icon.info { background-color: #dbeafe; color: #1e40af; }
+        .stat-icon.info { background-color: #fcf0f1; color: #7c1316; }
         .stat-icon.warning { background-color: #fef3c7; color: #92400e; }
         .stat-info .stat-title { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 0.25rem; }
         .stat-info .stat-value { font-size: 2rem; font-weight: 800; color: var(--text-dark); line-height: 1; }
@@ -440,7 +440,7 @@
                             datasets: [{
                                 label: 'Hadir',
                                 data: {!! json_encode(array_reverse($absensi7Days ?? [])) !!},
-                                backgroundColor: '#10b981', borderRadius: 6
+                                backgroundColor: '#7c1316', borderRadius: 6
                             }]
                         },
                         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
@@ -457,7 +457,7 @@ if (document.getElementById('ruanganChart')) {
                 label: 'Jumlah Mahasiswa',
                 data: {!! json_encode($ruanganData ?? []) !!},
                 // Bisa pakai warna-warni atau satu warna utama
-                backgroundColor: ['#7c1316', '#1e40af', '#eab308', '#22c55e', '#a855f7', '#f97316'],
+                backgroundColor: '#a3191d',
                 borderRadius: 4
             }]
         },

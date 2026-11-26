@@ -7,7 +7,7 @@
     $oldKomp = array_values(array_filter((array) old('kompetensi_dimiliki', [])));
     if (!count($oldKomp)) $oldKomp = [''];
     $ruangJs = $ruangans->mapWithKeys(function ($r) { return [$r->id => ['nama' => $r->nm_ruangan, 'kuota' => (int) $r->kuota_ruangan]]; });
-    $palette = ['#7c1316','#1d4ed8','#15803d','#b45309','#7e22ce','#0e7490','#be123c','#4d7c0f','#0f766e','#9333ea'];
+    $palette = ['#7c1316','#7c1316','#15803d','#b45309','#7e22ce','#0e7490','#be123c','#4d7c0f','#0f766e','#a3191d'];
 @endphp
 <style>
     :root { --maroon:#7c1316; --maroon-light:#a3191d; --maroon-subtle:#fcf0f1; }

@@ -47,7 +47,7 @@
         /* BADGES & PROGRESS */
         .badge-soft { padding: 0.4rem 0.75rem; border-radius: 6px; font-weight: 600; font-size: 0.75rem; letter-spacing: 0.3px; }
         .badge-unit { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
-        .badge-nip { background: #eff6ff; color: #3b82f6; }
+        .badge-nip { background: #fcf0f1; color: #a3191d; }
         .progress-slim { height: 6px; border-radius: 10px; background-color: #e2e8f0; overflow: hidden; margin-top: 6px;}
         .progress-slim .progress-bar { border-radius: 10px; transition: width 1s ease-in-out; height: 100%;}
         

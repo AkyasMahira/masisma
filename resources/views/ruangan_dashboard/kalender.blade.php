@@ -37,11 +37,11 @@
 
     <div class="kal-card">
         <div class="d-flex flex-wrap gap-3 mb-3">
-            <span class="legend-chip"><span class="legend-dot" style="background:#0d6efd;"></span> Pagi</span>
-            <span class="legend-chip"><span class="legend-dot" style="background:#fd7e14;"></span> Siang</span>
-            <span class="legend-chip"><span class="legend-dot" style="background:#6f42c1;"></span> Malam</span>
-            <span class="legend-chip"><span class="legend-dot" style="background:#6610f2;"></span> Reguler</span>
-            <span class="legend-chip"><span class="legend-dot" style="background:#20c997;"></span> Jumat</span>
+            <span class="legend-chip"><span class="legend-dot" style="background:#7c1316;"></span> Pagi</span>
+            <span class="legend-chip"><span class="legend-dot" style="background:#d97706;"></span> Siang</span>
+            <span class="legend-chip"><span class="legend-dot" style="background:#374151;"></span> Malam</span>
+            <span class="legend-chip"><span class="legend-dot" style="background:#7c1316;"></span> Reguler</span>
+            <span class="legend-chip"><span class="legend-dot" style="background:#b45309;"></span> Jumat</span>
         </div>
         <div id="kalender"></div>
     </div>

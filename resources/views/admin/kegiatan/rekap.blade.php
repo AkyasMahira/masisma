@@ -42,8 +42,8 @@
         .bg-izin { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa;}
         .bg-belum { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0;}
 
-        .btn-lihat-foto { background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; font-size: 0.75rem; padding: 5px 12px; border-radius: 6px; font-weight: 700; transition: 0.2s;}
-        .btn-lihat-foto:hover { background: #3b82f6; color: white; }
+        .btn-lihat-foto { background: #fcf0f1; color: #a3191d; border: 1px solid #f0c9cb; font-size: 0.75rem; padding: 5px 12px; border-radius: 6px; font-weight: 700; transition: 0.2s;}
+        .btn-lihat-foto:hover { background: #a3191d; color: white; }
 
         .chart-container { background: #f8fafc; border-radius: 16px; padding: 20px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center;}
     </style>

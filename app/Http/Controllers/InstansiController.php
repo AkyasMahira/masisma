@@ -79,7 +79,7 @@ class InstansiController extends Controller
             ->orderBy('tanggal_mulai')
             ->get();
 
-        $palette = ['#7c1316', '#1d4ed8', '#15803d', '#b45309', '#7e22ce', '#0e7490', '#be123c', '#4d7c0f', '#0f766e', '#9333ea'];
+        $palette = ['#7c1316', '#7c1316', '#15803d', '#b45309', '#7e22ce', '#0e7490', '#be123c', '#4d7c0f', '#0f766e', '#a3191d'];
         $events = []; $occ = [];
         foreach ($bookings as $b) {
             if (!$b->tanggal_mulai || !$b->tanggal_selesai) continue;
@@ -714,7 +714,7 @@ class InstansiController extends Controller
             })->values();
         }
 
-        $palette = ['#7c1316', '#1d4ed8', '#15803d', '#b45309', '#7e22ce', '#0e7490', '#be123c', '#4d7c0f', '#0f766e', '#9333ea'];
+        $palette = ['#7c1316', '#7c1316', '#15803d', '#b45309', '#7e22ce', '#0e7490', '#be123c', '#4d7c0f', '#0f766e', '#a3191d'];
         $mhsMap = $this->mahasiswaPerBooking($bookings);
 
         $events = [];

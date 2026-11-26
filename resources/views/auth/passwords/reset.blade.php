@@ -65,7 +65,7 @@
         }
         function cek() {
             var v = p.value, s = nilai(v);
-            var lv = !v ? null : (v.length < 6 ? ['Terlalu pendek', '#dc3545', 15] : s <= 2 ? ['Lemah', '#fd7e14', 40] : s <= 3 ? ['Cukup', '#ffc107', 70] : ['Kuat', '#198754', 100]);
+            var lv = !v ? null : (v.length < 6 ? ['Terlalu pendek', '#dc3545', 15] : s <= 2 ? ['Lemah', '#d97706', 40] : s <= 3 ? ['Cukup', '#ffc107', 70] : ['Kuat', '#198754', 100]);
             bar.style.width = lv ? lv[2] + '%' : '0'; bar.style.background = lv ? lv[1] : '';
             tk.textContent = lv ? 'Kekuatan: ' + lv[0] : ' ';
             if (!k.value) { tc.textContent = ' '; return; }

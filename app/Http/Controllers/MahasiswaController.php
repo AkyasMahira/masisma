@@ -342,7 +342,7 @@ class MahasiswaController extends Controller
 //     $events[] = [
 //         'title' => $title,
 //         'start' => $dStr,
-//         'color' => '#6610f2',
+//         'color' => '#7c1316',
 //         'extendedProps' => [
 //             'jam' => $jam, 
 //             'ruang' => $ruangName, 
@@ -381,7 +381,7 @@ class MahasiswaController extends Controller
 //                 $events[] = [
 //                     'title' => ucfirst($type),
 //                     'start' => $dStr,
-//                     'color' => ($type == 'Libur' ? '#6c757d' : '#0d6efd'), // Biru untuk Shift
+//                     'color' => ($type == 'Libur' ? '#6c757d' : '#7c1316'), // Biru untuk Shift
 //                     'extendedProps' => [
 //                         'jam' => ($type == 'Libur' ? 'Istirahat' : $jamShift), 
 //                         'ruang' => $ruangName, 
@@ -1556,7 +1556,7 @@ public function dashboard()
 //     $events[] = [
 //         'title' => $title,
 //         'start' => $dStr,
-//         'color' => '#6610f2',
+//         'color' => '#7c1316',
 //         'extendedProps' => [
 //             'jam' => $jam, 
 //             'ruang' => $ruangName, 
@@ -1595,7 +1595,7 @@ public function dashboard()
 //                 $events[] = [
 //                     'title' => ucfirst($type),
 //                     'start' => $dStr,
-//                     'color' => ($type == 'Libur' ? '#6c757d' : '#0d6efd'), // Biru untuk Shift
+//                     'color' => ($type == 'Libur' ? '#6c757d' : '#7c1316'), // Biru untuk Shift
 //                     'extendedProps' => [
 //                         'jam' => ($type == 'Libur' ? 'Istirahat' : $jamShift), 
 //                         'ruang' => $ruangName, 

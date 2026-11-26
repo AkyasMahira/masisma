@@ -624,7 +624,7 @@ class KepalaRuanganController extends Controller
             ];
         }
 
-        $warna = ['pagi' => '#0d6efd', 'siang' => '#fd7e14', 'malam' => '#6f42c1', 'reguler' => '#6610f2', 'jumat' => '#20c997'];
+        $warna = ['pagi' => '#7c1316', 'siang' => '#d97706', 'malam' => '#374151', 'reguler' => '#7c1316', 'jumat' => '#b45309'];
         $events = [];
 
         // Dari jadwal shift (ruangan shift)
@@ -653,7 +653,7 @@ class KepalaRuanganController extends Controller
                     $events[] = [
                         'title' => $nama . ' • ' . ($d->dayOfWeekIso == 5 ? 'Jumat' : 'Reguler'),
                         'start' => $tgl,
-                        'color' => $d->dayOfWeekIso == 5 ? '#20c997' : '#6610f2',
+                        'color' => $d->dayOfWeekIso == 5 ? '#b45309' : '#7c1316',
                         'extendedProps' => ['mid' => $seq->mahasiswa_id, 'shift' => $d->dayOfWeekIso == 5 ? 'Jumat' : 'Reguler'],
                     ];
                 }

@@ -447,7 +447,7 @@ public function show(Pengajuan $pengajuan)
             $ruangName = $seq ? $seq->ruangan->nm_ruangan : ($mahasiswa->ruangan->nm_ruangan ?? '-');
             $isMerak = \Illuminate\Support\Str::contains(strtolower($ruangName), 'merak');
 
-            $color = '#0d6efd'; // Biru Bootstrap
+            $color = '#7c1316'; // Biru Bootstrap
             $title = ucfirst($shift->shift_type);
           // ... (kode sebelumnya di dalam loop) ...
             $ruangName = $seq ? $seq->ruangan->nm_ruangan : ($mahasiswa->ruangan->nm_ruangan ?? '-');
@@ -455,7 +455,7 @@ public function show(Pengajuan $pengajuan)
             // TAMBAHAN: Cek Gizi
             $isGizi = \Illuminate\Support\Str::contains(strtolower($ruangName), 'gizi');
 
-            $color = '#0d6efd'; 
+            $color = '#7c1316'; 
             $title = ucfirst($shift->shift_type);
             $jam    = '';
 
@@ -507,7 +507,7 @@ public function show(Pengajuan $pengajuan)
                         $events[] = [
                             'title' => $title,
                             'start' => $dt->format('Y-m-d'),
-                            'color' => '#6610f2', // Ungu
+                            'color' => '#7c1316', // Ungu
                             'extendedProps' => ['jam' => $jam, 'ruang' => $seq->ruangan->nm_ruangan, 'type' => 'jadwal']
                         ];
                     }
@@ -565,7 +565,7 @@ public function show(Pengajuan $pengajuan)
                 'title' => 'IZIN',
                 'start' => $dispen->tanggal_mulai,
                 'end'   => \Carbon\Carbon::parse($dispen->tanggal_selesai)->addDay()->format('Y-m-d'),
-                'color' => '#fd7e14',
+                'color' => '#d97706',
                 'extendedProps' => ['jam' => $dispen->kategori, 'ruang' => 'Dispensasi', 'type' => 'izin']
             ];
         }

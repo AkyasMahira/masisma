@@ -79,7 +79,7 @@
     .btn-approve { background-color: #10b981; }
     .btn-reject { background-color: #ef4444; }
     .btn-delete { background-color: #94a3b8; }
-    .btn-detail { background-color: #3b82f6; color: white; width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; }
+    .btn-detail { background-color: #a3191d; color: white; width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; }
     
     .btn-action:hover, .btn-detail:hover { 
         transform: translateY(-2px); 

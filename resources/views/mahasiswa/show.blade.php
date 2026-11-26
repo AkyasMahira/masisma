@@ -393,7 +393,7 @@
 
     {{-- KARTU 3: TARGET BERJALAN --}}
     <div class="col-md-3 col-6">
-        <div class="stat-card" style="background: #fff; border-left: 4px solid #0d6efd;">
+        <div class="stat-card" style="background: #fff; border-left: 4px solid #7c1316;">
             <div class="position-relative z-1">
                 {{-- Data Pakai $targetBerjalan --}}
                 <h2 class="fw-bold mb-0 text-primary">{{ $targetBerjalan }}</h2>
@@ -476,7 +476,7 @@
                     <span class="badge bg-primary">Jadwal Shift</span>
                     <span class="badge bg-secondary">Libur</span>
                     <span class="badge bg-danger">Alpha</span>
-                    <span class="badge" style="background:#6610f2">Non-Shift</span>
+                    <span class="badge" style="background:#7c1316">Non-Shift</span>
                 </div>
 
                 <div id="calendar" class="mb-4"></div>

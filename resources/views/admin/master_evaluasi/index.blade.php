@@ -20,7 +20,7 @@
     .t-x thead th { background:var(--maroon-subtle); color:var(--maroon); font-size:.7rem; text-transform:uppercase; letter-spacing:.4px; border:none; padding:10px 12px; }
     .t-x td { padding:10px 12px; vertical-align:middle; border-color:#f1f3f5; font-size:.88rem; }
     .badge-x { font-size:.68rem; font-weight:700; padding:3px 9px; border-radius:20px; }
-    .tipe-rating { background:#dbeafe; color:#1d4ed8; } .tipe-text { background:#e0e7ff; color:#4338ca; }
+    .tipe-rating { background:#fcf0f1; color:#7c1316; } .tipe-text { background:#fcf0f1; color:#7c1316; }
     .st-aktif { background:#dcfce7; color:#15803d; } .st-nonaktif { background:#f1f5f9; color:#64748b; }
     .ic-btn { width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#64748b; text-decoration:none; }
     .ic-btn:hover { background:var(--maroon-subtle); color:var(--maroon); border-color:#ecd3d5; }

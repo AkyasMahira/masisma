@@ -16,7 +16,7 @@
     .card-soft { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
     .table thead th { background:var(--maroon-subtle); color:var(--maroon); font-size:.76rem; text-transform:uppercase; }
     .pill { padding:3px 10px; border-radius:20px; font-size:.72rem; font-weight:700; }
-    .p-belum { background:#fee2e2; color:#b91c1c; } .p-sudah { background:#dcfce7; color:#15803d; } .p-lulus { background:#dbeafe; color:#1d4ed8; }
+    .p-belum { background:#fee2e2; color:#b91c1c; } .p-sudah { background:#dcfce7; color:#15803d; } .p-lulus { background:#fcf0f1; color:#7c1316; }
     .btn-maroon { background:var(--maroon); color:#fff; border:none; border-radius:8px; font-weight:600; }
     .btn-maroon:hover { background:var(--maroon-light); color:#fff; }
     .row-belum { background:#fff7f7; }

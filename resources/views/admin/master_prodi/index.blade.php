@@ -38,7 +38,7 @@
     .pill { padding:4px 10px; border-radius:20px; font-size:.72rem; font-weight:700; display:inline-flex; align-items:center; gap:5px; }
     .pill::before { content:''; width:6px; height:6px; border-radius:50%; background:currentColor; }
     .st-on { background:#dcfce7; color:#15803d; } .st-off { background:#f1f5f9; color:#64748b; }
-    .badge-jen { background:#e0e7ff; color:#4338ca; padding:3px 9px; border-radius:6px; font-size:.72rem; font-weight:700; }
+    .badge-jen { background:#fcf0f1; color:#7c1316; padding:3px 9px; border-radius:6px; font-size:.72rem; font-weight:700; }
     .tag-kat { background:#f3f4f6; color:#4b5563; padding:3px 9px; border-radius:6px; font-size:.75rem; font-weight:600; }
 
     .action-btn { width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; border-radius:9px; border:none; text-decoration:none; transition:.15s; }

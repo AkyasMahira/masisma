@@ -323,7 +323,7 @@
                             <span class="tx"><b>Dispensasi Lupa Pulang</b><small>Lupa tap pulang — maksimal {{ \App\Models\Dispensasi::BATAS_LUPA_PULANG_HARI }} hari lalu</small></span>
                             <i class="bi bi-chevron-right chev"></i>
                         </button>
-                        <button type="button" class="dsp-opt" style="--c:#0d6efd;--cb:#e7f0ff" onclick="window.__pilihDispen('biasa')">
+                        <button type="button" class="dsp-opt" style="--c:#7c1316;--cb:#e7f0ff" onclick="window.__pilihDispen('biasa')">
                             <span class="ic"><i class="bi bi-calendar2-check"></i></span>
                             <span class="tx"><b>Izin Biasa / Sakit</b><small>Pakai surat — hard copy &amp; upload PDF</small></span>
                             <i class="bi bi-chevron-right chev"></i>

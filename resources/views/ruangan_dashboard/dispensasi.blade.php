@@ -96,7 +96,7 @@
                     $katMap = [
                         'terlambat'   => ['Terlambat',    '#dc3545', '#fdecee', 'bi-clock-history'],
                         'lupa_pulang' => ['Lupa Pulang',  '#f59e0b', '#fef3e2', 'bi-box-arrow-right'],
-                        'biasa'       => ['Izin / Sakit', '#0d6efd', '#e7f0ff', 'bi-calendar2-check'],
+                        'biasa'       => ['Izin / Sakit', '#7c1316', '#e7f0ff', 'bi-calendar2-check'],
                     ];
                     $ki = $katMap[$kat] ?? [ucwords(str_replace('_',' ',$kat)), '#6c757d', '#f1f5f9', 'bi-tag-fill'];
                     $stMap = [

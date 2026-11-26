@@ -6,7 +6,7 @@
     $grupParam  = ['pelatihan' => 'kegiatan_id', 'pendidikan' => 'mou_id', 'penelitian' => 'pra_penelitian_id'][$jenis];
     $ikonJenis  = ['pelatihan' => 'bi-easel2', 'pendidikan' => 'bi-mortarboard', 'penelitian' => 'bi-journal-text'][$jenis];
     $qs = request()->except('page');
-    $mutuWarna = ['A' => '#15803d', 'B' => '#1d4ed8', 'C' => '#b45309', 'D' => '#b91c1c', '-' => '#94a3b8'];
+    $mutuWarna = ['A' => '#15803d', 'B' => '#7c1316', 'C' => '#b45309', 'D' => '#b91c1c', '-' => '#94a3b8'];
 @endphp
 
 @section('title', $judulJenis . ' & IKM')
@@ -40,7 +40,7 @@
     .mutu { display:inline-flex; width:28px; height:28px; border-radius:8px; color:#fff; font-weight:800; align-items:center; justify-content:center; font-size:.8rem; }
     .bar { height:6px; background:#eef2f7; border-radius:6px; overflow:hidden; min-width:70px; }
     .bar span { display:block; height:100%; }
-    .chip-k { font-size:.6rem; font-weight:800; background:#eef2ff; color:#4338ca; border-radius:4px; padding:1px 5px; margin-left:4px; }
+    .chip-k { font-size:.6rem; font-weight:800; background:#eef2ff; color:#7c1316; border-radius:4px; padding:1px 5px; margin-left:4px; }
     .ic-btn { width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#64748b; text-decoration:none; }
     .ic-btn:hover { background:var(--maroon-subtle); color:var(--maroon); border-color:#ecd3d5; }
     .grup-row { cursor:pointer; }
@@ -158,7 +158,7 @@
     {{-- GRAFIK (Evaluasi Penyelenggaraan / IKM pelatihan) --}}
     @if($jenis === 'pelatihan')
     @php
-        $mutuHex = ['A' => '#15803d', 'B' => '#1d4ed8', 'C' => '#d97706', 'D' => '#dc2626'];
+        $mutuHex = ['A' => '#15803d', 'B' => '#7c1316', 'C' => '#d97706', 'D' => '#dc2626'];
         $bar = collect($grup)->filter(function ($g) { return $g['ikm'] !== null; })->sortByDesc('ikm')->values();
         $barData = [
             'labels' => $bar->map(function ($g) { return \Illuminate\Support\Str::limit($g['nama'], 55); })->all(),
@@ -223,7 +223,7 @@
                 type: 'line',
                 data: { labels: L.labels, datasets: [
                     { label: 'IKM', data: L.nilai, borderColor: '#7c1316', backgroundColor: 'rgba(124,19,22,.08)', fill: true, tension: .3, pointRadius: 5, pointHoverRadius: 7, pointBackgroundColor: '#7c1316' },
-                    ref(88.31, '#15803d'), ref(76.61, '#1d4ed8'), ref(65, '#d97706')
+                    ref(88.31, '#15803d'), ref(76.61, '#7c1316'), ref(65, '#d97706')
                 ] },
                 options: {
                     maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },

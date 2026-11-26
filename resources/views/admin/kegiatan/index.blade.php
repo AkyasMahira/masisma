@@ -46,15 +46,15 @@
         .btn-white { background-color: #fff; color: var(--custom-maroon); border: none; border-radius: 8px; padding: 0.6rem 1.2rem; font-weight: 600; transition: var(--transition); display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-decoration: none;}
         .btn-white:hover { background-color: #f1f5f9; transform: translateY(-1px); color: var(--custom-maroon-light); }
         
-        .badge-internal { background-color: #dbeafe; color: #1e40af; padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;}
-        .badge-eksternal { background-color: #fce7f3; color: #9d174d; padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;}
+        .badge-internal { background-color: #fcf0f1; color: #7c1316; padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;}
+        .badge-eksternal { background-color: #fcf0f1; color: #9d174d; padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;}
         
         /* Action Buttons */
         .action-group { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
         .action-btn { width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; border: none; text-decoration: none; transition: var(--transition); font-size: 1rem;}
-        .btn-detail { background: #f3e8ff; color: #9333ea; } .btn-detail:hover { background: #9333ea; color: white; transform: translateY(-2px);}
-        .btn-peserta { background: #e0e7ff; color: #4f46e5; } .btn-peserta:hover { background: #4f46e5; color: white; transform: translateY(-2px);}
-        .btn-info-custom { background: #e0f2fe; color: #0284c7; } .btn-info-custom:hover { background: #0284c7; color: white; transform: translateY(-2px);}
+        .btn-detail { background: #fcf0f1; color: #a3191d; } .btn-detail:hover { background: #a3191d; color: white; transform: translateY(-2px);}
+        .btn-peserta { background: #fcf0f1; color: #7c1316; } .btn-peserta:hover { background: #7c1316; color: white; transform: translateY(-2px);}
+        .btn-info-custom { background: #fcf0f1; color: #7c1316; } .btn-info-custom:hover { background: #7c1316; color: white; transform: translateY(-2px);}
         .btn-edit { background: #fff7ed; color: #ea580c; } .btn-edit:hover { background: #ea580c; color: white; transform: translateY(-2px);}
         .btn-delete { background: #fef2f2; color: #dc2626; } .btn-delete:hover { background: #dc2626; color: white; transform: translateY(-2px);}
         

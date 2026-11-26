@@ -347,7 +347,7 @@ public function dispensasis()
                         $jam = \Carbon\Carbon::parse($customShifts[$shiftName]->jam_masuk)->format('H:i') . ' - ' .
                                \Carbon\Carbon::parse($customShifts[$shiftName]->jam_keluar)->format('H:i');
                     }
-                    $events[] = ['title' => $shiftName, 'start' => $dStr, 'color' => '#6610f2', 'extendedProps' => ['jam' => $jam, 'ruang' => $ruangName, 'type' => 'jadwal']];
+                    $events[] = ['title' => $shiftName, 'start' => $dStr, 'color' => '#7c1316', 'extendedProps' => ['jam' => $jam, 'ruang' => $ruangName, 'type' => 'jadwal']];
                 } else {
                     if (isset($manualShifts[$dStr])) {
                         $type = $manualShifts[$dStr]->shift_type;
@@ -355,7 +355,7 @@ public function dispensasis()
                             $liburDates[$dStr] = true;
                             $jamShift = 'Istirahat'; $color = '#6c757d';
                         } else {
-                            $color = '#0d6efd'; $jamShift = 'Jam Default';
+                            $color = '#7c1316'; $jamShift = 'Jam Default';
                             if (isset($customShifts[$type])) {
                                 $jamShift = \Carbon\Carbon::parse($customShifts[$type]->jam_masuk)->format('H:i') . ' - ' .
                                             \Carbon\Carbon::parse($customShifts[$type]->jam_keluar)->format('H:i');
@@ -406,7 +406,7 @@ public function dispensasis()
                 $events[] = ['title' => 'HADIR', 'start' => $date, 'color' => '#198754', 'extendedProps' => ['jam' => "$jamM - $jamK", 'ruang' => $lintasHari ? 'Hadir • Shift Malam' : 'Absen', 'type' => 'absen']];
             } elseif (isset($lupaPulangDispDates[$date])) {
                 // Lupa pulang sudah diajukan & di-ACC -> tampil sebagai dispensasi (bukan LUPA merah)
-                $events[] = ['title' => 'DISPEN', 'start' => $date, 'color' => '#fd7e14', 'extendedProps' => ['jam' => \Carbon\Carbon::parse($masuk->jam_masuk)->format('H:i') . ' - (ACC)', 'ruang' => 'Dispen Lupa Pulang', 'type' => 'izin']];
+                $events[] = ['title' => 'DISPEN', 'start' => $date, 'color' => '#d97706', 'extendedProps' => ['jam' => \Carbon\Carbon::parse($masuk->jam_masuk)->format('H:i') . ' - (ACC)', 'ruang' => 'Dispen Lupa Pulang', 'type' => 'izin']];
             } else {
                 $isToday = $date == $today;
                 $events[] = ['title' => $isToday ? 'KERJA' : 'LUPA', 'start' => $date, 'color' => $isToday ? '#ffc107' : '#dc3545', 'extendedProps' => ['jam' => \Carbon\Carbon::parse($masuk->jam_masuk)->format('H:i') . ' - ?', 'ruang' => $isToday ? 'Belum checkout' : 'Lupa Pulang', 'type' => 'absen']];
@@ -420,7 +420,7 @@ public function dispensasis()
             $events[] = [
                 'title' => 'IZIN', 'start' => $dispen->tanggal_mulai,
                 'end'   => \Carbon\Carbon::parse($dispen->tanggal_selesai)->addDay()->format('Y-m-d'),
-                'color' => '#fd7e14',
+                'color' => '#d97706',
                 'extendedProps' => ['jam' => $katLabel[strtolower($dispen->kategori)] ?? 'Dispensasi', 'ruang' => 'Dispensasi', 'type' => 'izin'],
             ];
         }

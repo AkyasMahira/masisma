@@ -95,7 +95,7 @@
             .bg-soft-success { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
             .bg-soft-warning { background-color: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
             .bg-soft-danger { background-color: #fee2e2; color: #a3191d; border: 1px solid #fecaca; }
-            .bg-soft-info { background-color: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+            .bg-soft-info { background-color: #fcf0f1; color: #7c1316; border: 1px solid #f0c9cb; }
             .bg-soft-secondary { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
 
             /* --- Action Buttons --- */
@@ -111,7 +111,7 @@
             
             /* Specific Action Colors */
             .action-btn.ppt:hover { background: #ecfdf5; color: #059669; border-color: #10b981; }
-            .action-btn.doc:hover { background: #eff6ff; color: #2563eb; border-color: #3b82f6; }
+            .action-btn.doc:hover { background: #fcf0f1; color: #7c1316; border-color: #a3191d; }
 
             /* --- Inputs --- */
             .input-group-text { background-color: #f8f9fa; color: var(--custom-maroon); border-right: none; }

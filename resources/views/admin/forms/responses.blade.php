@@ -231,7 +231,7 @@
                                 labels: {!! json_encode($labels) !!},
                                 datasets: [{
                                     data: {!! json_encode($values) !!},
-                                    backgroundColor: ['#7c1316', '#1e293b', '#475569', '#94a3b8', '#cbd5e1', '#3b82f6', '#10b981'],
+                                    backgroundColor: ['#7c1316', '#1e293b', '#475569', '#94a3b8', '#cbd5e1', '#a3191d', '#10b981'],
                                     borderWidth: 0, hoverOffset: 20
                                 }]
                             },

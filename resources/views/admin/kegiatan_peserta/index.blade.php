@@ -40,7 +40,7 @@
         /* Badges */
         .badge-status { padding: 6px 14px; border-radius: 50px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px;}
         .bg-pending { background: #fffbeb; color: #d97706; border: 1px solid #fde68a;}
-        .bg-verified { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;}
+        .bg-verified { background: #fcf0f1; color: #7c1316; border: 1px solid #f0c9cb;}
         .bg-hadir { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;}
         .bg-belum { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0;}
         .bg-izin { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;}
@@ -48,20 +48,20 @@
         /* Action Panel Buttons */
         .action-group { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;}
         .btn-action { width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; border: none; transition: 0.2s; font-size: 1rem;}
-        .btn-detail { background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd;} .btn-detail:hover { background: #0284c7; color: white;}
+        .btn-detail { background: #fcf0f1; color: #7c1316; border: 1px solid #bae6fd;} .btn-detail:hover { background: #7c1316; color: white;}
         .btn-riwayat { background: #f0fdf4; color: #059669; border: 1px solid #bbf7d0;} .btn-riwayat:hover { background: #059669; color: white;}
         .btn-edit { background: #fffbeb; color: #d97706; border: 1px solid #fde68a;} .btn-edit:hover { background: #d97706; color: white;}
         .btn-delete { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;} .btn-delete:hover { background: #dc2626; color: white;}
         .btn-approve { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;} .btn-approve:hover { background: #059669; color: white;}
         .btn-cancel-approve { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;} .btn-cancel-approve:hover { background: #dc2626; color: white;}
-        .btn-bukti { background: #f3e8ff; color: #9333ea; border: 1px solid #e9d5ff;} .btn-bukti:hover { background: #9333ea; color: white;}
+        .btn-bukti { background: #fcf0f1; color: #a3191d; border: 1px solid #e9d5ff;} .btn-bukti:hover { background: #a3191d; color: white;}
 
         /* Certificate Buttons */
         .cert-action-group { display: flex; gap: 6px; justify-content: center; }
         .btn-cert { width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; transition: 0.2s; text-decoration: none; font-size: 1rem; }
         .btn-cert-preview { background: #fdf4ff; color: #a21caf; border-color: #fae8ff; } .btn-cert-preview:hover { background: #a21caf; color: white; }
         .btn-cert-open { background: #ecfdf5; color: #059669; border-color: #a7f3d0; } .btn-cert-open:hover { background: #059669; color: white; }
-        .btn-cert-copy { background: #eff6ff; color: #3b82f6; border-color: #bfdbfe; } .btn-cert-copy:hover { background: #3b82f6; color: white; }
+        .btn-cert-copy { background: #fcf0f1; color: #a3191d; border-color: #f0c9cb; } .btn-cert-copy:hover { background: #a3191d; color: white; }
 
         /* Form & Filter */
         .filter-label { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block; }
@@ -158,7 +158,7 @@
 
                     <!-- Tombol Aksi Kanan -->
                     <div class="col-xl-7 col-lg-12 d-flex flex-wrap gap-2 justify-content-xl-end">
-                        <a href="{{ route('admin.kegiatan.penilaian.teori.index', $kegiatan->id) }}" class="btn-theme" style="background: #0284c7;" title="Input Nilai Pre-Test & Post-Test">
+                        <a href="{{ route('admin.kegiatan.penilaian.teori.index', $kegiatan->id) }}" class="btn-theme" style="background: #7c1316;" title="Input Nilai Pre-Test & Post-Test">
                             <i class="bi bi-journal-text"></i> <span class="d-none d-sm-inline">Nilai Teori</span>
                         </a>
                         <a href="{{ route('admin.kegiatan.penilaian.setting', $kegiatan->id) }}" class="btn-theme" style="background: #ca8a04;" title="Setting Penilaian (Fasilitator & Checklist)">

@@ -144,8 +144,8 @@
         .id-card-wrapper.theme-black .card-footer-shape { background: #111827; }
 
         /* 2. THEME BLUE (Non-Kesehatan Random) */
-        .id-card-wrapper.theme-blue .card-header-shape { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
-        .id-card-wrapper.theme-blue .card-role { background-color: #eff6ff; color: #1e3a8a; border-color: #bfdbfe; }
+        .id-card-wrapper.theme-blue .card-header-shape { background: linear-gradient(135deg, #1e3a8a 0%, #a3191d 100%); }
+        .id-card-wrapper.theme-blue .card-role { background-color: #fcf0f1; color: #1e3a8a; border-color: #f0c9cb; }
         .id-card-wrapper.theme-blue .qr-text { color: #1e3a8a; }
         .id-card-wrapper.theme-blue .card-footer-shape { background: #1e3a8a; }
 
@@ -156,7 +156,7 @@
         .id-card-wrapper.theme-green .card-footer-shape { background: #14532d; }
 
         /* 4. THEME PURPLE (Non-Kesehatan Random) */
-        .id-card-wrapper.theme-purple .card-header-shape { background: linear-gradient(135deg, #581c87 0%, #a855f7 100%); }
+        .id-card-wrapper.theme-purple .card-header-shape { background: linear-gradient(135deg, #581c87 0%, #a3191d 100%); }
         .id-card-wrapper.theme-purple .card-role { background-color: #faf5ff; color: #581c87; border-color: #e9d5ff; }
         .id-card-wrapper.theme-purple .qr-text { color: #581c87; }
         .id-card-wrapper.theme-purple .card-footer-shape { background: #581c87; }
@@ -271,7 +271,7 @@ a.fc-event, a.fc-event:hover {
         .info-value { font-size: 0.9rem; color: var(--text-dark); font-weight: 600; text-align: right; max-width: 60%; }
         .stat-card { border: none; border-radius: var(--card-radius); color: white; padding: 1.5rem; position: relative; overflow: hidden; box-shadow: var(--shadow-soft); transition: transform 0.3s; height: 100%; }
         .stat-card:hover { transform: translateY(-5px); }
-        .bg-gradient-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .bg-gradient-blue { background: linear-gradient(135deg, #a3191d, #7c1316); }
         .bg-gradient-green { background: linear-gradient(135deg, #10b981, #059669); }
         .bg-gradient-orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
         .stat-icon-bg { position: absolute; right: -10px; bottom: -10px; font-size: 5rem; opacity: 0.2; transform: rotate(-15deg); }

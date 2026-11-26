@@ -270,7 +270,7 @@
                         labels: {!! json_encode($unitLabels ?? []) !!},
                         datasets: [{
                             data: {!! json_encode($unitScores ?? []) !!},
-                            backgroundColor: ['#7c1316', '#a3191d', '#d97706', '#059669', '#2563eb', '#6b7280', '#475569'],
+                            backgroundColor: ['#7c1316', '#a3191d', '#c2474b', '#d97a7d', '#e8a9ad', '#6b7280', '#94a3b8'],
                             borderWidth: 2,
                             borderColor: '#ffffff'
                         }]

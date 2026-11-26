@@ -6,7 +6,7 @@
 <style>
     .form-card { border: none; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); background: #fff; overflow: hidden; }
     .card-header-custom {
-        background: {{ $isLocked ? 'linear-gradient(135deg,#0d6efd,#0a58ca)' : 'linear-gradient(135deg,#7c1316,#5f0f12)' }};
+        background: {{ $isLocked ? 'linear-gradient(135deg,#7c1316,#0a58ca)' : 'linear-gradient(135deg,#7c1316,#5f0f12)' }};
         padding: 1.6rem 1.75rem; color: white; border-bottom: 4px solid rgba(0,0,0,0.1);
         position: relative; overflow: hidden;
     }
@@ -161,7 +161,7 @@
                                         $val = $existingShifts[$d] ?? '';
                                         $isToday = $date->isToday();
                                         $isWeekend = $date->isWeekend();
-                                        $shiftColors = ['pagi'=>'#0d6efd','siang'=>'#fd7e14','malam'=>'#6f42c1','reguler'=>'#6610f2','jumat'=>'#20c997','libur'=>'#94a3b8'];
+                                        $shiftColors = ['pagi'=>'#7c1316','siang'=>'#d97706','malam'=>'#374151','reguler'=>'#7c1316','jumat'=>'#b45309','libur'=>'#94a3b8'];
                                         $dotColor = $shiftColors[strtolower($val)] ?? '#cbd5e1';
                                     @endphp
                                     <tr class="{{ $isToday ? 'row-today' : ($isWeekend ? 'row-weekend' : '') }}">
@@ -238,7 +238,7 @@
 
 <script>
     (function () {
-        var COL = { pagi:'#0d6efd', siang:'#fd7e14', malam:'#6f42c1', reguler:'#6610f2', jumat:'#20c997', libur:'#94a3b8' };
+        var COL = { pagi:'#7c1316', siang:'#d97706', malam:'#374151', reguler:'#7c1316', jumat:'#b45309', libur:'#94a3b8' };
         document.querySelectorAll('select[data-shift]').forEach(function (sel) {
             sel.addEventListener('change', function () {
                 var dot = this.closest('td').querySelector('[data-dot]');

@@ -148,7 +148,7 @@
         width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
         border-radius: 6px; transition: var(--transition); border: none;
     }
-    .btn-edit-icon { background: #e0f2fe; color: #0284c7; }
+    .btn-edit-icon { background: #fcf0f1; color: #7c1316; }
     .btn-edit-icon:hover { background: #bae6fd; }
     .btn-del-icon { background: #fee2e2; color: #dc2626; }
     .btn-del-icon:hover { background: #fecaca; }

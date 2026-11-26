@@ -69,7 +69,7 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 1.5rem;
         }
-        .stat-icon.all { background: #e0f2fe; color: #1e40af; }
+        .stat-icon.all { background: #fcf0f1; color: #7c1316; }
         .stat-icon.active { background: #d1fae5; color: #065f46; }
         .stat-icon.nonactive { background: #fee2e2; color: #a3191d; }
         .stat-value { font-size: 1.5rem; font-weight: 700; line-height: 1; margin-bottom: 2px; color: var(--text-dark);}
@@ -109,7 +109,7 @@
         .badge-pill-soft { border-radius: 50px; padding: 6px 12px; font-weight: 500; font-size: 0.75rem; }
         .bg-soft-success { background-color: #d1fae5; color: #065f46; }
         .bg-soft-secondary { background-color: #f3f4f6; color: #4b5563; }
-        .bg-soft-info { background-color: #dbeafe; color: #1e40af; }
+        .bg-soft-info { background-color: #fcf0f1; color: #7c1316; }
         .bg-soft-danger { background-color: #fee2e2; color: #a3191d; }
         .bg-soft-warning { background-color: #fef3c7; color: #92400e; }
 
@@ -301,7 +301,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @php $palette = ['#7c1316','#1d4ed8','#15803d','#b45309','#7e22ce','#0e7490','#be123c','#4d7c0f','#0f766e','#9333ea']; @endphp
+                    @php $palette = ['#7c1316','#7c1316','#15803d','#b45309','#7e22ce','#0e7490','#be123c','#4d7c0f','#0f766e','#a3191d']; @endphp
                     @forelse ($mahasiswas as $m)
                         <tr class="m-row s-{{ $m->status }}">
                             <td class="text-center text-muted font-weight-bold">{{ $loop->iteration + $mahasiswas->firstItem() - 1 }}</td>

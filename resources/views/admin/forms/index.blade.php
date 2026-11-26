@@ -118,7 +118,7 @@
                            
 <form action="{{ route('admin.forms.duplicate', $form->id) }}" method="POST" style="display:inline;">
     @csrf
-    <button type="submit" class="btn-action" title="Duplikat Form" style="color: #6366f1; background: #e0e7ff; border-color: #c7d2fe;">
+    <button type="submit" class="btn-action" title="Duplikat Form" style="color: #a3191d; background: #fcf0f1; border-color: #c7d2fe;">
         <i class="fas fa-copy"></i>
     </button>
 </form>

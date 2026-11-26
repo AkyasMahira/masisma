@@ -798,12 +798,12 @@
     width: 58px;
     border-radius: 50%;
     border: none;
-    background: linear-gradient(130deg, #20c997, #0ca678); /* Hijau Teal */
+    background: linear-gradient(130deg, #b45309, #0ca678); /* Hijau Teal */
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 10px 25px rgba(32, 201, 151, 0.35);
+    box-shadow: 0 10px 25px rgba(163, 25, 29, 0.35);
     z-index: 1060;
     cursor: pointer;
     transition: all 0.5s ease;
@@ -818,12 +818,12 @@
     width: 58px;
     border-radius: 50%;
     border: none;
-    background: linear-gradient(130deg, #0d6efd, #0b5ed7); /* Biru Bootstrap */
+    background: linear-gradient(130deg, #7c1316, #0b5ed7); /* Biru Bootstrap */
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 10px 25px rgba(13, 110, 253, 0.35);
+    box-shadow: 0 10px 25px rgba(124, 19, 22, 0.35);
     z-index: 1060;
     cursor: pointer;
     transition: all 0.5s ease;
@@ -1360,7 +1360,7 @@
                             <div class="mini-stat-group">
                                 <div class="mini-stat-row">
                                     <div class="mini-stat-label">
-                                        <div class="mini-stat-icon" style="background: rgba(32, 201, 151, 0.15); color: #0ca678;">
+                                        <div class="mini-stat-icon" style="background: rgba(163, 25, 29, 0.15); color: #0ca678;">
                                             <svg fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M10.5 1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4H1v10h14V4h-2.5a.5.5 0 0 1 0-1h3a.5.5 0 0 1 .5.5v11a.5.5 0 0 1-.5.5H.5a.5.5 0 0 1-.5-.5v-11A.5.5 0 0 1 .5 3h3V1.5a.5.5 0 0 1 .5-.5h6ZM6 3h4V2H6v1Z"/></svg>
                                         </div>
                                         Pelatihan
@@ -1368,7 +1368,7 @@
                                     <div class="mini-stat-value">{{ $pelatihan }} Kegiatan</div>
                                 </div>
                                 <div class="mini-stat-bar-bg">
-                                    <div class="mini-stat-bar-fill" style="--bar-width: {{ $wPelatihan }}%; background: linear-gradient(90deg, #20c997, #0ca678);"></div>
+                                    <div class="mini-stat-bar-fill" style="--bar-width: {{ $wPelatihan }}%; background: linear-gradient(90deg, #b45309, #0ca678);"></div>
                                 </div>
                             </div>
 

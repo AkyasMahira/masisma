@@ -7,7 +7,7 @@
     $warna = function ($s) {
         if ($s === null) return ['#f1f5f9', '#94a3b8'];
         if ($s >= 86) return ['#dcfce7', '#15803d'];
-        if ($s >= 76) return ['#dbeafe', '#1d4ed8'];
+        if ($s >= 76) return ['#fcf0f1', '#7c1316'];
         if ($s >= 56) return ['#fef3c7', '#b45309'];
         return ['#fee2e2', '#b91c1c'];
     };
@@ -115,7 +115,7 @@
             <div class="p-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <div class="fw-bold"><i class="bi bi-grid-3x3 me-1" style="color:var(--maroon);"></i>Nilai narasumber per aspek</div>
                 <div class="legend">
-                    <span style="background:#fee2e2;color:#b91c1c;">Kurang 45–55</span><span style="background:#fef3c7;color:#b45309;">Sedang 56–75</span><span style="background:#dbeafe;color:#1d4ed8;">Baik 76–85</span><span style="background:#dcfce7;color:#15803d;">Sangat Baik 86+</span>
+                    <span style="background:#fee2e2;color:#b91c1c;">Kurang 45–55</span><span style="background:#fef3c7;color:#b45309;">Sedang 56–75</span><span style="background:#fcf0f1;color:#7c1316;">Baik 76–85</span><span style="background:#dcfce7;color:#15803d;">Sangat Baik 86+</span>
                 </div>
             </div>
             @if(count($data['narasumber']))

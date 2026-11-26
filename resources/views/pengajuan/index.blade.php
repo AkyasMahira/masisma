@@ -177,7 +177,7 @@
     .btn-maroon:hover { background: var(--maroon-light); transform: translateY(-3px); color: white; box-shadow: 0 10px 20px rgba(124,19,22,0.2); }
     
     .btn-blue { background: var(--blue-main); color: white; }
-    .btn-blue:hover { background: #0284c7; transform: translateY(-3px); color: white; box-shadow: 0 10px 20px rgba(3,105,161,0.2); }
+    .btn-blue:hover { background: #7c1316; transform: translateY(-3px); color: white; box-shadow: 0 10px 20px rgba(3,105,161,0.2); }
 
     /* --- ANIMATIONS --- */
     @keyframes fadeInUp {
@@ -257,7 +257,7 @@
             @else
                 {{-- TAMPILAN JIKA BELUM PERNAH MAGANG / MAGANG LAMA SUDAH SELESAI --}}
                 <div class="card-option" onclick="selectService('magang')" id="card-magang">
-                    <div class="icon-box" style="background: #e0f2fe; color: var(--blue-main);">
+                    <div class="icon-box" style="background: #fcf0f1; color: var(--blue-main);">
                         <i class="bi bi-building-up"></i>
                     </div>
                     <h4 class="fw-bold">Magang / PKL</h4>
@@ -425,7 +425,7 @@
         <div class="modal-content border-0" style="border-radius: 30px;">
             <div class="modal-body p-4 p-md-5">
                 <div class="text-center mb-4">
-                    <div class="icon-box mx-auto mb-3" style="background: #e0f2fe; color: var(--blue-main); width: 70px; height: 70px;">
+                    <div class="icon-box mx-auto mb-3" style="background: #fcf0f1; color: var(--blue-main); width: 70px; height: 70px;">
                         <i class="bi bi-bar-chart-steps fs-2"></i>
                     </div>
                     <h4 class="fw-bold">Alur Pengajuan Magang</h4>
