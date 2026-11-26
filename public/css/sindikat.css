@@ -266,3 +266,16 @@ a[class*="btn"], a.nav-link, a.dropdown-item, a.list-group-item, a.badge, a.card
 .content :is(.card-header-maroon, .card-header.bg-maroon, .card-header[style*="maroon"], .card-header[style*="7c1316"], .card-header[style*="gradient"]) .bi { color: var(--sd-utama) !important; }
 .content :is(.card-header-maroon, .card-header.bg-maroon, .card-header[style*="maroon"], .card-header[style*="7c1316"], .card-header[style*="gradient"]) :is(input, .form-control) { color: var(--sd-teks) !important; }
 .content .card-header.text-white:not([class*="bg-"]):not([style]) { color: var(--sd-teks) !important; }
+
+/* ---------- Kepala modal maroon/gradasi -> putih (merah bg-danger tetap untuk konfirmasi bahaya) ---------- */
+:is(.modal-header.bg-maroon, .modal-header.bg-primary, .modal-header[style*="maroon"], .modal-header[style*="7c1316"], .modal-header[style*="gradient"]) {
+    background: #fff !important; background-image: none !important; color: var(--sd-teks) !important;
+    border-bottom: 1px solid var(--sd-garis) !important; box-shadow: inset 0 3px 0 var(--sd-utama);
+}
+:is(.modal-header.bg-maroon, .modal-header.bg-primary, .modal-header[style*="maroon"], .modal-header[style*="7c1316"], .modal-header[style*="gradient"]) :is(.modal-title, h1, h2, h3, h4, h5, h6, span, div, .text-white) { color: var(--sd-teks) !important; }
+:is(.modal-header.bg-maroon, .modal-header.bg-primary, .modal-header[style*="maroon"], .modal-header[style*="7c1316"], .modal-header[style*="gradient"]) :is(small, p, .text-white-50, .opacity-75) { color: var(--sd-redup) !important; opacity: 1 !important; }
+:is(.modal-header.bg-maroon, .modal-header.bg-primary, .modal-header[style*="maroon"], .modal-header[style*="7c1316"], .modal-header[style*="gradient"]) .bi { color: var(--sd-utama) !important; }
+:is(.modal-header.bg-maroon, .modal-header.bg-primary, .modal-header[style*="maroon"], .modal-header[style*="7c1316"], .modal-header[style*="gradient"]) .btn-close { filter: none !important; }
+:is(.modal-header.bg-maroon, .modal-header.bg-primary, .modal-header[style*="maroon"], .modal-header[style*="7c1316"], .modal-header[style*="gradient"]) .btn-close-white { filter: none !important; }
+.modal-header .modal-title { font-weight: 600; }
+.modal-footer .btn { min-width: 90px; }
