@@ -259,3 +259,19 @@ a[class*="btn"], a.nav-link, a.dropdown-item, a.list-group-item, a.badge, a.card
 .content :is(.action-btn, .btn-action, .btn-icon, .icon-btn, .btn-action-sm, .btn-action-icon):is(.btn-danger, .btn-outline-danger):hover { background: #dc2626 !important; color: #fff !important; }
 .content :is(.action-btn, .btn-action, .btn-icon, .icon-btn, .btn-action-sm, .btn-action-icon):is(.btn-success, .btn-outline-success):hover { background: #15803d !important; color: #fff !important; }
 .content :is(.action-btn, .btn-action, .btn-icon, .icon-btn, .btn-action-sm, .btn-action-icon):hover .bi { color: #fff !important; }
+
+/* kartu angka dengan border-start bootstrap: garis warna hanya di kiri */
+.content .stat-card.border-start {
+    border-top: 1px solid var(--sd-garis) !important; border-right: 1px solid var(--sd-garis) !important; border-bottom: 1px solid var(--sd-garis) !important;
+    border-left-width: 4px !important;
+}
+/* kepala kartu berwarna (maroon/gradasi) -> putih + garis kiri, sama dengan card-header-custom */
+.content :is(.card-header-maroon, .card-header.bg-maroon, .card-header[style*="maroon"], .card-header[style*="7c1316"], .card-header[style*="gradient"]) {
+    background: #fff !important; background-image: none !important; color: var(--sd-teks) !important;
+    border-bottom: 1px solid var(--sd-garis) !important; border-left: 5px solid var(--sd-utama) !important;
+}
+.content :is(.card-header-maroon, .card-header.bg-maroon, .card-header[style*="maroon"], .card-header[style*="7c1316"], .card-header[style*="gradient"]) :is(h1, h2, h3, h4, h5, h6, .text-white, span, div) { color: var(--sd-teks) !important; }
+.content :is(.card-header-maroon, .card-header.bg-maroon, .card-header[style*="maroon"], .card-header[style*="7c1316"], .card-header[style*="gradient"]) :is(small, p, .text-white-50, .opacity-75) { color: var(--sd-redup) !important; opacity: 1 !important; }
+.content :is(.card-header-maroon, .card-header.bg-maroon, .card-header[style*="maroon"], .card-header[style*="7c1316"], .card-header[style*="gradient"]) .bi { color: var(--sd-utama) !important; }
+.content :is(.card-header-maroon, .card-header.bg-maroon, .card-header[style*="maroon"], .card-header[style*="7c1316"], .card-header[style*="gradient"]) :is(input, .form-control) { color: var(--sd-teks) !important; }
+.content .card-header.text-white:not([class*="bg-"]):not([style]) { color: var(--sd-teks) !important; }
