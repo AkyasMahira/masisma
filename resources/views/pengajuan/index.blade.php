@@ -38,8 +38,8 @@
         --maroon-main: #7c1316;
         --maroon-light: #a3191d;
         --maroon-gradient: linear-gradient(135deg, #7c1316 0%, #4a0a0c 100%);
-        --blue-main: #0369a1;
-        --blue-gradient: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+        --blue-main: #7c1316;
+        --blue-gradient: linear-gradient(135deg, #7c1316 0%, #7c1316 100%);
         --green-success: #10b981;
         --orange-warning: #f59e0b;
         --glass-bg: rgba(255, 255, 255, 0.85);
@@ -113,7 +113,7 @@
         box-shadow: 0 25px 50px rgba(0,0,0,0.08);
     }
     .card-option.active-pra { border-color: var(--maroon-main); background: #fff1f2; }
-    .card-option.active-magang { border-color: var(--blue-main); background: #f0f9ff; }
+    .card-option.active-magang { border-color: var(--blue-main); background: #fcf0f1; }
 
     .icon-box {
         width: 80px; height: 80px; margin: 0 auto 20px;

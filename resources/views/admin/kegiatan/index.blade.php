@@ -47,7 +47,7 @@
         .btn-white:hover { background-color: #f1f5f9; transform: translateY(-1px); color: var(--custom-maroon-light); }
         
         .badge-internal { background-color: #fcf0f1; color: #7c1316; padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;}
-        .badge-eksternal { background-color: #fcf0f1; color: #9d174d; padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;}
+        .badge-eksternal { background-color: #fcf0f1; color: #a3191d; padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;}
         
         /* Action Buttons */
         .action-group { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }

@@ -18,7 +18,7 @@
     .nilai-badge { font-weight:800; font-size:1rem; }
     .btn-sertif { font-size:.72rem; font-weight:600; border-radius:7px; padding:4px 9px; text-decoration:none; display:inline-flex; align-items:center; gap:4px; border:none; cursor:pointer; }
     .b-magang { background:#fde8e8; color:#7c1316; } .b-magang:hover { background:#7c1316; color:#fff; }
-    .b-orient { background:#fcf0f1; color:#0369a1; } .b-orient:hover { background:#0369a1; color:#fff; }
+    .b-orient { background:#fcf0f1; color:#7c1316; } .b-orient:hover { background:#7c1316; color:#fff; }
     .b-detail { background:#f1f5f9; color:#475569; } .b-detail:hover { background:#475569; color:#fff; }
     .view-tabs .vt { border:1.5px solid #e2e8f0; background:#fff; color:#64748b; border-radius:50px; padding:6px 16px; font-weight:600; font-size:.82rem; text-decoration:none; }
     .view-tabs .vt.active { background:var(--maroon); color:#fff; border-color:var(--maroon); }

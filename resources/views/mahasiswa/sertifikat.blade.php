@@ -167,18 +167,18 @@
         .id-card-wrapper.theme-black .card-role { background-color: #f1f5f9; color: #111827; border-color: #cbd5e1; }
         .id-card-wrapper.theme-black .qr-text { color: #111827; }
         .id-card-wrapper.theme-black .card-footer-shape { background: #111827; }
-        .id-card-wrapper.theme-blue .card-header-shape { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
-        .id-card-wrapper.theme-blue .card-role { background-color: #eff6ff; color: #1e3a8a; border-color: #bfdbfe; }
-        .id-card-wrapper.theme-blue .qr-text { color: #1e3a8a; }
-        .id-card-wrapper.theme-blue .card-footer-shape { background: #1e3a8a; }
+        .id-card-wrapper.theme-blue .card-header-shape { background: linear-gradient(135deg, #7c1316 0%, #3b82f6 100%); }
+        .id-card-wrapper.theme-blue .card-role { background-color: #eff6ff; color: #7c1316; border-color: #bfdbfe; }
+        .id-card-wrapper.theme-blue .qr-text { color: #7c1316; }
+        .id-card-wrapper.theme-blue .card-footer-shape { background: #7c1316; }
         .id-card-wrapper.theme-green .card-header-shape { background: linear-gradient(135deg, #14532d 0%, #22c55e 100%) !important; }
         .id-card-wrapper.theme-green .card-role { background-color: #f0fdf4 !important; color: #14532d !important; border-color: #bbf7d0 !important; }
         .id-card-wrapper.theme-green .qr-text { color: #14532d !important; }
         .id-card-wrapper.theme-green .card-footer-shape { background: #14532d !important; }
-        .id-card-wrapper.theme-purple .card-header-shape { background: linear-gradient(135deg, #581c87 0%, #a855f7 100%); }
-        .id-card-wrapper.theme-purple .card-role { background-color: #faf5ff; color: #581c87; border-color: #e9d5ff; }
-        .id-card-wrapper.theme-purple .qr-text { color: #581c87; }
-        .id-card-wrapper.theme-purple .card-footer-shape { background: #581c87; }
+        .id-card-wrapper.theme-purple .card-header-shape { background: linear-gradient(135deg, #374151 0%, #a855f7 100%); }
+        .id-card-wrapper.theme-purple .card-role { background-color: #faf5ff; color: #374151; border-color: #e9d5ff; }
+        .id-card-wrapper.theme-purple .qr-text { color: #374151; }
+        .id-card-wrapper.theme-purple .card-footer-shape { background: #374151; }
         .id-card-wrapper.theme-orange .card-header-shape { background: linear-gradient(135deg, #9a3412 0%, #f97316 100%); }
         .id-card-wrapper.theme-orange .card-role { background-color: #fff7ed; color: #9a3412; border-color: #fed7aa; }
         .id-card-wrapper.theme-orange .qr-text { color: #9a3412; }

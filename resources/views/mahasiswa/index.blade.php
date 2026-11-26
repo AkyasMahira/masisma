@@ -301,7 +301,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @php $palette = ['#7c1316','#7c1316','#15803d','#b45309','#7e22ce','#0e7490','#be123c','#4d7c0f','#0f766e','#a3191d']; @endphp
+                    @php $palette = ['#7c1316','#a3191d','#b45309','#92400e','#c2410c','#a16207','#475569','#374151','#be123c','#78350f']; @endphp
                     @forelse ($mahasiswas as $m)
                         <tr class="m-row s-{{ $m->status }}">
                             <td class="text-center text-muted font-weight-bold">{{ $loop->iteration + $mahasiswas->firstItem() - 1 }}</td>

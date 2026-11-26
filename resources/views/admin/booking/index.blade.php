@@ -44,7 +44,7 @@
     .bl-ppl small.ok { color:#15803d; }
     .pill { padding:3px 11px; border-radius:20px; font-size:.7rem; font-weight:700; display:inline-block; white-space:nowrap; }
     .b-pending { background:#fef3c7; color:#b45309; } .b-approved { background:#dcfce7; color:#15803d; } .b-rejected { background:#fee2e2; color:#b91c1c; }
-    .imp { display:inline-block; background:#eef2ff; color:#7c1316; font-size:.56rem; font-weight:800; padding:1px 5px; border-radius:4px; vertical-align:middle; margin-left:5px; }
+    .imp { display:inline-block; background:#fcf0f1; color:#7c1316; font-size:.56rem; font-weight:800; padding:1px 5px; border-radius:4px; vertical-align:middle; margin-left:5px; }
     .bl-aksi { display:flex; gap:5px; justify-content:flex-end; align-items:center; }
     .btn-acc { background:#16a34a; color:#fff; border:none; border-radius:9px; font-weight:700; font-size:.78rem; width:32px; height:32px; }
     .btn-acc:hover { background:#15803d; color:#fff; }
@@ -184,7 +184,7 @@
         </div>
 
         <div class="bl-list">
-            @php $palette = ['#7c1316','#7c1316','#15803d','#b45309','#7e22ce','#0e7490','#be123c','#4d7c0f','#0f766e','#a3191d']; @endphp
+            @php $palette = ['#7c1316','#a3191d','#b45309','#92400e','#c2410c','#a16207','#475569','#374151','#be123c','#78350f']; @endphp
             @forelse($bookings as $b)
             @php
                 $isImpor = \Illuminate\Support\Str::contains((string)$b->keterangan, '[IMPOR-MAPPING]');

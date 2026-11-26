@@ -144,10 +144,10 @@
         .id-card-wrapper.theme-black .card-footer-shape { background: #111827; }
 
         /* 2. THEME BLUE (Non-Kesehatan Random) */
-        .id-card-wrapper.theme-blue .card-header-shape { background: linear-gradient(135deg, #1e3a8a 0%, #a3191d 100%); }
-        .id-card-wrapper.theme-blue .card-role { background-color: #fcf0f1; color: #1e3a8a; border-color: #f0c9cb; }
-        .id-card-wrapper.theme-blue .qr-text { color: #1e3a8a; }
-        .id-card-wrapper.theme-blue .card-footer-shape { background: #1e3a8a; }
+        .id-card-wrapper.theme-blue .card-header-shape { background: linear-gradient(135deg, #7c1316 0%, #a3191d 100%); }
+        .id-card-wrapper.theme-blue .card-role { background-color: #fcf0f1; color: #7c1316; border-color: #f0c9cb; }
+        .id-card-wrapper.theme-blue .qr-text { color: #7c1316; }
+        .id-card-wrapper.theme-blue .card-footer-shape { background: #7c1316; }
 
         /* 3. THEME GREEN (Non-Kesehatan Random) */
         .id-card-wrapper.theme-green .card-header-shape { background: linear-gradient(135deg, #14532d 0%, #22c55e 100%); }
@@ -156,10 +156,10 @@
         .id-card-wrapper.theme-green .card-footer-shape { background: #14532d; }
 
         /* 4. THEME PURPLE (Non-Kesehatan Random) */
-        .id-card-wrapper.theme-purple .card-header-shape { background: linear-gradient(135deg, #581c87 0%, #a3191d 100%); }
-        .id-card-wrapper.theme-purple .card-role { background-color: #faf5ff; color: #581c87; border-color: #e9d5ff; }
-        .id-card-wrapper.theme-purple .qr-text { color: #581c87; }
-        .id-card-wrapper.theme-purple .card-footer-shape { background: #581c87; }
+        .id-card-wrapper.theme-purple .card-header-shape { background: linear-gradient(135deg, #374151 0%, #a3191d 100%); }
+        .id-card-wrapper.theme-purple .card-role { background-color: #fcf0f1; color: #374151; border-color: #fcf0f1; }
+        .id-card-wrapper.theme-purple .qr-text { color: #374151; }
+        .id-card-wrapper.theme-purple .card-footer-shape { background: #374151; }
 
         /* 5. THEME ORANGE (Non-Kesehatan Random) */
         .id-card-wrapper.theme-orange .card-header-shape { background: linear-gradient(135deg, #9a3412 0%, #f97316 100%); }

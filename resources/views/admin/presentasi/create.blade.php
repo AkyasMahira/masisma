@@ -291,7 +291,7 @@
                                           placeholder="Catatan untuk mahasiswa/dosen (Opsional)...">{{ old('keterangan_admin') }}</textarea>
                             </div>
 
-                            <div class="alert alert-info border-0 d-flex align-items-start mb-4 bg-opacity-10" style="background-color: #fcf0f1; color: #0369a1;">
+                            <div class="alert alert-info border-0 d-flex align-items-start mb-4 bg-opacity-10" style="background-color: #fcf0f1; color: #7c1316;">
                                 <i class="bi bi-info-circle-fill me-2 mt-1"></i>
                                 <div class="small">
                                     <strong>Catatan:</strong> Setelah disimpan, link penilaian akan otomatis dibuat dan kirimkan ke CI.

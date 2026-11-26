@@ -149,7 +149,7 @@
         border-radius: 6px; transition: var(--transition); border: none;
     }
     .btn-edit-icon { background: #fcf0f1; color: #7c1316; }
-    .btn-edit-icon:hover { background: #bae6fd; }
+    .btn-edit-icon:hover { background: #fcf0f1; }
     .btn-del-icon { background: #fee2e2; color: #dc2626; }
     .btn-del-icon:hover { background: #fecaca; }
 

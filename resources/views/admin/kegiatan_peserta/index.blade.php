@@ -48,18 +48,18 @@
         /* Action Panel Buttons */
         .action-group { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;}
         .btn-action { width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; border: none; transition: 0.2s; font-size: 1rem;}
-        .btn-detail { background: #fcf0f1; color: #7c1316; border: 1px solid #bae6fd;} .btn-detail:hover { background: #7c1316; color: white;}
+        .btn-detail { background: #fcf0f1; color: #7c1316; border: 1px solid #fcf0f1;} .btn-detail:hover { background: #7c1316; color: white;}
         .btn-riwayat { background: #f0fdf4; color: #059669; border: 1px solid #bbf7d0;} .btn-riwayat:hover { background: #059669; color: white;}
         .btn-edit { background: #fffbeb; color: #d97706; border: 1px solid #fde68a;} .btn-edit:hover { background: #d97706; color: white;}
         .btn-delete { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;} .btn-delete:hover { background: #dc2626; color: white;}
         .btn-approve { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;} .btn-approve:hover { background: #059669; color: white;}
         .btn-cancel-approve { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;} .btn-cancel-approve:hover { background: #dc2626; color: white;}
-        .btn-bukti { background: #fcf0f1; color: #a3191d; border: 1px solid #e9d5ff;} .btn-bukti:hover { background: #a3191d; color: white;}
+        .btn-bukti { background: #fcf0f1; color: #a3191d; border: 1px solid #fcf0f1;} .btn-bukti:hover { background: #a3191d; color: white;}
 
         /* Certificate Buttons */
         .cert-action-group { display: flex; gap: 6px; justify-content: center; }
         .btn-cert { width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; transition: 0.2s; text-decoration: none; font-size: 1rem; }
-        .btn-cert-preview { background: #fdf4ff; color: #a21caf; border-color: #fae8ff; } .btn-cert-preview:hover { background: #a21caf; color: white; }
+        .btn-cert-preview { background: #fdf4ff; color: #a3191d; border-color: #fcf0f1; } .btn-cert-preview:hover { background: #a3191d; color: white; }
         .btn-cert-open { background: #ecfdf5; color: #059669; border-color: #a7f3d0; } .btn-cert-open:hover { background: #059669; color: white; }
         .btn-cert-copy { background: #fcf0f1; color: #a3191d; border-color: #f0c9cb; } .btn-cert-copy:hover { background: #a3191d; color: white; }
 
@@ -185,7 +185,7 @@
                         <form action="{{ route('admin.kegiatan.peserta.set_instansi_rsud', $kegiatan->id) }}" method="POST" class="d-inline"
                               onsubmit="return confirm('Ubah instansi SEMUA peserta kegiatan ini menjadi RSUD Simpang Lima Gumul?');">
                             @csrf
-                            <button type="submit" class="btn-theme" style="background:#0f766e;" title="Jadikan instansi semua peserta = RSUD SLG">
+                            <button type="submit" class="btn-theme" style="background:#b45309;" title="Jadikan instansi semua peserta = RSUD SLG">
                                 <i class="bi bi-hospital"></i> <span class="d-none d-sm-inline">Instansi → RSUD</span>
                             </button>
                         </form>

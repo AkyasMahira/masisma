@@ -365,12 +365,12 @@
         text-decoration: none;
     }
     
-    .btn-soft-success { background: #e0f2f1; color: #009688; }
-    .btn-soft-success:hover { background: #009688; color: white; transform: translateY(-2px); }
+    .btn-soft-success { background: #fcf0f1; color: #b45309; }
+    .btn-soft-success:hover { background: #b45309; color: white; transform: translateY(-2px); }
     .btn-soft-warning { background: #fff8e1; color: #ffc107; }
     .btn-soft-warning:hover { background: #ffc107; color: white; transform: translateY(-2px); }
-    .btn-soft-info { background: #e3f2fd; color: #2196f3; }
-    .btn-soft-info:hover { background: #2196f3; color: white; transform: translateY(-2px); }
+    .btn-soft-info { background: #fcf0f1; color: #7c1316; }
+    .btn-soft-info:hover { background: #7c1316; color: white; transform: translateY(-2px); }
     .btn-soft-danger { background: #ffebee; color: #ef5350; }
     .btn-soft-danger:hover { background: #ef5350; color: white; transform: translateY(-2px); }
 

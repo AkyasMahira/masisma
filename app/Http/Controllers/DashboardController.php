@@ -63,7 +63,7 @@ class DashboardController extends Controller
                                    ->get();
         
         $calendarEvents = [];
-        $colors = ['#7c1316', '#7c1316', '#166534', '#b45309', '#6b21a8', '#0f766e', '#be123c', '#7c1316', '#047857'];
+        $colors = ['#7c1316', '#a3191d', '#b45309', '#92400e', '#c2410c', '#a16207', '#475569', '#374151', '#be123c', '#78350f'];
         $roomColorMap = []; $colorIndex = 0;
 
         foreach ($mahasiswaAktif as $mhs) {

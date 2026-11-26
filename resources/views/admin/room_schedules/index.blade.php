@@ -87,7 +87,7 @@
         .bg-soft-success { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
         .bg-soft-secondary { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
         .bg-soft-warning { background-color: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
-        .bg-soft-primary { background-color: #fcf0f1; color: #7c1316; border: 1px solid #bae6fd; }
+        .bg-soft-primary { background-color: #fcf0f1; color: #7c1316; border: 1px solid #fcf0f1; }
 
         /* --- Buttons --- */
         .btn-system-info {

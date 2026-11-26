@@ -74,7 +74,7 @@
     .bl-ppl small { display:block; font-size:.66rem; color:#94a3b8; font-weight:600; }
     .bl-ppl small.ok { color:#15803d; }
     .bl-empty { text-align:center; color:#94a3b8; padding:40px 10px; }
-    .imp { display:inline-block; background:#eef2ff; color:#7c1316; font-size:.56rem; font-weight:800; padding:1px 5px; border-radius:4px; vertical-align:middle; margin-left:4px; }
+    .imp { display:inline-block; background:#fcf0f1; color:#7c1316; font-size:.56rem; font-weight:800; padding:1px 5px; border-radius:4px; vertical-align:middle; margin-left:4px; }
     .pend { display:inline-block; background:#fef3c7; color:#b45309; font-size:.56rem; font-weight:800; padding:1px 5px; border-radius:4px; vertical-align:middle; margin-left:4px; }
 
     /* ===== Panel navigasi: Ruangan > Universitas > Prodi > Mahasiswa ===== */
@@ -622,7 +622,7 @@
                             sub = nu + ' instansi · ' + s.b + ' booking · ' + s.m + ' mhs tercatat';
                         } else if (path.length === 1) {
                             var np = Object.keys(groupBy(g[k], function (e) { return e.extendedProps.prodi || PRODI_KOSONG; })).length;
-                            icon = esc(initials(k)); st = 'background:#eef2ff;color:#7c1316';
+                            icon = esc(initials(k)); st = 'background:#fcf0f1;color:#7c1316';
                             sub = np + ' prodi · ' + s.b + ' booking · ' + s.m + ' mhs tercatat';
                         } else {
                             icon = '<i class="bi bi-mortarboard"></i>'; st = 'background:#ecfdf5;color:#047857';

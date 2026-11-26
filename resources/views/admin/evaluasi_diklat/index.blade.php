@@ -40,7 +40,7 @@
     .mutu { display:inline-flex; width:28px; height:28px; border-radius:8px; color:#fff; font-weight:800; align-items:center; justify-content:center; font-size:.8rem; }
     .bar { height:6px; background:#eef2f7; border-radius:6px; overflow:hidden; min-width:70px; }
     .bar span { display:block; height:100%; }
-    .chip-k { font-size:.6rem; font-weight:800; background:#eef2ff; color:#7c1316; border-radius:4px; padding:1px 5px; margin-left:4px; }
+    .chip-k { font-size:.6rem; font-weight:800; background:#fcf0f1; color:#7c1316; border-radius:4px; padding:1px 5px; margin-left:4px; }
     .ic-btn { width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#64748b; text-decoration:none; }
     .ic-btn:hover { background:var(--maroon-subtle); color:var(--maroon); border-color:#ecd3d5; }
     .grup-row { cursor:pointer; }

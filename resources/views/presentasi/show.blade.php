@@ -39,8 +39,8 @@
         }
 
         .bg-gradient-maroon { background: linear-gradient(135deg, #7c1316 0%, #a3191d 100%); }
-        .bg-gradient-blue { background: linear-gradient(135deg, #1e3a8a 0%, #a3191d 100%); } /* Untuk PPT */
-        .bg-gradient-purple { background: linear-gradient(135deg, #6b21a8 0%, #a3191d 100%); } /* Untuk Nilai */
+        .bg-gradient-blue { background: linear-gradient(135deg, #7c1316 0%, #a3191d 100%); } /* Untuk PPT */
+        .bg-gradient-purple { background: linear-gradient(135deg, #374151 0%, #a3191d 100%); } /* Untuk Nilai */
         .bg-gradient-green { background: linear-gradient(135deg, #065f46 0%, #10b981 100%); } /* Untuk Laporan */
 
         .card-body-custom { padding: 1.5rem; }
