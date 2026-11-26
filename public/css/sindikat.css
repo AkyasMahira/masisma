@@ -50,7 +50,15 @@ body,
 body *:not(.bi):not([class^="bi-"]):not([class*=" bi-"]):not(.fa):not(.fas):not(.far):not(.fab):not(.fal):not(.fa-solid):not(.fa-regular):not(.fa-brands):not(code):not(pre):not(kbd):not(samp) {
     font-family: var(--sd-font) !important;
 }
-body { color: var(--sd-teks); -webkit-font-smoothing: antialiased; }
+body { color: var(--sd-teks); -webkit-font-smoothing: antialiased; font-size: .9375rem; }
+/* Poppins lebih lebar dari Segoe UI -> ukuran kontrol sedikit diperkecil agar filter/tabel tidak sesak */
+.btn { --bs-btn-font-size: .9rem; }
+.btn-sm, .btn-group-sm > .btn { --bs-btn-font-size: .8rem; }
+.btn-lg, .btn-group-lg > .btn { --bs-btn-font-size: 1.05rem; }
+.form-control, .form-select, .input-group-text { font-size: .9rem; }
+.form-control-sm, .form-select-sm, .input-group-sm > .form-control, .input-group-sm > .form-select, .input-group-sm > .input-group-text { font-size: .8rem; }
+.form-control-lg, .form-select-lg { font-size: 1.05rem; }
+.table { font-size: .875rem; }
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 { font-weight: 600; letter-spacing: -.01em; }
 a { color: var(--sd-utama); }
 a:hover { color: var(--sd-hover); }

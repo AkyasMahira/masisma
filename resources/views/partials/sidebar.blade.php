@@ -385,7 +385,7 @@
     <div class="sidebar-footer">
         <div class="p-3 sidebar-user-profile">
             @if (auth()->check() && auth()->user()->role !== 'instansi')
-                <a class="nav-link {{ request()->is('akun/ganti-password') ? 'active' : '' }}" href="{{ route('akun.password') }}">
+                <a class="nav-link akun-link {{ request()->is('akun/ganti-password') ? 'active' : '' }}" href="{{ route('akun.password') }}">
                     <i class="bi bi-key"></i>
                     <span class="sidebar-text">Ganti Password</span>
                 </a>
@@ -639,92 +639,7 @@ html {
 ::-webkit-scrollbar-thumb:active {
     background: #5a0e10; /* Warna menjadi lebih gelap saat ditarik */
 }
-/* Terapkan class ini ke wadah/div yang menampung konten panjang */
-.area-scroll {
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-/* 1. Ukuran Lebar & Terlihat Jelas */
-.area-scroll::-webkit-scrollbar {
-    width: 16px; /* Lebih lebar dari standar, sangat mudah diklik */
-}
-
-/* 2. Jalur Scroll (Track) */
-.area-scroll::-webkit-scrollbar-track {
-    background: #f8f9fa;
-    border-left: 3px solid #1a1a1a; /* Garis outline hitam tegas */
-}
-
-/* 3. Bilah Gulir (Thumb) - Tampilan Solid & Berani */
-.area-scroll::-webkit-scrollbar-thumb {
-    background-color: #7c1316; 
-    border: 3px solid #1a1a1a; /* Outline hitam tebal memberikan struktur visual yang kuat */
-    border-radius: 6px;
-    /* Efek bayangan ke dalam (inset) untuk ilusi 3D retro */
-    box-shadow: inset -3px -3px 0px rgba(0, 0, 0, 0.3);
-}
-
-/* 4. Saat Kursor Diarahkan (Hover) - Menyala Terang */
-.area-scroll::-webkit-scrollbar-thumb:hover {
-    background-color: #ff3338; /* Berubah jadi warna yang sangat cerah/mencolok */
-}
-
-/* 5. Saat Ditekan/Ditarik (Active) - Animasi Masuk/Dipencet */
-.area-scroll::-webkit-scrollbar-thumb:active {
-    background-color: #a3191d;
-    /* Arah bayangan dibalik untuk memberikan efek bilah sedang "tertekan" */
-    box-shadow: inset 3px 3px 0px rgba(0, 0, 0, 0.5); 
-}
-/* =========================================
-   SCROLLBAR "ZIPPER / SLIDER" - SANGAT JELAS
-========================================= */
-
-/* 1. Lebar rel diperbesar biar gampang ditangkap mouse */
-.sidebar-inner::-webkit-scrollbar {
-    width: 16px; 
-}
-
-/* 2. JALUR (Rel tempat resleting ditarik) */
-.sidebar-inner::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.15); /* Gelap transparan */
-    border-left: 2px solid rgba(0, 0, 0, 0.4); /* Garis tegas pembatas rel */
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.3); /* Rel kerasa masuk ke dalam */
-}
-
-/* 3. PEGANGAN (Kepala Resleting) */
-.sidebar-inner::-webkit-scrollbar-thumb {
-    background-color: #f8f9fa; /* Putih terang biar super kontras dengan background maroon */
-    border: 2px solid #000000; /* Border hitam tegas biar bentuknya nyata */
-    border-radius: 6px; 
-    
-    /* INI KUNCI EFEK ZIPPER: Tekstur garis-garis (grip) di tengah bilah */
-    background-image: repeating-linear-gradient(
-        180deg,
-        transparent,
-        transparent 4px,
-        #000000 4px,
-        #000000 6px
-    );
-    background-size: 8px 100%; /* Garis tekstur difokuskan di tengah aja */
-    background-position: center;
-    background-repeat: no-repeat;
-    
-    /* Efek bayangan solid (ala retro/neo-brutalism) biar seolah ngambang dari rel */
-    box-shadow: -2px 3px 0px rgba(0, 0, 0, 0.4); 
-}
-
-/* 4. SAAT KURSOR MENDEKAT (Hover) */
-.sidebar-inner::-webkit-scrollbar-thumb:hover {
-    background-color: #ffde59; /* Berubah kuning menyala biar makin jelas posisinya! */
-}
-
-/* 5. SAAT DITARIK / DIKLIK (Active) */
-.sidebar-inner::-webkit-scrollbar-thumb:active {
-    background-color: #d12a30; /* Berubah merah pas ditarik */
-    /* Bayangan luar hilang, ganti bayangan dalam biar kerasa "ditekan" masuk */
-    box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.7); 
-}
+/* Scrollbar sidebar: tipis, putih transparan (satu nada dengan tema) */.sidebar-inner { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.35) transparent; }.sidebar-inner::-webkit-scrollbar { width: 8px; }.sidebar-inner::-webkit-scrollbar-track { background: transparent; }.sidebar-inner::-webkit-scrollbar-thumb { background: rgba(255,255,255,.28); border: 2px solid transparent; background-clip: padding-box; border-radius: 8px; }.sidebar-inner::-webkit-scrollbar-thumb:hover { background-color: rgba(255,255,255,.5); }
     /* ====== SEARCH BAR ====== */
     .sidebar-search { padding: 1rem 12px; margin-bottom: 0.5rem; }
     .search-container {
@@ -775,6 +690,8 @@ html {
         border-radius: 8px; transition: all 0.3s;
     }
     .logout-link:hover { background: rgba(255, 0, 0, 0.2); color: white !important; }
+    .akun-link { font-size: 0.85rem; margin: 0 0 4px 0 !important; padding: 0.5rem !important; border-radius: 8px; }
+    .akun-link:hover, .akun-link.active { background: rgba(255,255,255,0.1); }
     .logout-divider { border-color: rgba(255,255,255,0.1); margin: 10px 0; }
     
     .mobile-hamburger-btn {
