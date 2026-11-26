@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
-        :root { --primer: #7c1316; --sekunder: #a83236; --muda: #f8eaea; --teks: #2b2b2b; --redup: #6b6b6b; }
+        :root { --primer: #7c1316; --sekunder: #a3191d; --muda: #fcf0f1; --teks: #2b2b2b; --redup: #6b6b6b; }
         * { box-sizing: border-box; }
         html, body { min-height: 100%; }
         body {
@@ -62,6 +62,7 @@
         @media (prefers-reduced-motion: reduce) { .kartu, .ombak svg { animation: none; } }
         @media (max-width: 420px) { .kartu { padding: 24px 20px 20px; border-radius: 18px; } body { padding-top: 20px; } }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>
 <body>
     <div class="bungkus">
@@ -72,8 +73,8 @@
     </div>
 
     <div class="ombak">
-        <svg class="o1" viewBox="0 0 1440 320" preserveAspectRatio="none"><path fill="#a83236" fill-opacity=".55" d="M0,192L48,181.3C96,171,192,149,288,160C384,171,480,213,576,208C672,203,768,149,864,138.7C960,128,1056,160,1152,176C1248,192,1344,192,1392,192L1440,192L1440,320L0,320Z"></path></svg>
-        <svg class="o2" viewBox="0 0 1440 320" preserveAspectRatio="none"><path fill="#f8eaea" fill-opacity=".25" d="M0,256L48,245.3C96,235,192,213,288,208C384,203,480,213,576,229.3C672,245,768,267,864,256C960,245,1056,203,1152,192C1248,181,1344,203,1392,213.3L1440,224L1440,320L0,320Z"></path></svg>
+        <svg class="o1" viewBox="0 0 1440 320" preserveAspectRatio="none"><path fill="#a3191d" fill-opacity=".55" d="M0,192L48,181.3C96,171,192,149,288,160C384,171,480,213,576,208C672,203,768,149,864,138.7C960,128,1056,160,1152,176C1248,192,1344,192,1392,192L1440,192L1440,320L0,320Z"></path></svg>
+        <svg class="o2" viewBox="0 0 1440 320" preserveAspectRatio="none"><path fill="#fcf0f1" fill-opacity=".25" d="M0,256L48,245.3C96,235,192,213,288,208C384,203,480,213,576,229.3C672,245,768,267,864,256C960,245,1056,203,1152,192C1248,181,1344,203,1392,213.3L1440,224L1440,320L0,320Z"></path></svg>
     </div>
 
     <script>

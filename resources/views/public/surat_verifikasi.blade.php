@@ -27,6 +27,7 @@
         .foot { padding: 14px 28px; background: #f8fafc; font-size: 11.5px; color: var(--muted); text-align: center; }
         @media (max-width: 480px) { .row { flex-direction: column; gap: 2px; } .row .k { width: auto; } }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>
 <body>
     <div class="card">

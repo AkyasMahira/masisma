@@ -44,7 +44,7 @@
     /* --- BUTTONS & BADGES --- */
     .badge-status { padding: 8px 12px; border-radius: 10px; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; border: none; cursor: pointer; transition: 0.2s; }
     .badge-active { background: #dcfce7; color: #166534; }
-    .badge-inactive { background: #fee2e2; color: #991b1b; }
+    .badge-inactive { background: #fee2e2; color: #a3191d; }
     .badge-status:hover { transform: scale(1.05); }
 
     .btn-icon-group { display: flex; gap: 6px; }

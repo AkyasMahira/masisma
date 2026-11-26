@@ -19,7 +19,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 
     <style>
         :root { --primary-color: #7c1316; --primary-light: #fcebeb; --primary-hover: #5e0e10; --text-dark: #2c3e50; --text-muted: #64748b; --border-color: #e0e0e0; }
@@ -56,7 +56,7 @@
         .rating label:hover { border-color: var(--primary-color); background: var(--primary-light); }
         .rating input:checked + label { background: var(--primary-color); color: #fff; border-color: var(--primary-color); box-shadow: 0 4px 12px rgba(124,19,22,.25); }
 
-        .btn-submit-ultra { background: linear-gradient(135deg, #7c1316 0%, #a31d21 100%); color: white; border: none; border-radius: 12px; padding: 16px 40px; font-weight: 600; font-size: 16px; width: 100%; box-shadow: 0 4px 15px rgba(124, 19, 22, 0.3); cursor: pointer; letter-spacing: .5px; transition: 0.3s; margin-top: 10px; }
+        .btn-submit-ultra { background: linear-gradient(135deg, #7c1316 0%, #a3191d 100%); color: white; border: none; border-radius: 12px; padding: 16px 40px; font-weight: 600; font-size: 16px; width: 100%; box-shadow: 0 4px 15px rgba(124, 19, 22, 0.3); cursor: pointer; letter-spacing: .5px; transition: 0.3s; margin-top: 10px; }
         .btn-submit-ultra:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(124, 19, 22, 0.4); }
 
         .alert-ultra { background:#fef2f2; border:1px solid #fee2e2; border-left:5px solid var(--primary-color); border-radius:12px; padding:16px 20px; margin-bottom:20px; }
@@ -69,6 +69,7 @@
         .resp-toggle[open] summary { margin-bottom: 12px; border-style: solid; }
         .resp-toggle[open] summary .chev { transform: rotate(180deg); }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>
 <body>
     <div class="form-container">
@@ -76,7 +77,7 @@
 
         <div class="header-card animate__animated animate__fadeInDown">
             <div class="header-inner">
-                <h1 class="form-title"><i class="fas fa-clipboard-check mr-2"></i>{{ $judulForm }}</h1>
+                <h1 class="form-title"><i class="fas fa-clipboard-check me-2"></i>{{ $judulForm }}</h1>
                 <p class="form-desc">{{ $descForm }} Masukan Anda membantu kami meningkatkan mutu pelayanan.</p>
                 @if(!empty($konteks))
                     <div style="margin-top:16px;background:var(--primary-light);border-radius:12px;padding:12px 16px;">
@@ -89,7 +90,7 @@
 
         @if ($errors->any())
             <div class="alert-ultra">
-                <strong><i class="fas fa-exclamation-triangle mr-1"></i> Mohon periksa kembali:</strong>
+                <strong><i class="fas fa-exclamation-triangle me-1"></i> Mohon periksa kembali:</strong>
                 <ul class="mb-0 mt-2">
                     @foreach ($errors->all() as $e) <li>{{ $e }}</li> @endforeach
                 </ul>
@@ -111,7 +112,7 @@
             <details class="resp-toggle" {{ old('instansi') || old('kontak') || old('jenis_kelamin') || old('pendidikan') || old('umur') ? 'open' : '' }}>
                 <summary><i class="fas fa-user"></i> Data Responden <span class="opt">opsional — klik bila ingin mengisi</span><i class="fas fa-chevron-down chev"></i></summary>
             @else
-            <div class="section-title"><i class="fas fa-user"></i> Data Responden <span class="ml-2" style="font-size:12px;font-weight:500;color:var(--text-muted);">(opsional / boleh anonim)</span></div>
+            <div class="section-title"><i class="fas fa-user"></i> Data Responden <span class="ms-2" style="font-size:12px;font-weight:500;color:var(--text-muted);">(opsional / boleh anonim)</span></div>
             @endif
             <div class="input-card">
                 <div class="form-row">
@@ -192,7 +193,7 @@
                 <textarea name="saran" class="form-control-ultra" rows="3" placeholder="Saran untuk peningkatan layanan...">{{ old('saran') }}</textarea>
             </div>
 
-            <button type="submit" class="btn-submit-ultra"><i class="fas fa-paper-plane mr-2"></i> Kirim Evaluasi</button>
+            <button type="submit" class="btn-submit-ultra"><i class="fas fa-paper-plane me-2"></i> Kirim Evaluasi</button>
         </form>
     </div>
 </body>

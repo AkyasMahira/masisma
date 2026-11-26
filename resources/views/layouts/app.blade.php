@@ -23,7 +23,7 @@
     <style>
         :root {
             --maroon: #7c1316;
-            --maroon-light: #9d2a2e;
+            --maroon-light: #a3191d;
             --maroon-dark: #5c0f11;
             --bg-light: #f8f9fa;
             --sidebar-width: 260px;
@@ -136,6 +136,7 @@
     </style>
 
     @stack('styles')
+    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>
 
 <body>

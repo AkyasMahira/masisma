@@ -108,7 +108,7 @@
 
         .pdf-link:hover {
             background: #fee2e2;
-            color: #991b1b;
+            color: #a3191d;
         }
 
         .btn-back {

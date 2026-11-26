@@ -1,0 +1,125 @@
+/* =====================================================================
+   SINDIKAT - tema bersama (satu nada untuk semua halaman)
+   Dimuat PALING AKHIR di setiap layout / halaman mandiri supaya menang
+   dari gaya lama per halaman. Font: Poppins. Palet maroon:
+     utama  #7c1316 | hover #a3191d | gelap #5c0f11 | lembut #fcf0f1
+   ===================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --sd-utama: #7c1316;
+    --sd-hover: #a3191d;
+    --sd-gelap: #5c0f11;
+    --sd-lembut: #fcf0f1;
+    --sd-garis: #ece3e3;
+    --sd-teks: #1f2937;
+    --sd-redup: #6b7280;
+    --sd-latar: #f7f5f5;
+    --sd-radius: 14px;
+    --sd-radius-kecil: 10px;
+    --sd-bayang: 0 4px 16px rgba(124, 19, 22, .06);
+    --sd-font: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+    /* variabel lama di layout & halaman -> ikut palet */
+    --maroon: var(--sd-utama);
+    --maroon-light: var(--sd-hover);
+    --maroon-dark: var(--sd-gelap);
+    --primary-color: var(--sd-utama);
+    --warna-primer: var(--sd-utama);
+    --warna-sekunder: var(--sd-hover);
+    --warna-tertiary: var(--sd-lembut);
+
+    /* Bootstrap 5: "primary" = maroon */
+    --bs-primary: #7c1316;
+    --bs-primary-rgb: 124, 19, 22;
+    --bs-primary-text-emphasis: #5c0f11;
+    --bs-primary-bg-subtle: #fcf0f1;
+    --bs-primary-border-subtle: #f0c9cb;
+    --bs-link-color: #7c1316;
+    --bs-link-color-rgb: 124, 19, 22;
+    --bs-link-hover-color: #a3191d;
+    --bs-link-hover-color-rgb: 163, 25, 29;
+    --bs-body-font-family: var(--sd-font);
+    --bs-font-sans-serif: var(--sd-font);
+    --bs-border-radius: var(--sd-radius-kecil);
+    --bs-focus-ring-color: rgba(124, 19, 22, .18);
+}
+
+/* ---------- Font: satu keluarga, kecuali ikon ---------- */
+body,
+body *:not(.bi):not([class^="bi-"]):not([class*=" bi-"]):not(.fa):not(.fas):not(.far):not(.fab):not(.fal):not(.fa-solid):not(.fa-regular):not(.fa-brands):not(code):not(pre):not(kbd):not(samp) {
+    font-family: var(--sd-font) !important;
+}
+body { color: var(--sd-teks); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 { font-weight: 600; letter-spacing: -.01em; }
+a { color: var(--sd-utama); }
+a:hover { color: var(--sd-hover); }
+
+/* ---------- Warna utilitas ---------- */
+.text-maroon, .text-primary { color: var(--sd-utama) !important; }
+.bg-maroon, .bg-primary { background-color: var(--sd-utama) !important; color: #fff; }
+.bg-maroon-soft, .bg-primary-subtle { background-color: var(--sd-lembut) !important; }
+.border-maroon, .border-primary { border-color: var(--sd-utama) !important; }
+
+/* ---------- Tombol ---------- */
+.btn { border-radius: var(--sd-radius-kecil); font-weight: 500; }
+.btn.rounded-pill { border-radius: 50rem; }
+.btn-maroon, .btn-primary {
+    --bs-btn-color: #fff; --bs-btn-bg: var(--sd-utama); --bs-btn-border-color: var(--sd-utama);
+    --bs-btn-hover-color: #fff; --bs-btn-hover-bg: var(--sd-hover); --bs-btn-hover-border-color: var(--sd-hover);
+    --bs-btn-active-color: #fff; --bs-btn-active-bg: var(--sd-gelap); --bs-btn-active-border-color: var(--sd-gelap);
+    --bs-btn-disabled-color: #fff; --bs-btn-disabled-bg: var(--sd-utama); --bs-btn-disabled-border-color: var(--sd-utama);
+    --bs-btn-focus-shadow-rgb: 124, 19, 22;
+    color: #fff; background-color: var(--sd-utama); border-color: var(--sd-utama);
+}
+.btn-maroon:hover, .btn-primary:hover, .btn-maroon:focus-visible, .btn-primary:focus-visible { color: #fff; background-color: var(--sd-hover); border-color: var(--sd-hover); }
+.btn-outline-maroon, .btn-outline-primary {
+    --bs-btn-color: var(--sd-utama); --bs-btn-border-color: var(--sd-utama);
+    --bs-btn-hover-color: #fff; --bs-btn-hover-bg: var(--sd-utama); --bs-btn-hover-border-color: var(--sd-utama);
+    --bs-btn-active-color: #fff; --bs-btn-active-bg: var(--sd-gelap); --bs-btn-active-border-color: var(--sd-gelap);
+    color: var(--sd-utama); border-color: var(--sd-utama); background-color: transparent;
+}
+.btn-outline-maroon:hover, .btn-outline-primary:hover { color: #fff; background-color: var(--sd-utama); border-color: var(--sd-utama); }
+.btn-soft-maroon { color: var(--sd-utama); background: var(--sd-lembut); border: 1px solid transparent; }
+.btn-soft-maroon:hover { color: #fff; background: var(--sd-utama); }
+
+/* ---------- Form ---------- */
+.form-control, .form-select { border-radius: var(--sd-radius-kecil); border-color: #e2d9d9; }
+.form-control:focus, .form-select:focus, .form-check-input:focus {
+    border-color: var(--sd-hover); box-shadow: 0 0 0 .2rem rgba(124, 19, 22, .14);
+}
+.form-check-input:checked { background-color: var(--sd-utama); border-color: var(--sd-utama); }
+.form-switch .form-check-input:focus { --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23a3191d'/%3e%3c/svg%3e"); }
+.form-label { font-weight: 500; }
+.input-group > .form-control, .input-group > .form-select { border-radius: 0; }
+.input-group > :first-child { border-top-left-radius: var(--sd-radius-kecil) !important; border-bottom-left-radius: var(--sd-radius-kecil) !important; }
+.input-group > :last-child:not(.dropdown-menu):not(.invalid-feedback),
+.input-group > :nth-last-child(2):has(+ .invalid-feedback) { border-top-right-radius: var(--sd-radius-kecil) !important; border-bottom-right-radius: var(--sd-radius-kecil) !important; }
+
+/* ---------- Kartu, modal, alert ---------- */
+.card { border-radius: var(--sd-radius); border-color: var(--sd-garis); }
+.card > .card-header:first-child { border-top-left-radius: var(--sd-radius); border-top-right-radius: var(--sd-radius); }
+.card > .card-footer:last-child { border-bottom-left-radius: var(--sd-radius); border-bottom-right-radius: var(--sd-radius); }
+.modal-content { border-radius: 18px; }
+.alert { border-radius: var(--sd-radius-kecil); }
+
+/* ---------- Tabel ---------- */
+.table > thead th { font-weight: 600; font-size: .8rem; letter-spacing: .02em; color: #4b5563; }
+
+/* ---------- Navigasi ---------- */
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link { background-color: var(--sd-utama); color: #fff; }
+.nav-tabs .nav-link.active { color: var(--sd-utama); }
+.pagination { --bs-pagination-color: var(--sd-utama); --bs-pagination-hover-color: var(--sd-hover); --bs-pagination-focus-color: var(--sd-hover); --bs-pagination-active-bg: var(--sd-utama); --bs-pagination-active-border-color: var(--sd-utama); --bs-pagination-focus-box-shadow: 0 0 0 .2rem rgba(124, 19, 22, .14); }
+.page-item.active .page-link { background-color: var(--sd-utama); border-color: var(--sd-utama); }
+.dropdown-item.active, .dropdown-item:active { background-color: var(--sd-utama); }
+.progress-bar:not([class*="bg-"]) { background-color: var(--sd-utama); }
+.spinner-border.text-primary { color: var(--sd-utama) !important; }
+
+/* ---------- Choices.js / Tom Select ---------- */
+.choices__list--multiple .choices__item { background-color: var(--sd-utama); border-color: var(--sd-utama); }
+.choices__list--dropdown .choices__item--selectable.is-highlighted { background-color: var(--sd-lembut); }
+.ts-wrapper.multi .ts-control > div { background: var(--sd-lembut); color: var(--sd-utama); }
+
+/* ---------- SweetAlert2 ---------- */
+.swal2-styled.swal2-confirm { background-color: var(--sd-utama) !important; }
+.swal2-popup { border-radius: 18px !important; font-family: var(--sd-font) !important; }

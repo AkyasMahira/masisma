@@ -177,6 +177,7 @@
             .info-kegiatan-box { padding: 16px; }
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>
 <body>
 

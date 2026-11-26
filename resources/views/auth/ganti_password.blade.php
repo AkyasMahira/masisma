@@ -54,10 +54,10 @@
     .gp-head { display: flex; gap: 14px; align-items: center; margin-bottom: 20px; }
     .gp-head h1 { font-size: 1.2rem; font-weight: 700; margin: 0; color: #2b2b2b; }
     .gp-head p { margin: 2px 0 0; font-size: .85rem; color: #777; word-break: break-all; }
-    .gp-ikon { width: 46px; height: 46px; flex: 0 0 46px; border-radius: 12px; background: #f8eaea; color: #7c1316; display: grid; place-items: center; font-size: 1.35rem; }
+    .gp-ikon { width: 46px; height: 46px; flex: 0 0 46px; border-radius: 12px; background: #fcf0f1; color: #7c1316; display: grid; place-items: center; font-size: 1.35rem; }
     .gp-card .form-label { font-weight: 600; font-size: .88rem; }
     .gp-simpan { background: #7c1316; color: #fff; font-weight: 600; padding: 10px; border-radius: 10px; }
-    .gp-simpan:hover { background: #a83236; color: #fff; }
+    .gp-simpan:hover { background: #a3191d; color: #fff; }
     .gp-lupa { font-size: .8rem; color: #888; margin: 16px 0 0; text-align: center; }
 </style>
 @endpush

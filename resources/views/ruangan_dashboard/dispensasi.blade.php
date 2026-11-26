@@ -102,7 +102,7 @@
                     $stMap = [
                         'pending'  => ['Menunggu',  '#b45309', '#fef3c7'],
                         'approved' => ['Disetujui', '#166534', '#dcfce7'],
-                        'rejected' => ['Ditolak',   '#991b1b', '#fee2e2'],
+                        'rejected' => ['Ditolak',   '#a3191d', '#fee2e2'],
                     ];
                     $si = $stMap[$dispen->status] ?? ['-', '#64748b', '#f1f5f9'];
                     $appr = $dispen->keterangan_terlambat;
@@ -163,7 +163,7 @@
                                 </form>
                             </div>
                         @elseif($dispen->status === 'rejected' && $dispen->catatan_admin)
-                            <div class="mt-1 small p-2 rounded" style="background:#fff1f2;color:#991b1b;font-size:.74rem;"><i class="bi bi-chat-left-text me-1"></i>{{ $dispen->catatan_admin }}</div>
+                            <div class="mt-1 small p-2 rounded" style="background:#fff1f2;color:#a3191d;font-size:.74rem;"><i class="bi bi-chat-left-text me-1"></i>{{ $dispen->catatan_admin }}</div>
                         @endif
                     </div>
                 </div>

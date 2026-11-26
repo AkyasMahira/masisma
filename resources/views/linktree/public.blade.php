@@ -16,7 +16,7 @@
            ========================================================================== */
         :root { 
             --maroon: #7c1316; 
-            --maroon-light: #a91c1f;
+            --maroon-light: #a3191d;
             --dark: #121212;
             --grey-light: #f8f9fa;
             --white: #ffffff;
@@ -266,6 +266,7 @@
             .hero-banner { height: 200px; }
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>
 <body>
 

@@ -47,6 +47,7 @@
         .pdf-table td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; font-weight: 600; }
         .pdf-footer { margin-top: 50px; font-size: 11px; color: #999; text-align: center; border-top: 1px solid #eee; padding-top: 20px; }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>
 <body>
 

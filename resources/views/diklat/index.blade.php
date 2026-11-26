@@ -3,7 +3,6 @@
 @section('content')
 {{-- 1. LOAD LIBRARY PENTING (Wajib ada agar script jalan) --}}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -12,7 +11,7 @@
     :root {
         --primary-color: #7c1316;
         --primary-light: #fcebeb;
-        --primary-hover: #9c1c20;
+        --primary-hover: #a3191d;
         --text-dark: #2c3e50;
         --text-muted: #6c757d;
         --shadow-soft: 0 10px 40px -10px rgba(0,0,0,0.08);
@@ -66,7 +65,7 @@
 
     /* Button Utama Ultra */
     .btn-ultra {
-        background: linear-gradient(135deg, #7c1316 0%, #a31d21 100%);
+        background: linear-gradient(135deg, #7c1316 0%, #a3191d 100%);
         color: white;
         border: none;
         border-radius: 12px;
@@ -335,7 +334,7 @@
     }
     .btn-action-link:hover {
         background: #ffe0e0;
-        color: #9c1c20;
+        color: #a3191d;
         text-decoration: none;
     }
 
@@ -477,12 +476,10 @@
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert" style="background: #d4edda; color: #155724; border-radius: 12px;">
             <div class="d-flex align-items-center">
-                <i class="fas fa-check-circle mr-2" style="font-size: 1.2rem;"></i>
+                <i class="fas fa-check-circle me-2" style="font-size: 1.2rem;"></i>
                 <strong>Berhasil!</strong> &nbsp; {{ session('success') }}
             </div>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
         </div>
     @endif
 
@@ -548,19 +545,19 @@
                             </div>
                         </td>
                         <td class="text-center">
-                            <a href="{{ route('diklat.rekap', $form->id) }}" class="btn-soft btn-soft-success" data-toggle="tooltip" title="Lihat Pendaftar">
+                            <a href="{{ route('diklat.rekap', $form->id) }}" class="btn-soft btn-soft-success" data-bs-toggle="tooltip" title="Lihat Pendaftar">
                                 <i class="fas fa-users"></i>
                             </a>
-                            <a href="{{ route('diklat.edit', $form->id) }}" class="btn-soft btn-soft-warning" data-toggle="tooltip" title="Edit Data">
+                            <a href="{{ route('diklat.edit', $form->id) }}" class="btn-soft btn-soft-warning" data-bs-toggle="tooltip" title="Edit Data">
                                 <i class="fas fa-pen"></i>
                             </a>
-                            <a href="{{ route('diklat.show', $form->id) }}" class="btn-soft btn-soft-info" data-toggle="tooltip" title="Detail Lengkap">
+                            <a href="{{ route('diklat.show', $form->id) }}" class="btn-soft btn-soft-info" data-bs-toggle="tooltip" title="Detail Lengkap">
                                 <i class="fas fa-eye"></i>
                             </a>
                             <form action="{{ route('diklat.destroy', $form->id) }}" method="POST" class="d-inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn-soft btn-soft-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus form ini beserta seluruh data pendaftarnya?')" data-toggle="tooltip" title="Hapus Permanen">
+                                <button type="submit" class="btn-soft btn-soft-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus form ini beserta seluruh data pendaftarnya?')" data-bs-toggle="tooltip" title="Hapus Permanen">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </form>
@@ -603,11 +600,9 @@
         <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 5px 20px rgba(0,0,0,0.2);">
             <div class="modal-header" style="border-bottom: 1px solid #f1f3f9;">
                 <h5 class="modal-title" id="qrModalLabel" style="font-weight: 700; color: var(--text-dark); font-size: 16px;">
-                    <i class="fas fa-qrcode mr-1"></i> Scan QR
+                    <i class="fas fa-qrcode me-1"></i> Scan QR
                 </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
             </div>
             <div class="modal-body text-center p-3">
                 <p class="text-muted mb-2" id="qrTitlePreview" style="font-size: 13px; font-weight: 500;"></p>
@@ -709,13 +704,11 @@
             }, 300);
 
             // 4. Tampilkan Modal (Bootstrap)
-            $('#qrModal').modal('show');
+            bootstrap.Modal.getOrCreateInstance(document.querySelector('#qrModal')).show();
         });
 
         // Inisialisasi Tooltip Bootstrap
-        if (typeof $().tooltip === 'function') {
-            $('[data-toggle="tooltip"]').tooltip();
-        }
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) { bootstrap.Tooltip.getOrCreateInstance(el); });
     });
 </script>
 @endsection

@@ -332,7 +332,8 @@
                         img { width: 400px; }
                         h2 { color: #7c1316; margin-top: 15px; }
                     </style>
-                </head>
+                    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
+</head>
                 <body>
                     <img src="${qrImgSrc}">
                     <h2>${title}</h2>

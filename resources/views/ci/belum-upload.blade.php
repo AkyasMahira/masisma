@@ -158,6 +158,7 @@
             100% { transform: scale(1.5); opacity: 0; }
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>
 <body>
 

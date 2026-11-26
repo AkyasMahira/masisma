@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" href="{{ asset('icon.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <style>
         :root { --primary:#7c1316; --primary-light:#fcebeb; --text-dark:#2c3e50; --text-muted:#64748b; }
         body { background:#f0f2f5; font-family:'Poppins',sans-serif; color:var(--text-dark); padding:20px 12px 90px; }
@@ -42,7 +42,7 @@
         .bar-prog .in { max-width:900px; margin:0 auto; display:flex; align-items:center; gap:12px; }
         .prog { flex:1; height:8px; background:#eef2f7; border-radius:8px; overflow:hidden; }
         .prog span { display:block; height:100%; background:#16a34a; width:0; transition:width .2s; }
-        .btn-kirim { background:linear-gradient(135deg,#7c1316,#a31d21); color:#fff; border:none; border-radius:12px; padding:11px 22px; font-weight:600; white-space:nowrap; }
+        .btn-kirim { background:linear-gradient(135deg,#7c1316,#a3191d); color:#fff; border:none; border-radius:12px; padding:11px 22px; font-weight:600; white-space:nowrap; }
         .alert-x { background:#fef2f2; border:1px solid #fee2e2; border-left:5px solid var(--primary); border-radius:12px; padding:14px 18px; margin-bottom:16px; font-size:14px; }
         .empty { background:#fff; border-radius:16px; padding:30px; text-align:center; color:var(--text-muted); }
         @media (max-width:600px) {
@@ -52,11 +52,12 @@
             .grid th small { display:none; }
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>
 <body>
 <div class="wrap">
     <div class="head">
-        <h1><i class="fas fa-chalkboard-teacher mr-2"></i>Evaluasi Narasumber</h1>
+        <h1><i class="fas fa-chalkboard-teacher me-2"></i>Evaluasi Narasumber</h1>
         <div class="keg">{{ $kegiatan->nama_kegiatan }}</div>
         <div class="petunjuk">
             <b>Petunjuk pengerjaan</b>
@@ -73,7 +74,7 @@
         <div class="empty"><i class="fas fa-user-slash d-block mb-2" style="font-size:24px;"></i>Belum ada narasumber yang terdaftar untuk pelatihan ini.</div>
     @else
     @if ($errors->any())
-        <div class="alert-x"><b><i class="fas fa-exclamation-triangle mr-1"></i> Mohon periksa kembali:</b>
+        <div class="alert-x"><b><i class="fas fa-exclamation-triangle me-1"></i> Mohon periksa kembali:</b>
             <ul class="mb-0 mt-1">@foreach(collect($errors->all())->unique() as $e)<li>{{ $e }}</li>@endforeach</ul>
         </div>
     @endif
@@ -134,7 +135,7 @@
             <div class="in">
                 <div class="small text-muted text-nowrap" id="progTxt">0 / 0</div>
                 <div class="prog"><span id="progBar"></span></div>
-                <button type="submit" class="btn-kirim"><i class="fas fa-paper-plane mr-1"></i> Kirim</button>
+                <button type="submit" class="btn-kirim"><i class="fas fa-paper-plane me-1"></i> Kirim</button>
             </div>
         </div>
     </form>

@@ -30,7 +30,7 @@
         /* --- CUSTOM THEME --- */
         :root {
             --primary-maroon: #7c1316;
-            --primary-maroon-hover: #9c1c20;
+            --primary-maroon-hover: #a3191d;
             --bg-soft: #f8f9fc;
             --input-bg: #ffffff;
             --border-color: #e2e8f0;

@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" href="{{ asset('icon.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <style>
         :root { --primary-color:#7c1316; --primary-light:#fcebeb; --text-dark:#2c3e50; --text-muted:#64748b; }
         body { background:#f0f2f5; font-family:'Poppins',sans-serif; color:var(--text-dark); padding:20px 14px 60px; }
@@ -32,13 +32,14 @@
         .lain { display:block; text-align:center; margin-top:16px; color:var(--text-muted); font-size:13px; }
         .lain a { color:var(--primary-color); font-weight:600; }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>
 <body>
 <div class="wrap">
     <a href="{{ route('landing') }}" class="back-link"><i class="fas fa-arrow-left"></i> Kembali ke Beranda</a>
 
     <div class="head">
-        <h1><i class="fas fa-clipboard-check mr-2"></i>Evaluasi Pelatihan</h1>
+        <h1><i class="fas fa-clipboard-check me-2"></i>Evaluasi Pelatihan</h1>
         <p>Pilih pelatihan yang Anda ikuti, lalu isi penilaian, kritik, dan saran. Penilaian setiap pelatihan dicatat terpisah.</p>
     </div>
 
@@ -52,7 +53,7 @@
             <div class="ic"><i class="fas fa-chalkboard-teacher"></i></div>
             <div class="tx">
                 <b>{{ $k->nama_kegiatan }}</b>
-                <small><i class="far fa-calendar mr-1"></i>{{ $k->tanggal_mulai ? \Carbon\Carbon::parse($k->tanggal_mulai)->isoFormat('D MMM YYYY') : '-' }}@if($k->tanggal_selesai && $k->tanggal_selesai != $k->tanggal_mulai) – {{ \Carbon\Carbon::parse($k->tanggal_selesai)->isoFormat('D MMM YYYY') }}@endif</small>
+                <small><i class="far fa-calendar me-1"></i>{{ $k->tanggal_mulai ? \Carbon\Carbon::parse($k->tanggal_mulai)->isoFormat('D MMM YYYY') : '-' }}@if($k->tanggal_selesai && $k->tanggal_selesai != $k->tanggal_mulai) – {{ \Carbon\Carbon::parse($k->tanggal_selesai)->isoFormat('D MMM YYYY') }}@endif</small>
             </div>
             <i class="fas fa-chevron-right go"></i>
         </a>

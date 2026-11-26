@@ -88,7 +88,7 @@
     .pe-head { display: flex; gap: 14px; align-items: center; margin-bottom: 18px; }
     .pe-head h1 { font-size: 1.3rem; font-weight: 700; margin: 0; }
     .pe-head p { margin: 2px 0 0; color: #777; font-size: .9rem; }
-    .pe-ikon { width: 48px; height: 48px; flex: 0 0 48px; border-radius: 12px; background: #f8eaea; color: #7c1316; display: grid; place-items: center; font-size: 1.4rem; }
+    .pe-ikon { width: 48px; height: 48px; flex: 0 0 48px; border-radius: 12px; background: #fcf0f1; color: #7c1316; display: grid; place-items: center; font-size: 1.4rem; }
     .pe-status { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-bottom: 16px; }
     .pe-status > div { background: #fff; border: 1px solid #f1e4e4; border-radius: 12px; padding: 10px 14px; min-width: 0; }
     .pe-status span { display: block; font-size: .75rem; color: #888; }
@@ -98,7 +98,7 @@
     .pe-card h2 { font-size: 1rem; font-weight: 700; margin-bottom: 14px; color: #7c1316; }
     .pe-card .form-label { font-weight: 600; font-size: .88rem; }
     .pe-btn { background: #7c1316; color: #fff; font-weight: 600; padding: 10px; border-radius: 10px; }
-    .pe-btn:hover { background: #a83236; color: #fff; }
+    .pe-btn:hover { background: #a3191d; color: #fff; }
     .pe-panduan ol { padding-left: 18px; font-size: .88rem; margin-bottom: 10px; }
     .pe-panduan li { margin-bottom: 4px; }
 </style>

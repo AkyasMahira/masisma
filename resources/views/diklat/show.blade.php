@@ -55,7 +55,7 @@
     .upload-zone:hover { border-color: var(--primary-color); background: var(--primary-light); }
     .upload-zone input[type="file"] { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer; }
 
-    .btn-submit-ultra { background: linear-gradient(135deg, #7c1316 0%, #a31d21 100%); color: white; border: none; border-radius: 12px; padding: 16px 40px; font-weight: 600; font-size: 16px; width: 100%; box-shadow: 0 4px 15px rgba(124, 19, 22, 0.3); text-transform: uppercase; cursor: pointer; letter-spacing: 1px; transition: 0.3s; }
+    .btn-submit-ultra { background: linear-gradient(135deg, #7c1316 0%, #a3191d 100%); color: white; border: none; border-radius: 12px; padding: 16px 40px; font-weight: 600; font-size: 16px; width: 100%; box-shadow: 0 4px 15px rgba(124, 19, 22, 0.3); text-transform: uppercase; cursor: pointer; letter-spacing: 1px; transition: 0.3s; }
     .btn-submit-ultra:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(124, 19, 22, 0.4); }
 </style>
 
@@ -75,7 +75,7 @@
 
     {{-- ERROR ALERT --}}
     @if ($errors->any())
-    <div class="alert alert-danger animate__animated animate__shakeX border-0 shadow-sm mb-4" style="border-radius: 12px; background-color: #fef2f2; border: 1px solid #fee2e2; color: #991b1b;">
+    <div class="alert alert-danger animate__animated animate__shakeX border-0 shadow-sm mb-4" style="border-radius: 12px; background-color: #fef2f2; border: 1px solid #fee2e2; color: #a3191d;">
         <div class="d-flex align-items-center mb-2">
             <i class="fas fa-exclamation-triangle mr-2" style="font-size: 1.2rem;"></i>
             <h6 class="font-weight-bold mb-0">Mohon periksa kembali inputan Anda:</h6>

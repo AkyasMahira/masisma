@@ -7,8 +7,8 @@
 
     <style>
         :root {
-            --primary-color: #8c1515;
-            --primary-light: #a31d1d;
+            --primary-color: #7c1316;
+            --primary-light: #a3191d;
             --primary-soft: #fcf0f1;
             --bg-body: #f8fafc;
             --text-main: #1e293b;
@@ -387,9 +387,9 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     @if (isset($error))
-        <script>Swal.fire({ icon: 'error', title: 'Gangguan API!', text: '{!! $error !!}', confirmButtonColor: '#8c1515' });</script>
+        <script>Swal.fire({ icon: 'error', title: 'Gangguan API!', text: '{!! $error !!}', confirmButtonColor: '#7c1316' });</script>
     @elseif (session('error'))
-        <script>Swal.fire({ icon: 'error', title: 'Gagal!', text: '{{ session('error') }}', confirmButtonColor: '#8c1515' });</script>
+        <script>Swal.fire({ icon: 'error', title: 'Gagal!', text: '{{ session('error') }}', confirmButtonColor: '#7c1316' });</script>
     @endif
     @if (session('success'))
         <script>Swal.fire({ icon: 'success', title: 'Berhasil!', text: '{{ session('success') }}', showConfirmButton: false, timer: 2000 });</script>

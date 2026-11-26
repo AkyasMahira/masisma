@@ -4,7 +4,6 @@
 {{-- 1. LIBRARY --}}
 {{-- jQuery & Bootstrap Bundle (Wajib urutan ini) --}}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>-->
 
 {{-- Select2 (Dropdown Search) --}}
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -128,7 +127,7 @@
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('diklat.index') }}" class="btn-outline-back" style="text-decoration:none;">
-                <i class="fas fa-arrow-left mr-1"></i> Kembali
+                <i class="fas fa-arrow-left me-1"></i> Kembali
             </a>
             <button onclick="exportToExcel()" class="btn-maroon" style="background:#217346;">
                 <i class="fas fa-file-excel"></i> Excel
@@ -189,10 +188,10 @@
     <div class="text-center mb-4">
         <div class="view-switcher">
             <button class="view-btn active" id="btn-peserta" onclick="switchView('peserta')">
-                <i class="fas fa-user mr-1"></i> Data Per Peserta
+                <i class="fas fa-user me-1"></i> Data Per Peserta
             </button>
             <button class="view-btn" id="btn-instansi" onclick="switchView('instansi')">
-                <i class="fas fa-building mr-1"></i> Rekap Per Instansi
+                <i class="fas fa-building me-1"></i> Rekap Per Instansi
             </button>
         </div>
     </div>
@@ -231,7 +230,7 @@
                             @else - @endif
                         </td>
                         <td>
-                            <div class="small"><i class="fab fa-whatsapp text-success mr-1"></i> {{ $p->no_hp }}</div>
+                            <div class="small"><i class="fab fa-whatsapp text-success me-1"></i> {{ $p->no_hp }}</div>
                         </td>
                         <td class="text-center d-print-none">
                             <button type="button" class="btn btn-sm btn-info rounded-circle shadow-sm btn-detail-peserta" 
@@ -277,7 +276,7 @@
                         <td class="text-center font-weight-bold">{{ $no++ }}</td>
                         <td>
                             <div class="font-weight-bold text-dark">{{ $namaInstansi }}</div>
-                            <div class="small text-muted"><i class="fas fa-map-marker-alt mr-1"></i> {{ Str::limit($pj->alamat, 50) }}</div>
+                            <div class="small text-muted"><i class="fas fa-map-marker-alt me-1"></i> {{ Str::limit($pj->alamat, 50) }}</div>
                         </td>
                         <td>
                             <div class="small text-dark font-weight-bold">{{ $pj->email }}</div>
@@ -291,7 +290,7 @@
                             <button type="button" class="btn btn-sm btn-light border shadow-sm btn-detail-instansi"
                                     data-instansi="{{ $namaInstansi }}"
                                     data-pesertas="{{ json_encode($groupPeserta) }}">
-                                <i class="fas fa-list mr-1"></i> Lihat Peserta
+                                <i class="fas fa-list me-1"></i> Lihat Peserta
                             </button>
                         </td>
                     </tr>
@@ -311,13 +310,13 @@
         <div class="modal-content border-0" style="border-radius: 12px;">
             <div class="modal-header bg-light border-0">
                 <h6 class="modal-title font-weight-bold">Daftar Peserta: <span id="titleInstansi" class="text-primary"></span></h6>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
             </div>
             <div class="modal-body p-0" style="max-height: 400px; overflow-y: auto;">
                 <div id="containerListPeserta"></div>
             </div>
             <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Tutup</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
@@ -329,7 +328,7 @@
         <div class="modal-content border-0" style="border-radius: 12px;">
             <div class="modal-header bg-dark text-white border-0" style="border-radius: 12px 12px 0 0;">
                 <h6 class="modal-title font-weight-bold">Biodata Lengkap</h6>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
             </div>
             <div class="modal-body p-4">
                 <div class="text-center mb-4">
@@ -410,7 +409,7 @@
             });
 
             $('#containerListPeserta').html(html);
-            $('#modalListPeserta').modal('show');
+            bootstrap.Modal.getOrCreateInstance(document.querySelector('#modalListPeserta')).show();
         });
 
         // 4. Logic: Klik "Mata" (Detail Biodata) - Baik dari tabel utama maupun dari modal list
@@ -435,12 +434,12 @@
             // Bukti
             if(data.bukti_pembayaran) {
                 let url = "{{ asset('storage') }}/" + data.bukti_pembayaran;
-                $('#d_bukti').html(`<a href="${url}" target="_blank" class="btn btn-sm btn-success w-100"><i class="fas fa-download mr-1"></i> Download Bukti</a>`);
+                $('#d_bukti').html(`<a href="${url}" target="_blank" class="btn btn-sm btn-success w-100"><i class="fas fa-download me-1"></i> Download Bukti</a>`);
             } else {
                 $('#d_bukti').html('<span class="text-muted small">Tidak ada bukti</span>');
             }
 
-            $('#modalDetailPeserta').modal('show');
+            bootstrap.Modal.getOrCreateInstance(document.querySelector('#modalDetailPeserta')).show();
         });
 
     });

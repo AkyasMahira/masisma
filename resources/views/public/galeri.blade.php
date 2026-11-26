@@ -40,6 +40,7 @@
 
     @media (max-width:420px){ .hero h1{ font-size:1.5rem; } }
 </style>
+    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>
 <body>
 

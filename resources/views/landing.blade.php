@@ -1212,6 +1212,7 @@
     to { width: var(--bar-width); }
 }
 </style>
+    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>
 <body>
 <header class="glass-nav">

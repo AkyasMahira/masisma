@@ -15,8 +15,8 @@
     <style>
         :root {
             --warna-primer: #7c1316;
-            --warna-sekunder: #a83236;
-            --warna-tertiary: #f8eaea;
+            --warna-sekunder: #a3191d;
+            --warna-tertiary: #fcf0f1;
             --warna-white: #ffffff;
             --warna-text-dark: #333;
         }
@@ -267,6 +267,7 @@
             border-color: var(--warna-primer);
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>
 
 <body>
@@ -434,12 +435,12 @@
     <div class="wave-container">
         <div class="wave wave-1">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
-                <path fill="#a83236" d="M0,192L48,181.3C96,171,192,149,288,160C384,171,480,213,576,208C672,203,768,149,864,138.7C960,128,1056,160,1152,176C1248,192,1344,192,1392,192L1440,192L1440,320L0,320Z"></path>
+                <path fill="#a3191d" d="M0,192L48,181.3C96,171,192,149,288,160C384,171,480,213,576,208C672,203,768,149,864,138.7C960,128,1056,160,1152,176C1248,192,1344,192,1392,192L1440,192L1440,320L0,320Z"></path>
             </svg>
         </div>
         <div class="wave wave-2">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
-                <path fill="#f8eaea" d="M0,256L48,245.3C96,235,192,213,288,208C384,203,480,213,576,229.3C672,245,768,267,864,256C960,245,1056,203,1152,192C1248,181,1344,203,1392,213.3L1440,224L1440,320L0,320Z"></path>
+                <path fill="#fcf0f1" d="M0,256L48,245.3C96,235,192,213,288,208C384,203,480,213,576,229.3C672,245,768,267,864,256C960,245,1056,203,1152,192C1248,181,1344,203,1392,213.3L1440,224L1440,320L0,320Z"></path>
             </svg>
         </div>
     </div>

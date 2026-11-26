@@ -61,7 +61,7 @@
     .avatar-initial { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.25rem; background: linear-gradient(135deg, #7c1316, #a3191d); color: #fff; flex-shrink: 0; box-shadow: 0 4px 10px rgba(124,19,22,.25); }
     .status-badge { padding: 6px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
     .status-in { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-    .status-out { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .status-out { background: #fee2e2; color: #a3191d; border: 1px solid #fecaca; }
     .status-idle { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
 
     /* --- Pagination --- */

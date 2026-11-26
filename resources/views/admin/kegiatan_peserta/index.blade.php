@@ -117,7 +117,7 @@
             @endif
 
             @if(session('error'))
-                <div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center p-3" style="background: #fef2f2; color: #991b1b;">
+                <div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center p-3" style="background: #fef2f2; color: #a3191d;">
                     <i class="bi bi-exclamation-triangle-fill fs-3 me-3"></i> 
                     <div><strong class="d-block mb-1">Gagal!</strong><small>{{ session('error') }}</small></div>
                 </div>

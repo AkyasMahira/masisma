@@ -14,7 +14,7 @@
 
     <style>
         :root {
-            --primary: #8E1616;
+            --primary: #7c1316;
             --bg-body: #F3F4F6;
             --surface: #FFFFFF;
             --text-main: #1F2937;
@@ -181,7 +181,7 @@
             margin: 0 20px 15px; padding: 12px; border-radius: 12px; font-size: 0.8rem;
             display: flex; align-items: center; gap: 10px;
         }
-        .alert-red { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
+        .alert-red { background: #FEF2F2; border: 1px solid #FECACA; color: #a3191d; }
         .alert-yellow { background: #FFFBEB; border: 1px solid #FCD34D; color: #92400E; }
 
         /* ========================================= */
@@ -212,7 +212,7 @@
             display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;
         }
         .bg-in { background: #DCFCE7; color: #166534; }
-        .bg-out { background: #FEE2E2; color: #991B1B; }
+        .bg-out { background: #FEE2E2; color: #a3191d; }
         .h-title { font-weight: 700; font-size: 0.9rem; }
         .h-sub { font-size: 0.75rem; color: var(--text-sub); }
         .h-time { font-weight: 700; font-size: 0.85rem; color: var(--text-main); }
@@ -235,6 +235,7 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>
 <body>
 
@@ -389,7 +390,7 @@
                     {{-- Tampilan Jika Sedang Izin (Dispensasi) --}}
                     <div style="background: #FFF1F2; border:1px solid #FECACA; border-radius:16px; padding:20px; text-align:center;">
                         <i class="bi bi-calendar2-check fs-1 text-danger"></i>
-                        <h4 style="margin:10px 0 5px; color:#991B1B;">Sedang Izin</h4>
+                        <h4 style="margin:10px 0 5px; color:#a3191d;">Sedang Izin</h4>
                         <p style="margin:0; font-size:0.85rem; color:#7F1D1D;">{{ $dispensasiAktif->keterangan }}</p>
                     </div>
                 @endif
@@ -523,7 +524,7 @@ document.addEventListener("DOMContentLoaded", function() {
             title: 'Buka di Browser Asli!',
             text: 'Untuk menghindari error "Perangkat Salah", mohon klik ikon 3 titik di pojok kanan atas dan pilih "Buka di Chrome/Safari".',
             icon: 'warning',
-            confirmButtonColor: '#8E1616', 
+            confirmButtonColor: '#7c1316', 
             confirmButtonText: 'Mengerti'
         });
     }
@@ -729,7 +730,7 @@ function initMap() {
             icon: 'error',
             title: 'Gagal',
             text: errMsg,
-            confirmButtonColor: '#8E1616',
+            confirmButtonColor: '#7c1316',
             confirmButtonText: 'OK',
             // Jika terlambat, tampilkan tombol tambahan
             showCancelButton: isLate, 

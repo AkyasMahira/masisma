@@ -284,7 +284,7 @@ a.fc-event, a.fc-event:hover {
         .btn-qr:hover { background: #edd5d5; color: #5a0e10; }
         .badge-soft-success { background: #dcfce7; color: #166534; padding: 5px 10px; border-radius: 6px; font-weight: 600; font-size: 0.75rem; }
         .badge-soft-warning { background: #fef9c3; color: #854d0e; padding: 5px 10px; border-radius: 6px; font-weight: 600; font-size: 0.75rem; }
-        .badge-soft-danger { background: #fee2e2; color: #991b1b; padding: 5px 10px; border-radius: 6px; font-weight: 600; font-size: 0.75rem; }
+        .badge-soft-danger { background: #fee2e2; color: #a3191d; padding: 5px 10px; border-radius: 6px; font-weight: 600; font-size: 0.75rem; }
         .animate-up { animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
         @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 

@@ -27,7 +27,7 @@
         .stat-value { font-size: 2.5rem; font-weight: 800; line-height: 1; margin: 10px 0 5px 0; z-index: 1; position: relative;}
         .stat-label { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; z-index: 1; position: relative;}
         
-        .bg-maroon-gradient { background: linear-gradient(135deg, #7c1316 0%, #9f181c 100%); }
+        .bg-maroon-gradient { background: linear-gradient(135deg, #7c1316 0%, #a3191d 100%); }
         .bg-success-gradient { background: linear-gradient(135deg, #059669 0%, #10b981 100%); }
         .bg-warning-gradient { background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); }
         .bg-danger-gradient { background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); }

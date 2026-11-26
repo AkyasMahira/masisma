@@ -158,6 +158,7 @@
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>
 <body>
 
@@ -219,7 +220,7 @@
                 </div>
             @endif
             @if(session('error'))
-                <div class="alert alert-danger rounded-4 mb-4 border-0 d-flex align-items-center" style="background: #fef2f2; color: #991b1b;">
+                <div class="alert alert-danger rounded-4 mb-4 border-0 d-flex align-items-center" style="background: #fef2f2; color: #a3191d;">
                     <i class="bi bi-exclamation-triangle-fill fs-3 me-3"></i> 
                     <div><strong class="d-block mb-1">Perhatian!</strong><span style="font-size: 0.85rem;">{{ session('error') }}</span></div>
                 </div>

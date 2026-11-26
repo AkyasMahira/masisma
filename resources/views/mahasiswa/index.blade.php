@@ -71,7 +71,7 @@
         }
         .stat-icon.all { background: #e0f2fe; color: #1e40af; }
         .stat-icon.active { background: #d1fae5; color: #065f46; }
-        .stat-icon.nonactive { background: #fee2e2; color: #991b1b; }
+        .stat-icon.nonactive { background: #fee2e2; color: #a3191d; }
         .stat-value { font-size: 1.5rem; font-weight: 700; line-height: 1; margin-bottom: 2px; color: var(--text-dark);}
         .stat-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
 
@@ -110,7 +110,7 @@
         .bg-soft-success { background-color: #d1fae5; color: #065f46; }
         .bg-soft-secondary { background-color: #f3f4f6; color: #4b5563; }
         .bg-soft-info { background-color: #dbeafe; color: #1e40af; }
-        .bg-soft-danger { background-color: #fee2e2; color: #991b1b; }
+        .bg-soft-danger { background-color: #fee2e2; color: #a3191d; }
         .bg-soft-warning { background-color: #fef3c7; color: #92400e; }
 
         /* baris hidup + chip ruangan (samakan dengan daftar booking) */

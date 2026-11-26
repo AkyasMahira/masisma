@@ -94,7 +94,7 @@
 
             .bg-soft-success { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
             .bg-soft-warning { background-color: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
-            .bg-soft-danger { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+            .bg-soft-danger { background-color: #fee2e2; color: #a3191d; border: 1px solid #fecaca; }
             .bg-soft-info { background-color: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
             .bg-soft-secondary { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
 

@@ -68,7 +68,7 @@
         .status-select { font-size: 0.75rem; font-weight: 700; border-radius: 50px; padding: 4px 25px 4px 12px; border: none; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 10px; }
         .status-select:focus { outline: none; box-shadow: 0 0 0 3px rgba(0,0,0,0.1); }
         .status-buka { background-color: #dcfce7; color: #166534; }
-        .status-tutup { background-color: #fee2e2; color: #991b1b; }
+        .status-tutup { background-color: #fee2e2; color: #a3191d; }
         .status-otomatis { background-color: #fef9c3; color: #854d0e; }
 
         .animate-up { animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; transform: translateY(15px); }

@@ -37,7 +37,7 @@
     .heat b { font-size:.95rem; font-weight:800; }
     .heat .u { font-size:.62rem; font-weight:700; opacity:.85; }
     .heat .o { display:block; font-size:.64rem; font-weight:600; opacity:.85; }
-    .h1 { background:#fdf5f5; color:#9b2a30; } .h2 { background:#fbe4e6; color:#8a1d22; }
+    .h1 { background:#fdf5f5; color:#a3191d; } .h2 { background:#fbe4e6; color:#7c1316; }
     .h3 { background:#f6cdd0; color:#7c1316; } .h4 { background:#eda9ae; color:#5f0f12; } .h5 { background:#d65c66; color:#fff; }
     #bkcal .fc-day-other .heat { opacity:.4; }
     #bkcal.room-mode .heat { display:none; }

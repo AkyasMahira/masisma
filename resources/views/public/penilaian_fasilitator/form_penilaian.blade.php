@@ -69,6 +69,7 @@
             .score-display .fs-2 { font-size: 1.5rem !important; }
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>
 <body>
 <div class="container pt-4">

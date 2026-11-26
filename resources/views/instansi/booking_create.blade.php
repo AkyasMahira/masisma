@@ -82,7 +82,7 @@
     .day-badge:hover { transform:translateY(-1px); box-shadow:0 3px 10px rgba(124,19,22,.16); }
     .day-badge b { font-size:.86rem; font-weight:800; }
     .day-badge .sub { display:block; font-weight:600; opacity:.85; }
-    .h1 { background:#fdf5f5; color:#9b2a30; } .h2 { background:#fbe4e6; color:#8a1d22; } .h3 { background:#f6cdd0; color:#7c1316; }
+    .h1 { background:#fdf5f5; color:#a3191d; } .h2 { background:#fbe4e6; color:#7c1316; } .h3 { background:#f6cdd0; color:#7c1316; }
     .h4 { background:#eda9ae; color:#5f0f12; } .h5 { background:#d65c66; color:#fff; }
     .s-ok { background:#dcfce7; color:#15803d; } .s-warn { background:#fef3c7; color:#b45309; } .s-full { background:#fee2e2; color:#b91c1c; }
     @media (max-width:576px) { .day-badge .sub { display:none; } .day-badge { margin:2px; padding:3px 2px; text-align:center; } }

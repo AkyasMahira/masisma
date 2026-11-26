@@ -58,6 +58,7 @@
             .btn-action { width: 160px; }
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>
 <body>
 <div class="container pb-5">

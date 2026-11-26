@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 
     <style>
         :root {
@@ -123,6 +123,7 @@
             100% { transform: scale(1); }
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>
 <body>
 
@@ -146,13 +147,13 @@
                 {{-- TOMBOL KE LANDING PAGE (BERANDA) --}}
                 {{-- Menggunakan URL absolut sesuai request IP server --}}
                 <a href="http://103.139.47.173/sindikat/landing" class="btn-home">
-                    <i class="fas fa-home mr-2"></i> Kembali ke Beranda
+                    <i class="fas fa-home me-2"></i> Kembali ke Beranda
                 </a>
             </div>
             <div class="col-md-12">
                 {{-- TOMBOL KEMBALI KE FORM (DAFTAR LAGI/EDIT) --}}
                 <a href="{{ route('diklat.public.form', $form->public_link) }}" class="btn-back-form">
-                    <i class="fas fa-arrow-left mr-2"></i> Kembali ke Form
+                    <i class="fas fa-arrow-left me-2"></i> Kembali ke Form
                 </a>
             </div>
         </div>

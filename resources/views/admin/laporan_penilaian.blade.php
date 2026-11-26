@@ -115,7 +115,7 @@
                         @endforeach
                         <td class="text-center">
                             @if($r['nilai'] !== null)
-                                <span class="nilai-badge" style="color:{{ $r['nilai'] >= 75 ? '#166534' : ($r['nilai'] >= 60 ? '#b45309' : '#991b1b') }};">{{ $r['nilai'] }}</span>
+                                <span class="nilai-badge" style="color:{{ $r['nilai'] >= 75 ? '#166534' : ($r['nilai'] >= 60 ? '#b45309' : '#a3191d') }};">{{ $r['nilai'] }}</span>
                             @else
                                 <span class="badge bg-light text-secondary border">-</span>
                             @endif

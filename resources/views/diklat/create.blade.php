@@ -164,7 +164,7 @@
         margin-top: 5px;
         transition: all 0.2s;
     }
-    .btn-add-text:hover { color: #a31d21; text-decoration: underline; }
+    .btn-add-text:hover { color: #a3191d; text-decoration: underline; }
 
     /* Upload Area Styling */
     .upload-area {
@@ -182,7 +182,7 @@
 
     /* Main Action Buttons */
     .btn-ultra {
-        background: linear-gradient(135deg, #7c1316 0%, #a31d21 100%);
+        background: linear-gradient(135deg, #7c1316 0%, #a3191d 100%);
         color: white;
         border: none;
         border-radius: 12px;

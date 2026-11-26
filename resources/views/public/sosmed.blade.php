@@ -30,6 +30,7 @@
         .back { display:inline-block; margin-top:10px; color:#fff; opacity:.85; text-decoration:none; font-size:.82rem; }
         .back:hover { opacity:1; text-decoration:underline; }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>
 <body>
     <div class="wrap">
@@ -59,7 +60,7 @@
                 <span class="ic tt"><i class="fab fa-tiktok"></i></span>
                 <span class="t">TikTok <small>@rsudslg</small></span><i class="fas fa-chevron-right arrow"></i>
             </a>
-            <a class="link" href="https://wa.me/62" target="_blank" rel="noopener">
+            <a class="link" href="https://wa.me/6282245415977" target="_blank" rel="noopener">
                 <span class="ic wa"><i class="fab fa-whatsapp"></i></span>
                 <span class="t">WhatsApp <small>Layanan informasi</small></span><i class="fas fa-chevron-right arrow"></i>
             </a>
