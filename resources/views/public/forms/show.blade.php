@@ -188,7 +188,7 @@
 </div>
 </div>
 
-            @if(!empty($form->header_image))
+            @if(!empty($form->header_image) && \Illuminate\Support\Facades\Storage::disk('public')->exists($form->header_image))
                 <div style="margin-bottom: 25px;">
                     <img src="{{ url('storage/' . $form->header_image) }}" style="width:100%; max-height:150px; border-radius: 20px; box-shadow: var(--shadow);" alt="Header">
                 </div>

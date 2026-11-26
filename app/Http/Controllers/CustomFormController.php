@@ -34,6 +34,17 @@ public function duplicate($id) {
     // Jika is_active ingin otomatis non-aktif dulu bisa di-set false
     $newForm->is_active = false; 
 
+    // Gambar header disalin ke file sendiri: sebelumnya salinan memakai file yang sama,
+    // sehingga saat form asli dihapus / gambarnya diganti, header salinan ikut hilang.
+    if ($originalForm->header_image && Storage::disk('public')->exists($originalForm->header_image)) {
+        $ext = pathinfo($originalForm->header_image, PATHINFO_EXTENSION);
+        $baru = 'form_headers/' . Str::random(40) . ($ext ? '.' . $ext : '');
+        Storage::disk('public')->copy($originalForm->header_image, $baru);
+        $newForm->header_image = $baru;
+    } else {
+        $newForm->header_image = null;
+    }
+
     // 5. Simpan ke Database
     $newForm->save();
 
@@ -126,7 +137,7 @@ public function duplicate($id) {
 
         // Ganti Gambar Header & Hapus yang Lama biar Storage Gak Penuh
         if ($request->hasFile('header_image')) {
-            if ($form->header_image) {
+            if ($form->header_image && !$this->headerDipakaiLain($form)) {
                 Storage::disk('public')->delete($form->header_image);
             }
             $data['header_image'] = $request->file('header_image')->store('form_headers', 'public');
@@ -147,10 +158,16 @@ public function duplicate($id) {
         return back()->with('success', $pesan);
     }
 
+    /** File header masih dipakai form lain (salinan lama berbagi file yang sama)? */
+    private function headerDipakaiLain(CustomForm $form)
+    {
+        return CustomForm::where('header_image', $form->header_image)->where('id', '!=', $form->id)->exists();
+    }
+
     public function destroy($id) {
         $form = CustomForm::findOrFail($id);
         
-        if ($form->header_image) {
+        if ($form->header_image && !$this->headerDipakaiLain($form)) {
             Storage::disk('public')->delete($form->header_image);
         }
         

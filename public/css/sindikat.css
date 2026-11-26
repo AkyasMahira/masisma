@@ -20,15 +20,6 @@
     --sd-bayang: 0 4px 16px rgba(124, 19, 22, .06);
     --sd-font: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-    /* variabel lama di layout & halaman -> ikut palet */
-    --maroon: var(--sd-utama);
-    --maroon-light: var(--sd-hover);
-    --maroon-dark: var(--sd-gelap);
-    --primary-color: var(--sd-utama);
-    --warna-primer: var(--sd-utama);
-    --warna-sekunder: var(--sd-hover);
-    --warna-tertiary: var(--sd-lembut);
-
     /* Bootstrap 5: "primary" = maroon */
     --bs-primary: #7c1316;
     --bs-primary-rgb: 124, 19, 22;
