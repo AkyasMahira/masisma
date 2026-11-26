@@ -131,3 +131,67 @@ a:hover { color: var(--sd-hover); }
 /* ---------- SweetAlert2 ---------- */
 .swal2-styled.swal2-confirm { background-color: var(--sd-utama) !important; }
 .swal2-popup { border-radius: 18px !important; font-family: var(--sd-font) !important; }
+
+/* =====================================================================
+   TAHAP 2 - komponen halaman (dalam .content = halaman ber-layout utama)
+   ===================================================================== */
+
+/* ---------- Judul halaman: kartu putih + garis maroon kiri ---------- */
+.content :is(.sd-header, .header-card, .page-header, .page-header-wrapper, .dashboard-header, .hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card) {
+    background: #fff !important;
+    color: var(--sd-teks) !important;
+    border: 1px solid var(--sd-garis) !important;
+    border-left: 5px solid var(--sd-utama) !important;
+    border-radius: var(--sd-radius) !important;
+    box-shadow: var(--sd-bayang) !important;
+    padding: 20px 24px !important;
+    margin-bottom: 1.25rem !important;
+    background-image: none !important;
+}
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card)::after,
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card)::before { display: none !important; }
+.content :is(.sd-header, .header-card, .page-header, .page-header-wrapper, .dashboard-header, .hero, .ikm-hero, .page-hero, .rolling-hero) :is(h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5):first-of-type {
+    font-size: 1.3rem !important; font-weight: 600 !important; color: var(--sd-teks) !important; margin-bottom: 4px;
+}
+/* teks putih bawaan hero gradasi -> warna teks biasa */
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .card-header-custom) :is(.text-white, .text-white-50, .text-light, h1, h2, h3, h4, h5, h6, p, small, span, div, label) { color: inherit; }
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .card-header-custom) :is(.text-white-50, p, small, .sub, .period) { color: var(--sd-redup) !important; opacity: 1 !important; }
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card, .card-header-custom) .text-white { color: var(--sd-teks) !important; }
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card) .bi:not(.btn .bi) { color: var(--sd-utama); }
+/* tombol putih di hero gradasi -> tombol tema */
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card) :is(.btn-light, .btn-light-h, .btn-hero, .btn-ghost-w, .btn-outline-light) {
+    background: var(--sd-lembut) !important; color: var(--sd-utama) !important; border: 1px solid transparent !important; box-shadow: none !important;
+}
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card) :is(.btn-light, .btn-light-h, .btn-hero, .btn-ghost-w, .btn-outline-light):hover { background: var(--sd-utama) !important; color: #fff !important; }
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card) :is(.btn-light, .btn-light-h, .btn-hero, .btn-ghost-w, .btn-outline-light):hover .bi { color: #fff !important; }
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card) .btn-save-w { background: var(--sd-utama) !important; color: #fff !important; border: 0 !important; }
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card) .btn-save-w .bi { color: #fff !important; }
+.content :is(.hero, .ikm-hero, .page-hero, .rolling-hero, .welcome-card) :is(.wait-pill, .badge.bg-light, .period, .avatar) { background: var(--sd-lembut) !important; color: var(--sd-utama) !important; border-color: transparent !important; }
+.content .ikm-hero :is(.ikm-score, .ikm-grade) { color: var(--sd-utama) !important; }
+
+/* ---------- Kepala kartu form (dulu maroon penuh) ---------- */
+.content .card-header-custom {
+    background: #fff !important; background-image: none !important; color: var(--sd-teks) !important;
+    border-bottom: 1px solid var(--sd-garis) !important; border-left: 5px solid var(--sd-utama) !important;
+    padding: 18px 22px !important;
+}
+.content .card-header-custom :is(h1, h2, h3, h4, h5, h6) { color: var(--sd-teks) !important; font-size: 1.15rem !important; font-weight: 600 !important; margin-bottom: 2px; }
+.content .card-header-custom .bi, .content .card-header-custom .fas, .content .card-header-custom .fa { color: var(--sd-utama) !important; }
+.content .card-header-custom :is(.btn-light, .btn-outline-light) { background: var(--sd-lembut) !important; color: var(--sd-utama) !important; border-color: transparent !important; }
+
+/* ---------- Kepala tabel: abu-abu muda ---------- */
+.content .table > thead > tr > :is(th, td),
+.content .table > thead :is(th, td),
+.content table.dataTable > thead :is(th, td) {
+    background: #f7f5f5 !important; background-image: none !important;
+    color: #6b7280 !important;
+    font-size: .72rem !important; font-weight: 600 !important; text-transform: uppercase; letter-spacing: .04em;
+    border-color: var(--sd-garis) !important; border-top: 0 !important;
+    vertical-align: middle; white-space: nowrap;
+}
+.content .table > thead :is(th, td) :is(a, .bi, i, span) { color: inherit !important; }
+.content .table > thead :is(th, td) a:hover { color: var(--sd-utama) !important; }
+.content .table > thead { border-bottom: 1px solid var(--sd-garis); }
+.content .welcome-card .welcome-title { font-size: 1.5rem !important; color: var(--sd-teks) !important; }
+.content .welcome-card .welcome-text { color: var(--sd-redup) !important; opacity: 1 !important; font-size: .95rem !important; margin-bottom: 1rem !important; }
+.content .welcome-card :is(.btn-light, .btn-outline-light, .btn-white) { background: var(--sd-utama) !important; color: #fff !important; border: 0 !important; }
