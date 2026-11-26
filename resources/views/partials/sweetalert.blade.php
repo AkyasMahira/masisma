@@ -21,6 +21,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     @endif
 
+    // Error validasi: banyak halaman tidak menampilkan $errors -> tampilkan toast kecil (tidak menghalangi)
+    @if($errors->any())
+        Swal.fire({
+            toast: true, position: 'top-end', icon: 'warning',
+            title: 'Periksa kembali isian',
+            html: @json('<div style="text-align:left;font-size:.85rem">' . collect($errors->all())->unique()->take(5)->map(fn ($e) => '• ' . e($e))->implode('<br>') . '</div>'),
+            showConfirmButton: false, timer: 7000, timerProgressBar: true,
+        });
+    @endif
+
     // Menampilkan Akun Mahasiswa yang baru dibuat (Khusus Admin)
     @if(session('created_mahasiswa_credentials'))
         const creds = @json(session('created_mahasiswa_credentials'));
@@ -55,8 +65,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     text: "Data yang dihapus tidak dapat dikembalikan!",
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#d33', // Warna merah untuk hapus
-                    cancelButtonColor: '#3085d6',
+                    confirmButtonColor: '#dc2626', // Warna merah untuk hapus
+                    cancelButtonColor: '#6b7280',
                     confirmButtonText: 'Ya, Hapus!',
                     cancelButtonText: 'Batal'
                 }).then((result) => {
@@ -84,8 +94,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 text: message,
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
+                confirmButtonColor: '#7c1316',
+                cancelButtonColor: '#6b7280',
                 confirmButtonText: 'Ya, Lanjutkan',
                 cancelButtonText: 'Batal'
             }).then((result) => {

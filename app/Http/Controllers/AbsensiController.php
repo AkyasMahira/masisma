@@ -114,7 +114,15 @@ class AbsensiController extends Controller
             // $currentUser = auth()->user(); 
             
             // Tambahkan relasi 'user' agar kita bisa baca device_id mahasiswanya
-            $mahasiswa = Mahasiswa::with(['mou', 'user'])->where('share_token', $token)->firstOrFail();
+            $mahasiswa = Mahasiswa::with(['mou', 'user'])->where('share_token', $token)->first();
+            if (!$mahasiswa) {
+                // Link kartu lama (mis. periode sudah diganti): arahkan pemilik akun ke kartu periode aktifnya
+                $aktif = auth()->check() ? Mahasiswa::where('user_id', auth()->id())->where('status', 'aktif')->latest('tanggal_mulai')->first() : null;
+                if ($aktif && $aktif->share_token) {
+                    return redirect()->route('absensi.card', $aktif->share_token);
+                }
+                abort(404, 'Link kartu absen tidak berlaku. Buka kartu absen terbaru dari Dashboard Magang.');
+            }
 
             // FIX KEAMANAN: Izinkan jika yang buka adalah pemiliknya ATAU dia adalah Admin
             // if ($mahasiswa->user_id !== $currentUser->id && $currentUser->role !== 'admin') {
@@ -182,12 +190,11 @@ class AbsensiController extends Controller
             } else {
                 // Non-Shift Logic
                 $day = $now->dayOfWeekIso;
-                if ($day >= 1 && $day <= 4) { // Senin-Kamis
-                    $data['todayShift'] = 'Reguler';
-                    $data['scheduleInfo'] = 'Regular (07:15 - 15:30)';
-                } elseif ($day == 5) { // Jumat
-                    $data['todayShift'] = 'Jumat';
-                    $data['scheduleInfo'] = 'Jumat (07:00 - 11:30)';
+                if ($day >= 1 && $day <= 5) { // Senin-Kamis = Reguler, Jumat = Jumat
+                    $data['todayShift'] = $day == 5 ? 'Jumat' : 'Reguler';
+                    // jam diambil dari pengaturan ruangan (sebelumnya teks tetap, beda dengan jam yang dipakai validasi)
+                    $t = $this->getShiftTimes($data['todayShift'], $now, $sequence->ruangan->id);
+                    $data['scheduleInfo'] = $data['todayShift'] . (!empty($t['start']) && !empty($t['end']) ? ' (' . $t['start']->format('H:i') . ' - ' . $t['end']->format('H:i') . ')' : '');
                 } else {
                     $data['error_state'] = 'Hari Libur.';
                     $data['scheduleInfo'] = 'Akhir Pekan';
@@ -225,6 +232,8 @@ class AbsensiController extends Controller
 
             return view('absensi.card', $data);
 
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            throw $e;
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Error Buka ID Card: ' . $e->getMessage());
             return abort(404, 'ID Card tidak ditemukan.');

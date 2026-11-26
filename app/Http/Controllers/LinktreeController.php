@@ -155,7 +155,14 @@ class LinktreeController extends Controller
         $request->validate([
             'label' => 'required',
             'type' => 'required|in:link,file,image',
-            'file' => 'nullable|file|max:5120', // Maksimal 5MB
+            // link wajib URL, berkas wajib file (sebelumnya link tanpa URL -> error 500 "value cannot be null")
+            'value' => 'required_if:type,link|nullable|url|max:2000',
+            'file' => 'required_unless:type,link|nullable|file|max:5120', // Maksimal 5MB
+        ], [
+            'value.required_if' => 'URL link wajib diisi.',
+            'value.url' => 'URL link tidak valid (harus diawali https://).',
+            'file.required_unless' => 'Pilih berkas yang akan diunggah.',
+            'file.max' => 'Ukuran berkas maksimal 5 MB.',
         ]);
 
         $value = $request->value; // Default untuk link

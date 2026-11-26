@@ -120,7 +120,7 @@ a:hover { color: var(--sd-hover); }
 .ts-wrapper.multi .ts-control > div { background: var(--sd-lembut); color: var(--sd-utama); }
 
 /* ---------- SweetAlert2 ---------- */
-.swal2-styled.swal2-confirm { background-color: var(--sd-utama) !important; }
+body .swal2-styled.swal2-confirm { background-color: var(--sd-utama); }
 .swal2-popup { border-radius: 18px !important; font-family: var(--sd-font) !important; }
 
 /* =====================================================================

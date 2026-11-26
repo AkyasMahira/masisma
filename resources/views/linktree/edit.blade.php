@@ -227,7 +227,7 @@
                                     </div>
                                     <div class="col-md-4" id="input-{{$item->id}}">
                                         <div class="input-group input-group-sm">
-                                            <input type="url" name="value" class="form-control" placeholder="https://..." id="val-{{$item->id}}">
+                                            <input type="url" name="value" class="form-control" placeholder="https://..." id="val-{{$item->id}}" required>
                                             <input type="file" name="file" class="form-control d-none" id="file-{{$item->id}}">
                                             <button type="submit" class="btn btn-dark"><i class="fas fa-check"></i></button>
                                         </div>
