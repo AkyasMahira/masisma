@@ -228,10 +228,10 @@
         /* --- Wave Background Responsif --- */
         .wave-container { position: fixed; bottom: 0; left: 0; width: 100%; line-height: 0; z-index: 1; pointer-events: none; }
         .wave { position: absolute; bottom: 0; left: 0; width: 200%; } /* Diperlebar agar tidak patah di screen besar */
-        .wave-1 { z-index: 2; animation: waveMove 15s linear infinite; }
-        .wave-2 { z-index: 3; opacity: 0.8; animation: waveMove 12s linear infinite; }
+        .wave-1 { z-index: 2; opacity: .55; animation: waveMove 15s linear infinite; }
+        .wave-2 { z-index: 3; opacity: .25; animation: waveMove 12s linear infinite; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { transform: translateY(16px); } to { transform: translateY(0); } }
         @keyframes waveMove { 0% { transform: translateX(0); } 50% { transform: translateX(-25%); } 100% { transform: translateX(0); } }
         
         @media (max-width: 576px) { 
