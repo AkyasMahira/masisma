@@ -66,7 +66,7 @@
     }
     .blob-2 { 
         bottom: -150px; right: -150px; 
-        background: radial-gradient(circle, rgba(3, 105, 161, 0.08) 0%, rgba(255, 255, 255, 0) 70%); 
+        background: radial-gradient(circle, rgba(124, 19, 22, 0.08) 0%, rgba(255, 255, 255, 0) 70%); 
     }
 
     /* --- HEADER SECTION --- */
@@ -132,7 +132,7 @@
     }
     .hero-magang {
         background: var(--blue-gradient); border: none; color: white;
-        box-shadow: 0 20px 40px rgba(3, 105, 161, 0.2);
+        box-shadow: 0 20px 40px rgba(124, 19, 22, 0.2);
     }
     .hero-magang .text-muted { color: rgba(255,255,255,0.8) !important; }
 
@@ -177,7 +177,7 @@
     .btn-maroon:hover { background: var(--maroon-light); transform: translateY(-3px); color: white; box-shadow: 0 10px 20px rgba(124,19,22,0.2); }
     
     .btn-blue { background: var(--blue-main); color: white; }
-    .btn-blue:hover { background: #7c1316; transform: translateY(-3px); color: white; box-shadow: 0 10px 20px rgba(3,105,161,0.2); }
+    .btn-blue:hover { background: #7c1316; transform: translateY(-3px); color: white; box-shadow: 0 10px 20px rgba(124, 19, 22,0.2); }
 
     /* --- ANIMATIONS --- */
     @keyframes fadeInUp {

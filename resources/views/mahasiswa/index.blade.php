@@ -447,7 +447,7 @@
 
         // --- Toastify Helper ---
         function showToast(message, type = 'success') {
-            const colors = { success: "#00b09b", error: "#ff5f6d", info: "#2193b0" };
+            const colors = { success: "#15803d", error: "#dc2626", info: "#7c1316" };
             Toastify({
                 text: message, duration: 3000, gravity: "bottom", position: "right",
                 style: { background: colors[type] || colors.info }, className: "rounded shadow-lg"

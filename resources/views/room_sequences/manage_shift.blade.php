@@ -6,7 +6,7 @@
 <style>
     .form-card { border: none; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); background: #fff; overflow: hidden; }
     .card-header-custom {
-        background: {{ $isLocked ? 'linear-gradient(135deg,#7c1316,#0a58ca)' : 'linear-gradient(135deg,#7c1316,#5f0f12)' }};
+        background: {{ $isLocked ? 'linear-gradient(135deg,#5c0f11,#374151)' : 'linear-gradient(135deg,#7c1316,#5f0f12)' }};
         padding: 1.6rem 1.75rem; color: white; border-bottom: 4px solid rgba(0,0,0,0.1);
         position: relative; overflow: hidden;
     }

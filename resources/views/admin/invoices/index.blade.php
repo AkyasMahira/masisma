@@ -45,7 +45,7 @@
         appearance: none; transition: var(--transition);
     }
     .st-ttd { background: #fff5f5; color: #7c1316; border-color: #feb2b2; } /* Perlu TTD */
-    .st-menunggu { background: #ebf8ff; color: #2b6cb0; border-color: #bee3f8; } /* Menunggu Bayar */
+    .st-menunggu { background: #fffbeb; color: #b45309; border-color: #fde68a; } /* Menunggu Bayar */
     .st-proses { background: #fffaf0; color: #975a16; border-color: #fbd38d; animation: pulse-warn 2s infinite; }
     .st-selesai { background: #f0fff4; color: #276749; border-color: #9ae6b4; }
     .st-batal { background: #edf2f7; color: #4a5568; border-color: #cbd5e0; }
@@ -392,7 +392,7 @@
         if (!signaturePad) {
             signaturePad = new SignaturePad(canvas, {
                 backgroundColor: 'rgba(255, 255, 255, 0)',
-                penColor: 'rgb(0, 0, 128)'
+                penColor: 'rgb(31, 41, 55)'
             });
             resizeCanvas();
         }

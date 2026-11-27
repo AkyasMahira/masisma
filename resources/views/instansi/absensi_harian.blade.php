@@ -34,7 +34,7 @@
     .table td { font-size:.86rem; vertical-align:middle; }
     .pill { padding:3px 10px; border-radius:20px; font-size:.72rem; font-weight:700; white-space:nowrap; display:inline-flex; align-items:center; gap:4px; }
     .st-hadir { background:#dcfce7; color:#15803d; } .st-tugas { background:#fcf0f1; color:#7c1316; }
-    .st-warn { background:#fef3c7; color:#b45309; } .st-izin { background:#fcf0f1; color:#6d28d9; }
+    .st-warn { background:#fef3c7; color:#b45309; } .st-izin { background:#fcf0f1; color:#7c1316; }
     .st-libur { background:#f1f5f9; color:#64748b; } .st-alpha { background:#fee2e2; color:#b91c1c; }
     .jam { font-variant-numeric: tabular-nums; font-weight:700; }
     .tgl-row td { background:#f8fafc; font-weight:800; color:var(--maroon); font-size:.8rem; }

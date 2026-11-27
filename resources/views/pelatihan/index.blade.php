@@ -310,7 +310,7 @@
                 <form id="formAddPelatihan" method="POST" action="">
                     @csrf
                     <div class="modal-body p-4 bg-light">
-                        <div class="alert alert-primary bg-white border-primary" style="border-radius: 8px; padding: 10px; border: 1px solid #bce8f1; margin-bottom: 1rem;">
+                        <div class="alert alert-primary bg-white border-primary" style="border-radius: 8px; padding: 10px; border: 1px solid #f0c9cb; margin-bottom: 1rem;">
                             <small class="text-muted d-block mb-1">Menambahkan pelatihan untuk:</small>
                             <strong id="addPegawaiName" class="text-primary"></strong>
                         </div>

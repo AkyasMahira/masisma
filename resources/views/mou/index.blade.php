@@ -567,9 +567,9 @@
         // 1. Fungsi Toast
         function showToast(message, type = 'success') {
             const colors = {
-                success: "#00b09b",
-                error: "#ff5f6d",
-                info: "#2193b0"
+                success: "#15803d",
+                error: "#dc2626",
+                info: "#7c1316"
             };
             Toastify({
                 text: message,

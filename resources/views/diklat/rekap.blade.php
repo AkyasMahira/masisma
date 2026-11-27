@@ -101,7 +101,7 @@
 
     /* Badges */
     .badge-capsule { padding: 4px 10px; border-radius: 50px; font-size: 11px; font-weight: 600; }
-    .badge-capsule-primary { background: #ebf8ff; color: #2b6cb0; }
+    .badge-capsule-primary { background: #fcf0f1; color: #7c1316; }
     .badge-capsule-success { background: #f0fff4; color: #2f855a; }
     .badge-capsule-secondary { background: #edf2f7; color: #4a5568; }
 
