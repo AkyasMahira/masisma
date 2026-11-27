@@ -7,7 +7,7 @@
     :root { --maroon:#7c1316; --maroon-light:#a3191d; --radius:16px; }
     .form-card { background:#fff; border-radius:var(--radius); box-shadow:0 10px 30px rgba(0,0,0,.08); max-width:760px; margin:0 auto; overflow:hidden; }
     .card-head { background:var(--maroon); color:#fff; padding:1.2rem 1.5rem; border-bottom:4px solid var(--maroon-light); }
-    .form-label { font-weight:600; font-size:.88rem; color:#2c3e50; }
+    .form-label { font-weight:600; font-size:.88rem; color:#1f2937; }
     .form-control, .form-select { border-radius:10px; padding:.6rem .8rem; }
     .form-control:focus, .form-select:focus { border-color:var(--maroon); box-shadow:0 0 0 .2rem rgba(124,19,22,.12); }
     .btn-maroon { background:var(--maroon); color:#fff; border:none; border-radius:10px; padding:10px 20px; font-weight:700; }

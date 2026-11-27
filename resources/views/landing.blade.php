@@ -798,7 +798,7 @@
     width: 58px;
     border-radius: 50%;
     border: none;
-    background: linear-gradient(130deg, #b45309, #0ca678); /* Hijau Teal */
+    background: linear-gradient(130deg, #b45309, #92400e);
     color: #fff;
     display: flex;
     align-items: center;
@@ -818,7 +818,7 @@
     width: 58px;
     border-radius: 50%;
     border: none;
-    background: linear-gradient(130deg, #7c1316, #0b5ed7); /* Biru Bootstrap */
+    background: linear-gradient(130deg, #a3191d, #5c0f11);
     color: #fff;
     display: flex;
     align-items: center;
@@ -1360,7 +1360,7 @@
                             <div class="mini-stat-group">
                                 <div class="mini-stat-row">
                                     <div class="mini-stat-label">
-                                        <div class="mini-stat-icon" style="background: rgba(163, 25, 29, 0.15); color: #0ca678;">
+                                        <div class="mini-stat-icon" style="background: rgba(163, 25, 29, 0.15); color: #b45309;">
                                             <svg fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M10.5 1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4H1v10h14V4h-2.5a.5.5 0 0 1 0-1h3a.5.5 0 0 1 .5.5v11a.5.5 0 0 1-.5.5H.5a.5.5 0 0 1-.5-.5v-11A.5.5 0 0 1 .5 3h3V1.5a.5.5 0 0 1 .5-.5h6ZM6 3h4V2H6v1Z"/></svg>
                                         </div>
                                         Pelatihan
@@ -1368,7 +1368,7 @@
                                     <div class="mini-stat-value">{{ $pelatihan }} Kegiatan</div>
                                 </div>
                                 <div class="mini-stat-bar-bg">
-                                    <div class="mini-stat-bar-fill" style="--bar-width: {{ $wPelatihan }}%; background: linear-gradient(90deg, #b45309, #0ca678);"></div>
+                                    <div class="mini-stat-bar-fill" style="--bar-width: {{ $wPelatihan }}%; background: linear-gradient(90deg, #b45309, #92400e);"></div>
                                 </div>
                             </div>
 

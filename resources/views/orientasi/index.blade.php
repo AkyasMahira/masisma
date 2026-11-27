@@ -13,7 +13,7 @@
         --maroon-slg: #7c1316; 
         --maroon-dark: #5a0e10;
         --white: #ffffff;
-        --dark-industrial: #2c3e50;
+        --dark-industrial: #1f2937;
         --text-dark: #2d3436;
         --bg-body: #f4f6f9;
         --gold-accent: #f1c40f;

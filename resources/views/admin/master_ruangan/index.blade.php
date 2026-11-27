@@ -7,7 +7,7 @@
 
     <style>
         /* [CATATAN: CSS sama persis dengan Master Instansi, saya singkat agar efisien] */
-        :root { --custom-maroon: #7c1316; --custom-maroon-light: #a3191d; --custom-maroon-subtle: #fcf0f1; --text-dark: #2c3e50; --text-muted: #64748b; --card-radius: 12px; --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05); --transition: 0.3s ease; }
+        :root { --custom-maroon: #7c1316; --custom-maroon-light: #a3191d; --custom-maroon-subtle: #fcf0f1; --text-dark: #1f2937; --text-muted: #64748b; --card-radius: 12px; --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05); --transition: 0.3s ease; }
         .header-card { background: white; border-radius: var(--card-radius); border-left: 5px solid var(--custom-maroon); padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .filter-card { background: #fff; border-radius: var(--card-radius); box-shadow: var(--shadow-soft); overflow: hidden; border: 1px solid #f8f9fa; margin-bottom: 1.5rem; }
         .filter-header { background-color: var(--custom-maroon-subtle); padding: 12px 20px; border-bottom: 1px solid #f1f5f9; color: var(--custom-maroon); font-weight: 700; display: flex; align-items: center; gap: 8px; }

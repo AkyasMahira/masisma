@@ -9,7 +9,7 @@
     :root {
         --primary-color: #7c1316;
         --primary-light: #fcebeb;
-        --text-dark: #2c3e50;
+        --text-dark: #1f2937;
         --border-soft: #eef2f7;
         --shadow-card: 0 5px 20px rgba(0,0,0,0.05);
     }

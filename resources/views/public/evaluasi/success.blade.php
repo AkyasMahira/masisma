@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
-        :root { --primary-color: #7c1316; --primary-hover: #5e0e10; --bg-color: #f0f2f5; --text-dark: #2c3e50; }
+        :root { --primary-color: #7c1316; --primary-hover: #5e0e10; --bg-color: #f0f2f5; --text-dark: #1f2937; }
         body { background-color: var(--bg-color); font-family: 'Poppins', sans-serif; color: var(--text-dark); height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
         .success-card { background: white; border-radius: 20px; padding: 50px 40px; max-width: 550px; width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border-top: 6px solid var(--primary-color); }
         .ic { width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #7c1316 0%, #a3191d 100%); color:#fff; display:flex; align-items:center; justify-content:center; font-size: 2.6rem; margin: 0 auto 24px; box-shadow: 0 8px 20px rgba(124,19,22,.3); }

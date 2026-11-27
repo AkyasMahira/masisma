@@ -23,12 +23,10 @@
         .link .t { flex:1; text-align:left; }
         .link .t small { display:block; font-weight:500; color:#64748b; font-size:.72rem; }
         .link .arrow { color:#cbd5e1; }
-        .ig { background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); }
-        .fb { background:#1877f2; } .yt { background:#ff0000; } .tt { background:#000; }
-        .wa { background:#25d366; } .web { background:var(--maroon); } .mail { background:#ea4335; }
+        .ig, .fb, .yt, .tt, .wa, .web, .mail { background:var(--maroon); }
         .footer { margin-top:30px; opacity:.7; font-size:.78rem; }
         .back { display:inline-block; margin-top:10px; color:#fff; opacity:.85; text-decoration:none; font-size:.82rem; }
-        .back:hover { opacity:1; text-decoration:underline; }
+        .back:hover { opacity:1; }
     </style>
     <link rel="stylesheet" href="{{ asset('css/sindikat.css') }}?v={{ @filemtime(public_path('css/sindikat.css')) }}">
 </head>

@@ -5,7 +5,7 @@
 
 @section('content')
     <style>
-        :root { --custom-maroon: #7c1316; --custom-maroon-light: #a3191d; --text-dark: #2c3e50; }
+        :root { --custom-maroon: #7c1316; --custom-maroon-light: #a3191d; --text-dark: #1f2937; }
         
         /* Layout & Card */
         .page-header-wrapper { background: #fff; border-radius: 16px; padding: 1.5rem; border-left: 5px solid var(--custom-maroon); box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }

@@ -97,7 +97,7 @@
             --custom-maroon: #7c1316;
             --custom-maroon-light: #a3191d;
             --custom-maroon-subtle: #fcf0f1;
-            --text-dark: #2c3e50;
+            --text-dark: #1f2937;
             --text-muted: #64748b;
             --card-radius: 16px;
             text-decoration: none;

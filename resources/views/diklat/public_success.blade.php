@@ -16,7 +16,7 @@
             --primary-color: #7c1316;
             --primary-hover: #5e0e10;
             --bg-color: #f0f2f5;
-            --text-dark: #2c3e50;
+            --text-dark: #1f2937;
         }
 
         body {

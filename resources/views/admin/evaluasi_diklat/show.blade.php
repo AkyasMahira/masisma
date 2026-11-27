@@ -9,7 +9,7 @@
     .card-soft h5 { color:var(--custom-maroon); font-weight:700; font-size:1rem; }
     .info-item { padding:10px 0; border-bottom:1px dashed #e2e8f0; }
     .info-item .lbl { color:#64748b; font-size:.8rem; font-weight:600; }
-    .info-item .val { font-weight:600; color:#2c3e50; }
+    .info-item .val { font-weight:600; color:#1f2937; }
     .btn-outline-custom { border:1.5px solid var(--custom-maroon); color:var(--custom-maroon); background:#fff; border-radius:8px; padding:8px 16px; font-weight:600; }
     .btn-outline-custom:hover { background:var(--custom-maroon-subtle); }
     .nilai-pill { display:inline-block; min-width:34px; text-align:center; font-weight:700; padding:3px 10px; border-radius:20px; background:var(--custom-maroon-subtle); color:var(--custom-maroon); }

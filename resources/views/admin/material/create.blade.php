@@ -74,7 +74,7 @@
     }
 
     .alert-industrial {
-        background-color: #2c3e50;
+        background-color: #1f2937;
         color: #ecf0f1;
         border: none;
         border-radius: 12px;

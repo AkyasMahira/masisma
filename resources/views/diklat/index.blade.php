@@ -12,7 +12,7 @@
         --primary-color: #7c1316;
         --primary-light: #fcebeb;
         --primary-hover: #a3191d;
-        --text-dark: #2c3e50;
+        --text-dark: #1f2937;
         --text-muted: #6c757d;
         --shadow-soft: 0 10px 40px -10px rgba(0,0,0,0.08);
         --shadow-hover: 0 20px 40px -10px rgba(124, 19, 22, 0.15);
@@ -340,7 +340,7 @@
 
     /* Tombol QR Code */
     .btn-action-qr {
-        color: #2c3e50;
+        color: #1f2937;
         background: #f8f9fa;
         border-color: #e9ecef;
     }

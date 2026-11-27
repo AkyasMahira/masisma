@@ -8,7 +8,7 @@
 
 <style>
     /* --- CSS MODERN STYLE --- */
-    :root { --primary-color: #7c1316; --primary-light: #fcebeb; --text-dark: #2c3e50; --border-color: #e0e0e0; }
+    :root { --primary-color: #7c1316; --primary-light: #fcebeb; --text-dark: #1f2937; --border-color: #e0e0e0; }
     body { background-color: #f0f2f5; font-family: 'Poppins', sans-serif; color: var(--text-dark); padding-top: 20px; }
     .form-container { max-width: 850px; margin: 0 auto; padding-bottom: 80px; }
     

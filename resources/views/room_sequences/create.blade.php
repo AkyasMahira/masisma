@@ -9,7 +9,7 @@
             --custom-maroon: #7c1316;
             --custom-maroon-light: #a3191d;
             --custom-maroon-subtle: #fcf0f1;
-            --text-dark: #2c3e50;
+            --text-dark: #1f2937;
             --card-radius: 16px;
         }
         .form-card { border: none; border-radius: var(--card-radius); box-shadow: 0 10px 30px rgba(0,0,0,0.08); background: #fff; overflow: hidden; }

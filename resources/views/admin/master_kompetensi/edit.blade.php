@@ -4,7 +4,7 @@
 
 @section('content')
     <style>
-        :root { --custom-maroon: #7c1316; --custom-maroon-light: #a3191d; --text-dark: #2c3e50; --card-radius: 16px; --transition: 0.3s ease; }
+        :root { --custom-maroon: #7c1316; --custom-maroon-light: #a3191d; --text-dark: #1f2937; --card-radius: 16px; --transition: 0.3s ease; }
         .form-card { border: none; border-radius: var(--card-radius); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); background: #fff; overflow: hidden; }
         .card-header-custom { background-color: var(--custom-maroon); padding: 1.5rem; color: white; border-bottom: 4px solid var(--custom-maroon-light); }
         .form-label { font-weight: 600; color: var(--text-dark); font-size: 0.9rem; margin-bottom: 0.5rem; }

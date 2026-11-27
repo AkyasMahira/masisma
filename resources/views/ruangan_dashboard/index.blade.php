@@ -20,7 +20,7 @@
     /* --- Modern Cards & Layout --- */
     .dashboard-card { background: #fff; border: none; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); overflow: hidden; margin-bottom: 1.5rem; transition: 0.3s;}
     .dashboard-card:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.06); }
-    .card-header-clean { background: transparent; border-bottom: 1px solid #f1f5f9; padding: 1.2rem 1.5rem; font-weight: 700; color: #2c3e50; display: flex; justify-content: space-between; align-items: center; }
+    .card-header-clean { background: transparent; border-bottom: 1px solid #f1f5f9; padding: 1.2rem 1.5rem; font-weight: 700; color: #1f2937; display: flex; justify-content: space-between; align-items: center; }
     
     /* --- Summary Widgets --- */
     .summary-widget { padding: 1.5rem; display: flex; align-items: center; gap: 15px; border-radius: 16px; position: relative; overflow: hidden; border: 1px solid #f1f5f9;}

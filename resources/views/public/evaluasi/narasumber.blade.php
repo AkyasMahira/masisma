@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <style>
-        :root { --primary:#7c1316; --primary-light:#fcebeb; --text-dark:#2c3e50; --text-muted:#64748b; }
+        :root { --primary:#7c1316; --primary-light:#fcebeb; --text-dark:#1f2937; --text-muted:#64748b; }
         body { background:#f0f2f5; font-family:'Poppins',sans-serif; color:var(--text-dark); padding:20px 12px 90px; }
         .wrap { max-width:900px; margin:0 auto; }
         .head { background:#fff; border-radius:16px; border-top:5px solid var(--primary); box-shadow:0 10px 30px rgba(0,0,0,.08); padding:24px 26px; margin-bottom:18px; }

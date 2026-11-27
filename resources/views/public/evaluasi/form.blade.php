@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 
     <style>
-        :root { --primary-color: #7c1316; --primary-light: #fcebeb; --primary-hover: #5e0e10; --text-dark: #2c3e50; --text-muted: #64748b; --border-color: #e0e0e0; }
+        :root { --primary-color: #7c1316; --primary-light: #fcebeb; --primary-hover: #5e0e10; --text-dark: #1f2937; --text-muted: #64748b; --border-color: #e0e0e0; }
         body { background-color: #f0f2f5; font-family: 'Poppins', sans-serif; color: var(--text-dark); padding-top: 20px; }
         .form-container { max-width: 850px; margin: 0 auto; padding-bottom: 80px; }
 

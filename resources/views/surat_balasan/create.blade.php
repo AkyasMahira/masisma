@@ -23,7 +23,7 @@
             background-color: var(--custom-maroon); padding: 1.5rem; color: white;
             border-bottom: 4px solid var(--custom-maroon-light);
         }
-        .form-label { font-weight: 600; color: #2c3e50; font-size: 0.9rem; margin-bottom: 0.5rem; }
+        .form-label { font-weight: 600; color: #1f2937; font-size: 0.9rem; margin-bottom: 0.5rem; }
         .btn-maroon { background-color: var(--custom-maroon); color: white; border: none; }
         .btn-maroon:hover { background-color: var(--custom-maroon-light); color: white; }
     </style>

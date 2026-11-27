@@ -13,7 +13,7 @@
             --custom-maroon: #7c1316;
             --custom-maroon-light: #a3191d;
             --custom-maroon-subtle: #fcf0f1;
-            --text-dark: #2c3e50;
+            --text-dark: #1f2937;
             --text-muted: #95a5a6;
             --card-radius: 12px;
             --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);

@@ -8,7 +8,7 @@
         --maroon-slg: #7c1316;
         --maroon-light: #a3191d;
         --bg-light: #f4f6f9;
-        --industrial-dark: #2c3e50;
+        --industrial-dark: #1f2937;
     }
 
     body { background-color: var(--bg-light); }

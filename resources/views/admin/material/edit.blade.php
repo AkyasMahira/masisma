@@ -184,7 +184,7 @@
                 </form>
             </div>
 
-            <div class="mt-4 p-4 rounded-4 border-0 shadow-sm" style="background-color: #2c3e50; color: #ecf0f1;">
+            <div class="mt-4 p-4 rounded-4 border-0 shadow-sm" style="background-color: #1f2937; color: #ecf0f1;">
                 <div class="d-flex align-items-start">
                     <i class="fas fa-exclamation-triangle fa-2x text-warning me-3 mt-1"></i>
                     <div>
