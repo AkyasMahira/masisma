@@ -1385,6 +1385,49 @@
         </div>
     </section>
 
+<!-- SECTION DAFTAR PELATIHAN TERSESIA -->
+    <section class="section" id="pelatihan-tersedia">
+        <div class="container">
+            <div class="mb-5 text-center reveal-on-scroll">
+                <div class="eyebrow">Program Unggulan</div>
+                <h2>Daftar Pelatihan Tersedia</h2>
+                <p class="subtitle mx-auto">Tingkatkan kompetensi Anda melalui program pelatihan internal dan eksternal kami.</p>
+            </div>
+            
+            <div class="row g-4 justify-content-center">
+                @forelse($kegiatanTersedia as $k)
+                    <div class="col-md-6 col-lg-4 reveal-on-scroll">
+                        <div class="program-card h-100 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <span class="program-label {{ $k->jenis_kegiatan == 'internal' ? 'bg-primary text-white' : 'bg-danger text-white' }}">{{ strtoupper($k->jenis_kegiatan) }}</span>
+                                <span class="badge bg-light text-dark border"><i class="bi bi-clock-history"></i> {{ $k->jpl ?? 0 }} JPL</span>
+                            </div>
+                            <h5 class="fw-bold mb-2">{{ $k->nama_kegiatan }}</h5>
+                            <p class="small text-muted mb-3 flex-grow-1">{{ Str::limit($k->deskripsi, 100, '...') }}</p>
+                            
+                            <ul class="list-unstyled small text-muted mb-4">
+                                <li class="mb-1"><i class="bi bi-calendar-event me-2 text-danger"></i> {{ \Carbon\Carbon::parse($k->tanggal_mulai)->format('d M Y') }}</li>
+                                <li><i class="bi bi-geo-alt-fill me-2 text-danger"></i> {{ $k->platform }}</li>
+                            </ul>
+                            
+                            @if($k->jenis_kegiatan == 'eksternal')
+                                <a href="{{ route('public.kegiatan.daftar', $k->id) }}" class="btn btn-primary-soft w-100 mt-auto text-center"><i class="bi bi-pencil-square me-1"></i> Daftar Sekarang</a>
+                            @else
+                                <button class="btn btn-light w-100 mt-auto text-muted border" disabled><i class="bi bi-lock-fill me-1"></i> Internal RSUD</button>
+                            @endif
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-12 text-center py-5">
+                        <i class="bi bi-calendar-x fs-1 text-muted opacity-50 mb-3 d-block"></i>
+                        <h5 class="fw-bold text-muted">Belum Ada Pelatihan</h5>
+                        <p class="small text-muted">Jadwal pelatihan belum tersedia untuk saat ini.</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </section>
+
     <!-- MASKOT & FITUR (ICON GEDE) -->
     <section class="maskot-section section-soft" id="maskot">
         <div class="container">
@@ -1624,48 +1667,6 @@
                         </ul>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
-<!-- SECTION DAFTAR PELATIHAN TERSESIA -->
-    <section class="section" id="pelatihan-tersedia">
-        <div class="container">
-            <div class="mb-5 text-center reveal-on-scroll">
-                <div class="eyebrow">Program Unggulan</div>
-                <h2>Daftar Pelatihan Tersedia</h2>
-                <p class="subtitle mx-auto">Tingkatkan kompetensi Anda melalui program pelatihan internal dan eksternal kami.</p>
-            </div>
-            
-            <div class="row g-4 justify-content-center">
-                @forelse($kegiatanTersedia as $k)
-                    <div class="col-md-6 col-lg-4 reveal-on-scroll">
-                        <div class="program-card h-100 d-flex flex-column">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <span class="program-label {{ $k->jenis_kegiatan == 'internal' ? 'bg-primary text-white' : 'bg-danger text-white' }}">{{ strtoupper($k->jenis_kegiatan) }}</span>
-                                <span class="badge bg-light text-dark border"><i class="bi bi-clock-history"></i> {{ $k->jpl ?? 0 }} JPL</span>
-                            </div>
-                            <h5 class="fw-bold mb-2">{{ $k->nama_kegiatan }}</h5>
-                            <p class="small text-muted mb-3 flex-grow-1">{{ Str::limit($k->deskripsi, 100, '...') }}</p>
-                            
-                            <ul class="list-unstyled small text-muted mb-4">
-                                <li class="mb-1"><i class="bi bi-calendar-event me-2 text-danger"></i> {{ \Carbon\Carbon::parse($k->tanggal_mulai)->format('d M Y') }}</li>
-                                <li><i class="bi bi-geo-alt-fill me-2 text-danger"></i> {{ $k->platform }}</li>
-                            </ul>
-                            
-                            @if($k->jenis_kegiatan == 'eksternal')
-                                <a href="{{ route('public.kegiatan.daftar', $k->id) }}" class="btn btn-primary-soft w-100 mt-auto text-center"><i class="bi bi-pencil-square me-1"></i> Daftar Sekarang</a>
-                            @else
-                                <button class="btn btn-light w-100 mt-auto text-muted border" disabled><i class="bi bi-lock-fill me-1"></i> Internal RSUD</button>
-                            @endif
-                        </div>
-                    </div>
-                @empty
-                    <div class="col-12 text-center py-5">
-                        <i class="bi bi-calendar-x fs-1 text-muted opacity-50 mb-3 d-block"></i>
-                        <h5 class="fw-bold text-muted">Belum Ada Pelatihan</h5>
-                        <p class="small text-muted">Jadwal pelatihan belum tersedia untuk saat ini.</p>
-                    </div>
-                @endforelse
             </div>
         </div>
     </section>
